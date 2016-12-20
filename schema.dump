@@ -1,0 +1,1910 @@
+ALTER TABLE spatial_ref_sys DROP constraint spatial_ref_sys_srid_check;
+ALTER TABLE spatial_ref_sys DROP constraint spatial_ref_sys_pkey;
+CREATE TEMP TABLE _pgis_restore_spatial_ref_sys AS SELECT * FROM spatial_ref_sys;
+DELETE FROM spatial_ref_sys;
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+
+CREATE SCHEMA intime;
+
+
+ALTER SCHEMA intime OWNER TO integreen;
+
+SET search_path = intime, pg_catalog, public;
+
+
+CREATE SEQUENCE alarm_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.alarm_id_seq OWNER TO integreen;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+
+CREATE TABLE alarm (
+    id bigint DEFAULT nextval('alarm_id_seq'::regclass) NOT NULL,
+    "timestamp" timestamp without time zone,
+    specification_id bigint,
+    station_id bigint,
+    createdate timestamp without time zone
+);
+
+
+ALTER TABLE intime.alarm OWNER TO integreen;
+
+
+CREATE SEQUENCE alarm_spec_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.alarm_spec_seq OWNER TO integreen;
+
+
+CREATE TABLE alarmspecification (
+    id bigint NOT NULL,
+    description character varying(255),
+    name character varying(255)
+);
+
+
+ALTER TABLE intime.alarmspecification OWNER TO integreen;
+
+
+CREATE SEQUENCE basicdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.basicdata_id_seq OWNER TO integreen;
+
+
+CREATE TABLE bicyclebasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    bikesharingstation_id bigint,
+    type_id bigint
+);
+
+
+ALTER TABLE intime.bicyclebasicdata OWNER TO integreen;
+
+
+CREATE TABLE bikesharingstationbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    max_available integer,
+    type_id bigint
+);
+
+
+ALTER TABLE intime.bikesharingstationbasicdata OWNER TO integreen;
+
+
+CREATE TABLE bluetoothbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    sim_number character varying(255),
+    sim_serial character varying(255)
+);
+
+
+ALTER TABLE intime.bluetoothbasicdata OWNER TO integreen;
+
+
+CREATE TABLE carparkingbasicdata (
+    id bigint NOT NULL,
+    station_id bigint NOT NULL,
+    disabledcapacity integer,
+    disabledtoiletavailable boolean,
+    owneroperator character varying,
+    parkingtype character varying,
+    permittedvehicletypes character varying,
+    toiletsavailable boolean,
+    capacity integer,
+    area public.geometry,
+    phonenumber character varying,
+    email character varying,
+    url character varying,
+    mainaddress character varying,
+    station integer,
+    state integer,
+    womencapacity integer,
+    CONSTRAINT enforce_dims_area CHECK ((public.st_ndims(area) = 2)),
+    CONSTRAINT enforce_geotype_area CHECK (((public.geometrytype(area) = 'MULTIPOLYGON'::text) OR (area IS NULL))),
+    CONSTRAINT enforce_srid_area CHECK ((public.st_srid(area) = 4326))
+);
+
+
+ALTER TABLE intime.carparkingbasicdata OWNER TO integreen;
+
+
+CREATE SEQUENCE carparkingbasicdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.carparkingbasicdata_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE carparkingbasicdata_id_seq OWNED BY carparkingbasicdata.id;
+
+
+
+CREATE TABLE carparkingdynamic (
+    id integer NOT NULL,
+    station_id bigint NOT NULL,
+    carparkstate character varying,
+    carparktrend character varying,
+    exitrate double precision,
+    fillrate double precision,
+    lastupdate timestamp without time zone,
+    occupacy integer,
+    occupacypercentage integer,
+    createdate timestamp without time zone
+);
+
+
+ALTER TABLE intime.carparkingdynamic OWNER TO integreen;
+
+
+CREATE SEQUENCE carparkingdynamic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.carparkingdynamic_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE carparkingdynamic_id_seq OWNED BY carparkingdynamic.id;
+
+
+
+CREATE TABLE carparkingdynamichistory (
+    id integer NOT NULL,
+    station_id bigint NOT NULL,
+    carparkstate character varying,
+    carparktrend character varying,
+    exitrate double precision,
+    fillrate double precision,
+    lastupdate timestamp without time zone,
+    occupacy integer,
+    occupacypercentage integer,
+    createdate timestamp without time zone
+);
+
+
+ALTER TABLE intime.carparkingdynamichistory OWNER TO integreen;
+
+
+CREATE SEQUENCE carparkingdynamichistory_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.carparkingdynamichistory_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE carparkingdynamichistory_id_seq OWNED BY carparkingdynamichistory.id;
+
+
+
+CREATE TABLE carpoolinghubbasicdata (
+    id bigint NOT NULL,
+    station_id bigint
+);
+
+
+ALTER TABLE intime.carpoolinghubbasicdata OWNER TO integreen;
+
+
+CREATE TABLE carpoolinghubbasicdata_translation (
+    carpoolinghubbasicdata_id bigint NOT NULL,
+    i18n_id bigint NOT NULL,
+    i18n_key character varying(255) NOT NULL
+);
+
+
+ALTER TABLE intime.carpoolinghubbasicdata_translation OWNER TO integreen;
+
+
+CREATE TABLE carpoolinguserbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    cartype character varying(255),
+    gender character(1),
+    name character varying(255),
+    pendular boolean,
+    type character varying(255),
+    arrival character varying(255),
+    departure character varying(255),
+    hub_id bigint
+);
+
+
+ALTER TABLE intime.carpoolinguserbasicdata OWNER TO integreen;
+
+
+CREATE TABLE carpoolinguserbasicdata_translation (
+    carpoolinguserbasicdata_id bigint NOT NULL,
+    location_id bigint NOT NULL,
+    location_key character varying(255) NOT NULL
+);
+
+
+ALTER TABLE intime.carpoolinguserbasicdata_translation OWNER TO integreen;
+
+
+CREATE TABLE carsharingcarstationbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    brand character varying(255),
+    licenseplate character varying(255),
+    carsharingstation_id bigint
+);
+
+
+ALTER TABLE intime.carsharingcarstationbasicdata OWNER TO integreen;
+
+
+CREATE TABLE carsharingstationbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    canbookahead boolean,
+    companyshortname character varying(255),
+    hasfixedparking boolean,
+    parking integer,
+    spontaneously boolean
+);
+
+
+ALTER TABLE intime.carsharingstationbasicdata OWNER TO integreen;
+
+
+CREATE TABLE classification (
+    id integer NOT NULL,
+    type_id integer,
+    threshold character varying(512),
+    min double precision,
+    max double precision
+);
+
+
+ALTER TABLE intime.classification OWNER TO integreen;
+
+
+CREATE SEQUENCE classification_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.classification_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE classification_id_seq OWNED BY classification.id;
+
+
+
+CREATE TABLE copert_emisfact (
+    type_id bigint NOT NULL,
+    copert_parcom_id integer NOT NULL,
+    v_min numeric(5,1) DEFAULT (-99.0) NOT NULL,
+    v_max numeric(5,1) DEFAULT (-99.0) NOT NULL,
+    coef_a real,
+    coef_b real,
+    coef_c real,
+    coef_d real,
+    coef_e real,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE intime.copert_emisfact OWNER TO integreen;
+
+
+CREATE SEQUENCE copert_emisfact_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.copert_emisfact_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE copert_emisfact_id_seq OWNED BY copert_emisfact.id;
+
+
+
+CREATE TABLE copert_parcom (
+    descriz character(80) NOT NULL,
+    id integer NOT NULL,
+    percent real,
+    id_class smallint,
+    eurocl smallint
+);
+
+
+ALTER TABLE intime.copert_parcom OWNER TO integreen;
+
+
+CREATE TABLE datatype_i18n (
+    datatype_id bigint NOT NULL,
+    i18n character varying(255),
+    i18n_key character varying(255) NOT NULL
+);
+
+
+ALTER TABLE intime.datatype_i18n OWNER TO integreen;
+
+
+CREATE TABLE echargingplugbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    maxcurrent double precision,
+    maxpower double precision,
+    mincurrent double precision,
+    plugtype character varying(255),
+    estation_id bigint
+);
+
+
+ALTER TABLE intime.echargingplugbasicdata OWNER TO integreen;
+
+
+CREATE TABLE echargingplugoutlet (
+    id bigint NOT NULL,
+    code character varying(255),
+    hasfixedcable boolean,
+    maxcurrent double precision,
+    maxpower double precision,
+    mincurrent double precision,
+    plugtype character varying(255),
+    plug_id bigint
+);
+
+
+ALTER TABLE intime.echargingplugoutlet OWNER TO integreen;
+
+
+CREATE TABLE echargingstationbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    assetprovider character varying(255),
+    chargingpointscount integer,
+    city character varying(255),
+    state character varying(255),
+    accessinfo character varying(255),
+    address character varying(255),
+    flashinfo character varying(255),
+    locationserviceinfo character varying(255),
+    paymentinfo character varying(255),
+    reservable boolean
+);
+
+
+ALTER TABLE intime.echargingstationbasicdata OWNER TO integreen;
+
+
+CREATE TABLE elaboration (
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone NOT NULL,
+    value double precision,
+    station_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    period integer NOT NULL,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE intime.elaboration OWNER TO integreen;
+
+
+CREATE SEQUENCE elaboration_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.elaboration_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE elaboration_id_seq OWNED BY elaboration.id;
+
+
+
+CREATE TABLE elaborationhistory (
+    id bigint NOT NULL,
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone,
+    value double precision,
+    station_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    period integer
+);
+
+
+ALTER TABLE intime.elaborationhistory OWNER TO integreen;
+
+
+CREATE SEQUENCE elaborationhistory_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.elaborationhistory_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE elaborationhistory_id_seq OWNED BY elaborationhistory.id;
+
+
+
+CREATE SEQUENCE hibernate_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.hibernate_sequence OWNER TO integreen;
+
+
+CREATE SEQUENCE intime_measurement_mobile_history_seq
+    START WITH 29371884
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.intime_measurement_mobile_history_seq OWNER TO integreen;
+
+
+CREATE SEQUENCE intime_measurementhistory
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.intime_measurementhistory OWNER TO integreen;
+
+
+CREATE TABLE linkbasicdata (
+    station_id bigint NOT NULL,
+    id bigint NOT NULL,
+    length double precision,
+    linegeometry public.geometry,
+    street_ids_ref text,
+    destination_id bigint NOT NULL,
+    origin_id bigint NOT NULL,
+    elapsed_time_default integer,
+    CONSTRAINT "enforce_dims_lineGeometry" CHECK ((public.st_ndims(linegeometry) = 2)),
+    CONSTRAINT "enforce_geotype_lineGeometry" CHECK (((public.geometrytype(linegeometry) = 'LINESTRING'::text) OR (linegeometry IS NULL))),
+    CONSTRAINT "enforce_srid_lineGeometry" CHECK ((public.st_srid(linegeometry) = 32632))
+);
+
+
+ALTER TABLE intime.linkbasicdata OWNER TO integreen;
+
+
+CREATE SEQUENCE linkbasicdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.linkbasicdata_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE linkbasicdata_id_seq OWNED BY linkbasicdata.id;
+
+
+
+CREATE TABLE measurement (
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone,
+    value double precision,
+    station_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    period integer NOT NULL,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE intime.measurement OWNER TO integreen;
+
+
+CREATE SEQUENCE measurement_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurement_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE measurement_id_seq OWNED BY measurement.id;
+
+
+
+CREATE SEQUENCE measurement_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurement_seq OWNER TO integreen;
+
+
+CREATE SEQUENCE measurementhistory_seq
+    START WITH 500000
+    INCREMENT BY 1
+    MINVALUE 500000
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurementhistory_seq OWNER TO integreen;
+
+
+CREATE TABLE measurementhistory (
+    id bigint DEFAULT nextval('measurementhistory_seq'::regclass) NOT NULL,
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone,
+    value double precision,
+    station_id bigint,
+    type_id bigint,
+    period integer
+);
+
+
+ALTER TABLE intime.measurementhistory OWNER TO integreen;
+
+
+CREATE SEQUENCE measurementmobile_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurementmobile_seq OWNER TO integreen;
+
+
+CREATE TABLE measurementmobile (
+    id bigint DEFAULT nextval('measurementmobile_seq'::regclass),
+    ts_ms timestamp without time zone NOT NULL,
+    af_1_sccm double precision,
+    af_1_valid_b boolean,
+    can_acc_lat_mean_mps2 double precision,
+    can_acc_lat_mps2 double precision,
+    can_acc_lat_var_m2ps4 double precision,
+    can_acc_long_mean_mps2 double precision,
+    can_acc_long_mps2 double precision,
+    can_acc_long_var_m2ps4 double precision,
+    can_speed_mps double precision,
+    can_valid_b boolean,
+    co_1_ppm double precision,
+    co_1_runtime_s integer,
+    co_1_valid_b boolean,
+    gps_1_alt_m double precision,
+    gps_1_hdg_deg double precision,
+    gps_1_lat_deg double precision,
+    gps_1_long_deg double precision,
+    gps_1_speed_mps double precision,
+    id_driver_nr integer,
+    id_runtime_s integer,
+    id_status_char character varying(255),
+    id_system_nr integer,
+    id_vehicle_nr integer,
+    id_version_char character varying(255),
+    imu_acc_lat_mean_mps2 double precision,
+    imu_acc_lat_mps2 double precision,
+    imu_acc_lat_var_m2ps4 double precision,
+    imu_acc_long_mean_mps2 double precision,
+    imu_acc_long_mps2 double precision,
+    imu_acc_long_var_m2ps4 double precision,
+    imu_speed_mps double precision,
+    imu_valid_b boolean,
+    no2_1_ppb double precision,
+    no2_1_runtime_s integer,
+    no2_1_valid_b boolean,
+    no2_2_ppb double precision,
+    no2_2_runtime_s integer,
+    no2_2_valid_b boolean,
+    res_1_a double precision,
+    res_1_runtime_s integer,
+    res_1_valid_b boolean,
+    res_2_a double precision,
+    res_2_runtime_s integer,
+    res_2_valid_b boolean,
+    rh_1_pct double precision,
+    rh_1_valid_b boolean,
+    temp_1_c double precision,
+    temp_1_valid_b boolean,
+    gps_1_sat_nr integer,
+    gps_1_valid_b boolean,
+    gps_1_pdop_nr double precision,
+    o3_1_ppb double precision,
+    o3_1_runtime_s integer,
+    o3_1_valid_b boolean,
+    the_geom public.geometry,
+    station_id bigint NOT NULL,
+    created_on timestamp without time zone,
+    "position" public.geometry,
+    realtime_delay bigint,
+    no2_1_microgm3_ma double precision,
+    no2_1_microgm3_exp double precision,
+    CONSTRAINT enforce_dims_the_geom CHECK ((public.st_ndims(the_geom) = 2)),
+    CONSTRAINT enforce_geotype_the_geom CHECK (((public.geometrytype(the_geom) = 'POINT'::text) OR (the_geom IS NULL))),
+    CONSTRAINT enforce_srid_the_geom CHECK ((public.st_srid(the_geom) = 25832))
+);
+
+
+ALTER TABLE intime.measurementmobile OWNER TO integreen;
+
+
+CREATE SEQUENCE measurementmobilehistory_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurementmobilehistory_seq OWNER TO integreen;
+
+
+CREATE TABLE measurementmobilehistory (
+    id bigint DEFAULT nextval('measurementmobilehistory_seq'::regclass) NOT NULL,
+    ts_ms timestamp without time zone NOT NULL,
+    af_1_sccm double precision,
+    af_1_valid_b boolean,
+    can_acc_lat_mean_mps2 double precision,
+    can_acc_lat_mps2 double precision,
+    can_acc_lat_var_m2ps4 double precision,
+    can_acc_long_mean_mps2 double precision,
+    can_acc_long_mps2 double precision,
+    can_acc_long_var_m2ps4 double precision,
+    can_speed_mps double precision,
+    can_valid_b boolean,
+    co_1_ppm double precision,
+    co_1_runtime_s integer,
+    co_1_valid_b boolean,
+    gps_1_alt_m double precision,
+    gps_1_hdg_deg double precision,
+    gps_1_lat_deg double precision,
+    gps_1_long_deg double precision,
+    gps_1_speed_mps double precision,
+    id_driver_nr integer,
+    id_runtime_s integer,
+    id_status_char character varying(255),
+    id_system_nr integer,
+    id_vehicle_nr integer,
+    id_version_char character varying(255),
+    imu_acc_lat_mean_mps2 double precision,
+    imu_acc_lat_mps2 double precision,
+    imu_acc_lat_var_m2ps4 double precision,
+    imu_acc_long_mean_mps2 double precision,
+    imu_acc_long_mps2 double precision,
+    imu_acc_long_var_m2ps4 double precision,
+    imu_speed_mps double precision,
+    imu_valid_b boolean,
+    no2_1_ppb double precision,
+    no2_1_runtime_s integer,
+    no2_1_valid_b boolean,
+    no2_2_ppb double precision,
+    no2_2_runtime_s integer,
+    no2_2_valid_b boolean,
+    res_1_a double precision,
+    res_1_runtime_s integer,
+    res_1_valid_b boolean,
+    res_2_a double precision,
+    res_2_runtime_s integer,
+    res_2_valid_b boolean,
+    rh_1_pct double precision,
+    rh_1_valid_b boolean,
+    temp_1_c double precision,
+    temp_1_valid_b boolean,
+    gps_1_sat_nr integer,
+    gps_1_valid_b boolean,
+    gps_1_pdop_nr double precision,
+    o3_1_ppb double precision,
+    o3_1_runtime_s integer,
+    o3_1_valid_b boolean,
+    station_id bigint,
+    "position" public.geometry,
+    created_on timestamp without time zone,
+    realtime_delay bigint,
+    no2_1_microgm3_ma double precision,
+    no2_1_microgm3_exp double precision
+);
+
+
+ALTER TABLE intime.measurementmobilehistory OWNER TO integreen;
+
+
+CREATE TABLE measurementstring (
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone,
+    value character varying,
+    station_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    period integer,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE intime.measurementstring OWNER TO integreen;
+
+
+CREATE SEQUENCE measurementstring_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurementstring_id_seq OWNER TO integreen;
+
+
+CREATE TABLE measurementstringhistory (
+    created_on timestamp without time zone,
+    "timestamp" timestamp without time zone,
+    value character varying,
+    station_id bigint NOT NULL,
+    type_id bigint NOT NULL,
+    period integer,
+    id bigint NOT NULL
+);
+
+
+ALTER TABLE intime.measurementstringhistory OWNER TO integreen;
+
+
+CREATE SEQUENCE measurementstringhistory_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.measurementstringhistory_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE measurementstringhistory_id_seq OWNED BY measurementstringhistory.id;
+
+
+
+CREATE TABLE meteostationbasicdata (
+    id bigint NOT NULL,
+    area character varying(255),
+    zeus character varying(255),
+    station_id bigint NOT NULL
+);
+
+
+ALTER TABLE intime.meteostationbasicdata OWNER TO integreen;
+
+
+CREATE SEQUENCE meteostationbasicdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.meteostationbasicdata_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE meteostationbasicdata_id_seq OWNED BY meteostationbasicdata.id;
+
+
+
+CREATE SEQUENCE outlet_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.outlet_seq OWNER TO integreen;
+
+
+CREATE TABLE scheduler_run (
+    id integer NOT NULL,
+    task_id integer,
+    status character varying(512),
+    start_time timestamp without time zone,
+    stop_time timestamp without time zone,
+    run_output text,
+    run_result text,
+    traceback text,
+    worker_name character varying(512)
+);
+
+
+ALTER TABLE intime.scheduler_run OWNER TO integreen;
+
+
+CREATE SEQUENCE scheduler_run_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.scheduler_run_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE scheduler_run_id_seq OWNED BY scheduler_run.id;
+
+
+
+CREATE TABLE scheduler_task (
+    id integer NOT NULL,
+    application_name character varying(512),
+    task_name character varying(512),
+    group_name character varying(512),
+    status character varying(512),
+    function_name character varying(512),
+    uuid character varying(255),
+    args text,
+    vars text,
+    enabled character(1),
+    start_time timestamp without time zone,
+    next_run_time timestamp without time zone,
+    stop_time timestamp without time zone,
+    repeats integer,
+    retry_failed integer,
+    period integer,
+    prevent_drift character(1),
+    timeout integer,
+    sync_output integer,
+    times_run integer,
+    times_failed integer,
+    last_run_time timestamp without time zone,
+    assigned_worker_name character varying(512)
+);
+
+
+ALTER TABLE intime.scheduler_task OWNER TO integreen;
+
+
+CREATE TABLE scheduler_task_deps (
+    id integer NOT NULL,
+    job_name character varying(512),
+    task_parent integer,
+    task_child integer,
+    can_visit character(1)
+);
+
+
+ALTER TABLE intime.scheduler_task_deps OWNER TO integreen;
+
+
+CREATE SEQUENCE scheduler_task_deps_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.scheduler_task_deps_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE scheduler_task_deps_id_seq OWNED BY scheduler_task_deps.id;
+
+
+
+CREATE SEQUENCE scheduler_task_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.scheduler_task_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE scheduler_task_id_seq OWNED BY scheduler_task.id;
+
+
+
+CREATE TABLE scheduler_worker (
+    id integer NOT NULL,
+    worker_name character varying(255),
+    first_heartbeat timestamp without time zone,
+    last_heartbeat timestamp without time zone,
+    status character varying(512),
+    is_ticker character(1),
+    group_names text,
+    worker_stats text
+);
+
+
+ALTER TABLE intime.scheduler_worker OWNER TO integreen;
+
+
+CREATE SEQUENCE scheduler_worker_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.scheduler_worker_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE scheduler_worker_id_seq OWNED BY scheduler_worker.id;
+
+
+
+CREATE TABLE station (
+    id bigint NOT NULL,
+    name character varying,
+    shortname character varying,
+    description character varying,
+    stationtype character varying,
+    pointprojection public.geometry,
+    stationcode character varying NOT NULL,
+    active boolean,
+    parent_id integer,
+    st_old_id smallint,
+    available boolean,
+    origin character varying(255),
+    CONSTRAINT enforce_dims_pointprojection CHECK ((public.st_ndims(pointprojection) = 2)),
+    CONSTRAINT enforce_geotype_pointprojection CHECK (((public.geometrytype(pointprojection) = 'POINT'::text) OR (pointprojection IS NULL))),
+    CONSTRAINT enforce_srid_pointprojection CHECK ((public.st_srid(pointprojection) = 4326))
+);
+
+
+ALTER TABLE intime.station OWNER TO integreen;
+
+
+CREATE SEQUENCE station_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.station_seq OWNER TO integreen;
+
+
+CREATE TABLE streetbasicdata (
+    id bigint NOT NULL,
+    station_id bigint,
+    length double precision,
+    linegeometry public.geometry,
+    description character varying,
+    old_idstr smallint,
+    speed_default integer,
+    CONSTRAINT "enforce_dims_lineGeometry" CHECK ((public.st_ndims(linegeometry) = 2)),
+    CONSTRAINT "enforce_geotype_lineGeometry" CHECK (((public.geometrytype(linegeometry) = 'LINESTRING'::text) OR (linegeometry IS NULL))),
+    CONSTRAINT "enforce_srid_lineGeometry" CHECK ((public.st_srid(linegeometry) = 32632))
+);
+
+
+ALTER TABLE intime.streetbasicdata OWNER TO integreen;
+
+
+CREATE SEQUENCE streetbasicdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.streetbasicdata_id_seq OWNER TO integreen;
+
+
+ALTER SEQUENCE streetbasicdata_id_seq OWNED BY streetbasicdata.id;
+
+
+
+CREATE TABLE trafficstreetfactor (
+    id smallint NOT NULL,
+    id_arco smallint,
+    id_spira smallint,
+    factor numeric,
+    length numeric,
+    hv_perc numeric
+);
+
+
+ALTER TABLE intime.trafficstreetfactor OWNER TO integreen;
+
+
+CREATE TABLE translation (
+    dtype character varying(31) NOT NULL,
+    id bigint NOT NULL,
+    address character varying(255),
+    name character varying(255),
+    city character varying(255)
+);
+
+
+ALTER TABLE intime.translation OWNER TO integreen;
+
+
+CREATE SEQUENCE translation_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.translation_seq OWNER TO integreen;
+
+
+CREATE TABLE type (
+    id bigint DEFAULT nextval('station_seq'::regclass) NOT NULL,
+    cname character varying(255),
+    created_on timestamp without time zone,
+    cunit character varying(255),
+    description character varying(255),
+    rtype character varying(255),
+    "timestamp" timestamp without time zone
+);
+
+
+ALTER TABLE intime.type OWNER TO integreen;
+
+
+CREATE SEQUENCE type_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.type_seq OWNER TO integreen;
+
+
+ALTER TABLE ONLY carparkingdynamic ALTER COLUMN id SET DEFAULT nextval('carparkingdynamic_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY carparkingdynamichistory ALTER COLUMN id SET DEFAULT nextval('carparkingdynamichistory_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY classification ALTER COLUMN id SET DEFAULT nextval('classification_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY copert_emisfact ALTER COLUMN id SET DEFAULT nextval('copert_emisfact_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY elaboration ALTER COLUMN id SET DEFAULT nextval('elaboration_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY elaborationhistory ALTER COLUMN id SET DEFAULT nextval('elaborationhistory_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY measurement ALTER COLUMN id SET DEFAULT nextval('measurement_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY measurementstringhistory ALTER COLUMN id SET DEFAULT nextval('measurementstringhistory_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY scheduler_run ALTER COLUMN id SET DEFAULT nextval('scheduler_run_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY scheduler_task ALTER COLUMN id SET DEFAULT nextval('scheduler_task_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY scheduler_task_deps ALTER COLUMN id SET DEFAULT nextval('scheduler_task_deps_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY scheduler_worker ALTER COLUMN id SET DEFAULT nextval('scheduler_worker_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY alarm
+    ADD CONSTRAINT alarm_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY alarmspecification
+    ADD CONSTRAINT alarmspecification_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT bicyclebasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY bikesharingstationbasicdata
+    ADD CONSTRAINT bikesharingstationbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY bluetoothbasicdata
+    ADD CONSTRAINT bluetoothbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carparkingbasicdata
+    ADD CONSTRAINT carparkingbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carparkingdynamic
+    ADD CONSTRAINT carparkingdynamic_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carparkingdynamichistory
+    ADD CONSTRAINT carparkingdynamichistory_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata
+    ADD CONSTRAINT carpoolinghubbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata_translation
+    ADD CONSTRAINT carpoolinghubbasicdata_translation_pkey PRIMARY KEY (carpoolinghubbasicdata_id, i18n_key);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata
+    ADD CONSTRAINT carpoolinguserbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata_translation
+    ADD CONSTRAINT carpoolinguserbasicdata_translation_pkey PRIMARY KEY (carpoolinguserbasicdata_id, location_key);
+
+
+
+ALTER TABLE ONLY carsharingcarstationbasicdata
+    ADD CONSTRAINT carsharingcarstationbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY carsharingstationbasicdata
+    ADD CONSTRAINT carsharingstationbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY classification
+    ADD CONSTRAINT classification_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT combination_station_type_period UNIQUE (station_id, type_id, period);
+
+
+
+ALTER TABLE ONLY copert_emisfact
+    ADD CONSTRAINT copert_emisfact_pk PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY copert_parcom
+    ADD CONSTRAINT copert_parcom_id PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY datatype_i18n
+    ADD CONSTRAINT datatype_i18n_pkey PRIMARY KEY (datatype_id, i18n_key);
+
+
+
+ALTER TABLE ONLY echargingplugbasicdata
+    ADD CONSTRAINT echargingplugbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY echargingplugoutlet
+    ADD CONSTRAINT echargingplugoutlet_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY echargingstationbasicdata
+    ADD CONSTRAINT echargingstationbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT "intime.elaboration.pk_1" PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT "intime.measurementstring" UNIQUE (station_id, type_id, period);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT "intime.measurementstringhistory unique" UNIQUE ("timestamp", station_id, type_id, period, value);
+
+
+
+ALTER TABLE ONLY measurementhistory
+    ADD CONSTRAINT meteorecord_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY type
+    ADD CONSTRAINT meteorecordtype_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY meteostationbasicdata
+    ADD CONSTRAINT meteostationbasicdata_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY elaborationhistory
+    ADD CONSTRAINT pk_intime_elaborationhistory PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT pk_intime_measurementstring PRIMARY KEY (station_id, type_id);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT pk_intime_measurementstringhistory PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT pk_linkbasicdata PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY measurementmobile
+    ADD CONSTRAINT "pk_measuremenmobilehistory-station" PRIMARY KEY (station_id);
+
+
+
+ALTER TABLE ONLY scheduler_run
+    ADD CONSTRAINT scheduler_run_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY scheduler_task_deps
+    ADD CONSTRAINT scheduler_task_deps_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY scheduler_task
+    ADD CONSTRAINT scheduler_task_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY scheduler_task
+    ADD CONSTRAINT scheduler_task_uuid_key UNIQUE (uuid);
+
+
+
+ALTER TABLE ONLY scheduler_worker
+    ADD CONSTRAINT scheduler_worker_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY scheduler_worker
+    ADD CONSTRAINT scheduler_worker_worker_name_key UNIQUE (worker_name);
+
+
+
+ALTER TABLE ONLY station
+    ADD CONSTRAINT station_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY streetbasicdata
+    ADD CONSTRAINT streetbasicdata_pk PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY measurementmobilehistory
+    ADD CONSTRAINT traffic_vehicle_record_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY trafficstreetfactor
+    ADD CONSTRAINT trafficstreetfactor_pk PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY translation
+    ADD CONSTRAINT translation_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY type
+    ADD CONSTRAINT typeconstraint UNIQUE (cname);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata_translation
+    ADD CONSTRAINT uk_3m4xdkq0ub9i16b756rmkrrub UNIQUE (i18n_id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata_translation
+    ADD CONSTRAINT uk_cf78jl8o9ay9e0qjys8oxbm34 UNIQUE (location_id);
+
+
+
+CREATE INDEX "all" ON elaborationhistory USING btree (type_id, period, "timestamp", station_id);
+
+
+
+CREATE INDEX "fki_measuremenmobile-station" ON measurementmobilehistory USING btree (station_id);
+
+
+
+CREATE INDEX fki_trafficstreetfactor_station_arco_fk ON trafficstreetfactor USING btree (id_arco);
+
+
+
+CREATE INDEX fki_trafficstreetfactor_station_spira_fk ON trafficstreetfactor USING btree (id_spira);
+
+
+
+CREATE INDEX "index for mac" ON measurementstringhistory USING btree (station_id, "timestamp" DESC, value DESC);
+
+
+
+CREATE INDEX "index type" ON elaborationhistory USING btree (type_id);
+
+
+
+CREATE INDEX "left join (count)" ON measurementstringhistory USING btree (station_id, type_id, "timestamp" DESC);
+
+
+
+CREATE INDEX "left join intime.elaborationhistory" ON elaborationhistory USING btree (station_id, type_id, "timestamp" DESC);
+
+
+
+CREATE INDEX "measurementhistory left join" ON measurementhistory USING btree (station_id, type_id, "timestamp" DESC);
+
+
+
+CREATE INDEX "measurementhistory ts desc" ON measurementhistory USING btree ("timestamp" DESC);
+
+
+
+CREATE UNIQUE INDEX measurementindex ON measurement USING btree (station_id, type_id, period);
+
+
+
+CREATE INDEX no2_1_microgm3_ma ON measurementmobilehistory USING btree (no2_1_microgm3_ma);
+
+
+
+CREATE INDEX no2_1_ppb_index ON measurementmobilehistory USING btree (no2_1_ppb);
+
+
+
+CREATE INDEX "station-id lastupdate" ON carparkingdynamichistory USING btree (station_id, lastupdate);
+
+
+
+CREATE INDEX "station-type" ON measurementstringhistory USING btree (station_id, type_id);
+
+
+
+CREATE INDEX station_id ON station USING btree (id);
+
+
+
+CREATE INDEX station_type_timestamp_period ON measurementhistory USING btree (station_id, type_id, "timestamp", period);
+
+
+
+CREATE UNIQUE INDEX stop_duplicates_elaborationhistory ON elaborationhistory USING btree ("timestamp", station_id, type_id, period) WHERE (((type_id <> 21) AND (type_id <> 921)) AND (type_id <> 41));
+
+
+
+CREATE INDEX "ts desc" ON measurementstringhistory USING btree ("timestamp" DESC);
+
+
+
+CREATE INDEX ts_ms_index ON measurementmobilehistory USING btree (ts_ms);
+
+
+
+CREATE INDEX "type+period" ON elaborationhistory USING btree (period, type_id);
+
+
+
+CREATE UNIQUE INDEX uniquestationidentifier ON station USING btree (stationcode, stationtype);
+
+
+
+ALTER TABLE ONLY carparkingbasicdata
+    ADD CONSTRAINT carparkingbasicdata_station_id_fkey FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carparkingdynamic
+    ADD CONSTRAINT carparkingdynamic_station_id_fkey FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carparkingdynamichistory
+    ADD CONSTRAINT carparkingdynamichistory_station_id_fkey FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY classification
+    ADD CONSTRAINT classification_type_id_fkey FOREIGN KEY (type_id) REFERENCES type(id) ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY copert_emisfact
+    ADD CONSTRAINT copert_emisfact_fk_type FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY copert_emisfact
+    ADD CONSTRAINT copert_emisfact_id FOREIGN KEY (copert_parcom_id) REFERENCES copert_parcom(id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT elaboration_type_id_fkey FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurementmobile
+    ADD CONSTRAINT fk1dnojfv99vxielbkj9vv3u9wa FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT fk3gyvu9e5k94rx6dy5npnl8pj6 FOREIGN KEY (bikesharingstation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY echargingplugbasicdata
+    ADD CONSTRAINT fk3rd3lm3eceksp7b9fy1fgpgq6 FOREIGN KEY (estation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bikesharingstationbasicdata
+    ADD CONSTRAINT fk4f134epnmuntunab746r66vgv FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY carsharingcarstationbasicdata
+    ADD CONSTRAINT fk4sskxcenm2boj6rli581ov2dc FOREIGN KEY (carsharingstation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY alarm
+    ADD CONSTRAINT fk67hmoh6okqgqcv0j0ia04jsks FOREIGN KEY (specification_id) REFERENCES alarmspecification(id);
+
+
+
+ALTER TABLE ONLY measurementhistory
+    ADD CONSTRAINT fk6ft0if5pwoff43uyhh4g6mrv5 FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata_translation
+    ADD CONSTRAINT fk8bg2cr872cl7bpl1xlm7gbrme FOREIGN KEY (i18n_id) REFERENCES translation(id);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT fk9dpm4i4fnimhnxw80k7tfqox0 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY alarm
+    ADD CONSTRAINT fk9w0ph05u8x3louer75d8d6g0t FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY echargingplugbasicdata
+    ADD CONSTRAINT fk_4jocxfkbgifv7nuegafam1646 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carsharingcarstationbasicdata
+    ADD CONSTRAINT fk_6ujh2f9csu56eygfdthl0mhv FOREIGN KEY (carsharingstation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT fk_8mp7cb6atcqv5469h54byecn9 FOREIGN KEY (bikesharingstation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY echargingplugbasicdata
+    ADD CONSTRAINT fk_8njs5g5ad1p879386dq66a27t FOREIGN KEY (estation_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fk_cprhvfercw6ft327uft3jooqs FOREIGN KEY (origin_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY alarm
+    ADD CONSTRAINT fk_daf0pncvheiymc2b5j3ct5iuo FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY meteostationbasicdata
+    ADD CONSTRAINT fk_dclq4pqlin82mp08ypayegvp0 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata
+    ADD CONSTRAINT fk_denjym4bibvsqtnj6uhh1yhnw FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carparkingbasicdata
+    ADD CONSTRAINT fk_du6n60nd0ltuy2l0p4byo9tno FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bikesharingstationbasicdata
+    ADD CONSTRAINT fk_eyme20c34nvso7l79kmyyg8q3 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carsharingcarstationbasicdata
+    ADD CONSTRAINT fk_gd4fjxeuhk02yg6bjgees79s6 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT fk_intime_elaboration_station FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaborationhistory
+    ADD CONSTRAINT fk_intime_elaborationhistory FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY elaborationhistory
+    ADD CONSTRAINT fk_intime_elaborationhistory_station FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT fk_jb4jo748vr4kr2sp6lxsg0yak FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fk_jgn1kwid7kx08h80631ybgk1x FOREIGN KEY (destination_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fk_kbxohrwokjxqvk2v2hq2h2t7q FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT fk_kd6cluti67bvjsnon5ane961x FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata
+    ADD CONSTRAINT fk_knt96vdxugt1opmbg3l4goku7 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bikesharingstationbasicdata
+    ADD CONSTRAINT fk_kqs39ffqhmucfdinewdrtapht FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY echargingstationbasicdata
+    ADD CONSTRAINT fk_litvoxxj0dp67mt9v0j5wg7fh FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementmobilehistory
+    ADD CONSTRAINT "fk_measuremenmobile-station" FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementmobile
+    ADD CONSTRAINT "fk_measuremenmobilehistory-station" FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurement
+    ADD CONSTRAINT fk_measurement_station FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT fk_measurementstring_station FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT fk_measurementstring_stationhistory FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT fk_measurementstringhistorytype FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT fk_measurementstringtype FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurement
+    ADD CONSTRAINT fk_measurementtype FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurementhistory
+    ADD CONSTRAINT fk_meteorecordtype FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY bluetoothbasicdata
+    ADD CONSTRAINT fk_pyqilmrqxl9gxwpr8ui7jexij FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carsharingstationbasicdata
+    ADD CONSTRAINT fk_qhe8k3ekrkq81hib4u039e6mr FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carparkingbasicdata
+    ADD CONSTRAINT fk_qpw90a5us6r9a77vejyx6u10d FOREIGN KEY (station) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY streetbasicdata
+    ADD CONSTRAINT fk_qq8vbw6c0asj0wo1mycuwil93 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementhistory
+    ADD CONSTRAINT fk_station FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY streetbasicdata
+    ADD CONSTRAINT fk_station_id FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY station
+    ADD CONSTRAINT fk_station_parent_id FOREIGN KEY (parent_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fk_station_reference FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY alarm
+    ADD CONSTRAINT fk_t2gxcea3vw308jjtscpojr6ri FOREIGN KEY (specification_id) REFERENCES alarmspecification(id);
+
+
+
+ALTER TABLE ONLY trafficstreetfactor
+    ADD CONSTRAINT fk_traffic_streetfactor_station FOREIGN KEY (id_arco) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT fkav5dnq85ljasqix0nnjhbcoy8 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementmobilehistory
+    ADD CONSTRAINT fkdc8h2uo6mi73f6sho1cbc4qqt FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaboration
+    ADD CONSTRAINT fkdi3xmx3ick2mh5tf5kga91evx FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata_translation
+    ADD CONSTRAINT fkdq581wabl1levlfsq4pyjpjw5 FOREIGN KEY (carpoolinguserbasicdata_id) REFERENCES carpoolinguserbasicdata(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fketmcfal9cr1pyv8f2kvwelm44 FOREIGN KEY (origin_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY bicyclebasicdata
+    ADD CONSTRAINT fkeu76hkyyutdvnr78grwuvd2qt FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurementhistory
+    ADD CONSTRAINT fkgn083v6hfhqnguemmu0tqm1wp FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaborationhistory
+    ADD CONSTRAINT fkh3qi0htd1jkshh1ep377fovo4 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY echargingplugoutlet
+    ADD CONSTRAINT fkhce8yoanxbbeurhseaf2pu80j FOREIGN KEY (plug_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata
+    ADD CONSTRAINT fkhf0s6h0u5gkbu7jn49sq62tnt FOREIGN KEY (hub_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurement
+    ADD CONSTRAINT fkj13h3be4x0l41ge05ltnxmrax FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurement
+    ADD CONSTRAINT fkjnjrf7o7u7da0nefthimj167y FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementstringhistory
+    ADD CONSTRAINT fkjopbglno7qpm4sv8w43oacmur FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT fkkk0k0on8scofrsfmsr9o577gk FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY carparkingdynamichistory
+    ADD CONSTRAINT fkkno932ygx9q10x5s4hdt43eu5 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY datatype_i18n
+    ADD CONSTRAINT fkkuxk6ww2a8dxcub3iw9byny1k FOREIGN KEY (datatype_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY carpoolinghubbasicdata_translation
+    ADD CONSTRAINT fko7bkcktpodp3yst428317ipuk FOREIGN KEY (carpoolinghubbasicdata_id) REFERENCES carpoolinghubbasicdata(id);
+
+
+
+ALTER TABLE ONLY linkbasicdata
+    ADD CONSTRAINT fkorulsos70qv0goe1gpqmog7q5 FOREIGN KEY (destination_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY measurementstring
+    ADD CONSTRAINT fkpi0ege52d6f86n8o6l6s75irm FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY carpoolinguserbasicdata_translation
+    ADD CONSTRAINT fkq8p7bo9hwkfk8h3b7fhf3xflp FOREIGN KEY (location_id) REFERENCES translation(id);
+
+
+
+ALTER TABLE ONLY carparkingdynamic
+    ADD CONSTRAINT fkq90lpabiye1scahh0pa6drni7 FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY elaborationhistory
+    ADD CONSTRAINT fkqkj3j3kx7yctkubhil9a9kkqs FOREIGN KEY (type_id) REFERENCES type(id);
+
+
+
+ALTER TABLE ONLY meteostationbasicdata
+    ADD CONSTRAINT meteostationbasicdata_station_id_fkey FOREIGN KEY (station_id) REFERENCES station(id);
+
+
+
+ALTER TABLE ONLY scheduler_run
+    ADD CONSTRAINT scheduler_run_task_id_fkey FOREIGN KEY (task_id) REFERENCES scheduler_task(id) ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY scheduler_task_deps
+    ADD CONSTRAINT scheduler_task_deps_task_child_fkey FOREIGN KEY (task_child) REFERENCES scheduler_task(id) ON DELETE CASCADE;
+
+
+
+UPDATE spatial_ref_sys o set auth_name = n.auth_name, auth_srid = n.auth_srid, srtext = n.srtext, proj4text = n.proj4text FROM _pgis_restore_spatial_ref_sys n WHERE o.srid = n.srid;
+INSERT INTO spatial_ref_sys SELECT * FROM _pgis_restore_spatial_ref_sys n WHERE n.srid NOT IN ( SELECT srid FROM spatial_ref_sys );
+DROP TABLE _pgis_restore_spatial_ref_sys;
+ALTER TABLE spatial_ref_sys ADD constraint spatial_ref_sys_srid_check check ( srid > 0 and srid < 999000 ) ;
+ALTER TABLE spatial_ref_sys ENABLE TRIGGER ALL;
+ALTER TABLE spatial_ref_sys ADD PRIMARY KEY(srid);

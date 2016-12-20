@@ -30,7 +30,7 @@ To configure the DAL module to communicate with your database you need to provid
 As you will see 2 persistence-units are configured. One is meant for the reader with preferably a read-only user and the other one for the writer which performs all the transactions.
 You can either import the schema
 
-  `insert schema command here`
+  `psql [database] < schema.dump`
 
 or let the ORM automaticaly create it for you by replacing
 > hibernate.hbm2ddl.autohibernate.hbm2ddl.auto `validate` to `update`
@@ -98,7 +98,10 @@ More informations will be available soon.
   > alter database bd owner to bd
   > GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdreadonly;
   > GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA intime TO bdreadonly;
-  > create extension postgis```
+  > create extension postgis
+  psql bd < schema.dump
+
+  ```
 
 ### Step2: Configure and deploy your big data platform
   - clone git repo bdp-core
@@ -119,3 +122,75 @@ More informations will be available soon.
   cd../reader
   mvn clean package
   ```
+### Step 3: Check endpoints
+To check the endpoints of the 2 apps go to http://{host}:{port}/writer/xmlrpc and http://{host}:{port}/reader/xmlrpc. There you should get 405 method GET not allowed as response. You can test it by seeing if introspection works:
+
+  `curl -i --data @introspection.xml http://localhost:8080/writer/xmlrpc`
+
+  The response should be somehing like this:
+  ``` xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <methodResponse xmlns:ex="http://ws.apache.org/xmlrpc/namespaces/extensions">
+    <params>
+      <param>
+        <value>
+          <array>
+            <data>
+              <value>system.methodSignature</value>
+              <value>DataCollector.getLatestMeasurementStringRecord</value>
+              <value>system.methodHelp</value>
+              <value>DataCollector.syncStations</value>
+              <value>DataCollector.syncDataTypes</value>
+              <value>DataCollector.getDateOfLastRecord</value>
+              <value>DataCollector.pushRecords</value>
+              <value>system.listMethods</value>
+            </data>
+          </array>
+        </value>
+      </param>
+    </params>
+  </methodResponse>
+  ```
+
+  The same goes for the reader application:
+
+  `curl -i --data @introspection.xml http://localhost:8080/writer/xmlrpc`
+  ``` xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <methodResponse xmlns:ex="http://ws.apache.org/xmlrpc/namespaces/extensions">
+    <params>
+      <param>
+        <value>
+          <array>
+            <data>
+              <value>DataRetriever.getDataTypes</value>
+              <value>DataRetriever.getTypes</value>
+              <value>DataRetriever.getStationDetails</value>
+              <value>DataRetriever.getStations</value>
+              <value>system.methodHelp</value>
+              <value>DataRetriever.getFreeSlotsByTimeFrame</value>
+              <value>DataRetriever.getRecords</value>
+              <value>DataRetriever.getNumberOfFreeSlots</value>
+              <value>system.listMethods</value>
+              <value>DataRetriever.getAvailableStations</value>
+              <value>system.methodSignature</value>
+              <value>DataRetriever.getChildren</value>
+              <value>DataRetriever.getLastRecord</value>
+              <value>DataRetriever.getParkingStations</value>
+              <value>DataRetriever.getParkingIds</value>
+              <value>DataRetriever.getNewestRecord</value>
+              <value>DataRetriever.getStoricData</value>
+              <value>DataRetriever.getParkingStation</value>
+              <value>DataRetriever.getDateOfLastRecord</value>
+            </data>
+          </array>
+        </value>
+      </param>
+    </params>
+  </methodResponse>
+  ```
+
+If this works you made it.
+
+You deployed your bd-core and now will be able to add modules or develop your own.
+For more informations read the modules manual.
