@@ -56,19 +56,24 @@ Data transfer objects are used as format for exchanging the data. They are used 
 
 ## WRITER
 The writer is a simple interface exposing calls through a xmlrpc service.
-It integrates the DAL and saves the data through abstraction.
-The calls which the service exposes can be found out through introspection and the most important are:
-  - Object syncStations(String stationType, Object...data):
-    syncronizes data of stations with the given stationType
-  - Object syncDataTypes(Object...data):
-    syncronizes data types
-  - Object pushRecords(String stationType, Object... data):
-    persists new data of stations with specific station types
+The DAL is a big and shared part between writer and reader and saves and retrieves the data through abstraction.
+The writer himself implements the methods to write data to the bdp and therefore becomes an interface for all data collectors.
+
 
 ### dc-interface
-The writer comes with a ready to go java implementation. Just include the dc-interface jar in your project and use the existing xmlrpc client implementation.
+The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing xmlrpc client implementation.
+The API is compact and easy to use:
+	
+  - `Object syncStations(String dataStationTypology, Object[] data)` : This method is used to create,update,delete stations of a specific typology data must be an array of StationDto's and depending on dataStationTypology it can also be an extension of it. 
+  If, for example dataStationTypology = "Meteostation", the array can contain StationDto but also MeteostationDto
+	
+  - `Object syncDataTypes(String dataStationTypology, Object[] data)` : This method is used to create and update data types. Data must be an array of DataTypeDto
+  
+  - `Object pushData(String datasourceName, Object[] data)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. You have to put everything in a map which has as key a string identifying the data station it is correlated and a TypeMapDto as value. TypeMapDto himself contains a map himself where value is a unique string identifier representing the datatype the data is correlated to. As value you can put a list of SimpleRecordDto which simply are all the datapoints with a specific staiton and  a specific type. Each point is represented as timestamp and value
+  
+  - `Object getDateOfLastRecord(String stationCode,String dataType,Integer period)` : this method is required to get the date of the last valid record
 
-More informations will be available soon.
+**datasourceName** identifies which kind of data needs to be saved
 
 ## READER
 The reader is a simple interface exposing calls through a xmlrpc service.
