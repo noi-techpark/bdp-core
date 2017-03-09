@@ -1,11 +1,5 @@
 package it.bz.idm.bdp;
 
-import it.bz.idm.bdp.security.JwtUtil;
-import it.bz.idm.bdp.util.IntegreenException;
-import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.TypeDto;
-
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +19,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.security.JwtUtil;
+import it.bz.idm.bdp.util.IntegreenException;
+
 public abstract class RestControllerV2 {
+	
+	@Autowired
 	private DataRetriever retriever;
 
 	@Autowired
@@ -35,10 +37,6 @@ public abstract class RestControllerV2 {
 	AuthenticationManager authenticationManager;
 	
 	
-	public RestControllerV2(DataRetriever retriever) {
-		this.retriever = retriever;
-	}
-
 	@ExceptionHandler(value = Throwable.class)
 	public @ResponseBody ResponseEntity<IntegreenException> handleExceptions(
 			Throwable exception) {

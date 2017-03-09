@@ -23,19 +23,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 public abstract class RestController {
-	private DataRetriever retriever;
+	
+	@Autowired
+	public DataRetriever retriever;
 
 	@Autowired
 	private JwtUtil util;
 	
 	@Autowired
-	AuthenticationManager authenticationManager;
+	public AuthenticationManager authenticationManager;
 	
-	
-	public RestController(DataRetriever retriever) {
-		this.retriever = retriever;
-	}
-
 	@ExceptionHandler(value = Throwable.class)
 	public @ResponseBody ResponseEntity<IntegreenException> handleExceptions(
 			Throwable exception) {
@@ -55,12 +52,12 @@ public abstract class RestController {
 		return util.generateToken(principal);
 	}
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
-	public @ResponseBody String[] getStationIds(@RequestParam(required=false, value="luna")String luna) {
+	public @ResponseBody String[] getStationIds() {
 		return retriever.getStations();
 	}
 
 	@RequestMapping(value = "get-station-details", method = RequestMethod.GET)
-	public @ResponseBody List<StationDto> getStationDetails(@RequestParam(required=false, value="luna")String luna) {
+	public @ResponseBody List<StationDto> getStationDetails() {
 		return retriever.getStationDetails(null);
 	}
 

@@ -27,7 +27,7 @@ public abstract class DataRetriever implements IntegreenRunnable{
 		this.integreenTypology = initIntegreenTypology();
 	}
 
-	protected void initConfig() {
+	private void initConfig() {
 		if (config == null)
 			try {
 				config = new PropertiesConfiguration(APPLICATION_PROPERTIES_FILE);

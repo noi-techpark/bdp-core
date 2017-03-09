@@ -12,8 +12,6 @@ public class SwaggerWebAdapter extends WebMvcConfigurerAdapter{
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		  registry.addResourceHandler("/**").addResourceLocations("classpath:/META-INF/resources/");
-
-
 	}
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {

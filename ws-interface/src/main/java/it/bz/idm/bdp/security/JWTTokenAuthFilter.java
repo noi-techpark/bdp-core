@@ -15,12 +15,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.stereotype.Component;
 
 public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 
 	@Autowired
-	JwtUtil util;
+	public JwtUtil util;
 	
 	protected JWTTokenAuthFilter(String defaultFilterProcessesUrl) {
 		super(defaultFilterProcessesUrl);

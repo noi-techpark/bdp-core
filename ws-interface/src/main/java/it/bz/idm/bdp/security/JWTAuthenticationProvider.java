@@ -10,10 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JWTAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider{
-
-	@Autowired
-	private JwtUtil jwtUtil;
-
 	@Autowired
 	private UserDetailsService userDetailsService;
 
