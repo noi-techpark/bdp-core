@@ -1,6 +1,13 @@
 package it.bz.idm.bdp.reader;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+
 import it.bz.idm.bdp.dal.Alarm;
 import it.bz.idm.bdp.dal.AlarmSpecification;
 import it.bz.idm.bdp.dal.DataType;
@@ -14,14 +21,6 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.parking.ParkingStationDto;
-import it.bz.tis.integreen.util.IntegreenException;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
 
 public class DataRetriever {
 
@@ -161,7 +160,7 @@ public class DataRetriever {
 			List<Alarm> alarms = Alarm.findAlarmByStationAndTimestamp(em, station,new Date(dto.getTimestamp()));
 			if (!alarms.isEmpty()){
 				AlarmSpecification alarmSpec= alarms.get(0).getSpecification();
-				return new IntegreenException(alarmSpec.getName(),alarmSpec.getDescription());
+				return new IllegalStateException(alarmSpec.getName()+alarmSpec.getDescription());
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();
