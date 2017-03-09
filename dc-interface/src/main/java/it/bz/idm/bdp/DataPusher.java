@@ -6,9 +6,9 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 
 public abstract class DataPusher implements IntegreenPushable  {
 	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
-	protected static final String ENDPOINT_KEY		   				= "endpoint";
-	protected static final String HOST_KEY							= "host";
-	protected static final String PORT_KEY							= "port";
+	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
+	protected static final String HOST_KEY							= "bdp_host";
+	protected static final String PORT_KEY							= "bdp_port";
 	
 	protected static String DEFAULT_HOST 							= "localhost";
 	protected static Integer DEFAULT_PORT							= 8080;
