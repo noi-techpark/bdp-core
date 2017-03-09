@@ -16,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.NaturalId;
+
 import it.bz.idm.bdp.dto.SegmentDataPointDto;
 
 @Table(name="measurement")
@@ -34,12 +36,15 @@ public class Measurement{
 	private Double value;
 	private Date created_on;
 
+	@NaturalId
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
 	
+	@NaturalId
 	@ManyToOne(cascade = CascadeType.ALL)
 	private DataType type;
 	
+	@NaturalId
 	private Integer period;
 	
 	public Measurement() {

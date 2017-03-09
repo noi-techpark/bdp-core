@@ -18,6 +18,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.NaturalId;
+
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
@@ -32,16 +34,20 @@ public class MeasurementHistory{
     @SequenceGenerator(name="incrementhistory", sequenceName = "measurementhistory_seq",schema="intime",allocationSize=1)
 	private Long id;
     
+    @NaturalId
 	private Date timestamp;
 	private Double value;
 	private Date created_on;
 
+	@NaturalId
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
 	
+	@NaturalId
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	private DataType type;
 	
+	@NaturalId
 	private Integer period;
 	
 	public MeasurementHistory() {
@@ -55,7 +61,6 @@ public class MeasurementHistory{
 		this.period = period;
 		this.created_on = new Date();
 	}
-
 	
 	public Long getId() {
 		return id;

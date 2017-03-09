@@ -76,7 +76,6 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		date = MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em,stationtype, id);
 		em.close();
-
 		return date;
 	}
 

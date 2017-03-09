@@ -1,4 +1,19 @@
 package it.bz.idm.bdp.dal.parking;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.TemporalType;
+import javax.persistence.TypedQuery;
+
+import org.opengis.geometry.MismatchedDimensionException;
+
 import it.bz.idm.bdp.dal.Alarm;
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.DataType;
@@ -14,22 +29,6 @@ import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordDto;
 import it.bz.idm.bdp.dto.parking.CarParkingDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 import it.bz.idm.bdp.dto.parking.ParkingStationDto;
-import it.bz.tis.integreen.util.IntegreenException;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
-
-import org.opengis.geometry.MismatchedDimensionException;
 
 @Entity
 public class ParkingStation extends Station{
@@ -331,7 +330,7 @@ public class ParkingStation extends Station{
 
 			ParkingStation station = (ParkingStation) findStation(em,stationcode);
 			if (station == null || ! station.getActive())
-				return new IntegreenException("Station does not exist","One or more stations do not exist. Resynchronize stations");
+				return new IllegalStateException("Station does not exist");
 			CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
 			if (lastRecord == null){
 				lastRecord = new CarParkingDynamic();
