@@ -11,11 +11,11 @@
            <property name="hibernate.connection.provider_class" value="com.zaxxer.hikari.hibernate.HikariConnectionProvider"/>
            <property name="hibernate.hikari.dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>
            <property name="hibernate.hikari.maximumPoolSize" value="20" />
-           <property name="hibernate.hikari.dataSource.serverName" value=""/>
-           <property name="hibernate.hikari.dataSource.portNumber" value=""/>
-           <property name="hibernate.hikari.dataSource.databaseName" value=""/>
-	   <property name="hibernate.hikari.dataSource.user" value=""/>
-	   <property name="hibernate.hikari.dataSource.password" value=""/>
+           <property name="hibernate.hikari.dataSource.serverName" value="localhost"/>
+           <property name="hibernate.hikari.dataSource.portNumber" value="5432"/>
+           <property name="hibernate.hikari.dataSource.databaseName" value="bdp"/>
+	   <property name="hibernate.hikari.dataSource.user" value="bdp"/>
+	   <property name="hibernate.hikari.dataSource.password" value="bdp"/>
        </properties>
     </persistence-unit>
     <persistence-unit name="jpa-persistence-write" transaction-type="RESOURCE_LOCAL">
@@ -26,11 +26,11 @@
            <property name="hibernate.connection.provider_class" value="com.zaxxer.hikari.hibernate.HikariConnectionProvider"/>
            <property name="hibernate.hikari.dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>
            <property name="hibernate.hikari.maximumPoolSize" value="25" />
-	   <property name="hibernate.hikari.dataSource.serverName" value=""/>
-           <property name="hibernate.hikari.dataSource.portNumber" value=""/>
-           <property name="hibernate.hikari.dataSource.databaseName" value=""/>
-           <property name="hibernate.hikari.dataSource.user" value=""/>
-	   <property name="hibernate.hikari.dataSource.password" value=""/>
+	   <property name="hibernate.hikari.dataSource.serverName" value="localhost"/>
+           <property name="hibernate.hikari.dataSource.portNumber" value="5432"/>
+           <property name="hibernate.hikari.dataSource.databaseName" value="bdp"/>
+           <property name="hibernate.hikari.dataSource.user" value="bdp"/>
+	   <property name="hibernate.hikari.dataSource.password" value="bdp"/>
        </properties>
     </persistence-unit>
 </persistence>
