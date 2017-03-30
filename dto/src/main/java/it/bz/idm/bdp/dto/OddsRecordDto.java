@@ -2,6 +2,7 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class OddsRecordDto implements Serializable{
 	    /**
@@ -68,6 +69,15 @@ public class OddsRecordDto implements Serializable{
 
 		public void setGathered_on(Date gathered_on) {
 			this.gathered_on = gathered_on;
+		}
+
+		public static void removeCorruptedData(List<OddsRecordDto> records) {
+			for (int i=0;i<records.size();i++) {
+				OddsRecordDto record = records.get(i);
+				if (record == null || record.getGathered_on() == null || record.getMac() == null)
+					records.remove(i);
+			}
+			
 		}
 }
 

@@ -56,7 +56,6 @@ public abstract class XMLRPCPusher extends DataPusher {
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			return new IntegreenException(e);
-
 		}
 	}
 	public Object pushData(Object[] data) {
