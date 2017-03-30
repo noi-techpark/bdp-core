@@ -54,7 +54,7 @@ public class DataManager {
 
 	public Object getDateOfLastRecord(String stationtype,String stationcode,String type,Integer period){
 		EntityManager em = JPAUtil.createEntityManager();
-		Date date = new Date(0);
+		Date date = new Date(-1);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtype);
 			Station station = s.findStation(em,stationcode);

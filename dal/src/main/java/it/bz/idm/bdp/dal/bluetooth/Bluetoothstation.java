@@ -46,14 +46,12 @@ public class Bluetoothstation extends ElaborationStation {
 			queryString += " ORDER BY record.timestamp DESC";
 			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
 			query.setParameter("station", station);
-			if (type!=null)
+			if (type !=null)
 				query.setParameter("type", type);
 			if (period!=null)
 				query.setParameter("period", period);
 			List<Date> resultList = query.getResultList();
 			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}else {
-			date = new Date(0);
 		}
 		return date;
 	}
