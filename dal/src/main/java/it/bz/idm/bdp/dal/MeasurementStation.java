@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.apache.log4j.Logger;
 
 import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -20,6 +21,8 @@ import it.bz.idm.bdp.dto.TypeMapDto;
 
 
 public abstract class MeasurementStation extends Station {
+	private Logger logger = Logger.getLogger(MeasurementStation.class);
+	
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {
 		TypedQuery<Object[]> query;
@@ -128,6 +131,7 @@ public abstract class MeasurementStation extends Station {
 		if (object instanceof Map){
 			try{
 				Map<String,TypeMapDto> data = (Map) object;
+				logger.info("Start of transactions");
 				for (Map.Entry<String, TypeMapDto> entry:data.entrySet()){
 					Station station = findStation(em,entry.getKey());
 					for(Map.Entry<String,Set<SimpleRecordDto>> typeEntry:entry.getValue().getRecordsByType().entrySet()){
@@ -138,6 +142,7 @@ public abstract class MeasurementStation extends Station {
 							if (!records.isEmpty())
 								lastEntry = Measurement.findLatestEntry(em, station,type,records.get(0).getPeriod());
 							try{
+								logger.info("BEGIN");
 								em.getTransaction().begin();
 								SimpleRecordDto temp = null;
 								if (lastEntry != null)
@@ -164,6 +169,8 @@ public abstract class MeasurementStation extends Station {
 									em.merge(lastEntry);
 								}
 								em.getTransaction().commit();
+								logger.info("COMMIT");
+								
 							}catch(Exception ex){
 								ex.printStackTrace();
 								if (em.getTransaction().isActive())
@@ -173,6 +180,7 @@ public abstract class MeasurementStation extends Station {
 						}
 					}
 				}
+				logger.info("End of transactions");
 			}catch(Exception ex){
 				ex.printStackTrace();
 			}finally{

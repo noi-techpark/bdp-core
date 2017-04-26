@@ -3,6 +3,7 @@ package it.bz.idm.bdp;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,9 @@ import it.bz.idm.bdp.util.IntegreenException;
 
 public abstract class RestControllerV2 {
 	
-	@Autowired
-	private DataRetriever retriever;
+	protected DataRetriever retriever;
+	
+	public abstract DataRetriever initDataRetriever();
 
 	@Autowired
 	private JwtUtil util;
@@ -36,6 +38,10 @@ public abstract class RestControllerV2 {
 	@Autowired
 	AuthenticationManager authenticationManager;
 	
+	@PostConstruct
+	public void init(){
+		this.retriever = initDataRetriever();
+	}
 	
 	@ExceptionHandler(value = Throwable.class)
 	public @ResponseBody ResponseEntity<IntegreenException> handleExceptions(

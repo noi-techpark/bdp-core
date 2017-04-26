@@ -1,5 +1,6 @@
 package it.bz.idm.bdp;
 
+import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 
@@ -20,5 +21,7 @@ public interface IntegreenRunnable {
 	public abstract Object getNewestRecord(Object... objects);
 	
 	public abstract Date getDateOfLastRecord(Object... stationcode);
+	
+	public abstract List<? extends ChildDto> getChildren(String id);
 
 }

@@ -8,6 +8,8 @@ import it.bz.idm.bdp.dto.StationDto;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +26,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 public abstract class RestController {
 	
-	@Autowired
-	public DataRetriever retriever;
+	protected DataRetriever retriever;
+	
+	public abstract DataRetriever initDataRetriever();
 
 	@Autowired
 	private JwtUtil util;
@@ -33,6 +36,10 @@ public abstract class RestController {
 	@Autowired
 	public AuthenticationManager authenticationManager;
 	
+	@PostConstruct
+	public void init(){
+		this.retriever = initDataRetriever();
+	}
 	@ExceptionHandler(value = Throwable.class)
 	public @ResponseBody ResponseEntity<IntegreenException> handleExceptions(
 			Throwable exception) {
