@@ -53,13 +53,13 @@ public class MeasurementHistory{
 	public MeasurementHistory() {
 	}
 	public MeasurementHistory(Station station, DataType type,
-			Double value, Date timestamp, Integer period) {
+			Double value, Date timestamp, Integer period,Date created_on) {
 		this.station = station;
 		this.type = type;
 		this.value = value;
 		this.timestamp = timestamp;
 		this.period = period;
-		this.created_on = new Date();
+		this.created_on = created_on;
 	}
 	
 	public Long getId() {

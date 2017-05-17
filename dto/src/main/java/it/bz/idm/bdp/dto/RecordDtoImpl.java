@@ -2,7 +2,7 @@ package it.bz.idm.bdp.dto;
 
 import it.bz.idm.bdp.dto.RecordDto;
 
-public abstract class RecordDtoImpl implements RecordDto{
+public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImpl>{
 
 	/**
 	 * 
@@ -21,5 +21,10 @@ public abstract class RecordDtoImpl implements RecordDto{
 
 	public boolean validate() {
 		return this.timestamp != null && this.getValue() != null;
+	}
+	
+	@Override
+	public int compareTo(RecordDtoImpl o) {
+		return this.timestamp>o.timestamp?1:-1;
 	}
 }

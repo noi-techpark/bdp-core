@@ -2,11 +2,11 @@ package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -22,7 +22,7 @@ import it.bz.idm.bdp.dto.TypeMapDto;
 
 public abstract class MeasurementStation extends Station {
 	private Logger logger = Logger.getLogger(MeasurementStation.class);
-	
+
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {
 		TypedQuery<Object[]> query;
@@ -30,20 +30,20 @@ public abstract class MeasurementStation extends Station {
 			query = em
 					.createQuery(
 							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type  "
-							+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
-							Object[].class);
+									+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
+									Object[].class);
 			query.setParameter("station", stationId);
 		}else
 			query = em
-					.createQuery(
-							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type "
+			.createQuery(
+					"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type "
 							+ " where record.station.class=:stationtype GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
 							Object[].class);
 		query.setParameter("stationtype", this.getClass().getSimpleName());
 		List<Object[]> resultList = query.getResultList();
 		return getDataTypesFromQuery(resultList);
 	}
-	
+
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null) {
@@ -129,60 +129,58 @@ public abstract class MeasurementStation extends Station {
 	public Object pushRecords(EntityManager em,Object... objects) {
 		Object object = objects[0];
 		if (object instanceof Map){
+			Integer identityHashCode = System.identityHashCode(object);
 			try{
 				Map<String,TypeMapDto> data = (Map) object;
 				logger.info("Start of transactions");
 				for (Map.Entry<String, TypeMapDto> entry:data.entrySet()){
 					Station station = findStation(em,entry.getKey());
-					for(Map.Entry<String,Set<SimpleRecordDto>> typeEntry:entry.getValue().getRecordsByType().entrySet()){
-						DataType type = DataType.findByCname(em, typeEntry.getKey());
-						if (station != null && this.getClass().isInstance(station) && type != null){
-							List<SimpleRecordDto> records = new ArrayList<SimpleRecordDto>(typeEntry.getValue());
-							Measurement lastEntry = null;
-							if (!records.isEmpty())
-								lastEntry = Measurement.findLatestEntry(em, station,type,records.get(0).getPeriod());
-							try{
-								logger.info("BEGIN");
-								em.getTransaction().begin();
-								SimpleRecordDto temp = null;
-								if (lastEntry != null)
-									temp = new SimpleRecordDto(lastEntry.getTimestamp().getTime(),lastEntry.getValue());
-								for (SimpleRecordDto dto : typeEntry.getValue()){
-									Integer period = dto.getPeriod();
+					for(Map.Entry<String,List<SimpleRecordDto>> typeEntry:entry.getValue().getRecordsByType().entrySet()){
+						try{
+							em.getTransaction().begin();
+							DataType type = DataType.findByCname(em, typeEntry.getKey());
+							List<SimpleRecordDto> dataRecords = typeEntry.getValue();
+							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
+								Measurement lastEntry =  Measurement.findLatestEntry(em, station,type,dataRecords.get(0).getPeriod());
+								Date created_on = new Date();
+								Collections.sort(dataRecords);
+								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
+								for (SimpleRecordDto dto : dataRecords){
 									Long dateOfMeasurement = dto.getTimestamp();
 									Double value = dto.getValue();
-									if(lastEntry == null || lastEntry.getTimestamp().getTime() < dateOfMeasurement){
-										MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),period);
-										em.persist(record);								
-									}
-									if (temp == null || temp.getTimestamp() < dateOfMeasurement){
-										temp = dto;
+									if(lastEntryTime < dateOfMeasurement){
+										MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),dto.getPeriod(),created_on);
+										em.persist(record);
 									}
 								}
-								if (lastEntry == null && temp!= null && temp.isValid()){
-									lastEntry = new Measurement(station, type, temp.getValue(), new Date(temp.getTimestamp()), temp.getPeriod());
+								SimpleRecordDto newestDto = dataRecords.get(dataRecords.size()-1);
+								if (lastEntry == null){
+									lastEntry = new Measurement(station, type, newestDto.getValue(), new Date(newestDto.getTimestamp()), newestDto.getPeriod());
 									em.persist(lastEntry);
 								}
-								else if (temp != null){
-									lastEntry.setTimestamp(new Date(temp.getTimestamp()));
-									lastEntry.setValue(temp.getValue());
+								else if (newestDto != null && newestDto.getTimestamp()>lastEntryTime){
+									lastEntry.setTimestamp(new Date(newestDto.getTimestamp()));
+									lastEntry.setValue(newestDto.getValue());
 									em.merge(lastEntry);
 								}
-								em.getTransaction().commit();
-								logger.info("COMMIT");
-								
-							}catch(Exception ex){
-								ex.printStackTrace();
-								if (em.getTransaction().isActive())
-									em.getTransaction().rollback();
-								continue;
 							}
+							em.getTransaction().commit();
+						}catch(Exception ex){
+							ex.printStackTrace();
+							if (em.getTransaction().isActive())
+								em.getTransaction().rollback();
+							continue;
 						}
 					}
+
 				}
-				logger.info("End of transactions");
+				logger.info("End of transactions for: "+identityHashCode);
+
 			}catch(Exception ex){
 				ex.printStackTrace();
+				logger.info("Rollback single transaction: "+identityHashCode);
+				if (em.getTransaction().isActive())
+					em.getTransaction().rollback();
 			}finally{
 				em.clear();
 				em.close();
@@ -198,10 +196,10 @@ public abstract class MeasurementStation extends Station {
 					FullRecordDto full = (FullRecordDto)dto;
 					if (full.validate()){
 						if (!full.getStation().equals(tempSS)){
-								station = findStation(em,full.getStation());
-								if (station == null)
-									continue;
-								tempSS = station.getStationcode();
+							station = findStation(em,full.getStation());
+							if (station == null)
+								continue;
+							tempSS = station.getStationcode();
 						}
 						if (!full.getType().equals(tempTS)){
 							type = DataType.findByCname(em, full.getType());
@@ -212,15 +210,15 @@ public abstract class MeasurementStation extends Station {
 						Measurement lastEntry = Measurement.findLatestEntry(em, station,type,full.getPeriod());
 						Number value = (Number) full.getValue();
 						if (lastEntry == null){
-							 lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
-							 em.persist(lastEntry);
+							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
+							em.persist(lastEntry);
 						}
 						else if (lastEntry.getTimestamp().getTime()<full.getTimestamp()){
 							lastEntry.setValue(value.doubleValue());
 							lastEntry.setTimestamp(new Date(full.getTimestamp()));
 							em.merge(lastEntry);
 						}
-						MeasurementHistory record = new MeasurementHistory(station,type,value.doubleValue(), new Date(full.getTimestamp()),full.getPeriod());
+						MeasurementHistory record = new MeasurementHistory(station,type,value.doubleValue(), new Date(full.getTimestamp()),full.getPeriod(),new Date());
 						em.persist(record);
 					}
 				}
