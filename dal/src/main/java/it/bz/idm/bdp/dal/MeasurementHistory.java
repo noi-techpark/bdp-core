@@ -12,19 +12,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
-import org.hibernate.annotations.NaturalId;
-
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
-@Table(name="measurementhistory")
+@Table(name="measurementhistory",indexes={@Index(columnList="station_id,type_id,timestamp,period",unique=true)})
 @Entity
+
 public class MeasurementHistory{
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
@@ -34,20 +34,17 @@ public class MeasurementHistory{
     @SequenceGenerator(name="incrementhistory", sequenceName = "measurementhistory_seq",schema="intime",allocationSize=1)
 	private Long id;
     
-    @NaturalId
+    
 	private Date timestamp;
 	private Double value;
 	private Date created_on;
 
-	@NaturalId
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
 	
-	@NaturalId
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	private DataType type;
 	
-	@NaturalId
 	private Integer period;
 	
 	public MeasurementHistory() {
