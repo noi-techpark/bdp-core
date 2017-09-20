@@ -2,6 +2,7 @@ package it.bz.idm.bdp.dal.parking;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +15,15 @@ import javax.persistence.TypedQuery;
 
 import org.opengis.geometry.MismatchedDimensionException;
 
-import it.bz.idm.bdp.dal.Alarm;
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Elaboration;
 import it.bz.idm.bdp.dal.ElaborationHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordDto;
@@ -316,75 +317,47 @@ public class ParkingStation extends Station{
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
-		if (object instanceof Map){
-			Map<String, Object> parkingData = (Map) object;
-			String stationcode=parkingData.get("station-code").toString();
-			//Integer state =Integer.valueOf(parkingData.get("state-integer").toString()); 
-			Integer slots = Integer.valueOf(parkingData.get("numberOfParkingSlots-integer").toString());
-			Date timestamp = new Date(1000l*Integer.valueOf(parkingData.get("timestamp-integer").toString()));
-			Boolean communicationState = Byte.valueOf(parkingData.get("communicationState-boolean").toString())==1?true:false;
-			Boolean controlUnit = Byte.valueOf(parkingData.get("controlUnit-boolean").toString())==1?true:false;
-			Boolean totalChangeAllarm = Byte.valueOf(parkingData.get("totalChangeAllarm-boolean").toString())==1?true:false;
-			Boolean inactiveAllarm = Byte.valueOf(parkingData.get("inactiveAllarm-boolean").toString())==1?true:false;
-			Boolean occupiedSlotsAllarm = Byte.valueOf(parkingData.get("occupiedSlotsAllarm-boolean").toString())==1?true:false;
+		if (object instanceof DataMapDto){
+			DataMapDto dataMap = (DataMapDto) object;
+			for (Map.Entry<String, DataMapDto> entry : dataMap.entrySet()) {
+				if (!entry.getValue().getData().isEmpty()) {
+					ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
+					if (station == null || ! station.getActive())
+						return new IllegalStateException("Station does not exist");
+					CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
+					if (lastRecord == null){
+						lastRecord = new CarParkingDynamic();
+						lastRecord.setStation(station);
+					}
+					List<RecordDtoImpl> data = entry.getValue().getData();
+					Collections.sort(data);
+					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
+					CarParkingBasicData carData = (CarParkingBasicData) basicData;
+					em.getTransaction().begin();
 
-			ParkingStation station = (ParkingStation) findStation(em,stationcode);
-			if (station == null || ! station.getActive())
-				return new IllegalStateException("Station does not exist");
-			CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
-			if (lastRecord == null){
-				lastRecord = new CarParkingDynamic();
-				lastRecord.setStation(station);
-			}
-			BasicData basicData = new CarParkingBasicData().findByStation(em,station);
-			CarParkingBasicData carData = (CarParkingBasicData) basicData;
-
-			em.getTransaction().begin();
-			int occupacy = carData.getCapacity() - slots;
-			int occupacypercentage = Math.round(100f * occupacy/carData.getCapacity());
-			lastRecord.setOccupacy(occupacy);
-			lastRecord.setOccupacypercentage(occupacypercentage);
-			lastRecord.setLastupdate(timestamp);
-			lastRecord.setCreatedate(new Date());
-			em.merge(lastRecord);
-
-			CarParkingDynamicHistory historyRecord = new CarParkingDynamicHistory(station,occupacy,timestamp,occupacypercentage);
-			em.persist(historyRecord);
-			if (communicationState)
-				Alarm.createAllarm(em,"communication-status","Stato communicazione",station,timestamp);
-			if (controlUnit)
-				Alarm.createAllarm(em,"control-unit-status","Stato centralina",station,timestamp);
-			if (totalChangeAllarm)
-				Alarm.createAllarm(em,"capacity","cambio significativo dei posti totali della periferia",station,timestamp);
-			if (inactiveAllarm)
-				Alarm.createAllarm(em,"inactive","lungo periodo di inattività del parcheggio",station,timestamp);
-			if (occupiedSlotsAllarm)
-				Alarm.createAllarm(em,"occupiedSlots","cambio brusco del numero di posti occupati",station,timestamp);
-			em.getTransaction().commit();
-		}else if (object instanceof Object[]){
-			Object[] recordParameters =(Object[]) object;
-			DataType type = DataType.findByCname(em,DataTypeDto.PARKING_FORECAST);
-			ParkingStation station = (ParkingStation) findStation(em,recordParameters[0].toString());
-			Date timestamp = (Date) recordParameters[1];
-			Double slots = (Double) recordParameters[2];
-			Integer period = Integer.valueOf(recordParameters[3].toString());
-			ElaborationHistory prediction = ElaborationHistory.findRecordByProps(em,station, type,timestamp, period);
-			if (prediction == null) {
-				Elaboration lastPrediction = new Elaboration().findLastRecord(em,station, type, period);
-				double value = slots != null ? slots.doubleValue() : -1.;
-				if (lastPrediction == null){
-					lastPrediction = new Elaboration(station,type,value,timestamp, period);
-				}else{
-					lastPrediction.setCreated_on(new Date());
-					lastPrediction.setTimestamp(timestamp);
-					lastPrediction.setValue(value);
+					Integer slots = data.get(0).getValue();
+					int occupacy = carData.getCapacity() - slots;
+					int occupacypercentage = Math.round(100f * occupacy/carData.getCapacity());
+					lastRecord.setOccupacy(occupacy);
+					lastRecord.setOccupacypercentage(occupacypercentage);
+					lastRecord.setLastupdate(new Date(data.get(0).getTimestamp()));
+					lastRecord.setCreatedate(new Date());
+					em.merge(lastRecord);
+					for (RecordDtoImpl record : data) {
+						Integer free = record.getValue();
+						int occup = carData.getCapacity() - free;
+						int percentage = Math.round(100f * occup/carData.getCapacity());
+						CarParkingDynamicHistory historyRecord = new CarParkingDynamicHistory(station,occup,new Date(record.getTimestamp()),percentage);
+						em.persist(historyRecord);
+					}
+					em.getTransaction().commit();
 				}
-				prediction = new ElaborationHistory(station,type,value,timestamp,period);
-				em.getTransaction().begin();
-				em.merge(lastPrediction);
-				em.persist(prediction);
-				em.getTransaction().commit();
 			}
+
+
+
+
+
 		}
 		return "";
 	}
