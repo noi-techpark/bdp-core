@@ -15,12 +15,12 @@ public class DtoTest {
 		DataMapDto dto = new DataMapDto();
 		assertTrue(dto.getData().isEmpty());
 		DataMapDto childMapDto = new DataMapDto();
-		List<RecordDto> records = new ArrayList<RecordDto>();
+		List<RecordDtoImpl> records = new ArrayList<RecordDtoImpl>();
 		records.add(new SimpleRecordDto(121233l,1d));
 		childMapDto.setData(records);
 		dto.put("station1", childMapDto);
 		DataMapDto childOfChildMapDto = new DataMapDto();
-		List<RecordDto> records2 = new ArrayList<>();
+		List<RecordDtoImpl> records2 = new ArrayList<>();
 		records2.add(new SimpleRecordDto(324l,2d));
 		childOfChildMapDto.setData(records2);
 		childMapDto.put("precipitation", childOfChildMapDto);

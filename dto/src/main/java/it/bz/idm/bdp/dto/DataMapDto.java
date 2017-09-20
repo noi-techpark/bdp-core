@@ -9,13 +9,13 @@ public class DataMapDto extends HashMap<String, DataMapDto>{
 	
 
 	private static final long serialVersionUID = -6053193762265167013L;
-	private List<RecordDto> data = new ArrayList<RecordDto>();
+	private List<RecordDtoImpl> data = new ArrayList<RecordDtoImpl>();
 	
 	/**
 	 * This tree will always return data of the current branch, if that condition is not fullfilled it will search in it's branches and so on until the leafes are reached 
 	 * 
 	 */
-	public List<RecordDto> getData(){
+	public List<RecordDtoImpl> getData(){
 		if (data.isEmpty()) {
 			if (this.isEmpty())
 				return data;
@@ -25,7 +25,7 @@ public class DataMapDto extends HashMap<String, DataMapDto>{
 		}
 		return data;
 	}
-	public void setData(List<RecordDto> records) {
+	public void setData(List<RecordDtoImpl> records) {
 		this.data = records;
 	}
 

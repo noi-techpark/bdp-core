@@ -25,6 +25,6 @@ public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImp
 	
 	@Override
 	public int compareTo(RecordDtoImpl o) {
-		return this.timestamp>o.timestamp?1:-1;
+		return this.timestamp > o.timestamp ? 1:-1;
 	}
 }
