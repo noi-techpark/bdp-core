@@ -325,15 +325,16 @@ public class ParkingStation extends Station{
 					if (station == null || ! station.getActive())
 						return new IllegalStateException("Station does not exist");
 					CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
+					em.getTransaction().begin();
 					if (lastRecord == null){
 						lastRecord = new CarParkingDynamic();
 						lastRecord.setStation(station);
+						em.persist(lastRecord);
 					}
 					List<RecordDtoImpl> data = entry.getValue().getData();
 					Collections.sort(data);
 					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
 					CarParkingBasicData carData = (CarParkingBasicData) basicData;
-					em.getTransaction().begin();
 
 					Integer slots = data.get(0).getValue();
 					int occupacy = carData.getCapacity() - slots;

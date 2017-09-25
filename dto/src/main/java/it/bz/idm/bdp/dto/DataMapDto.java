@@ -1,11 +1,12 @@
 package it.bz.idm.bdp.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataMapDto extends HashMap<String, DataMapDto>{
+public class DataMapDto extends HashMap<String, DataMapDto> implements Serializable{
 	
 
 	private static final long serialVersionUID = -6053193762265167013L;
