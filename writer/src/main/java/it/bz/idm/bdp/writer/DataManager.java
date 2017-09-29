@@ -4,11 +4,14 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.stereotype.Component;
+
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
+@Component
 public class DataManager {
 
 	public Object pushRecords(String stationType, Object... data){

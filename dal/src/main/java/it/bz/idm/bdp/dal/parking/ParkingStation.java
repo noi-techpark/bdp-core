@@ -24,6 +24,7 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordDto;
@@ -319,7 +320,7 @@ public class ParkingStation extends Station{
 		Object object = objects[0];
 		if (object instanceof DataMapDto){
 			DataMapDto dataMap = (DataMapDto) object;
-			for (Map.Entry<String, DataMapDto> entry : dataMap.entrySet()) {
+			for (Map.Entry<String, DataMapDto> entry : dataMap.getBranch().entrySet()) {
 				if (!entry.getValue().getData().isEmpty()) {
 					ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
 					if (station == null || ! station.getActive())
@@ -331,12 +332,12 @@ public class ParkingStation extends Station{
 						lastRecord.setStation(station);
 						em.persist(lastRecord);
 					}
-					List<RecordDtoImpl> data = entry.getValue().getData();
+					List<SimpleRecordDto> data = entry.getValue().getData();
 					Collections.sort(data);
 					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
 					CarParkingBasicData carData = (CarParkingBasicData) basicData;
 
-					Integer slots = data.get(0).getValue();
+					Integer slots = (Integer) data.get(0).getValue();
 					int occupacy = carData.getCapacity() - slots;
 					int occupacypercentage = Math.round(100f * occupacy/carData.getCapacity());
 					lastRecord.setOccupacy(occupacy);
@@ -345,7 +346,7 @@ public class ParkingStation extends Station{
 					lastRecord.setCreatedate(new Date());
 					em.merge(lastRecord);
 					for (RecordDtoImpl record : data) {
-						Integer free = record.getValue();
+						Integer free = (Integer) record.getValue();
 						int occup = carData.getCapacity() - free;
 						int percentage = Math.round(100f * occup/carData.getCapacity());
 						CarParkingDynamicHistory historyRecord = new CarParkingDynamicHistory(station,occup,new Date(record.getTimestamp()),percentage);

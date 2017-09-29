@@ -17,7 +17,7 @@ public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImp
 		this.timestamp = timestamp;
 	}
 
-	public abstract <T extends Object> T getValue();
+	public abstract Object getValue();
 
 	public boolean validate() {
 		return this.timestamp != null && this.getValue() != null;

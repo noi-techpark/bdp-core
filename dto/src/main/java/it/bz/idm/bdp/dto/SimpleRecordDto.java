@@ -13,7 +13,7 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	 * 
 	 */
 	private static final long serialVersionUID = 5703758724961079739L;
-	private Double value;
+	private Object value;
 	private Integer period;
 	
 	
@@ -24,16 +24,16 @@ public class SimpleRecordDto extends RecordDtoImpl {
 		this.timestamp = timestamp;
 		this.value = value;
 	}
-	public SimpleRecordDto(Long timestamp, Double value, Integer period) {
+	public SimpleRecordDto(Long timestamp, Object value, Integer period) {
 		super();
 		this.timestamp = timestamp;
 		this.value = value;
 		this.period = period;
 	}
-	public Double getValue() {
+	public Object getValue() {
 		return value;
 	}
-	public void setValue(Double value) {
+	public void setValue(Object value) {
 		this.value = value;
 	}
 	public Integer getPeriod() {
