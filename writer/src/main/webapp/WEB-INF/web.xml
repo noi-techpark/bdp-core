@@ -28,4 +28,21 @@
 		<servlet-name>XmlRpcServlet</servlet-name>
 		<url-pattern>/xmlrpc</url-pattern>
 	</servlet-mapping>
+
+	<!-- Spring JSON -->
+	<servlet>
+		<servlet-name>json</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>WEB-INF/spring/webmvc-config.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>json</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
 </web-app>
