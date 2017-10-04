@@ -16,10 +16,12 @@ public abstract class JSONPusher extends DataPusher {
 
 
 	private static final String PUSH_RECORDS = "/pushRecords/";
+	
+	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
+
 
 
 	private static final String JSON_ENDPOINT = "json_endpoint";
-
 
 	protected RestTemplate restTemplate = new RestTemplate();
 
@@ -62,7 +64,7 @@ public abstract class JSONPusher extends DataPusher {
 
 	@Override
 	public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-		return restTemplate.getForObject(url, Date.class, stationCode, dataType, period);
+		return restTemplate.getForObject(url + GET_DATE_OF_LAST_RECORD+"{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}", Date.class,this.integreenTypology, stationCode, dataType, period);
 	}
 
 	@Override

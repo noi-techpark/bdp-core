@@ -6,10 +6,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.ManagedType;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 public class JPAUtil {
 
 	private static EntityManagerFactory emFactory;
