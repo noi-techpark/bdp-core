@@ -74,8 +74,10 @@ public class OddsRecordDto implements Serializable{
 		public static void removeCorruptedData(List<OddsRecordDto> records) {
 			for (int i=0;i<records.size();i++) {
 				OddsRecordDto record = records.get(i);
-				if (record == null || record.getGathered_on() == null || record.getMac() == null)
+				if (record == null || record.getGathered_on() == null || record.getMac() == null){
 					records.remove(i);
+					i--;
+				}
 			}
 			
 		}

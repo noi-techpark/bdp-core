@@ -2,6 +2,7 @@ package it.bz.idm.bdp.writer;
 
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
 @RequestMapping("/json")
@@ -23,7 +25,7 @@ public class JsonController extends DataManager{
 	}
 
 	@RequestMapping(value = "/pushRecords/{integreenTypology}", method = RequestMethod.POST)
-	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto stationData,
+	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
 			@PathVariable String integreenTypology) {
 		return super.pushRecords(integreenTypology, stationData);
 	}

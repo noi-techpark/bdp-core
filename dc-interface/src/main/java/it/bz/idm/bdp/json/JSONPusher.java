@@ -1,11 +1,15 @@
 package it.bz.idm.bdp.json;
 
 import java.sql.Date;
+import java.util.List;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 
 public abstract class JSONPusher extends DataPusher {
 	
@@ -31,14 +35,14 @@ public abstract class JSONPusher extends DataPusher {
 		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
 	}
 	@Override
-	public Object pushData(String datasourceName, DataMapDto dto) {
+	public Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto) {
 		if (dto == null)
 			return null;
 		return restTemplate.postForObject(url + PUSH_RECORDS + "{datasourceName}", dto, Object.class, datasourceName);
 	}
 	
 	
-	public Object pushData(DataMapDto dto) {
+	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
 		return pushData(this.integreenTypology, dto);
 	}
 

@@ -13,6 +13,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.opengis.geometry.MismatchedDimensionException;
 
 import it.bz.idm.bdp.dal.BasicData;
@@ -22,6 +24,7 @@ import it.bz.idm.bdp.dal.ElaborationHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
@@ -34,6 +37,7 @@ import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 @Entity
 public class ParkingStation extends Station{
+	private static Logger logger = Logger.getLogger(ParkingStation.class);
 	private static final String DEFAULT_DATE_PATTERN = "dd/MM/yyyy HH:mm";
 	public static final List<String[]> DATATYPES = new ArrayList<String[]>(){
 		private static final long serialVersionUID = -9025329745332375781L;
@@ -319,10 +323,10 @@ public class ParkingStation extends Station{
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
 		if (object instanceof DataMapDto){
-			DataMapDto dataMap = (DataMapDto) object;
-			for (Map.Entry<String, DataMapDto> entry : dataMap.getBranch().entrySet()) {
+			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) object;
+			for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()) {
+				ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
 				if (!entry.getValue().getData().isEmpty()) {
-					ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
 					if (station == null || ! station.getActive())
 						return new IllegalStateException("Station does not exist");
 					CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
@@ -332,7 +336,7 @@ public class ParkingStation extends Station{
 						lastRecord.setStation(station);
 						em.persist(lastRecord);
 					}
-					List<SimpleRecordDto> data = entry.getValue().getData();
+					List<? extends RecordDtoImpl> data = entry.getValue().getData();
 					Collections.sort(data);
 					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
 					CarParkingBasicData carData = (CarParkingBasicData) basicData;
@@ -349,17 +353,45 @@ public class ParkingStation extends Station{
 						Integer free = (Integer) record.getValue();
 						int occup = carData.getCapacity() - free;
 						int percentage = Math.round(100f * occup/carData.getCapacity());
-						CarParkingDynamicHistory historyRecord = new CarParkingDynamicHistory(station,occup,new Date(record.getTimestamp()),percentage);
-						em.persist(historyRecord);
+						CarParkingDynamicHistory historyRecord = CarParkingDynamicHistory.findRecord(em, station, record.getTimestamp());
+						if (historyRecord == null){
+							historyRecord = new CarParkingDynamicHistory(station,occup,new Date(record.getTimestamp()),percentage);
+							em.persist(historyRecord);
+						}
+						else
+							logger.log(Level.WARN, "Duplicate can not be saved to db: id="+station.getStationcode()+" timestamp="+record.getTimestamp());
 					}
 					em.getTransaction().commit();
+				}else{
+					DataMapDto<RecordDtoImpl> typeDto = entry.getValue().getBranch().get(DataTypeDto.PARKING_FORECAST);
+					if (typeDto != null){
+						DataType type = DataType.findByCname(em,DataTypeDto.PARKING_FORECAST);
+						em.getTransaction().begin();
+						for (RecordDtoImpl record : typeDto.getData()){
+							SimpleRecordDto dto = (SimpleRecordDto) record;
+							Date timestamp = new Date(dto.getTimestamp());
+							Double slots = Double.parseDouble(dto.getValue().toString());
+							Integer period = dto.getPeriod();
+							ElaborationHistory prediction = ElaborationHistory.findRecordByProps(em,station, type,timestamp, period);
+							if (prediction == null) {
+								Elaboration lastPrediction = new Elaboration().findLastRecord(em,station, type, period);
+								double value = slots != null ? slots.doubleValue() : -1.;
+								if (lastPrediction == null){
+									lastPrediction = new Elaboration(station,type,value,timestamp, period);
+								}else{
+									lastPrediction.setCreated_on(new Date());
+									lastPrediction.setTimestamp(timestamp);
+									lastPrediction.setValue(value);
+								}
+								prediction = new ElaborationHistory(station,type,value,timestamp,period);
+								em.merge(lastPrediction);
+								em.persist(prediction);
+							}
+						}
+						em.getTransaction().commit();
+					}
 				}
 			}
-
-
-
-
-
 		}
 		return "";
 	}
