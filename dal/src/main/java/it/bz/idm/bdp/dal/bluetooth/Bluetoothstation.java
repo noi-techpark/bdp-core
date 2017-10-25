@@ -1,20 +1,22 @@
 package it.bz.idm.bdp.dal.bluetooth;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.ElaborationStation;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dto.OddsRecordDto;
+import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 @Entity
 public class Bluetoothstation extends ElaborationStation {
@@ -58,41 +60,39 @@ public class Bluetoothstation extends ElaborationStation {
 
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
-		List<Object> records =Arrays.asList(objects);
-		DataType type = DataType.findByCname(em, VEHICLE_DETECTION);
-		if (type == null)
-			type = new DataType(VEHICLE_DETECTION);
-		for (Object object : records) {
-			em.getTransaction().begin();
-			Station station;
-			OddsRecordDto oRecord = (OddsRecordDto) object;
-			if (oRecord.getStationcode() == null) {
-				if (oRecord.getStation_id() != null) {
-					station = findStation(em,oRecord.getStation_id());
-				} else
-					continue;
-			} else
-				station = findStation(em, oRecord.getStationcode());
-			if (station == null){
-				station = new Bluetoothstation(oRecord.getStationcode());
-				em.persist(station);
-			}
+		if (objects.length>0 && objects[0] instanceof DataMapDto<?>)
+		{	
+			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) objects[0];
+			DataType type = DataType.findByCname(em, VEHICLE_DETECTION);
+			if (type == null)
+				type = new DataType(VEHICLE_DETECTION); //create it if it does not exists in DB
 
-			MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,oRecord.getMac(),oRecord.getGathered_on(),PERIOD); 
-			if (history == null){
-				history = new MeasurementStringHistory(station, type, oRecord.getMac(),oRecord.getGathered_on(),PERIOD);
-				em.merge(history);
+			for(Map.Entry<String,DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()){
+				em.getTransaction().begin();
+				Station station = findStation(em, entry.getKey());
+				if (station == null){
+					station = new Bluetoothstation(entry.getKey());
+					em.persist(station);
+				}
+				List<? extends RecordDtoImpl> data = entry.getValue().getData();
+				for (RecordDtoImpl record: data){
+					SimpleRecordDto dto = (SimpleRecordDto) record;
+					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD); 
+					if (history == null){
+						history = new MeasurementStringHistory(station, type, dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
+						em.merge(history);
+					}
+					MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em, station,	type,PERIOD);
+					if (lastMeasurement != null) {
+						lastMeasurement.setTimestamp(new Date(dto.getTimestamp()));
+						lastMeasurement.setCreated_on(new Date());
+						lastMeasurement.setValue(dto.getValue().toString());
+					} else
+						lastMeasurement = new MeasurementString(station, type, dto.getValue().toString(), new Date(dto.getTimestamp()),PERIOD);
+					em.merge(lastMeasurement);		
+				}
+				em.getTransaction().commit();
 			}
-
-			MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em, station,	type,PERIOD);
-			if (lastMeasurement != null) {
-				lastMeasurement.setTimestamp(oRecord.getGathered_on());
-				lastMeasurement.setCreated_on(new Date());
-				lastMeasurement.setValue(oRecord.getMac());
-			} else
-				lastMeasurement = new MeasurementString(station, type, oRecord.getMac(), oRecord.getGathered_on(),PERIOD);
-			em.merge(lastMeasurement);
-			em.getTransaction().commit();
 		}
 		return "";
 	}

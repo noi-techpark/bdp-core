@@ -189,4 +189,11 @@ public class CarParkingDynamicHistory {
 		}
 		return dtos;
 	}
+	public static CarParkingDynamicHistory findRecord(EntityManager em, ParkingStation station, Long timestamp) {
+		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
+		query.setParameter("station", station);
+		query.setParameter("lastupdate", new Date(timestamp));
+		List<CarParkingDynamicHistory> resultList = query.getResultList();
+		return resultList.isEmpty() ? null : resultList.get(0); 
+	}
 }

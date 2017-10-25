@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.TypeMapDto;
@@ -130,29 +131,32 @@ public abstract class MeasurementStation extends Station {
 	public Object pushRecords(EntityManager em,Object... objects) {
 		Object object = objects[0];
 		if (object instanceof DataMapDto) {
-			DataMapDto dto = (DataMapDto) object;
+			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
 			try{
-				for (Map.Entry<String, DataMapDto> entry:dto.getBranch().entrySet()){
+				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
 					Station station = findStation(em,entry.getKey());
-					for(Map.Entry<String,DataMapDto> typeEntry : entry.getValue().getBranch().entrySet()){
+					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
 							DataType type = DataType.findByCname(em, typeEntry.getKey());
-							List<SimpleRecordDto> dataRecords = typeEntry.getValue().getData();
+							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry =  Measurement.findLatestEntry(em, station,type,dataRecords.get(0).getPeriod());
+								Measurement lastEntry =  Measurement.findLatestEntry(em, station,type,null);
 								Date created_on = new Date();
 								Collections.sort(dataRecords);
 								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
-								for (SimpleRecordDto recordDto : dataRecords){
-									Long dateOfMeasurement = recordDto.getTimestamp();
-									Double value = (Double) recordDto.getValue();
-									if(lastEntryTime < dateOfMeasurement){
-										MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),recordDto.getPeriod(),created_on);
-										em.persist(record);
+								for (RecordDto recordDto : dataRecords){
+									if (recordDto instanceof SimpleRecordDto){
+										SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
+										Long dateOfMeasurement = simpleRecordDto.getTimestamp();
+										Double value = (Double) simpleRecordDto.getValue();
+										if(lastEntryTime < dateOfMeasurement){
+											MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),simpleRecordDto.getPeriod(),created_on);
+											em.persist(record);
+										}
 									}
 								}
-								SimpleRecordDto newestDto = dataRecords.get(dataRecords.size()-1);
+								SimpleRecordDto newestDto = (SimpleRecordDto) dataRecords.get(dataRecords.size()-1);
 								if (lastEntry == null){
 									Double value = (Double) newestDto.getValue();
 									lastEntry = new Measurement(station, type, value, new Date(newestDto.getTimestamp()), newestDto.getPeriod());
