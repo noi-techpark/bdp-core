@@ -327,7 +327,8 @@ public class ParkingStation extends Station{
 			for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()) {
 				ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
 				if (!entry.getValue().getData().isEmpty()) {
-					if (station == null || ! station.getActive())
+					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
+					if (station == null || ! station.getActive() || basicData == null)
 						return new IllegalStateException("Station does not exist");
 					CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
 					em.getTransaction().begin();
@@ -338,7 +339,6 @@ public class ParkingStation extends Station{
 					}
 					List<? extends RecordDtoImpl> data = entry.getValue().getData();
 					Collections.sort(data);
-					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
 					CarParkingBasicData carData = (CarParkingBasicData) basicData;
 
 					Integer slots = (Integer) data.get(0).getValue();

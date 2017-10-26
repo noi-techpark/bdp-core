@@ -2,12 +2,13 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import it.bz.idm.bdp.dto.StationDto;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonInclude(value=Include.NON_EMPTY)
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public class StationDto implements Serializable{
 
 	private static final long serialVersionUID = 7928534360551629831L;
@@ -20,11 +21,12 @@ public class StationDto implements Serializable{
 	
 	public StationDto() {
 	}
-	public StationDto(String stationcode, String name, Double y, Double x) {
-		this.id = stationcode;
+	
+	public StationDto(String id, String name, Double latitude, Double longitude ) {
+		this.id = id;
 		this.name = name;
-		this.longitude = x;
-		this.latitude = y;
+		this.longitude = longitude ;
+		this.latitude = latitude;
 	}
 
 	public String getId() {
@@ -63,10 +65,12 @@ public class StationDto implements Serializable{
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
+	
+	@JsonIgnore
 	public boolean checkIfValid() {
 		return this.id != null && !this.id.isEmpty();
 	}
-	
+	@JsonIgnore
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof StationDto){
@@ -76,6 +80,7 @@ public class StationDto implements Serializable{
 		}
 		return false;
 	}
+	@JsonIgnore
 	@Override
 	public int hashCode() {
 		return 1;
