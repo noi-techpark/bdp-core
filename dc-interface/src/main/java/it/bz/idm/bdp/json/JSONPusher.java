@@ -1,10 +1,7 @@
 package it.bz.idm.bdp.json;
 
-import java.sql.Date;
-import java.util.List;
+import java.util.Date;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import it.bz.idm.bdp.DataPusher;
