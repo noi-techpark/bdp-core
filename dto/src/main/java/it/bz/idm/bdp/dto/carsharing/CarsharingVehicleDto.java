@@ -83,9 +83,9 @@ public class CarsharingVehicleDto extends StationDto
       this.showType = showType;
    }
 
-   public void setStation(CarsharingStationDto carsharingStationDto)
+   public void setStation(String parentStationId)
    {
-      this.stationId = carsharingStationDto.getId();
+      this.stationId = parentStationId;
    }
 
    public String getStationId() {

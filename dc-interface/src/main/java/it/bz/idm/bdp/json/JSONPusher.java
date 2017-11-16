@@ -7,6 +7,7 @@ import org.springframework.web.client.RestTemplate;
 import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.StationList;
 
 public abstract class JSONPusher extends DataPusher {
 	
@@ -52,7 +53,14 @@ public abstract class JSONPusher extends DataPusher {
 	public Object syncStations(Object[] data) {
 		return syncStations(this.integreenTypology ,data);
 	}
-
+	public void syncStations(StationList data) {
+		this.syncStations(this.integreenTypology, data);
+	}
+	public Object syncStations(String datasourceName, StationList data) {
+		if (data == null)
+			return null;
+		return restTemplate.postForObject(url + SYNC_STATIONS + "{datasourceName}" , data, Object.class, datasourceName);
+	}
 	@Override
 	public Object syncDataTypes(String datasourceName, Object[] data) {
 		if (data == null)

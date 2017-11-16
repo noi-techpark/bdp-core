@@ -59,12 +59,6 @@ public class CarsharingStationDto extends StationDto
 		return this.hasFixedParking;
 	}
 
-	public void setGeoPos(GeoPos geoPos)
-	{
-		this.setLatitude(Double.parseDouble(geoPos.getLat()));
-		this.setLongitude(Double.parseDouble(geoPos.getLon()));
-	}
-
 	public void setBookMode(BookMode bookMode)
 	{
 		this.bookMode = bookMode;
