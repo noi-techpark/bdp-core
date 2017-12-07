@@ -1,5 +1,4 @@
 package it.bz.idm.bdp.json;
-
 import java.util.Date;
 
 import org.springframework.web.client.RestTemplate;
@@ -8,6 +7,7 @@ import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationList;
+
 
 public abstract class JSONPusher extends DataPusher {
 	
