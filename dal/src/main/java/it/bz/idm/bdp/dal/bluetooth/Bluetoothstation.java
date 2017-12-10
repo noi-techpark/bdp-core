@@ -80,7 +80,7 @@ public class Bluetoothstation extends ElaborationStation {
 					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD); 
 					if (history == null){
 						history = new MeasurementStringHistory(station, type, dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
-						em.merge(history);
+						em.persist(history);
 					}
 					MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em, station,	type,PERIOD);
 					if (lastMeasurement != null) {
