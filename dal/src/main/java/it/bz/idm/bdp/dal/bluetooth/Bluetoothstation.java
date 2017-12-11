@@ -14,6 +14,7 @@ import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.OddsRecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -74,7 +75,7 @@ public class Bluetoothstation extends ElaborationStation {
 					station = new Bluetoothstation(entry.getKey());
 					em.persist(station);
 				}
-				List<? extends RecordDtoImpl> data = entry.getValue().getData();
+				List<? extends RecordDtoImpl> data = entry.getValue().getBranch().get(VEHICLE_DETECTION).getData();
 				for (RecordDtoImpl record: data){
 					SimpleRecordDto dto = (SimpleRecordDto) record;
 					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD); 
