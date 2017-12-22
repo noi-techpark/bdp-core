@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 public class JPAUtil {
 
@@ -35,6 +36,13 @@ public class JPAUtil {
 				return entity.getJavaType().newInstance();
 			}
 		}
+		return null;
+	}
+	public static String getEntityNameByObject(Object obj) {
+		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
+			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))
+					return type.getName();
+		};
 		return null;
 	}
 }
