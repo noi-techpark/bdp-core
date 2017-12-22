@@ -64,6 +64,8 @@ public abstract class Station {
 	protected Boolean available;
 	
 	private String origin;
+	
+	private String municipality;
 
 	public Station() {
 		this.available = true;
@@ -85,16 +87,23 @@ public abstract class Station {
 		if (resultList.isEmpty())
 			return new ArrayList<StationDto>();
 		for (Station s: resultList){
-			Double x = null,y = null;
-			if (s.getPointprojection() != null){
-				y = s.getPointprojection().getY();
-				x = s.getPointprojection().getX();
-			}
-			StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
-			dto.setCrs(GEOM_CRS);
+			StationDto dto = convertToDto(s);
 			stationList.add(dto);
 		}
 		return stationList;
+	}
+
+	public StationDto convertToDto(Station s) {
+		Double x = null,y = null;
+		if (s.getPointprojection() != null){
+			y = s.getPointprojection().getY();
+			x = s.getPointprojection().getX();
+		}
+		StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
+		dto.setCrs(GEOM_CRS);
+		dto.setOrigin(s.getOrigin());
+		dto.setMunicipality(s.getMunicipality());
+		return dto;
 	}
 
 	public abstract List<String[]> findDataTypes(EntityManager em, String stationId);
@@ -172,6 +181,14 @@ public abstract class Station {
 
 	public void setOrigin(String origin) {
 		this.origin = origin;
+	}
+	
+	public String getMunicipality() {
+		return municipality;
+	}
+
+	public void setMunicipality(String municipality) {
+		this.municipality = municipality;
 	}
 
 	public List<Station> findStations(EntityManager em){
@@ -330,6 +347,24 @@ public abstract class Station {
 	
 	public List<ChildDto> findChildren(EntityManager em, String parent) {
 		return null;
+	}
+
+	public static List<Station> findStationsWithoutMunicipality(EntityManager em) {
+		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.municipality is null and pointprojection is not null",Station.class);
+		return stationquery.getResultList();
+	}
+
+	public static void patch(EntityManager em, StationDto dto) {
+		Station station = Station.findStationByIdentifier(em,dto.getId(),dto.getStationType());
+		station.setMunicipality(dto.getMunicipality());
+		em.merge(station);
+	}
+
+	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
+		TypedQuery<Station> stationquery = em.createQuery("select station from "+stationType+" station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
+		stationquery.setParameter("stationcode", id);
+		List<Station> resultList = stationquery.getResultList();
+		return resultList.isEmpty()?null:resultList.get(0);
 	}
 
 }

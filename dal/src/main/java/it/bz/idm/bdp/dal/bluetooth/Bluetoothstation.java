@@ -14,7 +14,6 @@ import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dto.DataMapDto;
-import it.bz.idm.bdp.dto.OddsRecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
