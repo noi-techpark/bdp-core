@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import it.bz.idm.bdp.dal.Alarm;
-import it.bz.idm.bdp.dal.AlarmSpecification;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.bluetooth.Linkstation;
@@ -67,16 +65,16 @@ public class DataRetriever {
 	
 	//APIv1
 	
-	public List<StationDto> getStationDetails(String type, String id) {
+	public List<? extends StationDto> getStationDetails(String type, String id) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			Station stationById = null;
-			if (id != null) {
+			if (id != null && !id.isEmpty()) {
 				stationById = station.findStation(em,id);
 			}
-			if ((stationById == null && id == null) || (stationById != null && station.getClass().equals(stationById.getClass())))
+			if ((stationById == null && (id == null || id.isEmpty())) || (stationById != null && station.getClass().equals(stationById.getClass())))
 				stations = station.findStationsDetails(em,stationById);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -120,7 +118,7 @@ public class DataRetriever {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			if (station!=null)
+			if (station != null)
 				dataTypes = station.findDataTypes(em,stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -150,37 +148,28 @@ public class DataRetriever {
 		return dateOfLastRecord;
 	}
 
-	public Object getLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
+	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
 		ParkingRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
 			dto = (ParkingRecordDto) station.findLastRecord(em,cname,period);
-			List<Alarm> alarms = Alarm.findAlarmByStationAndTimestamp(em, station,new Date(dto.getTimestamp()));
-			if (!alarms.isEmpty()){
-				AlarmSpecification alarmSpec= alarms.get(0).getSpecification();
-				return new IllegalStateException(alarmSpec.getName()+alarmSpec.getDescription());
-			}
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
 			em.close();
 		}
-		return null;
+		return dto;
 	}
-	public Object getNewestRecord(String typology, List<Object> params) {
+	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period) {
 		RecordDto dto = null;
-
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
 			if (s != null){
-				String stationcode = (String) params.get(0);
-				Station station = s.findStation(em, stationcode);
-				String cname = (String) params.get(1);
-				Integer period = (Integer) params.get(2);
-				dto = (RecordDto) station.findLastRecord(em,cname,period);
+				Station station = s.findStation(em, stationId);
+				dto = (RecordDto) station.findLastRecord(em,typeId,period);
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -189,12 +178,16 @@ public class DataRetriever {
 		}
 		return dto;
 	}
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Long seconds, Integer period){
+	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period){
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
-		return getRecords(stationtypology, identifier, type, start, end, period);
+		return getRecords(stationtypology, identifier, type, start, end, period,seconds);
 	}
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Date start, Date end, Integer period){
+	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Date start, Date end, Integer period, Integer seconds){
+		if (seconds != null && (start == null && end ==null )) {
+			end = new Date();
+			start = new Date(end.getTime()-(seconds*1000l));
+		}
 		EntityManager em = JPAUtil.createEntityManager();
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{

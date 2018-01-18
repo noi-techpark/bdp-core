@@ -1,6 +1,5 @@
 package it.bz.idm.bdp;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -65,18 +64,18 @@ public abstract class RestControllerV2 {
 	}
 	@RequestMapping(value = "station-ids", method = RequestMethod.GET)
 	public @ResponseBody String[] stationIds(HttpServletResponse response) {
-		return retriever.getStations();
+		return retriever.fetchStations();
 	}
 
 	@RequestMapping(value = "station-details", method = RequestMethod.GET)
 	public @ResponseBody List<StationDto> stationDetails(@RequestParam(required=false,value="station-id") String id) {
-		return retriever.getStationDetails(id);
+		return retriever.fetchStationDetails(id);
 	}
 
 	@RequestMapping(value = {"types"}, method = RequestMethod.GET)
 	public @ResponseBody List<TypeDto> dataTypes(
 			@RequestParam(value = "station", required = false) String station) {
-			List<TypeDto> dataTypes = (List<TypeDto>) retriever.getTypes(station);
+			List<TypeDto> dataTypes = (List<TypeDto>) retriever.fetchTypes(station);
 			return dataTypes;
 	}
 	
@@ -84,9 +83,9 @@ public abstract class RestControllerV2 {
 	public @ResponseBody List<RecordDto> history(
 			@RequestParam("station") String station,
 			@RequestParam("type") String cname,
-			@RequestParam("seconds") Long seconds,
+			@RequestParam("seconds") Integer seconds,
 			@RequestParam(value = "period", required = false) Integer period) {
-		return retriever.getRecords(station, cname, seconds, period);
+		return retriever.fetchRecords(station, cname, seconds, period);
 	}
 	
 	@RequestMapping(value = {"records"}, method = RequestMethod.GET)
@@ -95,7 +94,7 @@ public abstract class RestControllerV2 {
 			@RequestParam("type") String cname,
 			@RequestParam("from") Long from, @RequestParam("to") Long to,
 			@RequestParam(value = "period", required = false) Integer period) {
-		return retriever.getRecords(station, cname, new Date(from),new Date(to), period);
+		return retriever.fetchRecords(station, cname, from, to, period);
 	}
 
 	@RequestMapping(value = {"newest"}, method = RequestMethod.GET)
@@ -103,7 +102,7 @@ public abstract class RestControllerV2 {
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
-		return (RecordDto) retriever.getNewestRecord(station,type,period);
+		return (RecordDto) retriever.fetchNewestRecord(station,type,period);
 	}
 
 }
