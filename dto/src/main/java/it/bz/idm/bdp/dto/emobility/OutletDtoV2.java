@@ -2,10 +2,12 @@ package it.bz.idm.bdp.dto.emobility;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(value=Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class OutletDtoV2 implements Serializable{
 	/**
 	 * 
