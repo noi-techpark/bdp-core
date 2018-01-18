@@ -1,8 +1,5 @@
 package it.bz.idm.bdp.dto;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImpl>{
 
 	/**
@@ -10,6 +7,7 @@ public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImp
 	 */
 	private static final long serialVersionUID = -1124149647267291299L;
 	protected Long timestamp;
+
 	public Long getTimestamp() {
 		return timestamp;
 	}
@@ -27,4 +25,6 @@ public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImp
 	public int compareTo(RecordDtoImpl o) {
 		return this.timestamp > o.timestamp ? 1:-1;
 	}
+
+	
 }
