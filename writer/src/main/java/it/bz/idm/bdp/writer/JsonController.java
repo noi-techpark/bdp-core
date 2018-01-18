@@ -23,13 +23,21 @@ public class JsonController extends DataManager{
 			@RequestParam(value="typeId") String typeId, @RequestParam(value="period",required=false) Integer period) {
 		return (Date) super.getDateOfLastRecord(stationType, stationId, typeId, period);
 	}
-
+	
+	@RequestMapping(value = "/stationsWithoutMunicipality", method = RequestMethod.GET)
+	public @ResponseBody List<StationDto> getStationsWithoutMunicipality() {
+		return super.getStationsWithoutMunicipality();
+	}
+	
 	@RequestMapping(value = "/pushRecords/{integreenTypology}", method = RequestMethod.POST)
 	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
 			@PathVariable String integreenTypology) {
 		return super.pushRecords(integreenTypology, stationData);
 	}
-
+	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
+	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
+		super.patchStations(stations);;
+	}
 	@RequestMapping(value = "/syncStations/{integreenTypology}", method = RequestMethod.POST)
 	public @ResponseBody Object syncStations(@RequestBody(required = true) List<StationDto> data,
 			@PathVariable String integreenTypology) {
