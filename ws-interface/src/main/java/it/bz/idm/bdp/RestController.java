@@ -1,10 +1,5 @@
 package it.bz.idm.bdp;
 
-import it.bz.idm.bdp.security.JwtUtil;
-import it.bz.idm.bdp.util.IntegreenException;
-import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.StationDto;
-
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.security.JwtUtil;
+import it.bz.idm.bdp.util.IntegreenException;
 
 public abstract class RestController {
 	
@@ -60,27 +60,27 @@ public abstract class RestController {
 	}
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
 	public @ResponseBody String[] getStationIds() {
-		return retriever.getStations();
+		return retriever.fetchStations();
 	}
 
 	@RequestMapping(value = "get-station-details", method = RequestMethod.GET)
 	public @ResponseBody List<StationDto> getStationDetails() {
-		return retriever.getStationDetails(null);
+		return retriever.fetchStationDetails(null);
 	}
 
 	@RequestMapping(value = {"get-data-types"}, method = RequestMethod.GET)
-	public @ResponseBody List<Object> getDataTypes(
+	public @ResponseBody List<List<String>> getDataTypes(
 			@RequestParam(value = "station", required = false) String station) {
-		return retriever.getDataTypes(station);
+		return retriever.fetchDataTypes(station);
 	}
 	
 	@RequestMapping(value = {"get-records"}, method = RequestMethod.GET)
 	public @ResponseBody List<RecordDto> getRecords(
 			@RequestParam("station") String station,
 			@RequestParam("name") String cname,
-			@RequestParam("seconds") Long seconds,
+			@RequestParam("seconds") Integer seconds,
 			@RequestParam(value = "period", required = false) Integer period) {
-		return retriever.getRecords(station, cname, seconds, period);
+		return retriever.fetchRecords(station, cname, seconds, period);
 	}
 	
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
@@ -89,7 +89,7 @@ public abstract class RestController {
 			@RequestParam("name") String cname,
 			@RequestParam("from") Long from, @RequestParam("to") Long to,
 			@RequestParam(value = "period", required = false) Integer period) {
-		return retriever.getRecords(station, cname, new Date(from),new Date(to), period);
+		return retriever.fetchRecords(station, cname, from, to, period);
 	}
 
 	@RequestMapping(value = {"get-date-of-last-record"}, method = RequestMethod.GET)
@@ -97,13 +97,13 @@ public abstract class RestController {
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
-		return retriever.getDateOfLastRecord(station, type,period);
+		return retriever.fetchDateOfLastRecord(station, type,period);
 	}
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
-	public @ResponseBody Object getNewestRecord(
+	public @ResponseBody RecordDto getNewestRecord(
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
-		return retriever.getNewestRecord(station, type,period);
+		return retriever.fetchNewestRecord(station, type,period);
 	}
 }

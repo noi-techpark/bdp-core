@@ -7,6 +7,7 @@ import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.TypeDto;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -119,7 +120,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		object = client.execute(pMethodName,params);
 		return object;
 	}
-	public String[] getStations(){
+	@Override
+	public String[] fetchStations(){
 		Object[] params= new Object[]{integreenTypology};
 		Object execute;
 		try {
@@ -131,41 +133,42 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-
-	public List<Object> getDataTypes(String station){
+	@Override
+	public List<List<String>> fetchDataTypes(String station){
 		Object[] params = new Object[]{integreenTypology,station};
 		Object[] objects;
 		try {
 			objects = (Object[]) client.execute("DataRetriever.getDataTypes",params);
-			List<Object> serverResponse= Arrays.asList(objects);
+			List<List<String>> serverResponse= Arrays.asList(objects);
 			return serverResponse;
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-	public List<Object> getTypes(String station){
+	@Override
+	public List<TypeDto> fetchTypes(String station){
 		Object[] params = new Object[]{integreenTypology,station};
 		Object[] objects;
 		try {
 			Object execute = client.execute("DataRetriever.getTypes",params);
 			objects = (Object[]) execute;
 			List<Object> list = Arrays.asList(objects);
-			return list;
+			return null;
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-
+	@Override
 	@SuppressWarnings("unchecked")
-	public List<RecordDto> getRecords(Object... params){
+	public List<RecordDto> fetchRecords(Object... params){
 		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,params});
 		List<RecordDto> records=(List<RecordDto>) dtos;
 		return records;
 	}
-
-	public List<StationDto> getStationDetails(String stationId) {
+	@Override
+	public List<StationDto> fetchStationDetails(String stationId) {
 		Object[] params= new Object[]{integreenTypology,stationId};
 		Object execute;
 		try {
@@ -178,8 +181,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-
-	public Date getDateOfLastRecord(Object... params) {
+	@Override
+	public Date fetchDateOfLastRecord(Object... params) {
 		List<Object> list = new ArrayList<Object>(Arrays.asList(params));
 		list.add(0, integreenTypology);
 		Object serverResponse;
@@ -191,8 +194,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-
-	public Object getNewestRecord(Object... params) {
+	@Override
+	public Object fetchNewestRecord(String stationId, String typeId, Integer period) {
 		Object serverResponse;
 		try {
 			serverResponse = client.execute("DataRetriever.getNewestRecord",new Object[]{integreenTypology,params});
@@ -207,7 +210,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
-	public List<? extends ChildDto> getChildren(String id) {
+	@Override
+	public List<? extends ChildDto> fetchChildStations(String id) {
 		Object[] params= new Object[]{integreenTypology,id};
 		Object execute;
 		try {
@@ -220,6 +224,7 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
 	}
+
 	public boolean isCachingEnabled() {
 		return cachingEnabled;
 	}
