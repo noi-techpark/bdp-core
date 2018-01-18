@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.Lob;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.BasicData;
@@ -17,6 +18,7 @@ public class EchargingstationBasicData extends BasicData{
 	private String address;
 	private Integer chargingPointsCount;
 	private String state;
+	@Lob
 	private String paymentInfo;
 	private String accessInfo;
 	private String flashInfo;

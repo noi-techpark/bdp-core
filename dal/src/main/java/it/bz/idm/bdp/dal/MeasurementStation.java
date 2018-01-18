@@ -28,7 +28,7 @@ public abstract class MeasurementStation extends Station {
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {
 		TypedQuery<Object[]> query;
-		if (stationId != null){
+		if (stationId != null && !stationId.isEmpty()){
 			query = em
 					.createQuery(
 							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type  "
@@ -48,7 +48,7 @@ public abstract class MeasurementStation extends Station {
 
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
-		if (stationId == null) {
+		if (stationId == null || stationId.isEmpty()) {
 			query = em.createQuery("SELECT type,record.period FROM Measurement record INNER JOIN record.type type  "
 					+ "where record.station.class=:stationType GROUP BY type,record.period",Object[].class);
 			query.setParameter("stationType", this.getClass().getSimpleName());

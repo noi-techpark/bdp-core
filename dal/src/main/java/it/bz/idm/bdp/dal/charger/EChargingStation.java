@@ -88,7 +88,7 @@ public class EChargingStation extends MeasurementStation{
 				ChildPlugDto dto = new ChildPlugDto();
 				dto.setIdentifier(plug.getStationcode());
 				SimpleRecordDto record = (SimpleRecordDto) plug.findLastRecord(em,null, null);
-				Integer value = (Integer) record.getValue();
+				Integer value = ((Double) record.getValue()).intValue();
 				dto.setAvailable(value == 1);
 				
 				if (basic!= null){
