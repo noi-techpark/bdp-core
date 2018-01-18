@@ -33,7 +33,6 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
