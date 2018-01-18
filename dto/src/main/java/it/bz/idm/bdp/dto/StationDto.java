@@ -18,6 +18,7 @@ public class StationDto implements Serializable{
 	protected Double longitude;
 	protected String crs;
 	private String origin;
+	private String municipality;
 	
 	public StationDto() {
 	}
@@ -28,6 +29,7 @@ public class StationDto implements Serializable{
 		this.longitude = longitude ;
 		this.latitude = latitude;
 	}
+
 
 	public String getId() {
 		return id;
@@ -65,7 +67,14 @@ public class StationDto implements Serializable{
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
-	
+	public String getMunicipality() {
+		return municipality;
+	}
+
+	public void setMunicipality(String municipality) {
+		this.municipality = municipality;
+	}
+
 	@JsonIgnore
 	public boolean checkIfValid() {
 		return this.id != null && !this.id.isEmpty();
