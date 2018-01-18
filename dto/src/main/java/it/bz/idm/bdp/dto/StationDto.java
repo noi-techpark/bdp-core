@@ -19,6 +19,7 @@ public class StationDto implements Serializable{
 	protected String crs;
 	private String origin;
 	private String municipality;
+	private String stationType;
 	
 	public StationDto() {
 	}
@@ -70,9 +71,15 @@ public class StationDto implements Serializable{
 	public String getMunicipality() {
 		return municipality;
 	}
-
 	public void setMunicipality(String municipality) {
 		this.municipality = municipality;
+	}
+	public String getStationType() {
+		return stationType;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
 	}
 
 	@JsonIgnore
