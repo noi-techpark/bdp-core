@@ -37,7 +37,6 @@ public class DataRetriever {
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			List<ChildDto> children = null;
 			if (station != null){
-
 				children = station.findChildren(em,parent);
 				return children;
 			}
@@ -208,19 +207,19 @@ public class DataRetriever {
 
 	//LEGACY API FOR PARKING
 	@Deprecated
-	public List<String> getParkingIds(){
+	public List<String> fetchParkingIds(){
 		EntityManager em = JPAUtil.createEntityManager();
 		List<String> stations = Station.findActiveStations(em,"ParkingStation");
 		em.close();
 		return stations ;
 	}
 	@Deprecated
-	public Map<String,Object> getParkingStation(String identifier){
+	public Map<String,Object> fetchParkingStation(String identifier){
 		return ParkingStation.findParkingStation(identifier);
 	}
 
 	@Deprecated
-	public List<ParkingStationDto> getParkingStations(){
+	public List<ParkingStationDto> fetchParkingStations(){
 		return ParkingStation.findParkingStationsMetadata();
 	}
 	@Deprecated
@@ -228,12 +227,12 @@ public class DataRetriever {
 		return ParkingStation.findNumberOfFreeSlots(identifier);
 	}
 	@Deprecated
-	public List<Object[]> getStoricData(String identifier,Integer minutes){
+	public List<Object[]> fetchStoricData(String identifier,Integer minutes){
 		return ParkingStation.findStoricData(identifier,minutes);
 
 	}
 	@Deprecated
-	public List<Object> getFreeSlotsByTimeFrame(String identifier, String startDateString, String endDateString,
+	public List<Object> fetchFreeSlotsByTimeFrame(String identifier, String startDateString, String endDateString,
 			String datePattern) {
 		return ParkingStation.findFreeSlotsByTimeFrame(identifier,startDateString, endDateString,datePattern);
 	}
