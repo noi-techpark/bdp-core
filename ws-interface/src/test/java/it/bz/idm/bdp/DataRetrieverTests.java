@@ -5,14 +5,12 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import it.bz.idm.bdp.xmlrpc.XmlRPCDataRetriever;
-
 public class DataRetrieverTests {
 
 	private DataRetriever retriever;
 	@Before
 	public void doBefore(){
-		 retriever= new XmlRPCDataRetriever() {
+		 retriever= new RestClient(){
 			@Override
 			public String initIntegreenTypology() {
 				return "TestStation";

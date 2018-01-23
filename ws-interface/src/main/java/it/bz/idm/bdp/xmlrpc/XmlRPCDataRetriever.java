@@ -138,8 +138,7 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		Object[] params = new Object[]{integreenTypology,station};
 		Object[] objects;
 		try {
-			objects = (Object[]) client.execute("DataRetriever.getDataTypes",params);
-			List<List<String>> serverResponse= Arrays.asList(objects);
+			List<List<String>> serverResponse = (List<List<String>>) client.execute("DataRetriever.getDataTypes",params);
 			return serverResponse;
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
@@ -161,9 +160,16 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		}
 	}
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<RecordDto> fetchRecords(Object... params){
-		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,params});
+	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
+		List<Object> data = new ArrayList<Object>() {{add(stationId);add(typeId);add(seconds);add(period);}};
+		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,data.toArray()});
+		List<RecordDto> records=(List<RecordDto>) dtos;
+		return records;
+	}
+	@Override
+	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period) {
+		List<Object> data = new ArrayList<Object>() {{add(stationId);add(typeId);add(start);add(end);add(period);}};
+		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,data.toArray()});
 		List<RecordDto> records=(List<RecordDto>) dtos;
 		return records;
 	}
@@ -182,8 +188,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		}
 	}
 	@Override
-	public Date fetchDateOfLastRecord(Object... params) {
-		List<Object> list = new ArrayList<Object>(Arrays.asList(params));
+	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
+		List<Object> list = new ArrayList<Object>() {{add(stationId);add(typeId);add(period);}};
 		list.add(0, integreenTypology);
 		Object serverResponse;
 		try {
@@ -195,20 +201,18 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		}
 	}
 	@Override
-	public Object fetchNewestRecord(String stationId, String typeId, Integer period) {
+	public RecordDto fetchNewestRecord(String stationId, String typeId, Integer period) {
 		Object serverResponse;
+		RecordDto recordDto = null;
 		try {
+			Object params = null;
 			serverResponse = client.execute("DataRetriever.getNewestRecord",new Object[]{integreenTypology,params});
-			if (serverResponse instanceof RecordDto)
-				return (RecordDto) serverResponse;
-			else{
-				IntegreenException ex = (IntegreenException) serverResponse;
-				return ex;
-			}
+			recordDto = (RecordDto) serverResponse;
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			throw new IllegalStateException("Failed to execute request to xmlrpcserver");
 		}
+		return recordDto;
 	}
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
