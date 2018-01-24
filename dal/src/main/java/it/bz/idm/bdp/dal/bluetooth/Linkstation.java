@@ -3,8 +3,8 @@ package it.bz.idm.bdp.dal.bluetooth;
 import it.bz.idm.bdp.dal.ElaborationStation;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dto.CoordinateDto;
-import it.bz.idm.bdp.dto.LinkStationDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.bluetooth.LinkStationDto;
 
 import java.util.ArrayList;
 import java.util.List;

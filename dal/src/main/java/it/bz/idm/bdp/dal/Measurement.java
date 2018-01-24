@@ -18,7 +18,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.NaturalId;
 
-import it.bz.idm.bdp.dto.SegmentDataPointDto;
+import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
 @Table(name="measurement")
 @Entity

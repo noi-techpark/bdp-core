@@ -15,12 +15,12 @@ import org.apache.commons.beanutils.BeanMap;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.Car;
-import it.bz.idm.bdp.dto.CarValue;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.TrafficVehicleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.dto.vehicles.Car;
+import it.bz.idm.bdp.dto.vehicles.CarValue;
+import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
 
 @Entity
 public class Mobilestation extends Station {

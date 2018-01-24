@@ -1,7 +1,5 @@
 package it.bz.idm.bdp.dto.parking;
 
-import it.bz.idm.bdp.dto.ParkingRecordDto;
-
 public class ParkingRecordExtendedDto extends ParkingRecordDto{
 
 	/**

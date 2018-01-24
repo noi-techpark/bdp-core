@@ -9,7 +9,7 @@
 		
 	</http>
 
-	<beans:bean id="jwtAuthenticationFilter" class="it.bz.idm.bdp.security.JWTTokenAuthFilter">
+	<beans:bean id="jwtAuthenticationFilter" class="it.bz.idm.bdp.ws.security.JWTTokenAuthFilter">
 		<beans:constructor-arg value="/rest/**" />
 		<beans:property name="authenticationManager" ref="authenticationManager" />
 		<beans:property name="authenticationSuccessHandler"	ref="jwtAuthenticationSuccessHandler" />
@@ -21,11 +21,11 @@
 	</authentication-manager>
 
 	<beans:bean id="jwtAuthenticationSuccessHandler"
-		class="it.bz.idm.bdp.security.TokenSimpleUrlAuthenticationSuccessHandler" />
+		class="it.bz.idm.bdp.ws.security.TokenSimpleUrlAuthenticationSuccessHandler" />
 	<beans:bean id="restAuthenticationEntryPoint"
-		class="it.bz.idm.bdp.security.RestAuthenticationEntryPoint" />
-	<beans:bean id="jwtAuthenticationProvider" class="it.bz.idm.bdp.security.JWTAuthenticationProvider" />
-	<beans:bean id="jwtUtil" class="it.bz.idm.bdp.security.JwtUtil"/>
+		class="it.bz.idm.bdp.ws.security.RestAuthenticationEntryPoint" />
+	<beans:bean id="jwtAuthenticationProvider" class="it.bz.idm.bdp.ws.security.JWTAuthenticationProvider" />
+	<beans:bean id="jwtUtil" class="it.bz.idm.bdp.ws.security.JwtUtil"/>
 	<user-service id="userDetailsService">
   		<user name="idm" password="hiyou" authorities="ROLE_ADMIN,ROLE_USER" />
  		<user name="guest" password="hithere" authorities="ROLE_USER" />

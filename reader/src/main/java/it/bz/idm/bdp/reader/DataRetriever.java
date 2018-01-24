@@ -14,10 +14,10 @@ import it.bz.idm.bdp.dal.bluetooth.Linkstation;
 import it.bz.idm.bdp.dal.parking.ParkingStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.ChildDto;
-import it.bz.idm.bdp.dto.ParkingRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.dto.parking.ParkingRecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 public class DataRetriever {

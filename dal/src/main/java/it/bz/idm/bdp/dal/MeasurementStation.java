@@ -19,7 +19,6 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.dto.TypeMapDto;
 
 
 public abstract class MeasurementStation extends Station {
@@ -181,66 +180,6 @@ public abstract class MeasurementStation extends Station {
 				}
 			}catch(Exception ex){
 				ex.printStackTrace();
-				if (em.getTransaction().isActive())
-					em.getTransaction().rollback();
-			}finally{
-				em.clear();
-				em.close();
-			}
-		}
-		else if (object instanceof Map){
-			Integer identityHashCode = System.identityHashCode(object);
-			try{
-				Map<String,TypeMapDto> data = (Map) object;
-				logger.info("Start of transactions");
-				for (Map.Entry<String, TypeMapDto> entry:data.entrySet()){
-					Station station = findStation(em,entry.getKey());
-					for(Map.Entry<String,List<SimpleRecordDto>> typeEntry:entry.getValue().getRecordsByType().entrySet()){
-						try{
-							em.getTransaction().begin();
-							DataType type = DataType.findByCname(em, typeEntry.getKey());
-							List<SimpleRecordDto> dataRecords = typeEntry.getValue();
-							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry =  Measurement.findLatestEntry(em, station,type,dataRecords.get(0).getPeriod());
-								Date created_on = new Date();
-								Collections.sort(dataRecords);
-								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
-								for (SimpleRecordDto dto : dataRecords){
-									Long dateOfMeasurement = dto.getTimestamp();
-									Double value = (Double) dto.getValue();
-									if(lastEntryTime < dateOfMeasurement){
-										MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),dto.getPeriod(),created_on);
-										em.persist(record);
-									}
-								}
-								SimpleRecordDto newestDto = dataRecords.get(dataRecords.size()-1);
-								if (lastEntry == null){
-									Double value = (Double) newestDto.getValue();
-									lastEntry = new Measurement(station, type, value, new Date(newestDto.getTimestamp()), newestDto.getPeriod());
-									em.persist(lastEntry);
-								}
-								else if (newestDto != null && newestDto.getTimestamp()>lastEntryTime){
-									Double value = (Double) newestDto.getValue();
-									lastEntry.setTimestamp(new Date(newestDto.getTimestamp()));
-									lastEntry.setValue(value);
-									em.merge(lastEntry);
-								}
-							}
-							em.getTransaction().commit();
-						}catch(Exception ex){
-							ex.printStackTrace();
-							if (em.getTransaction().isActive())
-								em.getTransaction().rollback();
-							continue;
-						}
-					}
-
-				}
-				logger.info("End of transactions for: "+identityHashCode);
-
-			}catch(Exception ex){
-				ex.printStackTrace();
-				logger.info("Rollback single transaction: "+identityHashCode);
 				if (em.getTransaction().isActive())
 					em.getTransaction().rollback();
 			}finally{
