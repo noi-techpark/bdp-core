@@ -14,8 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.internal.stubbing.answers.Returns;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import it.bz.idm.bdp.dto.MeteoStationDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.meteo.MeteoStationDto;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JsonServiceTest {

@@ -8,8 +8,8 @@ import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dto.MeteoStationDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.meteo.MeteoStationDto;
 
 @Entity
 public class Meteostation extends MeasurementStation {

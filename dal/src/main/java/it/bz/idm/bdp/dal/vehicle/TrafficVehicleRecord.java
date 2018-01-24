@@ -3,7 +3,7 @@ package it.bz.idm.bdp.dal.vehicle;
 
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.CarValue;
+import it.bz.idm.bdp.dto.vehicles.CarValue;
 
 import java.util.ArrayList;
 import java.util.Date;

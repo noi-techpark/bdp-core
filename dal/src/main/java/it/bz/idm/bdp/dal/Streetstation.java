@@ -3,7 +3,7 @@ package it.bz.idm.bdp.dal;
 import it.bz.idm.bdp.dal.bluetooth.StreetBasicData;
 import it.bz.idm.bdp.dal.meteo.Meteostation;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.StreetStationDto;
+import it.bz.idm.bdp.dto.bluetooth.StreetStationDto;
 
 import java.util.ArrayList;
 import java.util.Date;
