@@ -1,6 +1,5 @@
 package it.bz.idm.bdp.ws;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.ws.security.JwtUtil;
+import it.bz.idm.bdp.ws.util.DtoParser;
 import it.bz.idm.bdp.ws.util.IntegreenException;
 
 public abstract class RestController {
@@ -83,25 +82,19 @@ public abstract class RestController {
 			@RequestParam("seconds") Integer seconds,
 			@RequestParam(value = "period", required = false) Integer period) {
 		List<RecordDto> records = retriever.fetchRecords(station, cname, seconds, period);
-		List<SlimRecordDto> list = new ArrayList<>();
-		for (RecordDto dto: records) {
-			if (dto instanceof SimpleRecordDto) {
-				SimpleRecordDto sDto = (SimpleRecordDto) dto;
-				list.add(new SlimRecordDto(sDto.getTimestamp(), sDto.getValue(), sDto.getPeriod(),null));
-			}
-				
-		}
+		List<SlimRecordDto> list = DtoParser.reduce(records);
 		return list;
 	}
 	
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
-	public @ResponseBody List<RecordDto> getRecordsInTimeFrame(
+	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(
 			@RequestParam("station") String station,
 			@RequestParam("name") String cname,
 			@RequestParam("from") Long from, @RequestParam("to") Long to,
 			@RequestParam(value = "period", required = false) Integer period) {
 		List<RecordDto> records = retriever.fetchRecords(station, cname, from, to, period);
-		return records;
+		List<SlimRecordDto> list = DtoParser.reduce(records);
+		return list;
 	}
 
 	@RequestMapping(value = {"get-date-of-last-record"}, method = RequestMethod.GET)
