@@ -23,7 +23,7 @@ public class EChargingPlug extends MeasurementStation {
 
 	@OneToMany(mappedBy="plug",fetch=FetchType.EAGER,cascade = CascadeType.ALL)
 	private List<EChargingPlugOutlet> outlets = new ArrayList<EChargingPlugOutlet>();
-	
+
 	@Override
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
@@ -36,8 +36,10 @@ public class EChargingPlug extends MeasurementStation {
 				x = plug.getPointprojection().getX();
 			}
 			List<OutletDtoV2> dtos = EChargingPlugOutlet.toDto(plug.getOutlets());
-			EchargingPlugDto dto = new EchargingPlugDto(plug.getStationcode(),plug.getName(),y,x,basic.geteStation().getStationcode(),dtos);
-			stationList.add(dto);
+			if (basic != null && basic.geteStation()!= null){
+				EchargingPlugDto dto = new EchargingPlugDto(plug.getStationcode(),plug.getName(),y,x,basic.geteStation().getStationcode(),dtos);
+				stationList.add(dto);
+			}
 		}
 		return stationList;
 	}
@@ -70,7 +72,7 @@ public class EChargingPlug extends MeasurementStation {
 				outlet.setMaxPower(outletDto.getMaxPower());
 				outlet.setPlugType(outletDto.getOutletTypeCode());
 				outlet.setHasFixedCable(outletDto.getHasFixedCable());
-				
+
 			}
 			Point pos = plug.getPointprojection();
 			if (pos != null)
