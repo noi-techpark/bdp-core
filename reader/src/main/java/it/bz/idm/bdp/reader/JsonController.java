@@ -37,7 +37,6 @@ public class JsonController extends DataRetriever{
 	public @ResponseBody List<String[]> getDataTypes(@RequestParam String stationType, @RequestParam(required=false) String stationId) {
 		return super.getDataTypes(stationType, stationId);
 	}
-	
 	@RequestMapping(value = "/types", method = RequestMethod.GET)
 	@Override
 	public @ResponseBody List<TypeDto> getTypes(String stationType, String stationId) {
@@ -59,10 +58,9 @@ public class JsonController extends DataRetriever{
 		return super.getNewestRecord(stationType, stationId, typeId, period);
 	}
 	@RequestMapping(value = "/records", method = RequestMethod.GET)
-	@Override
-	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,@RequestParam String stationId,@RequestParam(required=false) String typeId,@RequestParam(required=false) Date start,@RequestParam(required=false) Date end,
+	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,@RequestParam String stationId,@RequestParam(required=false) String typeId,@RequestParam(required=false) Long start,@RequestParam(required=false) Long end,
 			@RequestParam(required=false) Integer period, @RequestParam(required=false)Integer seconds) {
-		return super.getRecords(stationType, stationId, typeId, start, end, period, seconds);
+		return super.getRecords(stationType, stationId, typeId, start!= null ? new Date(start) : null , end!=null ? new Date(end) : null, period, seconds);
 	}
 	@RequestMapping(value = "/station-details", method = RequestMethod.GET)
 	@Override

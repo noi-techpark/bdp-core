@@ -11,7 +11,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import reactor.core.publisher.Mono;
@@ -60,24 +59,24 @@ public abstract class RestClient extends DataRetriever{
 
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
-		Map<String,String> map = new HashMap<>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("stationType", this.integreenTypology);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
-		map.put("seconds", seconds != null ? String.valueOf(seconds) : null);
-		map.put("period", period!=null?String.valueOf(period):null);
+		map.put("seconds", seconds);
+		map.put("period", period);
 		Mono<List<RecordDto>> mono = webClient.get().uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&seconds={seconds}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {});
 		return mono.block();
 	}
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start,Long end, Integer period) {
-		Map<String,String> map = new HashMap<>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("stationType", this.integreenTypology);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
-		map.put("start", start!=null ? String.valueOf(start) : null);
-		map.put("end", end != null ? String.valueOf(end) : null);
-		map.put("period", period!=null?String.valueOf(period):null);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("period", period);
 		Mono<List<RecordDto>> mono = webClient.get().uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&start={start}&end={end}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {});
 		return mono.block();
 	}
@@ -89,25 +88,28 @@ public abstract class RestClient extends DataRetriever{
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period!=null?String.valueOf(period):null);
-		Mono<RecordDtoImpl> mono = webClient.get().uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<RecordDtoImpl>() {});
+		Mono<RecordDto> mono = webClient.get().uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<RecordDto>() {});
 		return mono.block();
 	}
 
 	@Override
 	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
-		Map<String,String> map = new HashMap<>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("stationType", this.integreenTypology);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
-		map.put("period", String.valueOf(period));
+		map.put("period", period);
 		Mono<Date> mono = webClient.get().uri("/date-of-last-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<Date>() {});
 		return mono.block();
 	}
 
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String,String> map = new HashMap<>();
+		map.put("stationType", this.integreenTypology);
+		map.put("parent", id);
+		Mono<List<ChildDto>> mono = webClient.get().uri("/child-stations?stationType={stationType}&parent={parent}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<List<ChildDto>>() {});
+		return mono.block();
 	}
 
 	@Override

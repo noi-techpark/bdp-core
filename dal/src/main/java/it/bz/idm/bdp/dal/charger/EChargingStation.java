@@ -28,13 +28,15 @@ public class EChargingStation extends MeasurementStation{
 				y = station.getPointprojection().getY();
 				x = station.getPointprojection().getX();
 			}
-			EchargingStationDto dto = new EchargingStationDto(station.getStationcode(),station.getName(),y,x,basic.getChargingPointsCount(),basic.getAssetProvider(),basic.getCity(),basic.getState(),basic.getAddress());
-			dto.setAccessInfo(basic.getAccessInfo());
-			dto.setFlashInfo(basic.getFlashInfo());
-			dto.setLocationServiceInfo(basic.getLocationServiceInfo());
-			dto.setPaymentInfo(basic.getPaymentInfo());
-			dto.setReservable(basic.getReservable());
-			stationList.add(dto);
+			if (basic != null) {
+				EchargingStationDto dto = new EchargingStationDto(station.getStationcode(),station.getName(),y,x,basic.getChargingPointsCount(),basic.getAssetProvider(),basic.getCity(),basic.getState(),basic.getAddress());
+				dto.setAccessInfo(basic.getAccessInfo());
+				dto.setFlashInfo(basic.getFlashInfo());
+				dto.setLocationServiceInfo(basic.getLocationServiceInfo());
+				dto.setPaymentInfo(basic.getPaymentInfo());
+				dto.setReservable(basic.getReservable());
+				stationList.add(dto);
+			}
 		}
 		return stationList;
 	}
@@ -69,7 +71,7 @@ public class EChargingStation extends MeasurementStation{
 			em.merge(eStation);
 		}
 	}
-	
+
 	@Override
 	public List<ChildDto> findChildren(EntityManager em, String parent) {
 		List<ChildDto> dtos = new ArrayList<ChildDto>();
@@ -90,13 +92,13 @@ public class EChargingStation extends MeasurementStation{
 				SimpleRecordDto record = (SimpleRecordDto) plug.findLastRecord(em,null, null);
 				Integer value = ((Double) record.getValue()).intValue();
 				dto.setAvailable(value == 1);
-				
+
 				if (basic!= null){
 					if (basic.geteStation() != null)
 						dto.setStation(basic.geteStation().getStationcode());
-						List<OutletDtoV2> outletDtos = EChargingPlugOutlet.toDto(plug.getOutlets());
-						dto.setOutlets(outletDtos);
-						dto.setIdentifier(plug.getStationcode());
+					List<OutletDtoV2> outletDtos = EChargingPlugOutlet.toDto(plug.getOutlets());
+					dto.setOutlets(outletDtos);
+					dto.setIdentifier(plug.getStationcode());
 				}
 				dtos.add(dto);
 			}
