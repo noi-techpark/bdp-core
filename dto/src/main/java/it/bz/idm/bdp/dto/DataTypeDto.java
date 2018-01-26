@@ -19,6 +19,7 @@ public class DataTypeDto implements Serializable{
 	private String unit;
 	private String description;
 	private String rtype;
+	private Integer period;
 	
 	public DataTypeDto() {
 	}
@@ -28,6 +29,15 @@ public class DataTypeDto implements Serializable{
 		this.unit = unit;
 		this.description = description;
 		this.rtype = rtype;
+	}
+	
+	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
+		super();
+		this.name = name;
+		this.unit = unit;
+		this.description = description;
+		this.rtype = rtype;
+		this.period = period;
 	}
 	public String getName() {
 		return name;
@@ -53,7 +63,12 @@ public class DataTypeDto implements Serializable{
 	public void setRtype(String rtype) {
 		this.rtype = rtype;
 	}
-	
+	public Integer getPeriod() {
+		return period;
+	}
+	public void setPeriod(Integer period) {
+		this.period = period;
+	}
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DataTypeDto){
