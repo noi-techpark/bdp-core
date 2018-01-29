@@ -38,6 +38,7 @@ public class EChargingPlug extends MeasurementStation {
 			List<OutletDtoV2> dtos = EChargingPlugOutlet.toDto(plug.getOutlets());
 			if (basic != null && basic.geteStation()!= null){
 				EchargingPlugDto dto = new EchargingPlugDto(plug.getStationcode(),plug.getName(),y,x,basic.geteStation().getStationcode(),dtos);
+				dto.setMunicipality(station.getMunicipality());
 				stationList.add(dto);
 			}
 		}

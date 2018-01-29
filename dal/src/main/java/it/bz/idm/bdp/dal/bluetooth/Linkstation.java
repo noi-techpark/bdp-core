@@ -40,6 +40,7 @@ public class Linkstation extends ElaborationStation {
 			LinkBasicData basicData = basics.get(0);
 			
 			LinkStationDto dto = generateDto(station, basicData);
+			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
 					
 		}

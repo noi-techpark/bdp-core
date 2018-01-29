@@ -33,7 +33,8 @@ public class Streetstation extends ElaborationStation{
 			dto.setOld_idstr(basicData.getOld_idstr());
 			dto.setSpeed_default(basicData.getSpeed_default());
 			dto.setLength(basicData.getLength());
-			stationList .add(dto);
+			dto.setMunicipality(station.getMunicipality());
+			stationList.add(dto);
 		}
 		return stationList;
 	}

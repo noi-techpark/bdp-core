@@ -30,6 +30,13 @@ public class StationDto implements Serializable{
 		this.longitude = longitude ;
 		this.latitude = latitude;
 	}
+	public StationDto(String id, String name, Double latitude, Double longitude, String municipality ) {
+		this.id = id;
+		this.name = name;
+		this.longitude = longitude ;
+		this.latitude = latitude;
+		this.municipality = municipality;
+	}
 
 
 	public String getId() {

@@ -34,6 +34,7 @@ public class Carsharingcar extends MeasurementStation {
 			CarsharingCarStationBasicData basic =  (CarsharingCarStationBasicData) new CarsharingCarStationBasicData().findByStation(em, station);
 			String carsharingCode = (basic.getCarsharingStation() == null) ? null : basic.getCarsharingStation().getStationcode();
 			CarsharingCarDetailsDto dto = new CarsharingCarDetailsDto(station.getStationcode(),station.getName(),y,x,basic.getBrand(),carsharingCode,basic.getLicensePlate());
+			dto.setMunicipality(station.getMunicipality());
 			dtos.add(dto);
 		}
 		return dtos;
