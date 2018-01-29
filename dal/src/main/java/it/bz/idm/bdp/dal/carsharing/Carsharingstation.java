@@ -31,6 +31,7 @@ public class Carsharingstation extends MeasurementStation {
 			if (basic == null)
 				continue;
 			CarsharingDetailsDto dto = new CarsharingDetailsDto(station.getStationcode(),station.getName(),y,x,basic.getCompanyShortName(),basic.getParking(),basic.isCanBookAhead(),basic.isHasFixedParking(),basic.isSpontaneously());
+			dto.setMunicipality(station.getMunicipality());
 			dtos.add(dto);
 		}
 		return dtos;

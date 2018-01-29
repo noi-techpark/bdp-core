@@ -37,6 +37,7 @@ public class CarpoolingUser extends MeasurementStation{
 			CarpoolingUserDto dto = new CarpoolingUserDto(station.getStationcode(), station.getName(), y, x,
 					basic.getCarType(), basic.getGender(), basic.getType(), basic.getPendular(),
 					basic.getArrival(), basic.getDeparture(),basic.getHub().getStationcode(),hubTranslation,userTranslation);
+			dto.setMunicipality(station.getMunicipality());
 			dtos.add(dto);
 		}
 		return dtos;

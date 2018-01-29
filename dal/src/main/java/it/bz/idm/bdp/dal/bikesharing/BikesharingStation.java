@@ -35,6 +35,7 @@ public class BikesharingStation extends MeasurementStation{
 			}
 			BikesharingDetailsDto dto = new BikesharingDetailsDto(station.getStationcode(),station.getName(),y,x,map);
 			dto.setCrs(GEOM_CRS);
+			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
 		}
 		return stationList;

@@ -25,6 +25,7 @@ public class Meteostation extends MeasurementStation {
 			}
 			MeteoBasicData basicData = (MeteoBasicData) new MeteoBasicData().findByStation(em, station);
 			MeteoStationDto dto = new MeteoStationDto(station.getStationcode(),station.getName(),y,x);
+			dto.setMunicipality(station.getMunicipality());
 			dto.setArea(basicData.getArea());
 			stationList.add(dto);
 		}
