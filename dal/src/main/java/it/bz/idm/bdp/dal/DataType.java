@@ -1,6 +1,5 @@
 package it.bz.idm.bdp.dal;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -104,27 +103,23 @@ public class DataType {
 		return resultList.isEmpty()?null:resultList.get(0);
 	}
 
-	public static Object sync(EntityManager em, Object[] data) {
-		List<Object> dtos = Arrays.asList(data);
+	public static Object sync(EntityManager em, List<DataTypeDto> data) {
 		em.getTransaction().begin();
-		for (Object object: dtos){
-			if (object instanceof DataTypeDto){
-				DataTypeDto dto = (DataTypeDto) object;
-				DataType type = DataType.findByCname(em,dto.getName());
-				if (type != null){
-					if (dto.getDescription() != null)
-						type.setDescription(dto.getDescription());
-					type.setRtype(dto.getRtype());
-					type.setCunit(dto.getUnit());
-					if (type.getI18n().get(Locale.ENGLISH.getLanguage()) == null && dto.getDescription() != null)
-						type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
-					em.merge(type);
-				}else{
-					type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
+		for (DataTypeDto dto : data){
+			DataType type = DataType.findByCname(em,dto.getName());
+			if (type != null){
+				if (dto.getDescription() != null)
+					type.setDescription(dto.getDescription());
+				type.setRtype(dto.getRtype());
+				type.setCunit(dto.getUnit());
+				if (type.getI18n().get(Locale.ENGLISH.getLanguage()) == null && dto.getDescription() != null)
 					type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
-					em.persist(type);
-				}
-			} 
+				em.merge(type);
+			}else{
+				type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
+				type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
+				em.persist(type);
+			}
 		}
 		em.getTransaction().commit();
 		return null;

@@ -1,5 +1,6 @@
 package it.bz.idm.bdp.writer;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
@@ -36,16 +38,16 @@ public class JsonController extends DataManager{
 	}
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
-		super.patchStations(stations);;
+		super.patchStations(stations);
 	}
 	@RequestMapping(value = "/syncStations/{integreenTypology}", method = RequestMethod.POST)
 	public @ResponseBody Object syncStations(@RequestBody(required = true) List<StationDto> data,
 			@PathVariable String integreenTypology) {
-		return super.syncStations(integreenTypology, data.toArray());
+		return super.syncStations(integreenTypology, data);
 	}
 
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public Object syncDataTypes(Object... data) {
+	public Object syncDataTypes(ArrayList<DataTypeDto> data) {
 		return super.syncDataTypes(null, data);
 	}
 }
