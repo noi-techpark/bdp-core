@@ -12,6 +12,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.StationDto;
 
 @Component
@@ -32,12 +33,12 @@ public class DataManager {
 		}
 		return null;
 	}
-	public Object syncStations(String stationType, Object...data){
+	public Object syncStations(String stationType, List<StationDto> dtos){
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
 			if (station != null)
-				return station.syncStations(em,data);
+				return station.syncStations(em,dtos);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
@@ -45,11 +46,11 @@ public class DataManager {
 		}
 		return null;
 	}
-	public Object syncDataTypes(String stationType, Object...data){
+	public Object syncDataTypes(String stationType, List<DataTypeDto> dtos){
 		Object object = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			object = DataType.sync(em,data);
+			object = DataType.sync(em,dtos);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{

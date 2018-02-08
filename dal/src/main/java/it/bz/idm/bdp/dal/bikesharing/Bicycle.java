@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal.bikesharing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,8 @@ import it.bz.idm.bdp.dto.bikesharing.BikeSharingBikeDto;
 public class Bicycle extends MeasurementStation{
 
 	@Override
-	public Object syncStations(EntityManager em, Object[] data) {
-		List<Object> dtos = Arrays.asList(data);
-		for (Object object: dtos){
+	public Object syncStations(EntityManager em, List<StationDto> dtos) {
+		for (StationDto object: dtos){
 			if (object instanceof BikeSharingBikeDto){
 				em.getTransaction().begin();
 				BikeSharingBikeDto dto = (BikeSharingBikeDto) object;

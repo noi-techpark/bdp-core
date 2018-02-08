@@ -78,6 +78,7 @@ public class ParkingStation extends Station{
 			dto.setState(basicData.getState());
 			dto.setToiletsavailable(basicData.getToiletsavailable());
 			dto.setUrl(basicData.getUrl());
+			dto.setMunicipality(station.getMunicipality());
 			parkingList.add(dto);
 		}
 		return parkingList;

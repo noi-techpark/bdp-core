@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +45,7 @@ public abstract class Station {
 
 	@Id
 	@GeneratedValue(generator="incrementstation",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="incrementstation", sequenceName = "station_seq",schema="intime",allocationSize=1)
+	@SequenceGenerator(name="incrementstation", sequenceName = "station_seq",schema="intime",allocationSize=1)
 	protected Long id;
 
 	protected String name;
@@ -62,9 +61,9 @@ public abstract class Station {
 	protected Boolean active;
 
 	protected Boolean available;
-	
+
 	private String origin;
-	
+
 	private String municipality;
 
 	public Station() {
@@ -79,7 +78,7 @@ public abstract class Station {
 			resultList = findStations(em);
 		else 
 			resultList.add(station);
-			dtos = this.convertToDtos(em,resultList);
+		dtos = this.convertToDtos(em,resultList);
 		return dtos;
 	};
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
@@ -174,7 +173,7 @@ public abstract class Station {
 	public void setAvailable(Boolean available) {
 		this.available = available;
 	}
-	
+
 	public String getOrigin() {
 		return origin;
 	}
@@ -182,7 +181,7 @@ public abstract class Station {
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
-	
+
 	public String getMunicipality() {
 		return municipality;
 	}
@@ -255,54 +254,50 @@ public abstract class Station {
 	protected CoordinateDto parseCoordinate(Coordinate coordinate) {
 		return new CoordinateDto(coordinate.x,coordinate.y);
 	}
-	public Object syncStations(EntityManager em, Object[] data){
-		List<Object> objects =Arrays.asList(data);
-		syncActiveOfExistingStations(em, objects);
+	public Object syncStations(EntityManager em, List<StationDto> data){
+		syncActiveOfExistingStations(em, data);
 		em.getTransaction().begin();
-		for (Object obj:data){
-			if (obj instanceof StationDto){
-				StationDto dto = (StationDto) obj;
-				Station existingStation = findStation(em,dto.getId());
-				if (existingStation == null){
-					try {
-						existingStation = this.getClass().newInstance();
-					} catch (InstantiationException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-					existingStation.setStationcode(dto.getId());
-					em.persist(existingStation);
+		for (StationDto dto:data){
+			Station existingStation = findStation(em,dto.getId());
+			if (existingStation == null){
+				try {
+					existingStation = this.getClass().newInstance();
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
 				}
-				this.sync(em,existingStation,dto);									//sync instance specific metadata
-				if (existingStation.getName() == null)
-					existingStation.setName(dto.getName());
-				if (dto.getLatitude() != null && dto.getLongitude() != null){
-					Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
-					CoordinateReferenceSystem crs;
-					try {
-						crs = CRS.decode(GEOM_CRS,true);
-						if (dto.getCrs() != null && !GEOM_CRS.equals(dto.getCrs())){
-							CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCrs(),true);
-							Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
-							point = geometry.getCentroid();
-						}
-						point.setSRID(4326);
-						existingStation.setPointprojection(point);
-					} catch (NoSuchAuthorityCodeException e) {
-						e.printStackTrace();
-					} catch (FactoryException e) {
-						e.printStackTrace();
-					} catch (MismatchedDimensionException e) {
-						e.printStackTrace();
-					} catch (TransformException e) {
-						e.printStackTrace();
-					}
-
-				}
-				existingStation.setOrigin(dto.getOrigin());
-				em.merge(existingStation);
+				existingStation.setStationcode(dto.getId());
+				em.persist(existingStation);
 			}
+			this.sync(em,existingStation,dto);									//sync instance specific metadata
+			if (existingStation.getName() == null)
+				existingStation.setName(dto.getName());
+			if (dto.getLatitude() != null && dto.getLongitude() != null){
+				Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
+				CoordinateReferenceSystem crs;
+				try {
+					crs = CRS.decode(GEOM_CRS,true);
+					if (dto.getCrs() != null && !GEOM_CRS.equals(dto.getCrs())){
+						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCrs(),true);
+						Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
+						point = geometry.getCentroid();
+					}
+					point.setSRID(4326);
+					existingStation.setPointprojection(point);
+				} catch (NoSuchAuthorityCodeException e) {
+					e.printStackTrace();
+				} catch (FactoryException e) {
+					e.printStackTrace();
+				} catch (MismatchedDimensionException e) {
+					e.printStackTrace();
+				} catch (TransformException e) {
+					e.printStackTrace();
+				}
+
+			}
+			existingStation.setOrigin(dto.getOrigin());
+			em.merge(existingStation);
 		}
 		em.getTransaction().commit();
 		return null;
@@ -310,7 +305,7 @@ public abstract class Station {
 
 	public abstract void sync(EntityManager em,Station station, StationDto dto);
 
-	public void syncActiveOfExistingStations(EntityManager em, List<Object> dtos) {
+	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		List<Station> stations = this.findStationsByOrigin(em, dtos);
 		if (stations != null){
 			em.getTransaction().begin();
@@ -332,10 +327,10 @@ public abstract class Station {
 		}
 	}
 
-	private List<Station> findStationsByOrigin(EntityManager em, List<Object> dtos) {
+	private List<Station> findStationsByOrigin(EntityManager em, List<StationDto> dtos) {
 		List<Station> resultList = null;
 		if (dtos != null && !dtos.isEmpty()){
-			String origin = ((StationDto)dtos.get(0)).getOrigin();
+			String origin = dtos.get(0).getOrigin();
 			if (origin != null){
 				TypedQuery<Station> query = em.createQuery("select station from "+this.getClass().getSimpleName()+" station where station.origin = :origin",Station.class);
 				query.setParameter("origin", origin);
@@ -344,7 +339,7 @@ public abstract class Station {
 		}
 		return resultList;
 	}
-	
+
 	public List<ChildDto> findChildren(EntityManager em, String parent) {
 		return null;
 	}
