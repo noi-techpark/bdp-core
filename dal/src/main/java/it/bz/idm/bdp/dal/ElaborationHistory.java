@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
@@ -92,12 +91,12 @@ public class ElaborationHistory {
 
 	public static List<RecordDto> findRecords(EntityManager em, String stationtype,
 			String uuid, String type,  Date start, Date end, Integer period) {
-		Query query;
+		TypedQuery<ElaborationHistory> query;
 		if (period!=null){
-			query = em.createQuery("select record.timestamp,record.value,record.created_on FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.period=:period AND record.timestamp between :start AND :end ORDER BY record.timestamp asc");
+			query = em.createQuery("select record FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.period=:period AND record.timestamp between :start AND :end ORDER BY record.timestamp asc",ElaborationHistory.class);
 			query.setParameter("period", period);
 		}else
-			query = em.createQuery("select record.timestamp,record.value,record.created_on FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.timestamp between :start AND :end ORDER BY record.timestamp asc");
+			query = em.createQuery("select record FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.timestamp between :start AND :end ORDER BY record.timestamp asc",ElaborationHistory.class);
 		query.setParameter("stationtype", stationtype);
 		query.setParameter("stationid", uuid);
 		query.setParameter("type", type);
@@ -107,12 +106,11 @@ public class ElaborationHistory {
 		parseDtos(dtos, query);
 		return dtos;
 	}
-	private static void parseDtos(List<RecordDto> dtos, Query query) {
-		for (Object object:query.getResultList()){
-			Object[] objects =(Object[]) object;
-			Date date = (Date)objects[0];
-			Date created_on = (Date)objects[2];
-			Double value = Double.valueOf(objects[1].toString());
+	private static void parseDtos(List<RecordDto> dtos, TypedQuery<ElaborationHistory> query) {
+		for (ElaborationHistory history:query.getResultList()){
+			Date date = history.getTimestamp();
+			Long created_on = history.getCreated_on().getTime();
+			Double value = history.getValue();
 			BluetoothRecordExtendedDto dto = new BluetoothRecordExtendedDto(date.getTime(), value,created_on);
 			dtos.add(dto);
 		}
