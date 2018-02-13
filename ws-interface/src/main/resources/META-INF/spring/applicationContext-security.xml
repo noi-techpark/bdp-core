@@ -3,31 +3,39 @@
 	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
- 	
-	<http pattern="/rest/**" auto-config="false" entry-point-ref="restAuthenticationEntryPoint" create-session="stateless" authentication-manager-ref="authenticationManager">
-		<custom-filter ref="jwtAuthenticationFilter" position="FORM_LOGIN_FILTER"  />
-		
+
+	<http pattern="/rest/**" auto-config="false"
+		entry-point-ref="restAuthenticationEntryPoint" create-session="stateless"
+		authentication-manager-ref="authenticationManager">
+		<custom-filter ref="jwtAuthenticationFilter" position="FORM_LOGIN_FILTER" />
+
 	</http>
 
-	<beans:bean id="jwtAuthenticationFilter" class="it.bz.idm.bdp.ws.security.JWTTokenAuthFilter">
+	<beans:bean id="jwtAuthenticationFilter"
+		class="it.bz.idm.bdp.ws.security.JWTTokenAuthFilter">
 		<beans:constructor-arg value="/rest/**" />
 		<beans:property name="authenticationManager" ref="authenticationManager" />
-		<beans:property name="authenticationSuccessHandler"	ref="jwtAuthenticationSuccessHandler" />
+		<beans:property name="authenticationSuccessHandler"
+			ref="jwtAuthenticationSuccessHandler" />
 	</beans:bean>
 
-	<authentication-manager alias="authenticationManager" >
-	    <authentication-provider ref="jwtAuthenticationProvider"/>
-	    <authentication-provider user-service-ref="userDetailsService"/>
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="jwtAuthenticationProvider" />
+		<authentication-provider>
+			<password-encoder hash="bcrypt"/>
+			<user-service>
+				<user name="idm" password="$2a$04$mDvx.7rnQlGnfxEZSqJWDuh6BJEehH8gUIoV9bsSIvb1algmSxu0i" authorities="ROLE_ADMIN,ROLE_USER" />
+				<user name="guest" password="hithere" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
 	</authentication-manager>
 
 	<beans:bean id="jwtAuthenticationSuccessHandler"
 		class="it.bz.idm.bdp.ws.security.TokenSimpleUrlAuthenticationSuccessHandler" />
 	<beans:bean id="restAuthenticationEntryPoint"
 		class="it.bz.idm.bdp.ws.security.RestAuthenticationEntryPoint" />
-	<beans:bean id="jwtAuthenticationProvider" class="it.bz.idm.bdp.ws.security.JWTAuthenticationProvider" />
-	<beans:bean id="jwtUtil" class="it.bz.idm.bdp.ws.security.JwtUtil"/>
-	<user-service id="userDetailsService">
-  		<user name="idm" password="hiyou" authorities="ROLE_ADMIN,ROLE_USER" />
- 		<user name="guest" password="hithere" authorities="ROLE_USER" />
-	</user-service>
+	<beans:bean id="jwtAuthenticationProvider"
+		class="it.bz.idm.bdp.ws.security.JWTAuthenticationProvider" />
+	<beans:bean id="jwtUtil" class="it.bz.idm.bdp.ws.security.JwtUtil" />
+
 </beans:beans>
