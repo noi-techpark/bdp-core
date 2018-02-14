@@ -36,11 +36,11 @@ public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 		String token = request.getHeader(HEADER_SECURITY_TOKEN);
 		UserDetails user= null;
 		Authentication authRequest = null;
-		if(token == null || !token.startsWith("Bearer ")) {
+		if(token == null || !token.startsWith("JWT ")) {
 			response.setHeader("X-Error", "No auth token!");
 			throw new AuthenticationServiceException(MessageFormat.format("Error | {0}", "Auth token not found or invalid"));
 		}else{
-			String authToken = token.substring(7);
+			String authToken = token.substring(4);
 			user = util.parseToken(authToken);
 			if (user==null){
 				throw new JwtTokenMalformedException("Malformed token");
