@@ -8,7 +8,7 @@
 	<properties>
 		<xmlrpc.version>3.1.2</xmlrpc.version>
 		<spring.version>5.0.3.RELEASE</spring.version>
-		<springsecurity.version>5.0.0.RELEASE</springsecurity.version>
+		<springsecurity.version>5.0.1.RELEASE</springsecurity.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>

@@ -24,7 +24,7 @@
 		<authentication-provider>
 			<password-encoder hash="bcrypt"/>
 			<user-service>
-				<user name="idm" password="$2a$04$mDvx.7rnQlGnfxEZSqJWDuh6BJEehH8gUIoV9bsSIvb1algmSxu0i" authorities="ROLE_ADMIN,ROLE_USER" />
+				<user name="idm" password="$2a$04$XO.gqPesWVuWPZVSolexmenrQaoY1SS/2LitbZIYNbNCJyUqNub3K" authorities="ROLE_ADMIN,ROLE_USER" />
 				<user name="guest" password="hithere" authorities="ROLE_USER" />
 			</user-service>
 		</authentication-provider>
