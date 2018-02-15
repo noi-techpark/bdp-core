@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Configure') {
             steps {
-               sh 'cat ${BDP_DATABASE_CONFIG} > dal/src/main/resources/META-INF/persistence.xml'
+               sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
             }
         }
         stage('Test') {
