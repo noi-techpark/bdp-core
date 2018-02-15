@@ -32,8 +32,8 @@ pipeline {
         stage('Publish') {
             steps {
                sh 'mkdir -p /var/builds/test-server'
-               sh 'cp -f target/reader.war /var/builds/test-server/'
-               sh 'cp -f target/writer.war /var/builds/test-server/'
+               sh 'cp -f reader/target/reader.war /var/builds/test-server/'
+               sh 'cp -f writer/target/writer.war /var/builds/test-server/'
             }
         }
     }
