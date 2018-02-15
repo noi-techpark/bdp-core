@@ -29,7 +29,7 @@ pipeline {
                sh 'cd writer && mvn package'
             }
         }
-        stage('Publish') {
+        stage('Archive') {
             steps {
                sh 'mkdir -p /var/builds/test-server'
                sh 'cp -f reader/target/reader.war /var/builds/test-server/'
