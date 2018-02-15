@@ -2,24 +2,25 @@ pipeline {
     agent any
    	   
     stages {
+    
         stage('Test - DTO') {
             steps {
-               sh 'cd dto && mvn test'
+               sh 'cd dto && mvn clean test install'
             }
         }
         stage('Test - DAL') {
             steps {
-               sh 'cd dal && mvn test'
+               sh 'cd dal && mvn clean test install'
             }
         }
         stage('Test - Reader') {
             steps {
-               sh 'cd reader && mvn test'
+               sh 'cd reader && mvn clean test install'
             }
         }
         stage('Test - Writer') {
             steps {
-               sh 'cd writer && mvn test'
+               sh 'cd writer && mvn clean test install'
             }
         }
     }
