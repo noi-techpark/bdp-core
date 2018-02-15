@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+   	   
+    stages {
+        stage('Test - DTO') {
+            steps {
+               sh 'cd dto && mvn test'
+            }
+        }
+        stage('Test - DAL') {
+            steps {
+               sh 'cd dal && mvn test'
+            }
+        }
+        stage('Test - Reader') {
+            steps {
+               sh 'cd reader && mvn test'
+            }
+        }
+        stage('Test - Writer') {
+            steps {
+               sh 'cd writer && mvn test'
+            }
+        }
+    }
+}
