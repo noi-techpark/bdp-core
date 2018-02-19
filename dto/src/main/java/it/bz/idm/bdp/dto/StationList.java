@@ -1,10 +1,13 @@
 package it.bz.idm.bdp.dto;
 
 import java.util.ArrayList;
-
-import it.bz.idm.bdp.dto.StationDto;
+import java.util.Collection;
 
 public class StationList extends ArrayList<StationDto>{
+
+	public StationList(Collection<? extends StationDto> stations) {
+		super(stations);
+	}
 
 	/**
 	 * 
