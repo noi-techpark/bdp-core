@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Lob;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.Type;
+
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 
@@ -19,6 +21,7 @@ public class EchargingstationBasicData extends BasicData{
 	private Integer chargingPointsCount;
 	private String state;
 	@Lob
+	@Type(type="text")
 	private String paymentInfo;
 	private String accessInfo;
 	private String flashInfo;
