@@ -3,7 +3,8 @@ package it.bz.idm.bdp.dto.carsharing;
 import java.io.Serializable;
 
 public class StationAccess implements Serializable{
-	   String locationNote;
+	private static final long serialVersionUID = -6882191851531656942L;
+	String locationNote;
 	   String parking;
 
 	   public String getParking()
@@ -24,5 +25,5 @@ public class StationAccess implements Serializable{
 	   public void setLocationNote(String locationNote)
 	   {
 	      this.locationNote = locationNote;
-	   } 
+	   }
 }

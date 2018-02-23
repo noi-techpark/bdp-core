@@ -22,12 +22,13 @@ package it.bz.idm.bdp.dto.carsharing;
 import java.io.Serializable;
 
 /**
- * 
+ *
  * @author Davide Montesin <d@vide.bz>
  */
 public class GeoPos implements Serializable
 {
-   String lat;
+	private static final long serialVersionUID = -272687136980053485L;
+	String lat;
    String lon;
 
    public void setLat(String lat)
