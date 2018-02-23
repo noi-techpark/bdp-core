@@ -34,4 +34,23 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 	public Map<String, DataMapDto<RecordDtoImpl>> getBranch() {
 		return branch;
 	}
+
+	/**
+	 * Insert a new branch if the key does not exist, otherwise give the existing branch back.
+	 *
+	 * @param key
+	 *            to find the branch inside the data map
+	 * @return the existing branch associated to the given key, or a new branch with that key
+	 */
+	public DataMapDto<RecordDtoImpl> upsertBranch(String key) {
+		DataMapDto<RecordDtoImpl> existingMap = branch.get(key);
+
+		if (existingMap == null) {
+			existingMap = new DataMapDto<RecordDtoImpl>();
+			branch.put(key, existingMap);
+		}
+
+		return existingMap;
+	}
+
 }
