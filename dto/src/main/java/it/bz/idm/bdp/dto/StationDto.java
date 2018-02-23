@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonInclude(value=Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="_t",visible=true)
-public class StationDto implements Serializable{
+public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
 	protected String id;
@@ -20,10 +20,10 @@ public class StationDto implements Serializable{
 	private String origin;
 	private String municipality;
 	private String stationType;
-	
+
 	public StationDto() {
 	}
-	
+
 	public StationDto(String id, String name, Double latitude, Double longitude ) {
 		this.id = id;
 		this.name = name;
@@ -108,5 +108,12 @@ public class StationDto implements Serializable{
 	public int hashCode() {
 		return 1;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "StationDto [id=" + id + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude
+				+ ", crs=" + crs + ", origin=" + origin + ", municipality=" + municipality + ", stationType="
+				+ stationType + "]";
+	}
+
 }

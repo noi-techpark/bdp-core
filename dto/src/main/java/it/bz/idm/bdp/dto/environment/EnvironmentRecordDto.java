@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class EnvironmentRecordDto implements Serializable {
+	private static final long serialVersionUID = 4851382811235801919L;
 	private Date timestamp;
 	private String value;
 	public EnvironmentRecordDto() {
@@ -25,6 +26,6 @@ public class EnvironmentRecordDto implements Serializable {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
-	
+
+
 }
