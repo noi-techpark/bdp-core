@@ -11,8 +11,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.apache.log4j.Logger;
-
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -22,7 +20,6 @@ import it.bz.idm.bdp.dto.TypeDto;
 
 
 public abstract class MeasurementStation extends Station {
-	private Logger logger = Logger.getLogger(MeasurementStation.class);
 
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {
@@ -45,6 +42,7 @@ public abstract class MeasurementStation extends Station {
 		return getDataTypesFromQuery(resultList);
 	}
 
+	@Override
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null || stationId.isEmpty()) {
@@ -130,6 +128,7 @@ public abstract class MeasurementStation extends Station {
 	public Object pushRecords(EntityManager em,Object... objects) {
 		Object object = objects[0];
 		if (object instanceof DataMapDto) {
+			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
 			try{
 				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
