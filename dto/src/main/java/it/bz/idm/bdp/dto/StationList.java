@@ -8,6 +8,8 @@ public class StationList extends ArrayList<StationDto>{
 	public StationList(Collection<? extends StationDto> stations) {
 		super(stations);
 	}
+	public StationList() {
+	}
 
 	/**
 	 * 
