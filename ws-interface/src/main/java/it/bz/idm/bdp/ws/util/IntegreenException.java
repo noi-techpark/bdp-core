@@ -2,6 +2,10 @@ package it.bz.idm.bdp.ws.util;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(value=Include.NON_EMPTY)
 public class IntegreenException implements Serializable{
 
 	/**
@@ -18,7 +22,6 @@ public class IntegreenException implements Serializable{
 	}
 	public IntegreenException(Throwable exception) {
 		this.exceptionMessage = exception.getMessage();
-		this.exceptionName = exception.getClass().getName();	
 	}
 
 

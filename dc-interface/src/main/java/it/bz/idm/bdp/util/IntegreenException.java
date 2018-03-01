@@ -18,7 +18,6 @@ public class IntegreenException implements Serializable{
 	}
 	public IntegreenException(Throwable exception) {
 		this.exceptionMessage = exception.getMessage();
-		this.exceptionName = exception.getClass().getName();	
 	}
 
 
