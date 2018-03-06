@@ -61,7 +61,8 @@ public class Bluetoothstation extends ElaborationStation {
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		if (objects.length>0 && objects[0] instanceof DataMapDto<?>)
-		{	
+		{
+			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) objects[0];
 			DataType type = DataType.findByCname(em, VEHICLE_DETECTION);
 			if (type == null)
@@ -77,7 +78,7 @@ public class Bluetoothstation extends ElaborationStation {
 				List<? extends RecordDtoImpl> data = entry.getValue().getBranch().get(VEHICLE_DETECTION).getData();
 				for (RecordDtoImpl record: data){
 					SimpleRecordDto dto = (SimpleRecordDto) record;
-					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD); 
+					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
 					if (history == null){
 						history = new MeasurementStringHistory(station, type, dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
 						em.persist(history);
@@ -89,7 +90,7 @@ public class Bluetoothstation extends ElaborationStation {
 						lastMeasurement.setValue(dto.getValue().toString());
 					} else
 						lastMeasurement = new MeasurementString(station, type, dto.getValue().toString(), new Date(dto.getTimestamp()),PERIOD);
-					em.merge(lastMeasurement);		
+					em.merge(lastMeasurement);
 				}
 				em.getTransaction().commit();
 			}

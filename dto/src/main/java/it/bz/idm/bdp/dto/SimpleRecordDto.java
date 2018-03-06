@@ -4,19 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import it.bz.idm.bdp.dto.RecordDtoImpl;
-
 @JsonInclude(value=Include.NON_EMPTY)
 public class SimpleRecordDto extends RecordDtoImpl {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 5703758724961079739L;
 	private Object value;
 	private Integer period;
-	
-	
+
+
 	public SimpleRecordDto() {
 	}
 	public SimpleRecordDto(Long timestamp,Double value) {
@@ -30,6 +28,7 @@ public class SimpleRecordDto extends RecordDtoImpl {
 		this.value = value;
 		this.period = period;
 	}
+	@Override
 	public Object getValue() {
 		return value;
 	}
@@ -45,6 +44,11 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	@JsonIgnore
 	public boolean isValid() {
 		return value!=null&&timestamp!=null&&period!=null;
+	}
+
+	@Override
+	public String toString() {
+		return "SimpleRecordDto [timestamp=" + timestamp + ", value=" + value + ", period=" + period + "]";
 	}
 
 }

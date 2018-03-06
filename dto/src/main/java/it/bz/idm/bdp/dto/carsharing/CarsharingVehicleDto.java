@@ -22,16 +22,17 @@ package it.bz.idm.bdp.dto.carsharing;
 import it.bz.idm.bdp.dto.StationDto;
 
 /**
- * 
+ *
  * @author Davide Montesin <d@vide.bz>
  */
 public class CarsharingVehicleDto extends StationDto
 {
-   public static final String IDENTIFIER = "id";
+	private static final long serialVersionUID = -6739458663647210882L;
+	public static final String IDENTIFIER = "id";
    public static final String STATE = "state";
    public static final String CREATED_ON = "created_on";
    public static final String TIMESTAMP = "timestamp";
-   
+
    String licensePlate;
    String model;
    String brand;

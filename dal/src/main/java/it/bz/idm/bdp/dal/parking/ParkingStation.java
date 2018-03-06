@@ -109,7 +109,7 @@ public class ParkingStation extends Station{
 		}finally{
 			em.close();
 		}
-	}	
+	}
 	public static List<ParkingStationDto> findParkingStationsMetadata() {
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<CarParkingBasicData> query =em.createQuery("select basicdata from CarParkingBasicData basicdata where basicdata.station.active=:active",CarParkingBasicData.class);
@@ -150,7 +150,7 @@ public class ParkingStation extends Station{
 
 	public static List<Object[]> findStoricData(String identifier, Integer minutes) {
 		Calendar cal = Calendar.getInstance();
-		Date longAgo = new Date(cal.getTimeInMillis()-(minutes*60l*1000l)); 
+		Date longAgo = new Date(cal.getTimeInMillis()-(minutes*60l*1000l));
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<Object[]> query = em.createQuery("SELECT dynamic.occupacy,dynamic.lastupdate FROM CarParkingDynamicHistory dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?3 AND dynamic.lastupdate > ?2 order by dynamic.lastupdate",Object[].class);
 		query.setParameter(1, identifier);
@@ -324,6 +324,7 @@ public class ParkingStation extends Station{
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
 		if (object instanceof DataMapDto){
+			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) object;
 			for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()) {
 				ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
