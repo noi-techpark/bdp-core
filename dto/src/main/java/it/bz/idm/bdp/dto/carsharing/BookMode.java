@@ -22,12 +22,13 @@ package it.bz.idm.bdp.dto.carsharing;
 import java.io.Serializable;
 
 /**
- * 
+ *
  * @author Davide Montesin <d@vide.bz>
  */
 public class BookMode implements Serializable
 {
-   boolean canBookAhead;
+	private static final long serialVersionUID = -5558793090642205243L;
+	boolean canBookAhead;
    boolean spontaneously;
    boolean hasCompanyPreferredVehicle;
 

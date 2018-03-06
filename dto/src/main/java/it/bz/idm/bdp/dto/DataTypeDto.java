@@ -2,13 +2,8 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 
-import it.bz.idm.bdp.dto.DataTypeDto;
-
 public class DataTypeDto implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2577340085858167829L;
 	public static final String NUMBER_AVAILABE = "number-available";
 	public static final String AVAILABILITY = "availability";

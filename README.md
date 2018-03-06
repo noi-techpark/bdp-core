@@ -104,7 +104,7 @@ More informations will be available soon.
   > GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdreadonly;
   > GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA intime TO bdreadonly;
   > create extension postgis
-  psql bd < schema.dump
+  psql -U bd bd < schema.dump
 
   ```
 

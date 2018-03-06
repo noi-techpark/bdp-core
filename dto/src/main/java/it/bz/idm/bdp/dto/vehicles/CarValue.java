@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CarValue implements Serializable{
-	
+
+	private static final long serialVersionUID = 8313625056855553223L;
+
 	private Long ts_ms;
 
     private Double gps_lon;
@@ -14,122 +16,122 @@ public class CarValue implements Serializable{
     private Double gps_lat;
 
     private Double o3;
-    
+
     private Double o3_1_ppb;
-    
+
 	private Integer o3_1_runtime_s;
-	
+
 	private Boolean o3_1_valid_b;
 
     private Double no2_1_ppb;
-	
+
     private Integer no2_1_runtime_s;
-    
+
 	private Boolean no2_1_valid_b;
-	
+
 	private Double no2_2_ppb;
-	
+
 	private Integer no2_2_runtime_s;
-	
+
 	private Boolean no2_2_valid_b;
-	
+
 	private Double co_1_ppm;
-	
+
 	private Integer co_1_runtime_s;
-	
+
 	private Boolean co_1_valid_b;
-	
+
 	private Double res_1_a;
-	
+
 	private Integer res_1_runtime_s;
-	
+
 	private Boolean res_1_valid_b;
-	
+
 	private Double res_2_a;
-	
+
 	private Integer res_2_runtime_s;
-	
+
 	private Boolean res_2_valid_b;
-	
+
 	private Double temp_1_c;
-	
+
 	private Boolean temp_1_valid_b;
-	
+
 	private Double rh_1_pct;
-	
+
 	private Boolean rh_1_valid_b;
-	
+
 	private Double af_1_sccm;
-	
+
 	private Boolean af_1_valid_b;
-	
+
 	private Double gps_1_long_deg;
-	
+
 	private Double gps_1_lat_deg;
-	
+
 	private Double gps_1_alt_m;
-	
+
 	private Double gps_1_speed_mps;
-	
+
 	private Double gps_1_hdg_deg;
-	
+
 	private Integer gps_1_sat_nr;
-	
+
 	private Double gps_1_pdop_nr;
-	
+
 	private Boolean gps_1_valid_b;
-	
+
 	private Integer id_vehicle_nr;
-	
+
 	private Integer id_system_nr;
-	
+
 	private Integer id_driver_nr;
-	
+
 	private String id_version_char;
-	
+
 	private Integer id_runtime_s;
-	
+
 	private String id_status_char;
-	
+
 	private Double can_speed_mps;
-	
+
 	private Double can_acc_long_mps2;
-	
+
 	private Double can_acc_lat_mps2;
-	
+
 	private Double can_acc_long_mean_mps2;
-	
+
 	private Double can_acc_lat_mean_mps2;
-	
+
 	private Double can_acc_long_var_m2ps4;
-	
+
 	private Double can_acc_lat_var_m2ps4;
-	
+
 	private Boolean can_valid_b;
-	
+
 	private Double imu_speed_mps;
-	
+
 	private Double imu_acc_long_mps2;
-	
+
 	private Double imu_acc_lat_mps2;
-	
+
 	private Double imu_acc_long_mean_mps2;
-	
+
 	private Double imu_acc_lat_mean_mps2;
-	
+
 	private Double imu_acc_long_var_m2ps4;
-	
+
 	private Double imu_acc_lat_var_m2ps4;
-	
+
 	private Boolean imu_valid_b;
-	
+
 	private Double no2_1_µgm3_ma;
 
 	@JsonCreator
 	public CarValue(@JsonProperty("ts_ms") Long ts_ms,
-			@JsonProperty("gps_lon") Double gps_lon, 
+			@JsonProperty("gps_lon") Double gps_lon,
 			@JsonProperty("gps_lat") Double gps_lat,
-			@JsonProperty("O3") Double o3, 
+			@JsonProperty("O3") Double o3,
 			@JsonProperty("o3_1_ppb") Double o3_1_ppb,
 			@JsonProperty("o3_1_runtime_s") Integer o3_1_runtime_s,
 			@JsonProperty("o3_1_valid_b") Integer o3_1_valid_b,
@@ -139,25 +141,25 @@ public class CarValue implements Serializable{
 			@JsonProperty("no2_2_ppb") Double no2_2_ppb,
 			@JsonProperty("no2_2_runtime_s") Integer no2_2_runtime_s,
 			@JsonProperty("no2_2_valid_b") Integer no2_2_valid_b,
-			@JsonProperty("co_1_ppm") Double co_1_ppm, 
+			@JsonProperty("co_1_ppm") Double co_1_ppm,
 			@JsonProperty("co_1_runtime_s") Integer co_1_runtime_s,
 			@JsonProperty("co_1_valid_b") Integer co_1_valid_b,
 			@JsonProperty("res_1_a") Double res_1_a,
 			@JsonProperty("res_1_runtime_s") Integer res_1_runtime_s,
 			@JsonProperty("res_1_valid_b") Integer res_1_valid_b,
-			@JsonProperty("res_2_a") Double res_2_a, 
+			@JsonProperty("res_2_a") Double res_2_a,
 			@JsonProperty("res_2_runtime_s") Integer res_2_runtime_s,
 			@JsonProperty("res_2_valid_b") Integer res_2_valid_b,
 			@JsonProperty("temp_1_c") Double temp_1_c,
-			@JsonProperty("temp_1_valid_b") Integer temp_1_valid_b, 
+			@JsonProperty("temp_1_valid_b") Integer temp_1_valid_b,
 			@JsonProperty("rh_1_pct") Double rh_1_pct,
-			@JsonProperty("rh_1_valid_b") Integer rh_1_valid_b, 
+			@JsonProperty("rh_1_valid_b") Integer rh_1_valid_b,
 			@JsonProperty("Double af_1_sccm") Double af_1_sccm,
 			@JsonProperty("af_1_valid_b") Integer af_1_valid_b,
 			@JsonProperty("gps_1_long_deg") Double gps_1_long_deg,
-			@JsonProperty("gps_1_lat_deg") Double gps_1_lat_deg, 
+			@JsonProperty("gps_1_lat_deg") Double gps_1_lat_deg,
 			@JsonProperty("gps_1_alt_m") Double gps_1_alt_m,
-			@JsonProperty("gps_1_speed_mps") Double gps_1_speed_mps, 
+			@JsonProperty("gps_1_speed_mps") Double gps_1_speed_mps,
 			@JsonProperty("gps_1_hdg_deg") Double gps_1_hdg_deg,
 			@JsonProperty("gps_1_sat_nr") Integer gps_1_sat_nr,
 			@JsonProperty("gps_1_pdop_nr") Double gps_1_pdop_nr,
@@ -165,9 +167,9 @@ public class CarValue implements Serializable{
 			@JsonProperty("id_vehicle_nr")Integer id_vehicle_nr,
 			@JsonProperty("id_system_nr") Integer id_system_nr,
 			@JsonProperty("id_driver_nr") Integer id_driver_nr,
-			@JsonProperty("id_version_char") String id_version_char, 
+			@JsonProperty("id_version_char") String id_version_char,
 			@JsonProperty("id_runtime_s")Integer id_runtime_s,
-			@JsonProperty("id_status_char") String id_status_char, 
+			@JsonProperty("id_status_char") String id_status_char,
 			@JsonProperty("can_speed_mps") Double can_speed_mps,
 			@JsonProperty("can_acc_long_mps2") Double can_acc_long_mps2,
 			@JsonProperty("can_acc_lat_mps2") Double can_acc_lat_mps2,
@@ -175,7 +177,7 @@ public class CarValue implements Serializable{
 			@JsonProperty("can_acc_lat_mean_mps2") Double can_acc_lat_mean_mps2,
 			@JsonProperty("can_acc_long_var_m2ps4") Double can_acc_long_var_m2ps4,
 			@JsonProperty("can_acc_lat_var_m2ps4") Double can_acc_lat_var_m2ps4,
-			@JsonProperty("can_valid_b") Integer can_valid_b, 
+			@JsonProperty("can_valid_b") Integer can_valid_b,
 			@JsonProperty("imu_speed_mps") Double imu_speed_mps,
 			@JsonProperty("imu_acc_long_mps2") Double imu_acc_long_mps2,
 			@JsonProperty("imu_acc_lat_mps2") Double imu_acc_lat_mps2,
@@ -183,7 +185,7 @@ public class CarValue implements Serializable{
 			@JsonProperty("imu_acc_lat_mean_mps2") Double imu_acc_lat_mean_mps2,
 			@JsonProperty("imu_acc_long_var_m2ps4") Double imu_acc_long_var_m2ps4,
 			@JsonProperty("imu_acc_lat_var_m2ps4") Double imu_acc_lat_var_m2ps4,
-			@JsonProperty("imu_valid_b") Integer imu_valid_b, 
+			@JsonProperty("imu_valid_b") Integer imu_valid_b,
 			@JsonProperty("no2_1_µgm3_ma") Double no2_1_µgm3_ma) {
 		super();
 		this.ts_ms = ts_ms;
@@ -247,7 +249,7 @@ public class CarValue implements Serializable{
 		this.imu_valid_b= castToBoolean( imu_valid_b);
 	}
 
-	
+
     private Boolean castToBoolean(Integer value) {
 		return (value != null)? value ==1:null;
 	}
@@ -846,5 +848,5 @@ public class CarValue implements Serializable{
 		this.no2_1_µgm3_ma = no2_1_µgm3_ma;
 	}
 
-	
+
 }
