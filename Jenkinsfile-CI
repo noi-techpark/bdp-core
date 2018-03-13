@@ -1,8 +1,8 @@
 pipeline {
     agent any
-   	   
+
     stages {
-    
+
         stage('Test - DTO') {
             steps {
                sh 'cd dto && mvn clean test install'
@@ -11,6 +11,11 @@ pipeline {
         stage('Test - DAL') {
             steps {
                sh 'cd dal && mvn clean test install'
+            }
+        }
+        stage('Test - DC-INTERFACE') {
+            steps {
+               sh 'cd dc-interface && mvn clean test install'
             }
         }
         stage('Test - Reader') {
