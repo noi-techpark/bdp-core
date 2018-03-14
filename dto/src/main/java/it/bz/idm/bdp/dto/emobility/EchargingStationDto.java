@@ -13,6 +13,8 @@ public class EchargingStationDto extends StationDto {
 	private String state;
 	private String paymentInfo;
 	private String accessInfo;
+	private String accessType;
+	private String[] categories;
 	private String flashInfo;
 	private String locationServiceInfo;
 	private String address;
@@ -112,5 +114,20 @@ public class EchargingStationDto extends StationDto {
 	public void setReservable(Boolean reservable) {
 		this.reservable = reservable;
 	}
-	
+
+	public String getAccessType() {
+		return accessType;
+	}
+
+	public void setAccessType(String accessType) {
+		this.accessType = accessType;
+	}
+
+	public String[] getCategories() {
+		return categories;
+	}
+
+	public void setCategories(String[] categories) {
+		this.categories = categories;
+	}
 }
