@@ -27,6 +27,9 @@ public class EchargingstationBasicData extends BasicData{
 	private String flashInfo;
 	private String locationServiceInfo;
 	private Boolean reservable;
+	private String accessType;
+	
+	private String categories;
 	
 	
 	public Boolean getReservable() {
@@ -84,12 +87,23 @@ public class EchargingstationBasicData extends BasicData{
 	public void setLocationServiceInfo(String locationServiceInfo) {
 		this.locationServiceInfo = locationServiceInfo;
 	}
-	
 	public String getAddress() {
 		return address;
 	}
 	public void setAddress(String address) {
 		this.address = address;
+	}
+	public String getAccessType() {
+		return accessType;
+	}
+	public void setAccessType(String accessType) {
+		this.accessType = accessType;
+	}
+	public String getCategories() {
+		return categories;
+	}
+	public void setCategories(String categories) {
+		this.categories = categories;
 	}
 	@Override
 	public BasicData findByStation(EntityManager em, Station station)  {
