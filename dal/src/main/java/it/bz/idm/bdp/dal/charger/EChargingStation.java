@@ -1,5 +1,11 @@
 package it.bz.idm.bdp.dal.charger;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+
 import it.bz.idm.bdp.dal.MeasurementStation;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dto.ChildDto;
@@ -8,12 +14,6 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.emobility.ChildPlugDto;
 import it.bz.idm.bdp.dto.emobility.EchargingStationDto;
 import it.bz.idm.bdp.dto.emobility.OutletDtoV2;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 
 @Entity
 public class EChargingStation extends MeasurementStation{
@@ -36,6 +36,7 @@ public class EChargingStation extends MeasurementStation{
 				dto.setPaymentInfo(basic.getPaymentInfo());
 				dto.setReservable(basic.getReservable());
 				dto.setMunicipality(station.getMunicipality());
+				dto.setCategories(basic.getCategories().split(","));
 				stationList.add(dto);
 			}
 		}
@@ -68,6 +69,8 @@ public class EChargingStation extends MeasurementStation{
 			basic.setAccessInfo(charger.getAccessInfo());
 			basic.setAddress(charger.getAddress());
 			basic.setReservable(charger.getReservable());
+			basic.setAccessType(charger.getAccessType());
+			basic.setCategories(String.join(",",charger.getCategories()));
 			em.merge(basic);
 			em.merge(eStation);
 		}
