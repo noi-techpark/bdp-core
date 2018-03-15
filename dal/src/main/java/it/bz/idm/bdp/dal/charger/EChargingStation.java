@@ -36,7 +36,7 @@ public class EChargingStation extends MeasurementStation{
 				dto.setPaymentInfo(basic.getPaymentInfo());
 				dto.setReservable(basic.getReservable());
 				dto.setMunicipality(station.getMunicipality());
-				dto.setCategories(basic.getCategories().split(","));
+				dto.setCategories((basic.getCategories()!= null) ? basic.getCategories().split(",") : null);
 				stationList.add(dto);
 			}
 		}
@@ -70,7 +70,7 @@ public class EChargingStation extends MeasurementStation{
 			basic.setAddress(charger.getAddress());
 			basic.setReservable(charger.getReservable());
 			basic.setAccessType(charger.getAccessType());
-			basic.setCategories(String.join(",",charger.getCategories()));
+			basic.setCategories(charger.getCategories() != null ? String.join(",",charger.getCategories()) : null);
 			em.merge(basic);
 			em.merge(eStation);
 		}
