@@ -31,6 +31,7 @@ public class EChargingStation extends MeasurementStation{
 			if (basic != null) {
 				EchargingStationDto dto = new EchargingStationDto(station.getStationcode(),station.getName(),y,x,basic.getChargingPointsCount(),basic.getAssetProvider(),basic.getCity(),basic.getState(),basic.getAddress());
 				dto.setAccessInfo(basic.getAccessInfo());
+				dto.setAccessType(dto.getAccessType());
 				dto.setFlashInfo(basic.getFlashInfo());
 				dto.setLocationServiceInfo(basic.getLocationServiceInfo());
 				dto.setPaymentInfo(basic.getPaymentInfo());
