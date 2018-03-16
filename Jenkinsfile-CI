@@ -18,6 +18,11 @@ pipeline {
                sh 'cd dc-interface && mvn clean test install'
             }
         }
+        stage('Test - WS-INTERFACE') {
+            steps {
+               sh 'cd ws-interface && mvn clean test install'
+            }
+        }
         stage('Test - Reader') {
             steps {
                sh 'cd reader && mvn clean test'
