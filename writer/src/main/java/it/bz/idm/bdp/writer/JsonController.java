@@ -1,6 +1,5 @@
 package it.bz.idm.bdp.writer;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class JsonController extends DataManager{
 	}
 
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public Object syncDataTypes(ArrayList<DataTypeDto> data) {
+	public @ResponseBody Object syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
 		return super.syncDataTypes(null, data);
 	}
 }
