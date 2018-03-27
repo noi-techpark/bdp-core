@@ -2,7 +2,6 @@ package it.bz.idm.bdp.ws.xmlrpc;
 
 
 import it.bz.idm.bdp.ws.DataRetriever;
-import it.bz.idm.bdp.ws.util.IntegreenException;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
