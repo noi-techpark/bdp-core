@@ -12,23 +12,13 @@ import it.bz.idm.bdp.dto.StationList;
 
 
 public abstract class JSONPusher extends DataPusher {
-	
 	private static final String SYNC_DATA_TYPES = "/syncDataTypes/";
-
-
 	private static final String SYNC_STATIONS = "/syncStations/";
-
-
 	private static final String PUSH_RECORDS = "/pushRecords/";
-	
 	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
-
-
-
 	private static final String JSON_ENDPOINT = "json_endpoint";
 
 	protected RestTemplate restTemplate = new RestTemplate();
-
 	
 	private String url;
 	public JSONPusher() {

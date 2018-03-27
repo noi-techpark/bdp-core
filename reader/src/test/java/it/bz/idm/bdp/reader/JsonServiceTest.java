@@ -22,14 +22,21 @@ public class JsonServiceTest {
 
 	private static final String RANDOM_STATION_TYPE = "Meteostation";
 	private JsonController controller;
-	
+
 	@Before
 	public void setup() {
 		controller = mock(JsonController.class);
 	}
 	@Test
 	public void testStationsFetch() {
-		when(controller.getStations(RANDOM_STATION_TYPE)).thenReturn(new ArrayList<String>() {{add("hi");add("42");add("Im a unique identifier");}});
+		when(controller.getStations(RANDOM_STATION_TYPE)).thenReturn(new ArrayList<String>() {
+			private static final long serialVersionUID = -1187950189580524534L;
+			{
+				add("hi");
+				add("42");
+				add("Im a unique identifier");
+			}
+		});
 		List<String> stations = controller.getStations(RANDOM_STATION_TYPE);
 		assertNotNull(stations);
 		assertFalse(stations.isEmpty());
@@ -41,7 +48,13 @@ public class JsonServiceTest {
 		dto.setArea("An area");
 		MeteoStationDto anotherDto = new MeteoStationDto("234r1", null,15858.12 , 12);
 
-		List<StationDto> list = new ArrayList<StationDto>() {{add(dto);add(anotherDto);}};
+		List<StationDto> list = new ArrayList<StationDto>() {
+			private static final long serialVersionUID = 2145736428612955944L;
+			{
+				add(dto);
+				add(anotherDto);
+			}
+		};
 		when(controller.getStationDetails(RANDOM_STATION_TYPE,null)).then(new Returns(list));
 		List<? extends StationDto> stationDetails = controller.getStationDetails(RANDOM_STATION_TYPE,null);
 		assertNotNull(stationDetails);

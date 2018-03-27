@@ -22,7 +22,7 @@ public class SwaggerConfig{
 
 	 @Bean
 	    public Docket api(){
-	        return new Docket(DocumentationType.SWAGGER_2)	
+	        return new Docket(DocumentationType.SWAGGER_2)
 	            .select()
 	            .apis(RequestHandlerSelectors.any())
 	            .paths(PathSelectors.any())
@@ -31,7 +31,8 @@ public class SwaggerConfig{
 	    }
 
 	    private ApiInfo apiInfo() {
-	        Collection<VendorExtension> extensions = new ArrayList<VendorExtension>();
+		@SuppressWarnings("rawtypes")
+		Collection<VendorExtension> extensions = new ArrayList<VendorExtension>();
 			ApiInfo apiInfo = new ApiInfo(
 	            "Big data platform REST API",
 	            "This API contains all documentation about the big data platform ",
@@ -53,6 +54,6 @@ public class SwaggerConfig{
 	    			UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS,
 	    			false,        // enableJsonEditor      => true | false
 	    			true,
-	    			3000l);   
+	    			3000l);
 	    }
 }
