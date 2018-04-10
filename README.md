@@ -51,43 +51,57 @@ The core strutcture of the bdp is quiet simple. There exists 3 entities on which
 
 ## DTO
 Data transfer objects are used as format for exchanging the data. They are used between data provider and data persister(writer) but also between data dispatcher and data reader (reader). This dto module is a java library contained in all modules of the big data platform, simply because it contains the structure of communication between the modules.
-- dtos between data collectors and writer:
-- dtos between webservices and reader:
+- dtos between data collectors and writer: //TODO add definitive dtos
+- dtos between webservices and reader: //TODO add definitive dtos
 
 ## WRITER
-The writer is a simple interface exposing calls through a xmlrpc service.
+The writer is a simple interface exposing rest endpoints, where data can be pushed as json in the structures defined in dto.
 The DAL is a big and shared part between writer and reader and saves and retrieves the data through abstraction.
-The writer himself implements the methods to write data to the bdp and therefore becomes an interface for all data collectors.
+The writer himself implements the methods to write data to the bdp and is therefore the endpoint for all datacollectors.
+It uses the persistence-unit of the DAL which has permissions to read all data and also to write everything.
 
 
 ### dc-interface
-The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing xmlrpc client implementation.
+The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing json client implementation(JSONPusher.java).
 The API is compact and easy to use:
 	
-  - `Object syncStations(String dataStationTypology, Object[] data)` : This method is used to create,update,delete stations of a specific typology data must be an array of StationDto's and depending on dataStationTypology it can also be an extension of it. 
+  - `Object syncStations(String dataStationTypology, StationList data)` : This method is used to create,update,delete stations of a specific typology data must be a StationList(List of StationDto's)
+  
   If, for example dataStationTypology = "Meteostation", the array can contain StationDto but also MeteostationDto
 	
-  - `Object syncDataTypes(String dataStationTypology, Object[] data)` : This method is used to create and update data types. Data must be an array of DataTypeDto
+  - `Object syncDataTypes(String dataStationTypology, List<DataTypeDto> data)` : This method is used to create and update data types. Data must be a list of DataTypeDto
   
-  - `Object pushData(String datasourceName, Object[] data)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. You have to put everything in a map which has as key a string identifying the data station it is correlated and a TypeMapDto as value. TypeMapDto himself contains a map himself where value is a unique string identifier representing the datatype the data is correlated to. As value you can put a list of SimpleRecordDto which simply are all the datapoints with a specific staiton and  a specific type. Each point is represented as timestamp and value
+  - `Object pushData(String datasourceName,  DataMapDto<? extends RecordDtoImpl> dto)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. The data in here gets saved in form of a tree.
+Each branch can have multiple child branches but can also have data itself, which means it can have indefinitive depth.
+Right now, by our internal conventions we store everything on the second level, like this:
+```
+----Station
+
+-----------DataType
+
+--------------------Data
+```
+  As value you can put a list of SimpleRecordDto which simply are all the datapoints with a specific station and  a specific type. Each point is represented as timestamp and value. To better understand the structure, watch the source:
+https://github.com/idm-suedtirol/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java
   
   - `Object getDateOfLastRecord(String stationCode,String dataType,Integer period)` : this method is required to get the date of the last valid record
 
 **datasourceName** identifies which kind of data needs to be saved
 
 ## READER
-The reader is a simple interface exposing calls through a xmlrpc service.
-It integrates the DAL and retrieves the data through abstraction.
+The reader is a simple interface exposing calls through a json service (RestClient).
+It depends on the DAL and retrieves the data through abstraction.
+It uses the persistence unit which has read only access on the db.
 
 ### ws-interface
-Luckily on the reader side there exists already a Java implementation for the API to get the data you need. To be able to use it you need to include the ws-interface jar file in your dependencies and than use the xmlrpc-client implementation. If you want to serve the data as json throught the provided API you can also use the spring web-mvc Rest implementation with jwt authentication.
+Luckily on the reader side there exists already a Java implementation for the API to get the data you need. To be able to use it you need to include the ws-interface jar file in your dependencies and than use the RestClient implementation. If you want to serve the data as json throught the provided API you can also use the spring web-mvc Rest implementation with jwt authentication.
 
 More informations will be available soon.
 
 ## Installation guide
 ### Prerequisits
 - postgresql 9.3 or higher with postgis 2.2 extension
-- application server (we are using tomcat8)
+- application server (we use tomcat8)
 - JRE7+ (we use JRE8)
 
 ### Step1: Set up your database
@@ -128,71 +142,7 @@ More informations will be available soon.
   mvn clean package
   ```
 ### Step 3: Check endpoints
-To check the endpoints of the 2 apps go to http://{host}:{port}/writer/xmlrpc and http://{host}:{port}/reader/xmlrpc. There you should get 405 method GET not allowed as response. You can test it by seeing if introspection works:
-
-  `curl -i --data @introspection.xml http://localhost:8080/writer/xmlrpc`
-
-  The response should be somehing like this:
-  ``` xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <methodResponse xmlns:ex="http://ws.apache.org/xmlrpc/namespaces/extensions">
-    <params>
-      <param>
-        <value>
-          <array>
-            <data>
-              <value>system.methodSignature</value>
-              <value>DataCollector.getLatestMeasurementStringRecord</value>
-              <value>system.methodHelp</value>
-              <value>DataCollector.syncStations</value>
-              <value>DataCollector.syncDataTypes</value>
-              <value>DataCollector.getDateOfLastRecord</value>
-              <value>DataCollector.pushRecords</value>
-              <value>system.listMethods</value>
-            </data>
-          </array>
-        </value>
-      </param>
-    </params>
-  </methodResponse>
-  ```
-
-  The same goes for the reader application:
-
-  `curl -i --data @introspection.xml http://localhost:8080/writer/xmlrpc`
-  ``` xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <methodResponse xmlns:ex="http://ws.apache.org/xmlrpc/namespaces/extensions">
-    <params>
-      <param>
-        <value>
-          <array>
-            <data>
-              <value>DataRetriever.getDataTypes</value>
-              <value>DataRetriever.getTypes</value>
-              <value>DataRetriever.getStationDetails</value>
-              <value>DataRetriever.getStations</value>
-              <value>system.methodHelp</value>
-              <value>DataRetriever.getFreeSlotsByTimeFrame</value>
-              <value>DataRetriever.getRecords</value>
-              <value>DataRetriever.getNumberOfFreeSlots</value>
-              <value>system.listMethods</value>
-              <value>DataRetriever.getAvailableStations</value>
-              <value>system.methodSignature</value>
-              <value>DataRetriever.getChildren</value>
-              <value>DataRetriever.getLastRecord</value>
-              <value>DataRetriever.getParkingStations</value>
-              <value>DataRetriever.getParkingIds</value>
-              <value>DataRetriever.getNewestRecord</value>
-              <value>DataRetriever.getStoricData</value>
-              <value>DataRetriever.getParkingStation</value>
-              <value>DataRetriever.getDateOfLastRecord</value>
-            </data>
-          </array>
-        </value>
-      </param>
-    </params>
-  </methodResponse>
+To check the endpoints of the 2 apps go to http://{host}:{port}/writer/json and http://{host}:{port}/reader/json. There you should get 405 method GET not allowed as response. 
   ```
 
 If this works you made it.
