@@ -13,14 +13,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
-@Table(name = "user", schema = "intime")
 @Entity
-public class User {
+public class BDPUser {
 
 	@Id
 	@GeneratedValue(generator = "user_seq", strategy = GenerationType.SEQUENCE)
@@ -38,22 +36,22 @@ public class User {
 
 	@ManyToMany
 	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-	private Collection<Role> roles;
+	private Collection<BDPRole> roles;
 
-	public User() {
+	public BDPUser() {
 	}
 
-	public User(String email, String password) {
+	public BDPUser(String email, String password) {
 		this(null, null, email, password, true, false);
 	}
 
-	public User(String firstName, String lastName, String email, String password, boolean enabled,
+	public BDPUser(String firstName, String lastName, String email, String password, boolean enabled,
 			boolean tokenExpired) {
 		this(firstName, lastName, email, password, enabled, tokenExpired, null);
 	}
 
-	public User(String firstName, String lastName, String email, String password, boolean enabled,
-			boolean tokenExpired, Collection<Role> roles) {
+	public BDPUser(String firstName, String lastName, String email, String password, boolean enabled,
+			boolean tokenExpired, Collection<BDPRole> roles) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -119,27 +117,27 @@ public class User {
 		this.tokenExpired = tokenExpired;
 	}
 
-	public Collection<Role> getRoles() {
+	public Collection<BDPRole> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(Collection<Role> roles) {
+	public void setRoles(Collection<BDPRole> roles) {
 		this.roles = roles;
 	}
 
-	public static User findByEmail(EntityManager manager, String email) {
-		TypedQuery<User> query = manager.createQuery("SELECT id FROM user where email = :email", User.class);
+	public static BDPUser findByEmail(EntityManager manager, String email) {
+		TypedQuery<BDPUser> query = manager.createQuery("SELECT id FROM BDPUser where email = :email", BDPUser.class);
 		query.setParameter("email", email);
-		List<User> resultList = query.getResultList();
+		List<BDPUser> resultList = query.getResultList();
 		return resultList.isEmpty() ? null : resultList.get(0);
 	}
 
 	public static Object sync(EntityManager em, List<UserDto> data) {
 		em.getTransaction().begin();
 		for (UserDto dto : data) {
-			User user = User.findByEmail(em, dto.getEmail());
+			BDPUser user = BDPUser.findByEmail(em, dto.getEmail());
 			if (user == null) {
-				user = new User(dto.getEmail(), dto.getPassword());
+				user = new BDPUser(dto.getEmail(), dto.getPassword());
 				em.persist(user);
 			} else {
 				user.setPassword(dto.getPassword());

@@ -11,15 +11,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
 
-@Table(name = "role", schema = "intime")
 @Entity
-public class Role {
+public class BDPRole {
 
 	@Id
 	@GeneratedValue(generator = "role_seq", strategy = GenerationType.SEQUENCE)
@@ -29,17 +27,17 @@ public class Role {
 	private String name;
 	private String description;
 	@ManyToMany(mappedBy = "roles")
-	private Collection<User> users;
+	private Collection<BDPUser> users;
 
-	public Role() {
+	public BDPRole() {
 	}
 
-	public Role(String name, String description) {
+	public BDPRole(String name, String description) {
 		this.setName(name);
 		this.setDescription(description);
 	}
 
-	public Role(String name) {
+	public BDPRole(String name) {
 		this.setName(name);
 	}
 	public Long getId() {
@@ -65,19 +63,19 @@ public class Role {
 		this.description = description;
 	}
 
-	public static Role findByName(EntityManager manager, String name) {
-		TypedQuery<Role> query = manager.createQuery("SELECT id FROM role where name = :name", Role.class);
+	public static BDPRole findByName(EntityManager manager, String name) {
+		TypedQuery<BDPRole> query = manager.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
 		query.setParameter("name", name);
-		List<Role> resultList = query.getResultList();
+		List<BDPRole> resultList = query.getResultList();
 		return resultList.isEmpty() ? null : resultList.get(0);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {
 		em.getTransaction().begin();
 		for (RoleDto dto : data) {
-			Role role = Role.findByName(em, dto.getName());
+			BDPRole role = BDPRole.findByName(em, dto.getName());
 			if (role == null) {
-				role = new Role(dto.getName(), dto.getDescription());
+				role = new BDPRole(dto.getName(), dto.getDescription());
 				em.persist(role);
 			} else {
 				if (dto.getDescription() != null)
