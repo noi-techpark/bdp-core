@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
@@ -28,7 +29,10 @@ public class BDPRole {
 	private String description;
 	@ManyToMany(mappedBy = "roles")
 	private Collection<BDPUser> users;
-
+	
+	@ManyToOne
+	private BDPRole parent;
+	
 	public BDPRole() {
 	}
 
@@ -40,6 +44,7 @@ public class BDPRole {
 	public BDPRole(String name) {
 		this.setName(name);
 	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -61,6 +66,21 @@ public class BDPRole {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public Collection<BDPUser> getUsers() {
+		return users;
+	}
+
+	public void setUsers(Collection<BDPUser> users) {
+		this.users = users;
+	}
+
+	public BDPRole getParent() {
+		return parent;
+	}
+
+	public void setParent(BDPRole parent) {
+		this.parent = parent;
 	}
 
 	public static BDPRole findByName(EntityManager manager, String name) {
