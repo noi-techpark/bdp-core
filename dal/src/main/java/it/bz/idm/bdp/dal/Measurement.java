@@ -18,6 +18,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.NaturalId;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
 @Table(name="measurement")
@@ -138,6 +139,45 @@ public class Measurement{
 		}
 		singleQuery.setParameter("station", station);
 		List<Measurement> resultList = singleQuery.getResultList();
+		return resultList.isEmpty()?null:resultList.get(0);
+	}
+	public static Measurement findLatestEntry(EntityManager em, Station station, DataType type,
+			Integer period, BDPRole role) {
+		if (station == null || role == null)
+			return null;
+		String baseQuery = "SELECT record FROM Measurement record JOIN BDPRules ru ON (record.station = ru.station OR ru.station = null)"
+				+ " AND (record.type = ru.type OR ru.type = null) AND (record.period = ru.period OR ru.period = null) WHERE ru.role = :role AND record.station = :station";
+		TypedQuery<Measurement> queryPromise = null;
+		//set optional parameters
+		if (type == null){
+			if (period == null){
+				queryPromise = em.createQuery(baseQuery,Measurement.class);
+			}else{
+				queryPromise = em.createQuery(baseQuery + " AND record.period=:period",Measurement.class);
+				queryPromise.setParameter("period", period);
+			}
+		}else if (period==null){
+			queryPromise = em.createQuery(baseQuery + " AND record.type=:type",Measurement.class);
+			queryPromise.setParameter("type", type);
+
+		}else{
+			queryPromise = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period",Measurement.class);
+			queryPromise.setParameter("type", type);
+			queryPromise.setParameter("period", period);
+		}
+		//set required paramaters
+		queryPromise.setParameter("station", station);
+		queryPromise.setParameter("role", role);
+		List<Measurement> resultList = queryPromise.getResultList();
+		/* resulting example query which does return no records
+		 * --------------------------------------------------------
+		 * select measuremen0_.id as id1_26_, measuremen0_.created_on as created_2_26_, measuremen0_.period as period3_26_, measuremen0_.station_id as station_6_26_, 
+		 * measuremen0_.timestamp as timestam4_26_, measuremen0_.type_id as type_id7_26_, measuremen0_.value as value5_26_ from intime.measurement measuremen0_ inner join intime.station station2_ 
+		 * on measuremen0_.station_id=station2_.id inner join intime.type datatype5_ on measuremen0_.type_id=datatype5_.id inner join intime.BDPRules bdprules1_ on 
+		 * ((measuremen0_.station_id=bdprules1_.station_id or bdprules1_.station_id is null) and (measuremen0_.type_id=bdprules1_.type_id or bdprules1_.type_id is null) and 
+		 * (measuremen0_.period=bdprules1_.period or bdprules1_.period is null)) inner join intime.station station3_ on bdprules1_.station_id=station3_.id inner join intime.type datatype6_ 
+		 * on bdprules1_.type_id=datatype6_.id where bdprules1_.role_id=3 and measuremen0_.station_id=1 and measuremen0_.type_id=1;
+		 * */
 		return resultList.isEmpty()?null:resultList.get(0);
 	}
 
