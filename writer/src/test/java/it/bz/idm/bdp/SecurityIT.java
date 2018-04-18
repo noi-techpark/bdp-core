@@ -61,9 +61,11 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 	@Test
 	public void testGetRulesForRole() {
 		BDPRole r = BDPRole.findByName(entityManager, role.getName());
+		//JOIN between unrelated entities https://www.thoughts-on-java.org/how-to-join-unrelated-entities/
+		//had to upgrade hibernate to resolve this known issue https://hibernate.atlassian.net/browse/HHH-2772
 		TypedQuery<Measurement> query = entityManager.createQuery(
-				"select m from Measurement m join BDPRules ru where ru.role = :role and (m.station = ru.station or ru.station = null)"
-				+ " and (m.type = ru.type or ru.type = null) and (m.period = ru.period or ru.period = null)",
+				"select m from Measurement m join BDPRules ru on (m.station = ru.station or ru.station = null)"
+				+ " and (m.type = ru.type or ru.type = null) and (m.period = ru.period or ru.period = null) where ru.role = :role",
 				Measurement.class);
 		query.setParameter("role", r);
 		List<Measurement> resultList = query.getResultList();
@@ -72,7 +74,13 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 	}
 	
 	@Test
-	public void testInsertPermission() {
+	public void testRulesForLastRecord() {
+		BDPRole r = BDPRole.findByName(entityManager, role.getName());
+		Station station = new Environmentstation().findStation(entityManager, this.station.getName());
+		DataType type = DataType.findByCname(entityManager, this.type.getCname());
+		Measurement m = Measurement.findLatestEntry(entityManager, station, null, null, r);
+		assertNotNull(m);
+		
 	}
 	
 	@AfterClass

@@ -20,6 +20,7 @@ import it.bz.idm.bdp.dto.authentication.RoleDto;
 @Entity
 public class BDPRole {
 
+	public static final BDPRole ROLE_GUEST = new BDPRole("ROLE_GUEST");
 	@Id
 	@GeneratedValue(generator = "role_seq", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "role_seq", sequenceName = "role_seq", schema = "intime", allocationSize = 1)
