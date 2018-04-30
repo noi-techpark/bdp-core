@@ -1,29 +1,35 @@
 package it.bz.idm.bdp.dal.authentication;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.Immutable;
+import javax.persistence.SequenceGenerator;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
-@Immutable
 @Entity
 public class BDPRules {
-	
-	@Id
-	private Long uuid;
+    @Id
+	@GeneratedValue(generator = "rules_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "rules_gen", sequenceName = "rules_seq", schema = "intime", allocationSize = 1)
+    private Long id;
 
-	@ManyToOne
+    @ManyToOne
 	private BDPRole role;
-	@ManyToOne
+    @ManyToOne
 	private Station station;
-	@ManyToOne
+    @ManyToOne
 	private DataType type;
-	
 	private Integer period;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public BDPRole getRole() {
 		return role;
 	}
@@ -48,4 +54,5 @@ public class BDPRules {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
+
 }
