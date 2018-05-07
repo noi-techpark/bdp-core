@@ -2,6 +2,7 @@ package it.bz.idm.bdp;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,9 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
 import it.bz.idm.bdp.dal.environment.Environmentstation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
@@ -77,9 +81,26 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		BDPRole r = BDPRole.findByName(entityManager, role.getName());
 		Station station = new Environmentstation().findStation(entityManager, this.station.getName());
 		DataType type = DataType.findByCname(entityManager, this.type.getCname());
-		Measurement m = Measurement.findLatestEntry(entityManager, station, null, null, r);
+		Measurement m = Measurement.findLatestEntry(entityManager, station, type, null, r);
 		assertNotNull(m);
+	}
 
+	@Test
+	public void testSyncStations() {
+		StationDto s = new StationDto("!TEST-WRITER", null, null, null);
+		DataManager m = new DataManager();
+		List<StationDto> dtos = new ArrayList<StationDto>();
+		dtos.add(s);
+		m.syncStations("Environmentstation", dtos);
+	}
+
+	@Test
+	public void testSyncDataTypes() {
+		DataTypeDto t = new DataTypeDto("!TEST-WRITER", null, null, null);
+		DataManager m = new DataManager();
+		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
+		dtos.add(t);
+		m.syncDataTypes(dtos);
 	}
 
 	@AfterClass

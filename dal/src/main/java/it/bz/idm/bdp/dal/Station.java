@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
+import javax.persistence.UniqueConstraint;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -35,7 +36,7 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
-@Table(name="station")
+@Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode" }))
 @Entity
 @DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
 public abstract class Station {
@@ -44,7 +45,7 @@ public abstract class Station {
 	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 	@Id
-	@GeneratedValue(generator="incrementstation",strategy=GenerationType.SEQUENCE)
+	@GeneratedValue(generator = "incrementstation", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name="incrementstation", sequenceName = "station_seq",schema="intime",allocationSize=1)
 	protected Long id;
 
@@ -74,9 +75,9 @@ public abstract class Station {
 	public List<StationDto> findStationsDetails(EntityManager em, Station station){
 		List<StationDto> dtos = null;
 		List<Station> resultList = new ArrayList<Station>();
-		if (station == null) 
+		if (station == null)
 			resultList = findStations(em);
-		else 
+		else
 			resultList.add(station);
 		dtos = this.convertToDtos(em,resultList);
 		return dtos;

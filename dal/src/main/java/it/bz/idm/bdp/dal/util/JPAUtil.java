@@ -29,15 +29,17 @@ public class JPAUtil {
 		emFactory.close();
 	}
 
-	public static Object getInstanceByType(EntityManager em, String type) throws InstantiationException, IllegalAccessException{
+	public static Object getInstanceByType(EntityManager em, String type)
+			throws Exception {
 		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
 		for (ManagedType<?> entity: managedTypes){
 			if (entity.getJavaType().getSimpleName().equals(type)){
 				return entity.getJavaType().newInstance();
 			}
 		}
-		return null;
+		throw new Exception("ERROR: Cannot get any instance of type " + type + ". Type not found.");
 	}
+
 	public static String getEntityNameByObject(Object obj) {
 		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
 			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))

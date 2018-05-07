@@ -23,8 +23,7 @@ public class DataManager {
 		Station station;
 		try {
 			station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			if (station != null)
-				return station.pushRecords(em,data);
+			return station.pushRecords(em, data);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
@@ -37,16 +36,17 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			if (station != null)
-				return station.syncStations(em,dtos);
+			return station.syncStations(em, dtos);
 		} catch (Exception e) {
+			// FIXME Add error handling to report back to the writer method caller
 			e.printStackTrace();
-		}finally{
+		} finally {
 			em.close();
 		}
 		return null;
 	}
-	public Object syncDataTypes(String stationType, List<DataTypeDto> dtos){
+
+	public Object syncDataTypes(List<DataTypeDto> dtos) {
 		Object object = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
@@ -73,7 +73,7 @@ public class DataManager {
 			ex.printStackTrace();
 		}
 		finally{
-			em.close();	
+			em.close();
 		}
 		return date;
 	}
