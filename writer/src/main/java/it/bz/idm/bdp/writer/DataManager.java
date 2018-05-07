@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -104,6 +106,25 @@ public class DataManager {
 		for (StationDto dto:stations) {
 			Station.patch(em,dto);
 		}
+		em.getTransaction().commit();
+	}
+
+	/*
+	 * Updating sequences to be at the top of any serial id, because Hibernate does not
+	 * do that automatically at startup. It just queries the max value of each sequence
+	 * to get the next value. In addition, Hibernate does not generate a proper schema to
+	 * auto increment on each insertion.
+	 * XXX workaround to prevent unique key constraint violations during insertion: Should
+	 * be changed ASAP because we need to hard-code DB specific sequence updates here!
+	 */
+	@EventListener(ContextRefreshedEvent.class)
+	public void afterStartup() {
+		EntityManager em = JPAUtil.createEntityManager();
+		em.getTransaction().begin();
+		em.createNativeQuery("select setval('station_seq', (select max(id) from station))").getSingleResult();
+		em.createNativeQuery("select setval('type_seq', (select max(id) from type))").getSingleResult();
+		em.createNativeQuery("select setval('measurement_id_seq', (select max(id) from measurement))")
+				.getSingleResult();
 		em.getTransaction().commit();
 	}
 
