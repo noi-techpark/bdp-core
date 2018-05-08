@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -63,13 +64,14 @@ public class DataManager {
 
 	public Object getDateOfLastRecord(String stationtype,String stationcode,String type,Integer period){
 		EntityManager em = JPAUtil.createEntityManager();
+		BDPRole role = BDPRole.fetchAdminRole(em);
 		Date date = new Date(-1);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtype);
 			Station station = s.findStation(em,stationcode);
 			DataType dataType = DataType.findByCname(em,type);
 			if (station != null) {
-				date = station.getDateOfLastRecord(em,station, dataType, period);
+				date = station.getDateOfLastRecord(em, station, dataType, period, role);
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -80,10 +82,10 @@ public class DataManager {
 		return date;
 	}
 
-	public Object getLatestMeasurementStringRecord(String stationtype, String id){
+	public Object getLatestMeasurementStringRecord(String stationtype, String id, BDPRole role) {
 		Date date = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		date = MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em,stationtype, id);
+		date = MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em, stationtype, id, role);
 		em.close();
 		return date;
 	}

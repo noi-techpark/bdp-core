@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
@@ -18,13 +19,13 @@ public abstract class ElaborationStation extends Station {
 
 	@Override
 	public List<RecordDto> getRecords(EntityManager em, String type,
-			Date start, Date end, Integer period) {
-		List<RecordDto> records = ElaborationHistory.findRecords(em, this
-				.getClass().getSimpleName(), this.stationcode, type, start,
-				end, period);
+			Date start, Date end, Integer period, BDPRole role) {
+		List<RecordDto> records = ElaborationHistory.findRecords(em, this.getClass().getSimpleName(), this.stationcode,
+				type, start, end, period, role);
 		return records;
 	}
 
+	@Override
 	public List<String[]> findDataTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null) {
@@ -48,12 +49,10 @@ public abstract class ElaborationStation extends Station {
 	}
 
 	@Override
-	public RecordDto findLastRecord(EntityManager em, String cname,
-			Integer period) {
+	public RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role) {
 		SimpleRecordDto dto = null;
 		DataType type = DataType.findByCname(em, cname);
-		Elaboration latestEntry = new Elaboration().findLastRecord(em, this,
-				type, period);
+		Elaboration latestEntry = new Elaboration().findLastRecord(em, this, type, period, role);
 		if (latestEntry != null) {
 			dto = new SimpleRecordDto(latestEntry.getTimestamp().getTime(),
 					latestEntry.getValue());
@@ -62,6 +61,7 @@ public abstract class ElaborationStation extends Station {
 		return dto;
 	}
 
+	@Override
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null) {
@@ -104,27 +104,7 @@ public abstract class ElaborationStation extends Station {
 	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station,
-			DataType type, Integer period) {
-		Date date = null;
-		if (station != null) {
-			String queryString = "select record.timestamp from Elaboration record where record.station=:station";
-			if (type != null) {
-				queryString += " AND record.type = :type";
-			}
-			if (period != null) {
-				queryString += " AND record.period=:period";
-			}
-			queryString += " ORDER BY record.timestamp DESC";
-			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-			query.setParameter("station", station);
-			if (type != null)
-				query.setParameter("type", type);
-			if (period != null)
-				query.setParameter("period", period);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}
-		return date;
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return getDateOfLastRecordImpl(em, station, type, period, role, "Elaboration");
 	}
 }

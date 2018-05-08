@@ -14,25 +14,27 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
+
 @Table(name="elaboration")
 @Entity
 public class Elaboration {
-	
+
 	@Id
     @GeneratedValue(generator="elaboration_id_seq",strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name="elaboration_id_seq", sequenceName = "elaboration_id_seq",schema="intime",allocationSize=1)
 	protected Integer id;
 	private Date created_on;
 	private Date timestamp;
-	
+
 	@ManyToOne(cascade=CascadeType.MERGE)
 	private DataType type;
 	private Double value;
-	
+
 	@ManyToOne
 	private Station station;
 	private Integer period;
-	
+
 	public Elaboration() {
 	}
 	public Elaboration(Station station, DataType type,
@@ -86,52 +88,43 @@ public class Elaboration {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	public Elaboration findLastRecord(EntityManager em,
-			Station station, DataType type, Integer period) {
-		Elaboration elaboration = null;
-		if (type == null)
-			elaboration = findLastRecord(em,station, period);
-		else if (period == null){
-			elaboration = findLastRecord(em,station, type);
-		}
-		else{
-			TypedQuery<Elaboration> query = em.createQuery("SELECT elab FROM Elaboration elab WHERE elab.station=:station AND elab.type=:type AND elab.period=:period order by elab.timestamp desc",Elaboration.class);
-			query.setParameter("station",station);
-			query.setParameter("type", type);
-			query.setParameter("period", period);
-			List<Elaboration> resultList = query.getResultList();
-			if (!resultList.isEmpty())
-				elaboration = resultList.get(0);
-		}
-		return elaboration;
-		
 
-	}
-	private Elaboration findLastRecord(EntityManager em, Station station, DataType type) {
-		if (type == null)
-			findLastRecord(em,station);
-		TypedQuery<Elaboration> query = em.createQuery("SELECT elaboration FROM Elaboration elaboration WHERE elaboration.station=:station AND elaboration.type=:type order by elaboration.timestamp desc",Elaboration.class);
-		query.setParameter("station",station);
-		query.setParameter("type", type);
-		List<Elaboration> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
-	}
-	private Elaboration findLastRecord(EntityManager em, Station station, Integer period) {
-		if (period == null)
-			return findLastRecord(em,station);
-		TypedQuery<Elaboration> query = em.createQuery("SELECT elaboration FROM Elaboration elaboration WHERE elaboration.station=:station AND elaboration.period=:period order by elaboration.timestamp desc",Elaboration.class);
-		query.setParameter("station",station);
-		query.setParameter("period", period);
-		List<Elaboration> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
-		
-	}
-	private Elaboration findLastRecord(EntityManager em,Station station) {
+	public Elaboration findLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		if (station == null)
 			return null;
-		TypedQuery<Elaboration> query = em.createQuery("SELECT elaboration FROM Elaboration elaboration WHERE elaboration.station=:station order by elaboration.timestamp desc",Elaboration.class);
-		query.setParameter("station",station);
+
+		String querySQL1 = "SELECT elab FROM Elaboration elab, BDPPermissions p "
+				+ "WHERE (elab.station = p.station OR p.station = null) "
+				+ "AND (elab.type = p.type OR p.type = null) "
+				+ "AND (elab.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND elab.station=:station ";
+		String querySQL2 = "order by elab.timestamp desc";
+		String queryType = "AND elab.type=:type ";
+		String queryPeriod = "AND elab.period=:period ";
+
+		TypedQuery<Elaboration> query;
+
+		if (type == null && period == null) {
+			query = em.createQuery(querySQL1 + querySQL2, Elaboration.class);
+		} else if (type == null) {
+			query = em.createQuery(querySQL1 + queryPeriod + querySQL2, Elaboration.class);
+			query.setParameter("period", period);
+		} else if (period == null) {
+			query = em.createQuery(querySQL1 + queryType + querySQL2, Elaboration.class);
+			query.setParameter("type", type);
+		} else {
+			query = em.createQuery(querySQL1 + queryPeriod + queryType + querySQL2, Elaboration.class);
+			query.setParameter("period", period);
+			query.setParameter("type", type);
+		}
+
+		query.setParameter("station", station);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+
+		// FIXME We fetch a lot of data here, but we want only the most recent one... use LIMIT 1 or getSingleResult()
 		List<Elaboration> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return resultList.isEmpty() ? null : resultList.get(0);
 	}
+
 }

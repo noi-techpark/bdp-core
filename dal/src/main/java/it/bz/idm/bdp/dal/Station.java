@@ -30,6 +30,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -108,10 +109,48 @@ public abstract class Station {
 
 	public abstract List<String[]> findDataTypes(EntityManager em, String stationId);
 	public abstract List<TypeDto> findTypes(EntityManager em, String stationId);
-	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type,Integer period);
-	public abstract RecordDto findLastRecord(EntityManager em, String cname, Integer period);
-	public abstract List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period);
+
+	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
+			BDPRole role);
+
+	public abstract RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role);
+
+	public abstract List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period,
+			BDPRole role);
 	public abstract Object pushRecords(EntityManager em, Object... object);
+
+	protected static Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period,
+			BDPRole role, String table) {
+		if (station == null)
+			return null;
+
+		String queryString = "select record.timestamp "
+				+ "from :table record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station=:station";
+
+		if (type != null) {
+			queryString += " AND record.type = :type";
+		}
+		if (period != null) {
+			queryString += " AND record.period=:period";
+		}
+		queryString += " ORDER BY record.timestamp DESC";
+		TypedQuery<Date> query = em.createQuery(queryString, Date.class);
+		query.setParameter("station", station);
+		query.setParameter("table", table);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+		if (type != null)
+			query.setParameter("type", type);
+		if (period != null)
+			query.setParameter("period", period);
+		List<Date> resultList = query.getResultList();
+		return resultList.isEmpty() ? new Date(0) : resultList.get(0);
+	}
+
 
 	public String getName() {
 		return name;

@@ -14,6 +14,7 @@ import org.apache.commons.beanutils.BeanMap;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -42,7 +43,7 @@ public class Mobilestation extends Station {
 		}
 
 	}
-	
+
 	private void persistNewestRecord(
 			EntityManager em, List<CarValue> values, Mobilestation trafficVehicle) {
 		CarValue value = filterNewestRecord(values);
@@ -82,7 +83,7 @@ public class Mobilestation extends Station {
 		return TrafficVehicleRecord.DATATYPES;
 	}
 	@Override
-	public Date getDateOfLastRecord(EntityManager em,Station station, DataType type, Integer period) {
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		Date date = null;
 		if (station != null){
 			TypedQuery<Date> query;
@@ -99,7 +100,7 @@ public class Mobilestation extends Station {
 		return date;
 	}
 	@Override
-	public RecordDto findLastRecord(EntityManager em, String cname, Integer period) {
+	public RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role) {
 		TrafficVehicleRecordDto dto = null;
 		TrafficVehicleRecord latestEntry = TrafficVehicleRecord.findRecordByVehicle(em,this,cname,period);
 		if (latestEntry != null)
@@ -115,8 +116,9 @@ public class Mobilestation extends Station {
 
 	@Override
 	public List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end,
-			Integer period) {
-		return TrafficVehicleRecordHistory.findTrafficVehicleRecords(em,this.stationcode,type,start,end,period);
+			Integer period, BDPRole role) {
+		return TrafficVehicleRecordHistory.findTrafficVehicleRecords(em, this.stationcode, type, start, end, period,
+				role);
 	}
 
 	@Override
@@ -147,7 +149,7 @@ public class Mobilestation extends Station {
 
 	@Override
 	public void sync(EntityManager em, Station station, StationDto dto) {
-		
+
 	}
 
 	@Override

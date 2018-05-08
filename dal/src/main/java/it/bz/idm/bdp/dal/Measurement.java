@@ -23,16 +23,16 @@ import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
 @Table(name="measurement")
 @Entity
-public class Measurement{
-	
+public class Measurement {
+
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
-	
+
     @Id
     @GeneratedValue(generator="incrementmeasurement",strategy=GenerationType.SEQUENCE)
     @SequenceGenerator(name="incrementmeasurement", sequenceName = "measurement_id_seq",schema="intime",allocationSize=1)
 	private Integer id;
-    
+
 	private Date timestamp;
 	private Double value;
 	private Date created_on;
@@ -40,14 +40,14 @@ public class Measurement{
 	@NaturalId
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
-	
+
 	@NaturalId
 	@ManyToOne(cascade = CascadeType.ALL)
 	private DataType type;
-	
+
 	@NaturalId
 	private Integer period;
-	
+
 	public Measurement() {
 	}
 	public Measurement(SegmentDataPointDto dataPoint) {
@@ -75,7 +75,7 @@ public class Measurement{
 	public Date getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public void setTimestamp(Date date) {
 		this.timestamp = date;
 	}
@@ -110,67 +110,47 @@ public class Measurement{
 	public void setType(DataType type) {
 		this.type = type;
 	}
-	
+
 	public Integer getPeriod() {
 		return period;
 	}
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	public static Measurement findLatestEntry(EntityManager em, Station station, DataType type,Integer period) {
+
+	public static Measurement findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		if (station == null)
 			return null;
-		TypedQuery<Measurement> singleQuery = null;
-		if (type == null){
-			if (period == null){
-				singleQuery = em.createQuery("SELECT record FROM Measurement record WHERE record.station = :station",Measurement.class);
-			}else{
-				singleQuery = em.createQuery("SELECT record FROM Measurement record WHERE record.station = :station AND record.period=:period",Measurement.class);
-				singleQuery.setParameter("period", period);
-			}
-		}else if (period==null){
-			singleQuery = em.createQuery("SELECT record FROM Measurement record WHERE record.station = :station AND record.type=:type",Measurement.class);
-			singleQuery.setParameter("type", type);
+		String baseQuery = "SELECT record FROM Measurement record, BDPPermissions p"
+						 + " WHERE (record.station = p.station OR p.station = null)"
+						 + " AND (record.type = p.type OR p.type = null)"
+						 + " AND (record.period = p.period OR p.period = null)"
+					 	 + " AND p.role = :role "
+					 	 + "AND record.station = :station";
 
-		}else{
-			singleQuery = em.createQuery("SELECT record FROM Measurement record WHERE record.station = :station AND record.type=:type AND record.period=:period",Measurement.class);
-			singleQuery.setParameter("type", type);
-			singleQuery.setParameter("period", period);
-		}
-		singleQuery.setParameter("station", station);
-		List<Measurement> resultList = singleQuery.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
-	}
-	public static Measurement findLatestEntry(EntityManager em, Station station, DataType type,
-			Integer period, BDPRole role) {
-		if (station == null || role == null)
-			return null;
-		String baseQuery = "SELECT record FROM Measurement record , BDPRules ru WHERE (record.station = ru.station OR ru.station = null)"
-				+ " AND (record.type = ru.type OR ru.type = null) AND (record.period = ru.period OR ru.period = null) AND ru.role = :role AND record.station = :station";
-		TypedQuery<Measurement> queryPromise = null;
+		TypedQuery<Measurement> query = null;
 		//set optional parameters
 		if (type == null){
 			if (period == null){
-				queryPromise = em.createQuery(baseQuery,Measurement.class);
+				query = em.createQuery(baseQuery,Measurement.class);
 			}else{
-				queryPromise = em.createQuery(baseQuery + " AND record.period=:period",Measurement.class);
-				queryPromise.setParameter("period", period);
+				query = em.createQuery(baseQuery + " AND record.period=:period",Measurement.class);
+				query.setParameter("period", period);
 			}
 		}else if (period==null){
-			queryPromise = em.createQuery(baseQuery + " AND record.type=:type",Measurement.class);
-			queryPromise.setParameter("type", type);
+			query = em.createQuery(baseQuery + " AND record.type=:type",Measurement.class);
+			query.setParameter("type", type);
 
 		}else{
-			queryPromise = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period",Measurement.class);
-			queryPromise.setParameter("type", type);
-			queryPromise.setParameter("period", period);
+			query = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period",Measurement.class);
+			query.setParameter("type", type);
+			query.setParameter("period", period);
 		}
 		//set required paramaters
-		queryPromise.setParameter("station", station);
-		queryPromise.setParameter("role", role);
-		List<Measurement> resultList = queryPromise.getResultList();
-
-		return resultList.isEmpty()?null:resultList.get(0);
+		query.setParameter("station", station);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+		List<Measurement> resultList = query.getResultList();
+		return resultList.isEmpty() ? null : resultList.get(0);
 	}
 
 }

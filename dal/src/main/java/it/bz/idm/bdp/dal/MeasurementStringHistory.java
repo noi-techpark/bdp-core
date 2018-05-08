@@ -14,6 +14,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
+
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
 public class MeasurementStringHistory {
@@ -25,10 +27,10 @@ public class MeasurementStringHistory {
 	private Date created_on;
 	private Date timestamp;
 	private String value;
-	
+
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
-	
+
 	@ManyToOne(cascade=CascadeType.PERSIST)
 	private DataType type;
 
@@ -97,32 +99,57 @@ public class MeasurementStringHistory {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	public static MeasurementStringHistory findRecord(EntityManager em,Station station,
-			DataType type, String value, Date timestamp,
-			Integer period) {
-		
-		TypedQuery<MeasurementStringHistory> history = em.createQuery("SELECT record FROM MeasurementStringHistory record WHERE record.station = :station  AND record.type=:type AND record.timestamp=:timestamp AND record.value=:value AND record.period=:period", MeasurementStringHistory.class);
+
+	public static MeasurementStringHistory findRecord(EntityManager em, Station station, DataType type, String value,
+			Date timestamp, Integer period, BDPRole role) {
+
+		TypedQuery<MeasurementStringHistory> history = em.createQuery("SELECT record "
+				+ "FROM MeasurementStringHistory record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station = :station "
+				+ "AND record.type=:type "
+				+ "AND record.timestamp=:timestamp "
+				+ "AND record.value=:value "
+				+ "AND record.period=:period", MeasurementStringHistory.class);
+
 		history.setParameter("station", station);
 		history.setParameter("type", type);
 		history.setParameter("value", value);
 		history.setParameter("timestamp", timestamp);
 		history.setParameter("period", period);
-		
+		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+
 		List<MeasurementStringHistory> resultList = history.getResultList();
 		return resultList.isEmpty()?null:resultList.get(0);
 	}
-	public static Date findTimestampOfNewestRecordByStationId(EntityManager em,String stationtype, String id){
+
+	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
+			BDPRole role) {
+
+		String sql1 = "SELECT record.timestamp "
+				+ "from MeasurementString record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station.stationcode=:stationcode ";
+		String sql2 = "record.class=:stationtype";
+
 		TypedQuery<Date> query;
-		if (stationtype != null){
-			query = em.createQuery("SELECT record.timestamp from MeasurementString record WHERE record.class=:stationtype AND record.station.stationcode=:stationcode", Date.class);
+		if (stationtype == null) {
+			query = em.createQuery(sql1, Date.class);
+		} else {
+			query = em.createQuery(sql1 + sql2, Date.class);
 			query.setParameter("stationtype",stationtype);
 		}
-		else
-			query = em.createQuery("SELECT record.timestamp from MeasurementString record WHERE record.station.stationcode=:stationcode", Date.class);
 		query.setParameter("stationcode", id);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		List<Date> resultList = query.getResultList();
-		return resultList.isEmpty()? new Date(0):resultList.get(0);
+		return resultList.isEmpty() ? new Date(0) : resultList.get(0);
 	}
-	
-	
+
+
 }

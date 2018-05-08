@@ -14,11 +14,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordExtendedDto;
 @Entity
 public class ElaborationHistory {
-	
+
 	@Id
     @GeneratedValue(generator="elaborationhistory_id_seq",strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name="elaborationhistory_id_seq", sequenceName = "elaborationhistory_id_seq",schema="intime",allocationSize=1)
@@ -29,7 +30,7 @@ public class ElaborationHistory {
 	@ManyToOne
 	private DataType type;
 	private Double value;
-	
+
 	@ManyToOne
 	private Station station;
 	private Integer period;
@@ -90,41 +91,72 @@ public class ElaborationHistory {
 	}
 
 	public static List<RecordDto> findRecords(EntityManager em, String stationtype,
-			String uuid, String type,  Date start, Date end, Integer period) {
+			String uuid, String type, Date start, Date end, Integer period, BDPRole role) {
+
+		String sql1 = "select record "
+				+ "FROM ElaborationHistory record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station.class= :stationtype "
+				+ "AND record.station.stationcode= :stationid "
+				+ "AND record.type.cname=:type "
+				+ "AND record.timestamp between :start AND :end ";
+		String sql2 = "AND record.period=:period ";
+		String sql3 = "ORDER BY record.timestamp asc";
+
 		TypedQuery<ElaborationHistory> query;
-		if (period!=null){
-			query = em.createQuery("select record FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.period=:period AND record.timestamp between :start AND :end ORDER BY record.timestamp asc",ElaborationHistory.class);
+		if (period == null) {
+			query = em.createQuery(sql1 + sql3, ElaborationHistory.class);
+		} else {
+			query = em.createQuery(sql1 + sql2 + sql3, ElaborationHistory.class);
 			query.setParameter("period", period);
-		}else
-			query = em.createQuery("select record FROM ElaborationHistory record WHERE record.station.class= :stationtype AND record.station.stationcode= :stationid AND record.type.cname=:type AND record.timestamp between :start AND :end ORDER BY record.timestamp asc",ElaborationHistory.class);
+		}
+
 		query.setParameter("stationtype", stationtype);
 		query.setParameter("stationid", uuid);
 		query.setParameter("type", type);
 		query.setParameter("start", start);
 		query.setParameter("end", end);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+
 		List<RecordDto> dtos = new ArrayList<RecordDto>();
 		parseDtos(dtos, query);
 		return dtos;
 	}
-	private static void parseDtos(List<RecordDto> dtos, TypedQuery<ElaborationHistory> query) {
-		for (ElaborationHistory history:query.getResultList()){
-			Date date = history.getTimestamp();
-			Long created_on = history.getCreated_on().getTime();
-			Double value = history.getValue();
-			BluetoothRecordExtendedDto dto = new BluetoothRecordExtendedDto(date.getTime(), value,created_on);
-			dtos.add(dto);
-		}
-	}
-	public static ElaborationHistory findRecordByProps(EntityManager em, Station station, DataType type, Date timestamp, Integer period) {
-		TypedQuery<ElaborationHistory> query = em.createQuery("select record FROM ElaborationHistory record WHERE record.station= :station AND record.type=:type AND record.timestamp = :timestamp AND record.period=:period ORDER BY record.timestamp asc",ElaborationHistory.class);
+
+	public static ElaborationHistory findRecordByProps(EntityManager em, Station station, DataType type, Date timestamp,
+			Integer period, BDPRole role) {
+		TypedQuery<ElaborationHistory> query = em.createQuery("select record "
+				+ "FROM ElaborationHistory record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station= :station "
+				+ "AND record.type=:type "
+				+ "AND record.timestamp = :timestamp "
+				+ "AND record.period=:period "
+				+ "ORDER BY record.timestamp asc", ElaborationHistory.class);
+
 		query.setParameter("station", station);
 		query.setParameter("type", type);
 		query.setParameter("timestamp", timestamp);
-		query.setParameter("period",period);
-		List<ElaborationHistory> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
-	}
-	
-	
+		query.setParameter("period", period);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
+		List<ElaborationHistory> resultList = query.getResultList();
+		return resultList.isEmpty() ? null : resultList.get(0);
+	}
+
+	private static void parseDtos(List<RecordDto> dtos, TypedQuery<ElaborationHistory> query) {
+		for (ElaborationHistory history : query.getResultList()) {
+			Date date = history.getTimestamp();
+			Long created_on = history.getCreated_on().getTime();
+			Double value = history.getValue();
+			BluetoothRecordExtendedDto dto = new BluetoothRecordExtendedDto(date.getTime(), value, created_on);
+			dtos.add(dto);
+		}
+	}
 }
