@@ -14,6 +14,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
+
 @Table(name="measurementstring",schema="intime")
 @Entity
 public class MeasurementString {
@@ -25,13 +27,13 @@ public class MeasurementString {
 	private Date created_on;
 	private Date timestamp;
 	private String value;
-	
+
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
-	
+
 	@ManyToOne(cascade=CascadeType.ALL)
 	private DataType type;
-	
+
 	private Integer period;
 
 	public MeasurementString() {
@@ -99,13 +101,22 @@ public class MeasurementString {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	
+
 	public static MeasurementString findLastMeasurementByStationAndType(
-			EntityManager em, Station station, DataType type, Integer period) {
-		TypedQuery<MeasurementString> q = em.createQuery("SELECT measurement FROM MeasurementString measurement WHERE measurement.station = :station AND measurement.type=:type AND measurement.period=:period",MeasurementString.class);
+			EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		TypedQuery<MeasurementString> q = em.createQuery("SELECT measurement "
+				+ "FROM MeasurementString measurement, BDPPermissions p "
+				+ "WHERE (measurement.station = p.station OR p.station = null) "
+				+ "AND (measurement.type = p.type OR p.type = null) "
+				+ "AND (measurement.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND measurement.station = :station "
+				+ "AND measurement.type=:type "
+				+ "AND measurement.period=:period",MeasurementString.class);
 		q.setParameter("station",station);
 		q.setParameter("type",type);
 		q.setParameter("period", period);
+		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		List<MeasurementString> resultList = q.getResultList();
 		return resultList.isEmpty() ? null : resultList.get(0);
 	}

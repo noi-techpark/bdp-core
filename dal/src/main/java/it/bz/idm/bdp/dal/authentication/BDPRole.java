@@ -20,7 +20,9 @@ import it.bz.idm.bdp.dto.authentication.RoleDto;
 @Entity
 public class BDPRole {
 
-	public static final BDPRole ROLE_GUEST = new BDPRole("ROLE_GUEST");
+	public static final String ROLE_GUEST = "ROLE_GUEST";
+	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
 	@Id
 	@GeneratedValue(generator = "role_seq", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "role_seq", sequenceName = "role_seq", schema = "intime", allocationSize = 1)
@@ -30,11 +32,19 @@ public class BDPRole {
 	private String description;
 	@ManyToMany(mappedBy = "roles")
 	private Collection<BDPUser> users;
-	
+
 	@ManyToOne
 	private BDPRole parent;
-	
+
 	public BDPRole() {
+	}
+
+	public static BDPRole fetchGuestRole(EntityManager manager) {
+		return findByName(manager, ROLE_GUEST);
+	}
+
+	public static BDPRole fetchAdminRole(EntityManager manager) {
+		return findByName(manager, ROLE_ADMIN);
 	}
 
 	public BDPRole(String name, String description) {
@@ -45,7 +55,7 @@ public class BDPRole {
 	public BDPRole(String name) {
 		this.setName(name);
 	}
-	
+
 	public Long getId() {
 		return id;
 	}

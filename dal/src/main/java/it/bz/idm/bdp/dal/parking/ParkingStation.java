@@ -22,6 +22,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Elaboration;
 import it.bz.idm.bdp.dal.ElaborationHistory;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
@@ -252,31 +253,12 @@ public class ParkingStation extends Station{
 		return types;
 	}
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type,Integer period) {
-		Date date = null;
-		if (station != null){
-			String queryString = "select record.timestamp from Elaboration record where record.station=:station";
-			if (type != null){
-				queryString += " AND record.type = :type";
-			}
-			if (period != null){
-				queryString += " AND record.period=:period";
-			}
-			queryString += " ORDER BY record.timestamp DESC";
-			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-			query.setParameter("station", station);
-			if (type!=null)
-				query.setParameter("type", type);
-			if (period!=null)
-				query.setParameter("period", period);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}
-		return date;
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return getDateOfLastRecordImpl(em, station, type, period, role, "Elaboration");
 	}
 
 	@Override
-	public RecordDto findLastRecord(EntityManager em, String cname, Integer period) {
+	public RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role) {
 		DataType type = DataType.findByCname(em,cname);
 		int capacity = 0;
 		if (!"occupied".equals(cname)){
@@ -286,7 +268,7 @@ public class ParkingStation extends Station{
 		ParkingRecordExtendedDto dto;
 		//TODO: change if condition, once free and occupied are in db "Parking forecast".equals(cname)
 		if (type != null) {
-			Elaboration elab = new  Elaboration().findLastRecord(em,this, type, period);
+			Elaboration elab = new Elaboration().findLastRecord(em, this, type, period, role);
 			dto = new ParkingRecordExtendedDto(elab.getTimestamp().getTime(), Math.abs(capacity-elab.getValue().intValue()),elab.getCreated_on().getTime());
 		}else{
 			CarParkingDynamic dynamic = CarParkingDynamic.findLastRecord(em,this,period);
@@ -298,12 +280,13 @@ public class ParkingStation extends Station{
 
 	@Override
 	public List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end,
-			Integer period) {
+			Integer period, BDPRole role) {
 		DataType dataType = DataType.findByCname(em,type);
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		//TODO: change if free and occupied are mapped in db
 		if (dataType != null) {
-			records = ElaborationHistory.findRecords(em,ParkingStation.class.getSimpleName(), this.stationcode, type, start,end,period);
+			records = ElaborationHistory.findRecords(em, ParkingStation.class.getSimpleName(), this.stationcode, type,
+					start, end, period, role);
 			records = changeToFree(records);
 		}else
 			records = CarParkingDynamicHistory.findRecords(em,this.stationcode,type,start,end);
@@ -323,6 +306,7 @@ public class ParkingStation extends Station{
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
+		BDPRole role = BDPRole.fetchAdminRole(em);
 		if (object instanceof DataMapDto){
 			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) object;
@@ -374,9 +358,11 @@ public class ParkingStation extends Station{
 							Date timestamp = new Date(dto.getTimestamp());
 							Double slots = Double.parseDouble(dto.getValue().toString());
 							Integer period = dto.getPeriod();
-							ElaborationHistory prediction = ElaborationHistory.findRecordByProps(em,station, type,timestamp, period);
+							ElaborationHistory prediction = ElaborationHistory.findRecordByProps(em, station, type,
+									timestamp, period, role);
 							if (prediction == null) {
-								Elaboration lastPrediction = new Elaboration().findLastRecord(em,station, type, period);
+								Elaboration lastPrediction = new Elaboration().findLastRecord(em, station, type, period,
+										role);
 								double value = slots != null ? slots.doubleValue() : -1.;
 								if (lastPrediction == null){
 									lastPrediction = new Elaboration(station,type,value,timestamp, period);

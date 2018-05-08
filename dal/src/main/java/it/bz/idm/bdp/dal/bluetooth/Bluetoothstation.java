@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.ElaborationStation;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
@@ -35,31 +35,13 @@ public class Bluetoothstation extends ElaborationStation {
 	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period) {
-		Date date = null;
-		if (station != null){
-			String queryString = "select record.timestamp from MeasurementString record where record.station=:station";
-			if (type != null){
-				queryString += " AND record.type = :type";
-			}
-			if (period != null){
-				queryString += " AND record.period=:period";
-			}
-			queryString += " ORDER BY record.timestamp DESC";
-			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-			query.setParameter("station", station);
-			if (type !=null)
-				query.setParameter("type", type);
-			if (period!=null)
-				query.setParameter("period", period);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}
-		return date;
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return getDateOfLastRecordImpl(em, station, type, period, role, "MeasurementString");
 	}
 
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
+		BDPRole role = BDPRole.fetchAdminRole(em);
 		if (objects.length>0 && objects[0] instanceof DataMapDto<?>)
 		{
 			@SuppressWarnings("unchecked")
@@ -78,12 +60,14 @@ public class Bluetoothstation extends ElaborationStation {
 				List<? extends RecordDtoImpl> data = entry.getValue().getBranch().get(VEHICLE_DETECTION).getData();
 				for (RecordDtoImpl record: data){
 					SimpleRecordDto dto = (SimpleRecordDto) record;
-					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em,station,type,dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
+					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em, station, type,
+							dto.getValue().toString(), new Date(dto.getTimestamp()), PERIOD, role);
 					if (history == null){
 						history = new MeasurementStringHistory(station, type, dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
 						em.persist(history);
 					}
-					MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em, station,	type,PERIOD);
+					MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em,
+							station, type, PERIOD, role);
 					if (lastMeasurement != null) {
 						lastMeasurement.setTimestamp(new Date(dto.getTimestamp()));
 						lastMeasurement.setCreated_on(new Date());

@@ -15,8 +15,8 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
 @Controller
-public class JsonController extends DataRetriever{	
-	
+public class JsonController extends DataRetriever{
+
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	@Override
 	public @ResponseBody List<String> getStations(@RequestParam String stationType) {
