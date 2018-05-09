@@ -104,7 +104,6 @@ public class MeasurementHistory {
 		this.type = type;
 	}
 
-
 	public Date getTimestamp() {
 		return timestamp;
 	}
@@ -124,7 +123,7 @@ public class MeasurementHistory {
 		Date past = new Date(Calendar.getInstance().getTimeInMillis() - 1000 * seconds);
 
 		String querySQL = "SELECT record.timestamp, record.value FROM MeasurementHistory record, BDPPermissions p"
-						+ " WHERE (record.id = p.station OR p.station = null)"
+						+ " WHERE (record.station = p.station OR p.station = null)"
 						+ " AND (record.type = p.type OR p.type = null)"
 						+ " AND (record.period = p.period OR p.period = null)"
 						+ " AND p.role = :role"
@@ -165,7 +164,7 @@ public class MeasurementHistory {
 
 		String querySQL1 = "SELECT record.timestamp, record.value ";
 		String querySQL2 = " FROM MeasurementHistory record, BDPPermissions p"
-						 + " WHERE (record.id = p.station OR p.station = null)"
+						 + " WHERE (record.station = p.station OR p.station = null)"
 						 + " AND (record.type = p.type OR p.type = null)"
 						 + " AND (record.period = p.period OR p.period = null)"
 						 + " AND p.role = :role"
@@ -195,7 +194,7 @@ public class MeasurementHistory {
 	public static boolean recordExists(EntityManager em, Station station, DataType type, Date date, Integer period,
 			BDPRole role) {
 		String baseQuery = "SELECT record FROM MeasurementHistory record, BDPPermissions p"
-						 + " WHERE (record.id = p.station OR p.station = null)"
+						 + " WHERE (record.station = p.station OR p.station = null)"
 						 + " AND (record.type = p.type OR p.type = null)"
 						 + " AND (record.period = p.period OR p.period = null)"
 						 + " AND p.role = :role"
