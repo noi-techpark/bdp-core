@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordExtendedDto;
 @Entity
@@ -146,8 +147,7 @@ public class ElaborationHistory {
 		query.setParameter("period", period);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		List<ElaborationHistory> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (ElaborationHistory) JPAUtil.getSingleResultOrNull(query);
 	}
 
 	private static void parseDtos(List<RecordDto> dtos, TypedQuery<ElaborationHistory> query) {

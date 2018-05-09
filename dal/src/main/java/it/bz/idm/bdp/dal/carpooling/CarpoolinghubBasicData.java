@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal.carpooling;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 @Entity
 public class CarpoolinghubBasicData extends BasicData{
 
@@ -20,10 +20,9 @@ public class CarpoolinghubBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarpoolinghubBasicData> query = em.createQuery("Select basic from CarpoolinghubBasicData basic where basic.station=:station", CarpoolinghubBasicData.class);
 		query.setParameter("station", station);
-		List<CarpoolinghubBasicData> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return (CarpoolinghubBasicData) JPAUtil.getSingleResultOrNull(query);
 	}
-	
+
 	@OneToMany(cascade = CascadeType.ALL)
 	private Map<Locale, Translation> i18n = new HashMap<Locale, Translation>();
 

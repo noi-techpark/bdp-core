@@ -16,6 +16,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 
@@ -23,34 +24,34 @@ import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 @Table(name="carparkingdynamichistory",schema="intime")
 @Entity
 public class CarParkingDynamicHistory {
-	
+
 	@Id
     @GeneratedValue(generator="parkingincrementhistory",strategy=GenerationType.SEQUENCE)
     @SequenceGenerator(name="parkingincrementhistory", sequenceName = "carparkingdynamichistory_id_seq",schema="intime",allocationSize=1)
 	private Integer id;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "station_id")
 	private ParkingStation station;
-	
+
 	private String carparkstate;
-	
+
 	private String 	carparktrend;
-	
+
 	private Double exitrate;
-	
+
 	private Double fillrate;
-	
+
 	private Date lastupdate;
-	
+
 	private Date createdate;
-	
+
 	private Integer occupacy;
-	
+
 	private Integer occupacypercentage;
 
 	public CarParkingDynamicHistory() {
-	}	
+	}
 	public CarParkingDynamicHistory(ParkingStation station, int occupacy,
 			Date slotsTS, int occupacypercentage) {
 		this.station = station;
@@ -168,7 +169,7 @@ public class CarParkingDynamicHistory {
 		List<RecordDto> dtos = castToDto(identifier, type, resultList);
 		return dtos;
 	}
-	
+
 	private static List<RecordDto> castToDto(String identifier, String type,
 			List<CarParkingDynamicHistory> resultList) {
 		List<RecordDto> dtos = new ArrayList<RecordDto>();
@@ -193,7 +194,6 @@ public class CarParkingDynamicHistory {
 		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
 		query.setParameter("station", station);
 		query.setParameter("lastupdate", new Date(timestamp));
-		List<CarParkingDynamicHistory> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0); 
+		return (CarParkingDynamicHistory) JPAUtil.getSingleResultOrNull(query);
 	}
 }

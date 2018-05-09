@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
@@ -208,7 +209,6 @@ public class MeasurementHistory {
 		preparedQuery.setParameter("timestamp",date);
 		preparedQuery.setParameter("period",period);
 		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		List<MeasurementHistory> resultList = preparedQuery.getResultList();
-		return !resultList.isEmpty();
+		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
 	}
 }

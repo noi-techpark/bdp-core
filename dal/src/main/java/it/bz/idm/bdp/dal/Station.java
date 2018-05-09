@@ -31,6 +31,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -150,8 +151,8 @@ public abstract class Station {
 			query.setParameter("type", type);
 		if (period != null)
 			query.setParameter("period", period);
-		List<Date> resultList = query.getResultList();
-		return resultList.isEmpty() ? new Date(0) : resultList.get(0);
+		Date result = (Date) JPAUtil.getSingleResultOrNull(query);
+		return result == null ? new Date(0) : result;
 	}
 
 
@@ -260,8 +261,7 @@ public abstract class Station {
 	public static Station findStation(EntityManager em, Integer integer) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", integer);
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
@@ -269,8 +269,7 @@ public abstract class Station {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
 		List<String[]> stringlist = new ArrayList<String[]>();
@@ -401,8 +400,7 @@ public abstract class Station {
 	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from "+stationType+" station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", id);
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
 }

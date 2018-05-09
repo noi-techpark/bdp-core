@@ -2,7 +2,6 @@ package it.bz.idm.bdp.dal;
 
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -19,6 +18,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.NaturalId;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
 @Table(name="measurement")
@@ -149,8 +149,7 @@ public class Measurement {
 		//set required paramaters
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		List<Measurement> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (Measurement) JPAUtil.getSingleResultOrNull(query);
 	}
 
 }

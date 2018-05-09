@@ -1,7 +1,5 @@
 package it.bz.idm.bdp.dal.parking;
 
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Table;
@@ -11,6 +9,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="carparkingbasicdata",schema="intime")
 @Entity
@@ -166,7 +165,6 @@ public class CarParkingBasicData extends BasicData{
 		TypedQuery<CarParkingBasicData> typedQuery = em.createQuery("select basic from CarParkingBasicData basic where basic.station = :station and basic.station.active=:active",CarParkingBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		List<CarParkingBasicData> resultList = typedQuery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (CarParkingBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 }

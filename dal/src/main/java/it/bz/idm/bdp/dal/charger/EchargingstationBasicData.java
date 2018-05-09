@@ -11,6 +11,7 @@ import org.hibernate.annotations.Type;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 
 @Entity
@@ -28,10 +29,10 @@ public class EchargingstationBasicData extends BasicData{
 	private String locationServiceInfo;
 	private Boolean reservable;
 	private String accessType;
-	
+
 	private String categories;
-	
-	
+
+
 	public Boolean getReservable() {
 		return reservable;
 	}
@@ -56,7 +57,7 @@ public class EchargingstationBasicData extends BasicData{
 	public void setChargingPointsCount(Integer chargingPointsCount) {
 		this.chargingPointsCount = chargingPointsCount;
 	}
-	
+
 	public String getState() {
 		return state;
 	}
@@ -110,8 +111,7 @@ public class EchargingstationBasicData extends BasicData{
 		TypedQuery<EchargingstationBasicData> typedQuery = em.createQuery("select basic from EchargingstationBasicData basic where basic.station = :station and basic.station.active=:active",EchargingstationBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		List<EchargingstationBasicData> resultList = typedQuery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (EchargingstationBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 	public static List<EchargingstationBasicData> findAllEchargingStations(
 			EntityManager entityManager) {
@@ -122,7 +122,6 @@ public class EchargingstationBasicData extends BasicData{
 			EntityManager em, Station station) {
 		TypedQuery<EchargingstationBasicData> typedQuery = em.createQuery("select basic from EchargingstationBasicData basic where basic.station = :station",EchargingstationBasicData.class);
 		typedQuery.setParameter("station", station);
-		List<EchargingstationBasicData> resultList = typedQuery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (EchargingstationBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 }

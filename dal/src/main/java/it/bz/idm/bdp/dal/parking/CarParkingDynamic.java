@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal.parking;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -16,40 +15,41 @@ import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="carparkingdynamic",schema="intime")
 @Entity
 public class CarParkingDynamic {
-	
+
 	@Id
     @GeneratedValue(generator="carparkingdynamic_id_seq",strategy=GenerationType.SEQUENCE)
 	@SequenceGenerator(name="carparkingdynamic_id_seq", sequenceName = "carparkingdynamic_id_seq",schema="intime",allocationSize=1)
 	private Integer id;
-	
+
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "station_id")
 	private ParkingStation station;
-	
+
 	private String carparkstate;
-	
+
 	private String 	carparktrend;
-	
+
 	private Double exitrate;
-	
+
 	private Double fillrate;
-	
+
 	private Date lastupdate;
-	
+
 	private Date createdate;
-	
+
 	private Integer occupacy;
-	
+
 	private Integer occupacypercentage;
 
 	public CarParkingDynamic() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public CarParkingDynamic(ParkingStation area,
 			Integer occupacy, Date lastupdate) {
 		this.station = area;
@@ -140,8 +140,7 @@ public class CarParkingDynamic {
 	public static CarParkingDynamic findByParkingStation(EntityManager em,ParkingStation area) {
 		TypedQuery<CarParkingDynamic> typedQuery = em.createQuery("select dynamic from CarParkingDynamic dynamic where dynamic.station.id = :area order by dynamic.lastupdate asc",CarParkingDynamic.class);
 		typedQuery.setParameter("area", area.getId());
-		List<CarParkingDynamic> results = typedQuery.getResultList();
-		return results.isEmpty()?null:results.get(0);
+		return (CarParkingDynamic) JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 
 	public static CarParkingDynamic findLastRecord(EntityManager em,Station station, Integer period) {
@@ -149,8 +148,7 @@ public class CarParkingDynamic {
 			return findLastRecord(em,station);
 		TypedQuery<CarParkingDynamic> query = em.createQuery("SELECT dynamic FROM CarParkingDynamic dynamic WHERE dynamic.station.id = :station order by dynamic.lastupdate asc",CarParkingDynamic.class);
 		query.setParameter("station", station.getId());
-		List<CarParkingDynamic> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (CarParkingDynamic) JPAUtil.getSingleResultOrNull(query);
 	}
 
 	private static CarParkingDynamic findLastRecord(EntityManager em, Station station) {
@@ -158,8 +156,7 @@ public class CarParkingDynamic {
 			return null;
 		TypedQuery<CarParkingDynamic> query = em.createQuery("SELECT dynamic FROM CarParkingDynamic dynamic WHERE dynamic.station.id = :station order by dynamic.lastupdate asc",CarParkingDynamic.class);
 		query.setParameter("station", station.getId());
-		List<CarParkingDynamic> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (CarParkingDynamic) JPAUtil.getSingleResultOrNull(query);
 	}
-	
+
 }

@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="elaboration")
 @Entity
@@ -122,9 +122,7 @@ public class Elaboration {
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		// FIXME We fetch a lot of data here, but we want only the most recent one... use LIMIT 1 or getSingleResult()
-		List<Elaboration> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (Elaboration) JPAUtil.getSingleResultOrNull(query);
 	}
 
 }
