@@ -94,8 +94,8 @@ public class Mobilestation extends Station {
 			else
 				query = em.createQuery("select record.ts_ms from TrafficVehicleRecord record where record.station=:station ORDER BY record.ts_ms DESC",Date.class);
 			query.setParameter("station", station);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
+			Date result = (Date) JPAUtil.getSingleResultOrNull(query);
+			date = result == null ? new Date(0) : result;
 			}
 		return date;
 	}

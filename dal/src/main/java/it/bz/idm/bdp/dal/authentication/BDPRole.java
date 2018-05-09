@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
 
@@ -97,8 +98,7 @@ public class BDPRole {
 	public static BDPRole findByName(EntityManager manager, String name) {
 		TypedQuery<BDPRole> query = manager.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
 		query.setParameter("name", name);
-		List<BDPRole> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (BDPRole) JPAUtil.getSingleResultOrNull(query);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {

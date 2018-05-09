@@ -1,11 +1,5 @@
 package it.bz.idm.bdp.dal.bluetooth;
 
-import it.bz.idm.bdp.dal.ElaborationStation;
-import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dto.CoordinateDto;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.bluetooth.LinkStationDto;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +19,13 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
+import it.bz.idm.bdp.dal.ElaborationStation;
+import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.CoordinateDto;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.bluetooth.LinkStationDto;
+
 @Entity
 public class Linkstation extends ElaborationStation {
 
@@ -34,15 +35,14 @@ public class Linkstation extends ElaborationStation {
 		for (Station station:resultList){
 			TypedQuery<LinkBasicData> query = em.createQuery("select basicdata from LinkBasicData basicdata where basicdata.station=:station",LinkBasicData.class);
 			query.setParameter("station",station);
-			List<LinkBasicData> basics = query.getResultList();
-			if (basics.isEmpty())
+			LinkBasicData basics = (LinkBasicData) JPAUtil.getSingleResultOrNull(query);
+			if (basics == null)
 				continue;
-			LinkBasicData basicData = basics.get(0);
-			
-			LinkStationDto dto = generateDto(station, basicData);
+
+			LinkStationDto dto = generateDto(station, basics);
 			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
-					
+
 		}
 		return stationList;
 	}

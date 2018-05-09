@@ -60,7 +60,8 @@ public class JsonController extends DataRetriever{
 	@RequestMapping(value = "/records", method = RequestMethod.GET)
 	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,@RequestParam String stationId,@RequestParam(required=false) String typeId,@RequestParam(required=false) Long start,@RequestParam(required=false) Long end,
 			@RequestParam(required=false) Integer period, @RequestParam(required=false)Integer seconds) {
-		return super.getRecords(stationType, stationId, typeId, start!= null ? new Date(start) : null , end!=null ? new Date(end) : null, period, seconds);
+		return super.getRecords(stationType, stationId, typeId, start != null ? new Date(start) : null,
+				end != null ? new Date(end) : null, period, seconds);
 	}
 	@RequestMapping(value = "/station-details", method = RequestMethod.GET)
 	@Override

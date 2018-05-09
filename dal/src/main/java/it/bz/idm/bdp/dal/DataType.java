@@ -17,6 +17,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 
 
@@ -99,8 +100,8 @@ public class DataType {
 	public static DataType findByCname(EntityManager manager, String cname) {
 		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class);
 		query.setParameter("cname",cname);
-		List<DataType> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (DataType) JPAUtil.getSingleResultOrNull(query);
+
 	}
 
 	public static Object sync(EntityManager em, List<DataTypeDto> data) {

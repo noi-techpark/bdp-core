@@ -15,6 +15,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
 @Entity
@@ -128,8 +129,7 @@ public class BDPUser {
 	public static BDPUser findByEmail(EntityManager manager, String email) {
 		TypedQuery<BDPUser> query = manager.createQuery("SELECT id FROM BDPUser where email = :email", BDPUser.class);
 		query.setParameter("email", email);
-		List<BDPUser> resultList = query.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (BDPUser) JPAUtil.getSingleResultOrNull(query);
 	}
 
 	public static Object sync(EntityManager em, List<UserDto> data) {

@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
@@ -122,8 +122,7 @@ public class MeasurementStringHistory {
 		history.setParameter("period", period);
 		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		List<MeasurementStringHistory> resultList = history.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return (MeasurementStringHistory) JPAUtil.getSingleResultOrNull(history);
 	}
 
 	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
@@ -147,8 +146,7 @@ public class MeasurementStringHistory {
 		}
 		query.setParameter("stationcode", id);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		List<Date> resultList = query.getResultList();
-		return resultList.isEmpty() ? new Date(0) : resultList.get(0);
+		return (Date) JPAUtil.getSingleResultOrNull(query);
 	}
 
 

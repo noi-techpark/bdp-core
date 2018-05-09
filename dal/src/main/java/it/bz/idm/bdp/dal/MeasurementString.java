@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="measurementstring",schema="intime")
 @Entity
@@ -117,7 +117,6 @@ public class MeasurementString {
 		q.setParameter("type",type);
 		q.setParameter("period", period);
 		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		List<MeasurementString> resultList = q.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return (MeasurementString) JPAUtil.getSingleResultOrNull(q);
 	}
 }

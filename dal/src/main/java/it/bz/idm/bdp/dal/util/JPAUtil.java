@@ -4,7 +4,9 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 public class JPAUtil {
@@ -47,5 +49,13 @@ public class JPAUtil {
 		}
 		throw new Exception("ERROR: Cannot get any entity name for object "
 				+ obj.getClass().getTypeName() + ". Class not found.");
+	}
+
+	public static Object getSingleResultOrNull(TypedQuery<? extends Object> query) {
+		try {
+			return query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
 	}
 }

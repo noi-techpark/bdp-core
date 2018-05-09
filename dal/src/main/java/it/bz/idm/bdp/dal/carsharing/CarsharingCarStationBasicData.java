@@ -10,13 +10,14 @@ import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Entity
 public class CarsharingCarStationBasicData extends BasicData{
-	
+
 	@ManyToOne(cascade = CascadeType.MERGE)
 	private Carsharingstation carsharingStation;
-	
+
 	private String brand;
 	private String licensePlate;
 
@@ -42,8 +43,7 @@ public class CarsharingCarStationBasicData extends BasicData{
 	public static CarsharingCarStationBasicData findBasicByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingCarStationBasicData> query = em.createQuery("Select basicData from CarsharingCarStationBasicData basicData where basicData.station=:station", CarsharingCarStationBasicData.class);
 		query.setParameter("station", station);
-		List<CarsharingCarStationBasicData> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return (CarsharingCarStationBasicData) JPAUtil.getSingleResultOrNull(query);
 	}
 	public static List<CarsharingCarStationBasicData> findAllCars(
 			EntityManager em) {
@@ -54,7 +54,6 @@ public class CarsharingCarStationBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingCarStationBasicData> query = em.createQuery("Select basicData from CarsharingCarStationBasicData basicData where basicData.station=:station AND basicData.station.active = true", CarsharingCarStationBasicData.class);
 		query.setParameter("station", station);
-		List<CarsharingCarStationBasicData> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return (CarsharingCarStationBasicData) JPAUtil.getSingleResultOrNull(query);
 	}
 }

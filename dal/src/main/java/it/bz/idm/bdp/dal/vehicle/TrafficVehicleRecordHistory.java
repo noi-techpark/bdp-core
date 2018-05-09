@@ -880,30 +880,11 @@ public class TrafficVehicleRecordHistory {
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<Date> query = em.createQuery("select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",Date.class).setMaxResults(1);
 		query.setParameter("station", stationId);
-		List<Date> resultList = query.getResultList();
+		Date result = (Date) JPAUtil.getSingleResultOrNull(query);
 		em.close();
-		return resultList.isEmpty()?new Date(0):resultList.get(0);
+		return result == null ? new Date(0) : result;
 
 	}
-
-//	public static List<TrafficVehicleRecordDto> findTrafficVehicleRecords(String stationtype,
-//			String uuid, String type, Long seconds, Integer period) {
-//		Date past = new Date(Calendar.getInstance().getTimeInMillis()-(1000*seconds));
-//		List<TrafficVehicleRecordDto> dtos = new ArrayList<TrafficVehicleRecordDto>();
-//		 if (dataTypeExists(type)){
-//			 Query query;
-//			 query = entityManager().createNativeQuery("select record.ts_ms,record."+type+" FROM intime.station station join intime.measurementmobilehistory record on station.id=record.station_id WHERE station.stationcode=:vehicle AND record."+type+" is not null AND record.ts_ms > :date order by record.ts_ms desc");
-//			 query.setParameter("vehicle", uuid);
-//			 query.setParameter("date", past);
-//			 for (Object object:query.getResultList()){
-//				 Object[] objects =(Object[]) object;
-//				 Date date = (Date)objects[0];
-//				 TrafficVehicleRecordDto dto = new TrafficVehicleRecordDto(date, String.valueOf(objects[1]));
-//				 dtos.add(dto);
-//			 }
-//		 }
-//		 return dtos;
-//	}
 
 	public static List<RecordDto> findTrafficVehicleRecords(EntityManager em, String uuid, String type, Date start,
 			Date end, Integer period, BDPRole role) {

@@ -191,7 +191,7 @@ public class ParkingStation extends Station{
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<Integer> query = em.createQuery("select basic.capacity from CarParkingBasicData basic where basic.station.stationcode=:station_id",Integer.class).setMaxResults(1);
 		query.setParameter("station_id",identifier);
-		Integer result = query.getSingleResult();
+		Integer result = (Integer) JPAUtil.getSingleResultOrNull(query);
 		em.close();
 		return result;
 	}
