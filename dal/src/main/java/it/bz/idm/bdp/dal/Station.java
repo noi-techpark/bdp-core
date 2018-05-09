@@ -124,8 +124,12 @@ public abstract class Station {
 		if (station == null)
 			return null;
 
+		if (!table.matches("[a-zA-Z_]+")) {
+			throw new IllegalArgumentException("Table '" + table + "' contains illegal characters.");
+		}
+
 		String queryString = "select record.timestamp "
-				+ "from :table record, BDPPermissions p "
+				+ "from " + table + " record, BDPPermissions p "
 				+ "WHERE (record.station = p.station OR p.station = null) "
 				+ "AND (record.type = p.type OR p.type = null) "
 				+ "AND (record.period = p.period OR p.period = null) "
@@ -141,7 +145,6 @@ public abstract class Station {
 		queryString += " ORDER BY record.timestamp DESC";
 		TypedQuery<Date> query = em.createQuery(queryString, Date.class);
 		query.setParameter("station", station);
-		query.setParameter("table", table);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		if (type != null)
 			query.setParameter("type", type);

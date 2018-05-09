@@ -40,11 +40,12 @@ public class JPAUtil {
 		throw new Exception("ERROR: Cannot get any instance of type " + type + ". Type not found.");
 	}
 
-	public static String getEntityNameByObject(Object obj) {
+	public static String getEntityNameByObject(Object obj) throws Exception {
 		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
 			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))
 					return type.getName();
-		};
-		return null;
+		}
+		throw new Exception("ERROR: Cannot get any entity name for object "
+				+ obj.getClass().getTypeName() + ". Class not found.");
 	}
 }

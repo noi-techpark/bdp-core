@@ -16,7 +16,7 @@ import it.bz.idm.bdp.dal.Station;
 public class MeteoBasicData extends BasicData{
 
 	private String area;
-	
+
 	private String zeus;
 
 	public String getArea() {
