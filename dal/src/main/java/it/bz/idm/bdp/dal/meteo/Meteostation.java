@@ -13,7 +13,7 @@ import it.bz.idm.bdp.dto.meteo.MeteoStationDto;
 
 @Entity
 public class Meteostation extends MeasurementStation {
-	
+
 	@Override
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
@@ -23,14 +23,16 @@ public class Meteostation extends MeasurementStation {
 				y = station.getPointprojection().getY();
 				x = station.getPointprojection().getX();
 			}
-			MeteoBasicData basicData = (MeteoBasicData) new MeteoBasicData().findByStation(em, station);
 			MeteoStationDto dto = new MeteoStationDto(station.getStationcode(),station.getName(),y,x);
 			dto.setMunicipality(station.getMunicipality());
-			dto.setArea(basicData.getArea());
+			MeteoBasicData basicData = (MeteoBasicData) new MeteoBasicData().findByStation(em, station);
+			if (basicData != null)
+				dto.setArea(basicData.getArea());
 			stationList.add(dto);
 		}
 		return stationList;
 	}
+	@Override
 	public void sync(EntityManager em, Station station,StationDto stationDto) {
 		if (stationDto instanceof MeteoStationDto){
 			MeteoStationDto dto = (MeteoStationDto) stationDto;
