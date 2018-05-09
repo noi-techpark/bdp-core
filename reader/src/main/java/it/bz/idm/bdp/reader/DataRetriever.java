@@ -23,6 +23,9 @@ import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 public class DataRetriever {
 
+	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given */
+	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
+
 	//Utility
 	private List<String> getStationTypes(EntityManager em){
 		List<String> result = null;
@@ -37,8 +40,8 @@ public class DataRetriever {
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			List<ChildDto> children = null;
-			if (station != null){
-				children = station.findChildren(em,parent);
+			if (station != null) {
+				children = station.findChildren(em, parent);
 				return children;
 			}
 		}catch(Exception ex){
@@ -53,7 +56,7 @@ public class DataRetriever {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			if (station!=null)
+			if (station != null)
 				dataTypes = station.findTypes(em, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -119,7 +122,7 @@ public class DataRetriever {
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			if (station != null)
-				dataTypes = station.findDataTypes(em,stationId);
+				dataTypes = station.findDataTypes(em, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -182,6 +185,7 @@ public class DataRetriever {
 		return dto;
 	}
 	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period){
+		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
 		return getRecords(stationtypology, identifier, type, start, end, period,seconds);
@@ -189,9 +193,10 @@ public class DataRetriever {
 
 	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end,
 			Integer period, Integer seconds) {
-		if (seconds != null && (start == null && end ==null )) {
+		if (start == null && end == null) {
+			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
-			start = new Date(end.getTime()-(seconds*1000l));
+			start = new Date(end.getTime() - (seconds * 1000l));
 		}
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = BDPRole.fetchGuestRole(em);

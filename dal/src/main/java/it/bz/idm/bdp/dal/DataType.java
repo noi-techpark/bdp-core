@@ -105,7 +105,7 @@ public class DataType {
 
 	public static Object sync(EntityManager em, List<DataTypeDto> data) {
 		em.getTransaction().begin();
-		for (DataTypeDto dto : data){
+		for (DataTypeDto dto : data) {
 			DataType type = DataType.findByCname(em,dto.getName());
 			if (type != null){
 				if (dto.getDescription() != null)
