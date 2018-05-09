@@ -94,10 +94,15 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		List<Station> stations = Station.findStationsWithoutMunicipality(em);
 		for (Station station : stations) {
-			StationDto dto = station.convertToDto(station);
-			String name = JPAUtil.getEntityNameByObject(station);
-			dto.setStationType(name);
-			stationsDtos.add(dto);
+			try {
+				StationDto dto = station.convertToDto(station);
+				String name = JPAUtil.getEntityNameByObject(station);
+				dto.setStationType(name);
+				stationsDtos.add(dto);
+			} catch (Exception e) {
+				// FIXME Give the error back to be handled in writer...
+				e.printStackTrace();
+			}
 		}
 		em.close();
 		return stationsDtos;

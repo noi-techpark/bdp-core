@@ -15,34 +15,34 @@ import it.bz.idm.bdp.dal.Station;
 @Table(name="carparkingbasicdata",schema="intime")
 @Entity
 public class CarParkingBasicData extends BasicData{
-	
+
 	private Integer disabledcapacity;
-	
+
 	private Integer womencapacity;
-	
+
 	private Boolean disabledtoiletavailable;
-	
+
 	private String owneroperator;
-	
+
 	private String parkingtype;
-	
+
 	private String permittedvehicletypes;
-	
+
 	private Boolean toiletsavailable;
-	
+
 	private Integer capacity;
-	
+
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")
 	private MultiPolygon area;
-	
+
 	private String phonenumber;
-	
+
 	private String email;
-	
+
 	private String url;
-	
+
 	private String mainaddress;
-	
+
 	private Integer state;
 
 	public Integer getDisabledcapacity() {
@@ -140,7 +140,7 @@ public class CarParkingBasicData extends BasicData{
 	public void setMainaddress(String mainaddress) {
 		this.mainaddress = mainaddress;
 	}
-	
+
 	public Integer getState() {
 		return state;
 	}
@@ -148,7 +148,7 @@ public class CarParkingBasicData extends BasicData{
 	public void setState(Integer state) {
 		this.state = state;
 	}
-	
+
 	public Integer getWomencapacity() {
 		return womencapacity;
 	}
@@ -156,19 +156,13 @@ public class CarParkingBasicData extends BasicData{
 	public void setWomencapacity(Integer womencapacity) {
 		this.womencapacity = womencapacity;
 	}
-	
+
 	@Override
-	public CarParkingBasicData findByStation(
-			EntityManager em, Station station) {
-		TypedQuery<CarParkingBasicData> typedQuery = em.createQuery("select basic from CarParkingBasicData basic where basic.station = :station and basic.station.active=:active",CarParkingBasicData.class);
-		typedQuery.setParameter("station", station);
-		typedQuery.setParameter("active",true);
-		List<CarParkingBasicData> resultList = typedQuery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+	public CarParkingBasicData findByStation(EntityManager em, Station station) {
+		return findBasicByStation(em, station);
 	}
 
-	public static CarParkingBasicData findBasicByStation(EntityManager em,
-			Station station) {
+	public static CarParkingBasicData findBasicByStation(EntityManager em, Station station) {
 		TypedQuery<CarParkingBasicData> typedQuery = em.createQuery("select basic from CarParkingBasicData basic where basic.station = :station and basic.station.active=:active",CarParkingBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
