@@ -51,7 +51,6 @@ public class BikesharingStationBasicData extends BasicData {
 		query.setParameter("station", station);
 		query.setParameter("type", type);
 		return (BikesharingStationBasicData) JPAUtil.getSingleResultOrNull(query);
-
 	}
 
 	public static List<BikesharingStationBasicData> findAllBikeStations(
