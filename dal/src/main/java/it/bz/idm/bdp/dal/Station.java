@@ -38,7 +38,7 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
-@Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode" }))
+@Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 @DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
 public abstract class Station {
