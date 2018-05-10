@@ -70,7 +70,7 @@ public class StreetBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<StreetBasicData> query = em.createQuery("select basicdata from StreetBasicData basicdata where basicdata.station=:station",StreetBasicData.class);
 		query.setParameter("station", station);
-		return (StreetBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 }

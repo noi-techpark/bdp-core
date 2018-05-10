@@ -52,7 +52,7 @@ public class CarsharingStationBasicData extends BasicData{
 	public static CarsharingStationBasicData findBasicByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station=:station", CarsharingStationBasicData.class);
 		query.setParameter("station", station);
-		return (CarsharingStationBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 	public static List<CarsharingStationBasicData> findAllCarsharingStations(EntityManager em) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station.active=true", CarsharingStationBasicData.class);
@@ -63,6 +63,6 @@ public class CarsharingStationBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station=:station", CarsharingStationBasicData.class);
 		query.setParameter("station", station);
-		return (CarsharingStationBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 }

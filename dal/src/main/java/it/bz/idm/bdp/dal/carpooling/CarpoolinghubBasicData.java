@@ -20,7 +20,7 @@ public class CarpoolinghubBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarpoolinghubBasicData> query = em.createQuery("Select basic from CarpoolinghubBasicData basic where basic.station=:station", CarpoolinghubBasicData.class);
 		query.setParameter("station", station);
-		return (CarpoolinghubBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	@OneToMany(cascade = CascadeType.ALL)

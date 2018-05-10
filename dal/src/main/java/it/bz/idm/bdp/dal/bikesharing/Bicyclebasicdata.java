@@ -44,7 +44,7 @@ public class Bicyclebasicdata extends BasicData {
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<Bicyclebasicdata> query = em.createQuery("Select basicData from Bicyclebasicdata basicData where basicData.station=:station", Bicyclebasicdata.class);
 		query.setParameter("station", station);
-		return (Bicyclebasicdata) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 
 	}
 	public static List<Bicyclebasicdata> findAllBikes(

@@ -147,7 +147,7 @@ public class ElaborationHistory {
 		query.setParameter("period", period);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		return (ElaborationHistory) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	private static void parseDtos(List<RecordDto> dtos, TypedQuery<ElaborationHistory> query) {

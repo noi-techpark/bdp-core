@@ -117,6 +117,6 @@ public class MeasurementString {
 		q.setParameter("type",type);
 		q.setParameter("period", period);
 		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return (MeasurementString) JPAUtil.getSingleResultOrNull(q);
+		return JPAUtil.getSingleResultOrNull(q);
 	}
 }

@@ -152,8 +152,7 @@ public class Measurement {
 		//set required paramaters
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		query.setMaxResults(1);
-		return (Measurement) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 }

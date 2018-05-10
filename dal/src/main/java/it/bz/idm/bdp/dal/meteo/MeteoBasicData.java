@@ -38,6 +38,6 @@ public class MeteoBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<MeteoBasicData> query = em.createQuery("Select basicData from MeteoBasicData basicData where basicData.station=:station", MeteoBasicData.class);
 		query.setParameter("station", station);
-		return (MeteoBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 }

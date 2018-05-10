@@ -20,7 +20,7 @@ public class Carsharingcar extends MeasurementStation {
 	private static Long getCarCount(EntityManager em, Carsharingstation station) {
 		TypedQuery<Long> query = em.createQuery("Select count(basicdata) from CarsharingCarStationBasicData basicdata where basicdata.carsharingStation = :carsharing", Long.class);
 		query.setParameter("carsharing", station);
-		return (Long) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 	@Override
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
