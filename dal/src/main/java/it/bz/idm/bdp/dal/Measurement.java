@@ -127,28 +127,32 @@ public class Measurement {
 						 + " AND (record.period = p.period OR p.period = null)"
 					 	 + " AND p.role = :role "
 					 	 + "AND record.station = :station";
+		String order = " ORDER BY record.timestamp DESC";
 
 		TypedQuery<Measurement> query = null;
 		//set optional parameters
 		if (type == null){
 			if (period == null){
-				query = em.createQuery(baseQuery,Measurement.class);
+				query = em.createQuery(baseQuery + order, Measurement.class);
 			}else{
-				query = em.createQuery(baseQuery + " AND record.period=:period",Measurement.class);
+				query = em.createQuery(baseQuery + " AND record.period=:period" + order, Measurement.class);
 				query.setParameter("period", period);
 			}
 		}else if (period==null){
-			query = em.createQuery(baseQuery + " AND record.type=:type",Measurement.class);
+			query = em.createQuery(baseQuery + " AND record.type=:type" + order, Measurement.class);
 			query.setParameter("type", type);
 
 		}else{
-			query = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period",Measurement.class);
+			query = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period" + order,
+					Measurement.class);
 			query.setParameter("type", type);
 			query.setParameter("period", period);
 		}
+
 		//set required paramaters
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+		query.setMaxResults(1);
 		return (Measurement) JPAUtil.getSingleResultOrNull(query);
 	}
 
