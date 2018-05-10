@@ -122,7 +122,7 @@ public class Elaboration {
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		return (Elaboration) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 }

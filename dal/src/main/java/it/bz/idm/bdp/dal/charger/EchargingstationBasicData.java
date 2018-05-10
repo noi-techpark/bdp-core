@@ -111,7 +111,7 @@ public class EchargingstationBasicData extends BasicData{
 		TypedQuery<EchargingstationBasicData> typedQuery = em.createQuery("select basic from EchargingstationBasicData basic where basic.station = :station and basic.station.active=:active",EchargingstationBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		return (EchargingstationBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
+		return JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 	public static List<EchargingstationBasicData> findAllEchargingStations(
 			EntityManager entityManager) {
@@ -122,6 +122,6 @@ public class EchargingstationBasicData extends BasicData{
 			EntityManager em, Station station) {
 		TypedQuery<EchargingstationBasicData> typedQuery = em.createQuery("select basic from EchargingstationBasicData basic where basic.station = :station",EchargingstationBasicData.class);
 		typedQuery.setParameter("station", station);
-		return (EchargingstationBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
+		return JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 }

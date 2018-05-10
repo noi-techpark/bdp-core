@@ -165,6 +165,6 @@ public class CarParkingBasicData extends BasicData{
 		TypedQuery<CarParkingBasicData> typedQuery = em.createQuery("select basic from CarParkingBasicData basic where basic.station = :station and basic.station.active=:active",CarParkingBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		return (CarParkingBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
+		return JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 }

@@ -122,7 +122,7 @@ public class MeasurementStringHistory {
 		history.setParameter("period", period);
 		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		return (MeasurementStringHistory) JPAUtil.getSingleResultOrNull(history);
+		return JPAUtil.getSingleResultOrNull(history);
 	}
 
 	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
@@ -146,7 +146,7 @@ public class MeasurementStringHistory {
 		}
 		query.setParameter("stationcode", id);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return (Date) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 

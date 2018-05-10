@@ -44,7 +44,7 @@ public class AlarmSpecification {
 	public static AlarmSpecification findSpecificationByName(EntityManager manager, String name) {
 		TypedQuery<AlarmSpecification> q = manager.createQuery("select spec from AlarmSpecification spec where spec.name=:name", AlarmSpecification.class);
 		q.setParameter("name", name);
-		return (AlarmSpecification) JPAUtil.getSingleResultOrNull(q);
+		return JPAUtil.getSingleResultOrNull(q);
 	}
 
 

@@ -50,7 +50,7 @@ public class BikesharingStationBasicData extends BasicData {
 		TypedQuery<BikesharingStationBasicData> query = entityManager.createQuery("Select basicData from BikesharingStationBasicData basicData where basicData.station=:station AND basicData.type=:type", BikesharingStationBasicData.class);
 		query.setParameter("station", station);
 		query.setParameter("type", type);
-		return (BikesharingStationBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	public static List<BikesharingStationBasicData> findAllBikeStations(

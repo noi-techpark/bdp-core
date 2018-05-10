@@ -35,7 +35,7 @@ public class Linkstation extends ElaborationStation {
 		for (Station station:resultList){
 			TypedQuery<LinkBasicData> query = em.createQuery("select basicdata from LinkBasicData basicdata where basicdata.station=:station",LinkBasicData.class);
 			query.setParameter("station",station);
-			LinkBasicData basics = (LinkBasicData) JPAUtil.getSingleResultOrNull(query);
+			LinkBasicData basics = JPAUtil.getSingleResultOrNull(query);
 			if (basics == null)
 				continue;
 

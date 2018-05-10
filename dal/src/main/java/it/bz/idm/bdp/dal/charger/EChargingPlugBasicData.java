@@ -38,7 +38,7 @@ public class EChargingPlugBasicData extends BasicData{
 		TypedQuery<EChargingPlugBasicData> typedQuery = em.createQuery("select basic from EChargingPlugBasicData basic where basic.station = :station and basic.station.active=:active",EChargingPlugBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		return (EChargingPlugBasicData) JPAUtil.getSingleResultOrNull(typedQuery);
+		return JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 
 

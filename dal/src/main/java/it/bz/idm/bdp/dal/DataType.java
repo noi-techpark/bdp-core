@@ -100,7 +100,7 @@ public class DataType {
 	public static DataType findByCname(EntityManager manager, String cname) {
 		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class);
 		query.setParameter("cname",cname);
-		return (DataType) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 
 	}
 

@@ -861,7 +861,7 @@ public class TrafficVehicleRecordHistory {
 
 	public boolean alreadyExists() {
 		List<TrafficVehicleRecordHistory> records = findTrafficVehicleRecordsByVehicleAndTs_msEquals(station, ts_ms);
-		return (!records.isEmpty());
+		return !records.isEmpty();
 
 	}
 
@@ -880,10 +880,9 @@ public class TrafficVehicleRecordHistory {
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<Date> query = em.createQuery("select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",Date.class).setMaxResults(1);
 		query.setParameter("station", stationId);
-		Date result = (Date) JPAUtil.getSingleResultOrNull(query);
+		Date result = JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 		em.close();
-		return result == null ? new Date(0) : result;
-
+		return result;
 	}
 
 	public static List<RecordDto> findTrafficVehicleRecords(EntityManager em, String uuid, String type, Date start,

@@ -850,7 +850,7 @@ public class TrafficVehicleRecord {
 	}
 	public boolean alreadyExists() {
 		List<TrafficVehicleRecord> resultList = findTrafficVehicleRecordsByVehicleAndTs_msEquals(station, ts_ms);
-		return (!resultList.isEmpty());
+		return !resultList.isEmpty();
 
 	}
 
@@ -869,7 +869,7 @@ public class TrafficVehicleRecord {
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<Date> query = em.createQuery("select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",Date.class).setMaxResults(1);
 		query.setParameter("station", stationId);
-		Date result = (Date) JPAUtil.getSingleResultOrNull(query);
+		Date result = JPAUtil.getSingleResultOrNull(query);
 		em.close();
 		return result;
 	}
@@ -877,7 +877,7 @@ public class TrafficVehicleRecord {
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Mobilestation trafficVehicle){
 		TypedQuery<TrafficVehicleRecord > query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station",TrafficVehicleRecord.class);
 		query.setParameter("station", trafficVehicle);
-		return (TrafficVehicleRecord) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Mobilestation trafficVehicle, String cname, Integer period){
 		TrafficVehicleRecord vehicleRecord = null;
@@ -897,7 +897,7 @@ public class TrafficVehicleRecord {
 				TrafficVehicleRecord.class);
 		query.setParameter("station", trafficVehicle);
 		query.setParameter("type", type);
-		return (TrafficVehicleRecord) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 }

@@ -87,16 +87,17 @@ public class Mobilestation extends Station {
 		Date date = null;
 		if (station != null){
 			TypedQuery<Date> query;
-			if (type != null){
+			if (type != null) {
 				query = em.createQuery("select record.ts_ms from TrafficVehicleRecord record where record.station=:station AND record.type = :type",Date.class);
 				query.setParameter("type", type);
+			} else {
+				query = em.createQuery(
+						"select record.ts_ms from TrafficVehicleRecord record where record.station=:station ORDER BY record.ts_ms DESC",
+						Date.class);
 			}
-			else
-				query = em.createQuery("select record.ts_ms from TrafficVehicleRecord record where record.station=:station ORDER BY record.ts_ms DESC",Date.class);
 			query.setParameter("station", station);
-			Date result = (Date) JPAUtil.getSingleResultOrNull(query);
-			date = result == null ? new Date(0) : result;
-			}
+			date = JPAUtil.getSingleResultOrAlternative(query, new Date(0));
+		}
 		return date;
 	}
 	@Override

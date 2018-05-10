@@ -22,7 +22,7 @@ public class CarpoolingUserBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarpoolingUserBasicData> query = em.createQuery("Select basic from CarpoolingUserBasicData basic where basic.station=:station", CarpoolingUserBasicData.class);
 		query.setParameter("station", station);
-		return (CarpoolingUserBasicData) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	private Character gender;

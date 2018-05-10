@@ -151,8 +151,7 @@ public abstract class Station {
 			query.setParameter("type", type);
 		if (period != null)
 			query.setParameter("period", period);
-		Date result = (Date) JPAUtil.getSingleResultOrNull(query);
-		return result == null ? new Date(0) : result;
+		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 	}
 
 
@@ -261,7 +260,7 @@ public abstract class Station {
 	public static Station findStation(EntityManager em, Integer integer) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", integer);
-		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
@@ -269,7 +268,7 @@ public abstract class Station {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
-		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
 		List<String[]> stringlist = new ArrayList<String[]>();
@@ -400,7 +399,7 @@ public abstract class Station {
 	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from "+stationType+" station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
 		stationquery.setParameter("stationcode", id);
-		return (Station) JPAUtil.getSingleResultOrNull(stationquery);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
 }

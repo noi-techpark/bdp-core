@@ -194,6 +194,6 @@ public class CarParkingDynamicHistory {
 		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
 		query.setParameter("station", station);
 		query.setParameter("lastupdate", new Date(timestamp));
-		return (CarParkingDynamicHistory) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 }

@@ -98,7 +98,7 @@ public class BDPRole {
 	public static BDPRole findByName(EntityManager manager, String name) {
 		TypedQuery<BDPRole> query = manager.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
 		query.setParameter("name", name);
-		return (BDPRole) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {

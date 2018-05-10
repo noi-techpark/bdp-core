@@ -129,7 +129,7 @@ public class BDPUser {
 	public static BDPUser findByEmail(EntityManager manager, String email) {
 		TypedQuery<BDPUser> query = manager.createQuery("SELECT id FROM BDPUser where email = :email", BDPUser.class);
 		query.setParameter("email", email);
-		return (BDPUser) JPAUtil.getSingleResultOrNull(query);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 
 	public static Object sync(EntityManager em, List<UserDto> data) {
