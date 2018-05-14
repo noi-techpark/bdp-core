@@ -32,6 +32,9 @@
             <property name="hibernate.hikari.dataSource.user" value="bdp"/>
             <property name="hibernate.hikari.dataSource.password" value="bdp"/>
             <property name="hibernate.id.new_generator_mappings" value="true" />
+            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.hbm2ddl.import_files_sql_extractor" value="org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor" />
+            <property name="hibernate.hbm2ddl.import_files" value="/META-INF/sql/init.sql" />
         </properties>
     </persistence-unit>
 </persistence>

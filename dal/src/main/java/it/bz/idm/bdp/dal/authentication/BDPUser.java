@@ -15,6 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
@@ -22,39 +24,41 @@ import it.bz.idm.bdp.dto.authentication.UserDto;
 public class BDPUser {
 
 	@Id
-	@GeneratedValue(generator = "user_seq", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "user_seq", sequenceName = "user_seq", schema = "intime", allocationSize = 1)
+	@GeneratedValue(generator = "bdpuser_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "bdpuser_gen", sequenceName = "bdpuser_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('bdpuser_seq')")
 	private Long id;
-	private String firstName;
-	private String lastName;
+
 	@Column(unique = true, nullable = false)
 	private String email;
+
 	@Column(nullable = false)
 	private String password;
+
 	@Column(nullable = false)
+	@ColumnDefault(value = "true")
 	private boolean enabled;
+
+	@Column(nullable = false)
+	@ColumnDefault(value = "false")
 	private boolean tokenExpired;
 
 	@ManyToMany
-	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+	@JoinTable(name = "bdpusers_bdproles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
 	private Collection<BDPRole> roles;
 
 	public BDPUser() {
 	}
 
 	public BDPUser(String email, String password) {
-		this(null, null, email, password, true, false);
+		this(email, password, true, false);
 	}
 
-	public BDPUser(String firstName, String lastName, String email, String password, boolean enabled,
-			boolean tokenExpired) {
-		this(firstName, lastName, email, password, enabled, tokenExpired, null);
+	public BDPUser(String email, String password, boolean enabled, boolean tokenExpired) {
+		this(email, password, enabled, tokenExpired, null);
 	}
 
-	public BDPUser(String firstName, String lastName, String email, String password, boolean enabled,
-			boolean tokenExpired, Collection<BDPRole> roles) {
-		this.firstName = firstName;
-		this.lastName = lastName;
+	public BDPUser(String email, String password, boolean enabled, boolean tokenExpired, Collection<BDPRole> roles) {
 		this.email = email;
 		this.password = password;
 		this.enabled = enabled;
@@ -68,22 +72,6 @@ public class BDPUser {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getEmail() {
