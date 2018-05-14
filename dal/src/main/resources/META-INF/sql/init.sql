@@ -42,3 +42,10 @@ with x as (
     	  (x.station_id is not null and x.type_id is not null and x.period is null and not e_stationid and not e_typeid) or
     	  (x.station_id is not null and x.type_id is not null and x.period is not null and not e_stationid and not e_typeid and not e_period);
 
+
+--
+-- Add initial data
+--
+INSERT INTO bdprole(name, description) VALUES ('ROLE_GUEST', 'Default role, that sees open data');
+INSERT INTO bdprole(name, description) VALUES ('ROLE_ADMIN', 'Default role, that sees all data');
+
