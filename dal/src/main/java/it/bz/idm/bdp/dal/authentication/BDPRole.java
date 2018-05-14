@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
@@ -25,12 +27,16 @@ public class BDPRole {
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
 	@Id
-	@GeneratedValue(generator = "role_seq", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "role_seq", sequenceName = "role_seq", schema = "intime", allocationSize = 1)
+	@GeneratedValue(generator = "bdprole_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "bdprole_gen", sequenceName = "bdprole_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('bdprole_seq')")
 	private Long id;
+
 	@Column(unique = true, nullable = false)
 	private String name;
+
 	private String description;
+
 	@ManyToMany(mappedBy = "roles")
 	private Collection<BDPUser> users;
 
