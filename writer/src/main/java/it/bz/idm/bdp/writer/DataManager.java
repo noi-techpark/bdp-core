@@ -35,7 +35,8 @@ public class DataManager {
 		}
 		return null;
 	}
-	public Object syncStations(String stationType, List<StationDto> dtos){
+
+	public Object syncStations(String stationType, List<StationDto> dtos) throws Exception {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
@@ -43,10 +44,12 @@ public class DataManager {
 		} catch (Exception e) {
 			// FIXME Add error handling to report back to the writer method caller
 			e.printStackTrace();
+			// return false;
+			throw e;
 		} finally {
 			em.close();
 		}
-		return null;
+		// return null;
 	}
 
 	public Object syncDataTypes(List<DataTypeDto> dtos) {
