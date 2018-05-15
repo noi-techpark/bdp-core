@@ -1,13 +1,6 @@
 package it.bz.idm.bdp.ws.xmlrpc;
 
 
-import it.bz.idm.bdp.ws.DataRetriever;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.ChildDto;
-import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.SimpleRecordDto;
-import it.bz.idm.bdp.dto.TypeDto;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -17,11 +10,17 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import net.spy.memcached.MemcachedClient;
-
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+
+import it.bz.idm.bdp.dto.ChildDto;
+import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.ws.DataRetriever;
+import net.spy.memcached.MemcachedClient;
 
 public abstract class XmlRPCDataRetriever extends DataRetriever{
 	protected static final String MEMCACHE_HOST_KEY 						= "memcache.host";
@@ -64,13 +63,14 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		connect(serverHost, null,null);
 	}
 
+	@Override
 	public void connect() {
 		connect(null, null, null);
-	}	
+	}
 
 	protected List<? extends Object> getRecordsByMethodName(String pMethodName,
 			Object[] params) {
-		Object object = null;	
+		Object object = null;
 		List<Object> parameterList= new ArrayList<Object>(Arrays.asList((Object[])params[1]));
 		parameterList.add(0,params[0]);
 		if (cachingEnabled){
@@ -79,7 +79,7 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 				String stringToAppend;
 				if (obj == null || obj instanceof Date)
 					continue;
-				else 
+				else
 					stringToAppend = obj.toString();
 				memcachedKey.append(stringToAppend);
 			}
@@ -135,8 +135,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 	@Override
 	public List<List<String>> fetchDataTypes(String station){
 		Object[] params = new Object[]{integreenTypology,station};
-		Object[] objects;
 		try {
+			@SuppressWarnings("unchecked")
 			List<List<String>> serverResponse = (List<List<String>>) client.execute("DataRetriever.getDataTypes",params);
 			return serverResponse;
 		} catch (XmlRpcException e) {
@@ -147,11 +147,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 	@Override
 	public List<TypeDto> fetchTypes(String station){
 		Object[] params = new Object[]{integreenTypology,station};
-		Object[] objects;
 		try {
-			Object execute = client.execute("DataRetriever.getTypes",params);
-			objects = (Object[]) execute;
-			List<Object> list = Arrays.asList(objects);
+			client.execute("DataRetriever.getTypes", params);
 			return null;
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
@@ -160,18 +157,39 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 	}
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
-		List<Object> data = new ArrayList<Object>() {{add(stationId);add(typeId);add(seconds);add(period);}};
+		List<Object> data = new ArrayList<Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				add(stationId);
+				add(typeId);
+				add(seconds);
+				add(period);
+			}
+		};
 		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,data.toArray()});
+		@SuppressWarnings("unchecked")
 		List<RecordDto> records=(List<RecordDto>) dtos;
 		return records;
 	}
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period) {
-		List<Object> data = new ArrayList<Object>() {{add(stationId);add(typeId);add(start);add(end);add(period);}};
+		List<Object> data = new ArrayList<Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				add(stationId);
+				add(typeId);
+				add(start);
+				add(end);
+				add(period);
+			}
+		};
 		List<? extends Object> dtos = getRecordsByMethodName("DataRetriever.getRecords",new Object[]{integreenTypology,data.toArray()});
+		@SuppressWarnings("unchecked")
 		List<RecordDto> records=(List<RecordDto>) dtos;
 		return records;
 	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<StationDto> fetchStationDetails(String stationId) {
 		Object[] params= new Object[]{integreenTypology,stationId};
@@ -188,7 +206,14 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 	}
 	@Override
 	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
-		List<Object> list = new ArrayList<Object>() {{add(stationId);add(typeId);add(period);}};
+		List<Object> list = new ArrayList<Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				add(stationId);
+				add(typeId);
+				add(period);
+			}
+		};
 		list.add(0, integreenTypology);
 		Object serverResponse;
 		try {
@@ -213,6 +238,8 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 		}
 		return recordDto;
 	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
 		Object[] params= new Object[]{integreenTypology,id};
@@ -233,5 +260,5 @@ public abstract class XmlRPCDataRetriever extends DataRetriever{
 	}
 	public void setCachingEnabled(boolean cachingEnabled) {
 		this.cachingEnabled = cachingEnabled;
-	}	
+	}
 }
