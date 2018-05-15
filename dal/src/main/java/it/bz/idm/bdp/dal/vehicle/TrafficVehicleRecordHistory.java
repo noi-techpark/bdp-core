@@ -19,6 +19,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -162,8 +164,9 @@ public class TrafficVehicleRecordHistory {
 	};
 
 	@Id
-    @GeneratedValue(generator="incrementtrafficvehiclerecordhistory",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="incrementtrafficvehiclerecordhistory", sequenceName = "measurementmobilehistory_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "trafficvehiclerecordhistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "trafficvehiclerecordhistory_gen", sequenceName = "trafficvehiclerecordhistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('trafficvehiclerecordhistory_seq')")
 	private Long id;
 
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")

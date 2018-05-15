@@ -13,6 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
@@ -21,9 +23,11 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 public class MeasurementString {
 
 	@Id
-    @GeneratedValue(generator="measurementstring_id_seq",strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="measurementstring_id_seq", sequenceName = "measurementstring_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "measurementstring_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "measurementstring_gen", sequenceName = "measurementstring_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurementstring_seq')")
 	private Integer id;
+
 	private Date created_on;
 	private Date timestamp;
 	private String value;

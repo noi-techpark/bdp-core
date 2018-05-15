@@ -13,6 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
@@ -21,8 +23,9 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 public class Elaboration {
 
 	@Id
-    @GeneratedValue(generator="elaboration_id_seq",strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="elaboration_id_seq", sequenceName = "elaboration_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "elaboration_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "elaboration_gen", sequenceName = "elaboration_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('elaboration_seq')")
 	protected Integer id;
 	private Date created_on;
 	private Date timestamp;
