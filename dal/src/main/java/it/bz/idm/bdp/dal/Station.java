@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
@@ -61,6 +62,7 @@ public abstract class Station {
 
 	protected Point pointprojection;
 
+	@Column(nullable = false)
 	protected String stationcode;
 
 	protected Boolean active;
