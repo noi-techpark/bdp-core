@@ -19,6 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -32,8 +34,9 @@ public class MeasurementHistory {
 	private static final long serialVersionUID = 2900270107783989197L;
 
     @Id
-    @GeneratedValue(generator="incrementhistory",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="incrementhistory", sequenceName = "measurementhistory_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "measurementhistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "measurementhistory_gen", sequenceName = "measurementhistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurementhistory_seq')")
 	private Long id;
 
 	private Date timestamp;

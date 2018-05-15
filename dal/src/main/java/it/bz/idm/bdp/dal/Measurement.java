@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.NaturalId;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -29,8 +30,9 @@ public class Measurement {
 	private static final long serialVersionUID = 2900270107783989197L;
 
     @Id
-    @GeneratedValue(generator="incrementmeasurement",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="incrementmeasurement", sequenceName = "measurement_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "measurement_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurement_seq')")
 	private Integer id;
 
 	private Date timestamp;

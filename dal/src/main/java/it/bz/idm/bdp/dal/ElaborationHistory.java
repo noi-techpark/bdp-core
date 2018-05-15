@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -22,8 +24,9 @@ import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordExtendedDto;
 public class ElaborationHistory {
 
 	@Id
-    @GeneratedValue(generator="elaborationhistory_id_seq",strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="elaborationhistory_id_seq", sequenceName = "elaborationhistory_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "elaborationhistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "elaborationhistory_gen", sequenceName = "elaborationhistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('elaborationhistory_seq')")
 	protected Long id;
 	private Date created_on;
 	private Date timestamp;

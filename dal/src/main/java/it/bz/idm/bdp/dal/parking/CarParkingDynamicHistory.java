@@ -16,6 +16,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
@@ -26,8 +28,9 @@ import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 public class CarParkingDynamicHistory {
 
 	@Id
-    @GeneratedValue(generator="parkingincrementhistory",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="parkingincrementhistory", sequenceName = "carparkingdynamichistory_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "parkingdynamichistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "parkingdynamichistory_gen", sequenceName = "parkingdynamichistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('parkingdynamichistory_seq')")
 	private Integer id;
 
 	@ManyToOne

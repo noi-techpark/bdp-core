@@ -9,6 +9,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="alarmspecification")
@@ -16,8 +18,9 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 public class AlarmSpecification {
 
 	@Id
-    @GeneratedValue(generator="alarm_specs_id", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name="alarm_specs_id", sequenceName = "alarm_spec_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "alarmspecification_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "alarmspecification_gen", sequenceName = "alarmspecification_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('alarmspecification_seq')")
 	private Long id;
 
 	private String name;

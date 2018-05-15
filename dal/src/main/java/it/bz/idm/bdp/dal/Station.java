@@ -18,6 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.hibernate.annotations.ColumnDefault;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -47,8 +48,9 @@ public abstract class Station {
 	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 	@Id
-	@GeneratedValue(generator = "incrementstation", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name="incrementstation", sequenceName = "station_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "station_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('station_seq')")
 	protected Long id;
 
 	protected String name;

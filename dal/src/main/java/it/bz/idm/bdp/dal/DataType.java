@@ -17,6 +17,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 
@@ -26,8 +28,9 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 public class DataType {
 
 	@Id
-	@GeneratedValue(generator="type_seq",strategy=GenerationType.SEQUENCE)
-	@SequenceGenerator(name="type_seq", sequenceName = "type_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "type_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "type_gen", sequenceName = "type_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('type_seq')")
 	protected Long id;
 	private String cname;
 	private Date created_on;

@@ -14,13 +14,16 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Table(name="alarm")
 @Entity
 public class Alarm {
 
 	@Id
-	@GeneratedValue(generator="alarm_seq",strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name="alarm_seq", sequenceName = "alarm_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "alarm_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "alarm_gen", sequenceName = "alarm_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('alarm_seq')")
 	private Long id;
 
 	@ManyToOne(cascade=CascadeType.ALL)
