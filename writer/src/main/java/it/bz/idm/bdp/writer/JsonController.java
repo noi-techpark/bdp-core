@@ -3,8 +3,6 @@ package it.bz.idm.bdp.writer;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,11 +45,7 @@ public class JsonController extends DataManager{
 	@RequestMapping(value = "/syncStations/{integreenTypology}", method = RequestMethod.POST)
 	public @ResponseBody Object syncStations(@RequestBody(required = true) List<StationDto> data,
 			@PathVariable String integreenTypology) {
-		try {
-			return super.syncStations(integreenTypology, data);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
+		return super.syncStations(integreenTypology, data);
 	}
 
 	@Override
