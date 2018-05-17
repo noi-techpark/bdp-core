@@ -262,14 +262,17 @@ public abstract class Station {
 	}
 
 	public static Station findStation(EntityManager em, Integer integer) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from Station station where station.stationcode=:stationcode", Station.class);
 		stationquery.setParameter("stationcode", integer);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",
+				Station.class);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
 		return JPAUtil.getSingleResultOrNull(stationquery);
@@ -401,7 +404,9 @@ public abstract class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from "+stationType+" station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from " + stationType + " station where station.stationcode=:stationcode",
+				Station.class);
 		stationquery.setParameter("stationcode", id);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}

@@ -1,6 +1,6 @@
---
+------------------------------------------------------------------------------------------------------------------------
 -- Permission handling
---
+------------------------------------------------------------------------------------------------------------------------
 drop view if exists bdproles_unrolled;
 create view bdproles_unrolled as
     with recursive roles(role, subroles) as (
@@ -42,10 +42,11 @@ with x as (
     	  (x.station_id is not null and x.type_id is not null and x.period is null and not e_stationid and not e_typeid) or
     	  (x.station_id is not null and x.type_id is not null and x.period is not null and not e_stationid and not e_typeid and not e_period);
 
-
 --
--- Add initial data
+-- Initial data: Add guest (sees nothing, used to define open-data), and admin (sees everything) role
 --
 INSERT INTO bdprole(name, description) VALUES ('ROLE_GUEST', 'Default role, that sees open data');
 INSERT INTO bdprole(name, description) VALUES ('ROLE_ADMIN', 'Default role, that sees all data');
+INSERT INTO bdprules(role_id, station_id, type_id, period)
+	VALUES ((SELECT id FROM bdprole WHERE name = 'ROLE_ADMIN'), null, null, null);
 

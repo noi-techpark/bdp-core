@@ -89,12 +89,13 @@ public class ParkingStation extends Station{
 		Map<String, Object> areaMap= new HashMap<String, Object>();
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			TypedQuery<CarParkingBasicData> query = em.createQuery("select basicdata from CarParkingBasicData basicdata where basicdata.station.stationcode=:code and basicdata.station.active=:active",CarParkingBasicData.class).setMaxResults(1);
+			TypedQuery<CarParkingBasicData> query = em.createQuery(
+					"select basicdata from CarParkingBasicData basicdata where basicdata.station.stationcode=:code and basicdata.station.active=:active",
+					CarParkingBasicData.class);
 			query.setParameter("code", identifier);
 			query.setParameter("active",true);
-			List<CarParkingBasicData> resultList = query.getResultList();
-			if (resultList.size() == 1){
-				CarParkingBasicData basicData = resultList.get(0);
+			CarParkingBasicData basicData = JPAUtil.getSingleResultOrNull(query);
+			if (basicData != null) {
 				areaMap.put("name", basicData.getStation().getName());
 				areaMap.put("slots", basicData.getCapacity());
 				areaMap.put("latitude", basicData.getStation().getPointprojection().getY());
@@ -136,13 +137,14 @@ public class ParkingStation extends Station{
 
 	public static Integer findNumberOfFreeSlots(String identifier) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Integer> query = em.createQuery("SELECT dynamic.occupacy from CarParkingDynamic dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?2",Integer.class).setMaxResults(1);
+		TypedQuery<Integer> query = em.createQuery(
+				"SELECT dynamic.occupacy from CarParkingDynamic dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?2",
+				Integer.class);
 		query.setParameter(1, identifier);
 		query.setParameter(2,true);
-		List<Integer> resultList = query.getResultList();
+		Integer occupiedSlots = JPAUtil.getSingleResultOrNull(query);
 		em.close();
-		if (resultList.size() == 1){
-			Integer occupiedSlots= resultList.get(0);
+		if (occupiedSlots != null) {
 			Integer parkingStationCapacity = getParkingStationCapacity(identifier);
 			return parkingStationCapacity-occupiedSlots;
 		}
@@ -189,9 +191,11 @@ public class ParkingStation extends Station{
 
 	public static Integer getParkingStationCapacity(String identifier) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Integer> query = em.createQuery("select basic.capacity from CarParkingBasicData basic where basic.station.stationcode=:station_id",Integer.class).setMaxResults(1);
+		TypedQuery<Integer> query = em.createQuery(
+				"select basic.capacity from CarParkingBasicData basic where basic.station.stationcode=:station_id",
+				Integer.class);
 		query.setParameter("station_id",identifier);
-		Integer result = (Integer) JPAUtil.getSingleResultOrNull(query);
+		Integer result = JPAUtil.getSingleResultOrNull(query);
 		em.close();
 		return result;
 	}

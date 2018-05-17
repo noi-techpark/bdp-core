@@ -870,7 +870,9 @@ public class TrafficVehicleRecord {
 
 	public static Date findRecordTimestampByVehicle(String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Date> query = em.createQuery("select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",Date.class).setMaxResults(1);
+		TypedQuery<Date> query = em.createQuery(
+				"select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
+				Date.class);
 		query.setParameter("station", stationId);
 		Date result = JPAUtil.getSingleResultOrNull(query);
 		em.close();
