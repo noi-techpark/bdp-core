@@ -13,18 +13,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorOptions(force=true)
 public abstract class BasicData {
-	
+
 	@Id
-    @GeneratedValue(generator="basicdata_id_seq",strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="basicdata_id_seq", sequenceName = "basicdata_id_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "basicdata_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "basicdata_gen", sequenceName = "basicdata_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('basicdata_seq')")
 	private Long id;
-	
+
 	@ManyToOne
 	protected Station station;
 
@@ -35,7 +37,7 @@ public abstract class BasicData {
 	public void setStation(Station station) {
 		this.station = station;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}

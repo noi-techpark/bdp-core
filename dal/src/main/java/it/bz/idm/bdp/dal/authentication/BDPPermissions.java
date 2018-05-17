@@ -12,18 +12,21 @@ import it.bz.idm.bdp.dal.Station;
 @Immutable
 @Entity
 public class BDPPermissions {
-	
+
 	@Id
 	private Long uuid;
 
 	@ManyToOne
 	private BDPRole role;
+
 	@ManyToOne
 	private Station station;
+
 	@ManyToOne
 	private DataType type;
-	
+
 	private Integer period;
+
 	public BDPRole getRole() {
 		return role;
 	}

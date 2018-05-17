@@ -1,12 +1,6 @@
 package it.bz.idm.bdp.dal.vehicle;
 
 
-import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.vehicles.CarValue;
-import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,14 +19,23 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.vehicles.CarValue;
+import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
+
 @Entity
 @Table(name="measurementmobilehistory",schema="intime")
 public class TrafficVehicleRecordHistory {
-	
+
 	//private static final Integer MAX_FRACTION_DIGITS = 3;
 
 	private static GeometryFactory geometryFactory = Station.geometryFactory;
@@ -43,255 +46,256 @@ public class TrafficVehicleRecordHistory {
 
 		{
 	        add(new String[]{"o3_1_ppb","",""});
-	        
+
 	    	add(new String[]{"o3_1_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"o3_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"no2_1_microgm3_ma","",""});
-	    	
+
 	    	add(new String[]{"no2_1_microgm3_exp","",""});
 
 	        add(new String[]{"no2_1_ppb","",""});
-	    	
+
 	        add(new String[]{"no2_1_runtime_s","",""});
-	        
+
 	    	add(new String[]{"no2_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"no2_2_ppb","",""});
-	    	
+
 	    	add(new String[]{"no2_2_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"no2_2_valid_b","",""});
-	    	
+
 	    	add(new String[]{"co_1_ppm","",""});
-	    	
+
 	    	add(new String[]{"co_1_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"co_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"res_1_a","",""});
-	    	
+
 	    	add(new String[]{"res_1_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"res_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"res_2_a","",""});
-	    	
+
 	    	add(new String[]{"res_2_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"res_2_valid_b","",""});
-	    	
+
 	    	add(new String[]{"temp_1_c","",""});
-	    	
+
 	    	add(new String[]{"temp_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"rh_1_pct","",""});
-	    	
+
 	    	add(new String[]{"rh_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"af_1_sccm","",""});
-	    	
+
 	    	add(new String[]{"af_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"gps_1_long_deg","",""});
-	    	
+
 	    	add(new String[]{"gps_1_lat_deg","",""});
-	    	
+
 	    	add(new String[]{"gps_1_alt_m","",""});
-	    	
+
 	    	add(new String[]{"gps_1_speed_mps","",""});
-	    	
+
 	    	add(new String[]{"gps_1_hdg_deg","",""});
-	    	
+
 	    	add(new String[]{"gps_1_sat_nr","",""});
-	    	
+
 	    	add(new String[]{"gps_1_pdop_nr","",""});
-	    	
+
 	    	add(new String[]{"gps_1_valid_b","",""});
-	    	
+
 	    	add(new String[]{"id_vehicle_nr","",""});
-	    	
+
 	    	add(new String[]{"id_system_nr","",""});
-	    	
+
 	    	add(new String[]{"id_driver_nr","",""});
-	    	
+
 	    	add(new String[]{"id_version_char","",""});
-	    	
+
 	    	add(new String[]{"id_runtime_s","",""});
-	    	
+
 	    	add(new String[]{"id_status_char","",""});
-	    	
+
 	    	add(new String[]{"can_speed_mps","",""});
-	    	
+
 	    	add(new String[]{"can_acc_long_mps2","",""});
-	    	
+
 	    	add(new String[]{"can_acc_lat_mps2","",""});
-	    	
+
 	    	add(new String[]{"can_acc_long_mean_mps2","",""});
-	    	
+
 	    	add(new String[]{"can_acc_lat_mean_mps2","",""});
-	    	
+
 	    	add(new String[]{"can_acc_long_var_m2ps4","",""});
-	    	
+
 	    	add(new String[]{"can_acc_lat_var_m2ps4","",""});
-	    	
+
 	    	add(new String[]{"can_valid_b","",""});
-	    	
+
 	    	add(new String[]{"imu_speed_mps","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_long_mps2","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_lat_mps2","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_long_mean_mps2","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_lat_mean_mps2","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_long_var_m2ps4","",""});
-	    	
+
 	    	add(new String[]{"imu_acc_lat_var_m2ps4","",""});
-	    	
-	    	add(new String[]{"imu_valid_b","",""});  
-	    	
+
+	    	add(new String[]{"imu_valid_b","",""});
+
 	    	add(new String[]{"position","",""});
-	    	
+
 	    	add(new String[]{"realtime_delay","",""});
 	    }
 	};
 
 	@Id
-    @GeneratedValue(generator="incrementtrafficvehiclerecordhistory",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="incrementtrafficvehiclerecordhistory", sequenceName = "measurementmobilehistory_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "trafficvehiclerecordhistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "trafficvehiclerecordhistory_gen", sequenceName = "trafficvehiclerecordhistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('trafficvehiclerecordhistory_seq')")
 	private Long id;
-	
+
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")
 	private Point position;
-	
+
     private Double o3_1_ppb;
-    
+
 	private Integer o3_1_runtime_s;
-	
+
 	private Boolean o3_1_valid_b;
 
     private Double no2_1_ppb;
-	
+
     private Integer no2_1_runtime_s;
-    
+
 	private Boolean no2_1_valid_b;
-	
+
 	private Double no2_2_ppb;
-	
+
 	private Integer no2_2_runtime_s;
-	
+
 	private Boolean no2_2_valid_b;
-	
+
 	private Double co_1_ppm;
-	
+
 	private Integer co_1_runtime_s;
-	
+
 	private Boolean co_1_valid_b;
-	
+
 	private Double res_1_a;
-	
+
 	private Integer res_1_runtime_s;
-	
+
 	private Boolean res_1_valid_b;
-	
+
 	private Double res_2_a;
-	
+
 	private Integer res_2_runtime_s;
-	
+
 	private Boolean res_2_valid_b;
-	
+
 	private Double temp_1_c;
-	
+
 	private Boolean temp_1_valid_b;
-	
+
 	private Double rh_1_pct;
-	
+
 	private Boolean rh_1_valid_b;
-	
+
 	private Double af_1_sccm;
-	
+
 	private Boolean af_1_valid_b;
-	
+
 	private Double gps_1_long_deg;
-	
+
 	private Double gps_1_lat_deg;
-	
+
 	private Double gps_1_alt_m;
-	
+
 	private Double gps_1_speed_mps;
-	
+
 	private Double gps_1_hdg_deg;
-	
+
 	private Integer gps_1_sat_nr;
-	
+
 	private Double gps_1_pdop_nr;
-	
+
 	private Boolean gps_1_valid_b;
-	
+
 	private Integer id_vehicle_nr;
-	
+
 	private Integer id_system_nr;
-	
+
 	private Integer id_driver_nr;
-	
+
 	private String id_version_char;
-	
+
 	private Integer id_runtime_s;
-	
+
 	private String id_status_char;
-	
+
 	private Double can_speed_mps;
-	
+
 	private Double can_acc_long_mps2;
-	
+
 	private Double can_acc_lat_mps2;
-	
+
 	private Double can_acc_long_mean_mps2;
-	
+
 	private Double can_acc_lat_mean_mps2;
-	
+
 	private Double can_acc_long_var_m2ps4;
-	
+
 	private Double can_acc_lat_var_m2ps4;
-	
+
 	private Boolean can_valid_b;
-	
+
 	private Double imu_speed_mps;
-	
+
 	private Double imu_acc_long_mps2;
-	
+
 	private Double imu_acc_lat_mps2;
-	
+
 	private Double imu_acc_long_mean_mps2;
-	
+
 	private Double imu_acc_lat_mean_mps2;
-	
+
 	private Double imu_acc_long_var_m2ps4;
-	
+
 	private Double imu_acc_lat_var_m2ps4;
-	
+
 	private Boolean imu_valid_b;
-	
+
 	private Double no2_1_microgm3_ma;
-	
+
 	private Double no2_1_microgm3_exp;
-	
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date created_on;
 
     private Long realtime_delay;
- 
+
     @ManyToOne(cascade=CascadeType.ALL)
     private Mobilestation station;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date ts_ms;
 
-    
+
     public Long getId() {
 		return id;
 	}
@@ -300,7 +304,7 @@ public class TrafficVehicleRecordHistory {
 		this.id = id;
 	}
 
-	
+
 	public Point getPosition() {
 		return position;
 	}
@@ -756,7 +760,7 @@ public class TrafficVehicleRecordHistory {
 	public void setTs_ms(Date ts_ms) {
 		this.ts_ms = ts_ms;
 	}
-	
+
 	public Date getCreated_on() {
 		return created_on;
 	}
@@ -772,7 +776,7 @@ public class TrafficVehicleRecordHistory {
 	public void setRealtime_delay(Long realtime_delay) {
 		this.realtime_delay = realtime_delay;
 	}
-	
+
 	public Double getNo2_1_microgm3_ma() {
 		return no2_1_microgm3_ma;
 	}
@@ -781,7 +785,7 @@ public class TrafficVehicleRecordHistory {
 		this.no2_1_microgm3_ma = no2_1_microgm3_ma;
 	}
 
-	
+
 	public Double getNo2_1_microgm3_exp() {
 		return no2_1_microgm3_exp;
 	}
@@ -860,8 +864,8 @@ public class TrafficVehicleRecordHistory {
 
 	public boolean alreadyExists() {
 		List<TrafficVehicleRecordHistory> records = findTrafficVehicleRecordsByVehicleAndTs_msEquals(station, ts_ms);
-		return (!records.isEmpty());
-		
+		return !records.isEmpty();
+
 	}
 
 	private List<TrafficVehicleRecordHistory> findTrafficVehicleRecordsByVehicleAndTs_msEquals(
@@ -877,42 +881,35 @@ public class TrafficVehicleRecordHistory {
 
 	public static Date findRecordTimestampByVehicle(String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Date> query = em.createQuery("select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",Date.class).setMaxResults(1);
+		TypedQuery<Date> query = em.createQuery(
+				"select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
+				Date.class);
 		query.setParameter("station", stationId);
-		List<Date> resultList = query.getResultList();
+		Date result = JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 		em.close();
-		return resultList.isEmpty()?new Date(0):resultList.get(0);
-		
+		return result;
 	}
 
-//	public static List<TrafficVehicleRecordDto> findTrafficVehicleRecords(String stationtype,
-//			String uuid, String type, Long seconds, Integer period) {
-//		Date past = new Date(Calendar.getInstance().getTimeInMillis()-(1000*seconds));
-//		List<TrafficVehicleRecordDto> dtos = new ArrayList<TrafficVehicleRecordDto>();
-//		 if (dataTypeExists(type)){
-//			 Query query;
-//			 query = entityManager().createNativeQuery("select record.ts_ms,record."+type+" FROM intime.station station join intime.measurementmobilehistory record on station.id=record.station_id WHERE station.stationcode=:vehicle AND record."+type+" is not null AND record.ts_ms > :date order by record.ts_ms desc");
-//			 query.setParameter("vehicle", uuid);
-//			 query.setParameter("date", past);
-//			 for (Object object:query.getResultList()){
-//				 Object[] objects =(Object[]) object;
-//				 Date date = (Date)objects[0];
-//				 TrafficVehicleRecordDto dto = new TrafficVehicleRecordDto(date, String.valueOf(objects[1]));
-//				 dtos.add(dto);
-//			 }
-//		 }
-//		 return dtos;
-//	}
-
-	public static List<RecordDto> findTrafficVehicleRecords(
-			EntityManager em, String uuid, String type, Date start,
-			Date end, Integer period) {
+	public static List<RecordDto> findTrafficVehicleRecords(EntityManager em, String uuid, String type, Date start,
+			Date end, Integer period, BDPRole role) {
 		List<RecordDto> dtos = new ArrayList<RecordDto>();
 		if (dataTypeExists(type)){
-			Query query = em.createNativeQuery("select record.ts_ms,record."+type+" FROM intime.station station join intime.measurementmobilehistory record on station.id=record.station_id WHERE station.stationcode=:vehicle AND record."+type+" is not null AND record.ts_ms between :start AND :end order by record.ts_ms desc");
+			Query query = em.createNativeQuery("select record.ts_ms, record."+type+" "
+					+ "FROM intime.station station, BDPPermissions p "
+					+ "join intime.measurementmobilehistory record on station.id=record.station_id "
+					+ "WHERE (record.station = p.station OR p.station = null) "
+					+ "AND (record.type = p.type OR p.type = null) "
+					+ "AND (record.period = p.period OR p.period = null) "
+					+ "AND p.role = :role "
+					+ "AND station.stationcode=:vehicle "
+					+ "AND record."+type+" is not null "
+					+ "AND record.ts_ms between :start AND :end "
+					+ "order by record.ts_ms desc");
+
 			query.setParameter("vehicle", uuid);
 			query.setParameter("start", start);
 			query.setParameter("end", end);
+			query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 			for (Object object:query.getResultList()){
 				Object[] objects =(Object[]) object;
 				Object valueObject = objects[1];
@@ -929,7 +926,7 @@ public class TrafficVehicleRecordHistory {
 		}
 		return dtos;
 	}
-	
+
 	private static boolean dataTypeExists(String type){
 		 for (String[] objects: TrafficVehicleRecord.DATATYPES)
 		 {

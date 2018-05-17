@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.bluetooth.Linkstation;
 import it.bz.idm.bdp.dal.parking.ParkingStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -22,6 +23,9 @@ import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 public class DataRetriever {
 
+	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given */
+	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
+
 	//Utility
 	private List<String> getStationTypes(EntityManager em){
 		List<String> result = null;
@@ -30,20 +34,20 @@ public class DataRetriever {
 
 	}
 
-	//API additions for V2 
+	//API additions for V2
 	public List<ChildDto> getChildren(String type, String parent){
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			List<ChildDto> children = null;
-			if (station != null){
-				children = station.findChildren(em,parent);
+			if (station != null) {
+				children = station.findChildren(em, parent);
 				return children;
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
-			em.close();	
+			em.close();
 		}
 		return null;
 	}
@@ -52,7 +56,7 @@ public class DataRetriever {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			if (station!=null)
+			if (station != null)
 				dataTypes = station.findTypes(em, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -61,9 +65,9 @@ public class DataRetriever {
 		}
 		return dataTypes;
 	}
-	
+
 	//APIv1
-	
+
 	public List<? extends StationDto> getStationDetails(String type, String id) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
@@ -78,7 +82,7 @@ public class DataRetriever {
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
-			em.close();	
+			em.close();
 		}
 		return stations;
 	}
@@ -92,7 +96,7 @@ public class DataRetriever {
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
-			em.close();	
+			em.close();
 		}
 		return stations;
 	}
@@ -118,7 +122,7 @@ public class DataRetriever {
 		try{
 			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			if (station != null)
-				dataTypes = station.findDataTypes(em,stationId);
+				dataTypes = station.findDataTypes(em, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -131,14 +135,15 @@ public class DataRetriever {
 		return getDataTypes(type, null);
 	}
 
-	public Date getDateOfLastRecord(String stationTypology, String stationcode,String cname,Integer period) {
+	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
 		EntityManager em = JPAUtil.createEntityManager();
+		BDPRole role = BDPRole.fetchGuestRole(em);
 		Date dateOfLastRecord = null;
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
 			DataType type = DataType.findByCname(em,cname);
-			dateOfLastRecord = s.getDateOfLastRecord(em,station, type, period);
+			dateOfLastRecord = s.getDateOfLastRecord(em, station, type, period, role);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -150,10 +155,11 @@ public class DataRetriever {
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
 		ParkingRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
+		BDPRole role = BDPRole.fetchGuestRole(em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
-			dto = (ParkingRecordDto) station.findLastRecord(em,cname,period);
+			dto = (ParkingRecordDto) station.findLastRecord(em, cname, period, role);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -164,11 +170,12 @@ public class DataRetriever {
 	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period) {
 		RecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
+		BDPRole role = BDPRole.fetchGuestRole(em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
 			if (s != null){
 				Station station = s.findStation(em, stationId);
-				dto = (RecordDto) station.findLastRecord(em,typeId,period);
+				dto = station.findLastRecord(em, typeId, period, role);
 			}
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -178,22 +185,27 @@ public class DataRetriever {
 		return dto;
 	}
 	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period){
+		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
 		return getRecords(stationtypology, identifier, type, start, end, period,seconds);
 	}
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Date start, Date end, Integer period, Integer seconds){
-		if (seconds != null && (start == null && end ==null )) {
+
+	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end,
+			Integer period, Integer seconds) {
+		if (start == null && end == null) {
+			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
-			start = new Date(end.getTime()-(seconds*1000l));
+			start = new Date(end.getTime() - (seconds * 1000l));
 		}
 		EntityManager em = JPAUtil.createEntityManager();
+		BDPRole role = BDPRole.fetchGuestRole(em);
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtypology);
 			Station station = s.findStation(em, identifier);
 			if (station != null) {
-				records.addAll(station.getRecords(em,type,start,end,period));
+				records.addAll(station.getRecords(em, type, start, end, period, role));
 				return records;
 			}
 		}catch(Exception ex){

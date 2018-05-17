@@ -1,7 +1,5 @@
 package it.bz.idm.bdp.dal;
 
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
@@ -11,18 +9,23 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
+import it.bz.idm.bdp.dal.util.JPAUtil;
+
 @Table(name="alarmspecification")
 @Entity
 public class AlarmSpecification {
-	
+
 	@Id
-    @GeneratedValue(generator="alarm_specs_id", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name="alarm_specs_id", sequenceName = "alarm_spec_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "alarmspecification_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "alarmspecification_gen", sequenceName = "alarmspecification_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('alarmspecification_seq')")
 	private Long id;
-	
+
 	private String name;
 	private String description;
-	
+
 	public AlarmSpecification() {
 	}
 	public AlarmSpecification(String name, String description) {
@@ -44,10 +47,9 @@ public class AlarmSpecification {
 	public static AlarmSpecification findSpecificationByName(EntityManager manager, String name) {
 		TypedQuery<AlarmSpecification> q = manager.createQuery("select spec from AlarmSpecification spec where spec.name=:name", AlarmSpecification.class);
 		q.setParameter("name", name);
-		List<AlarmSpecification> resultList = q.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(q);
 	}
-	
-	
+
+
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.hibernate.annotations.ColumnDefault;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -30,13 +32,15 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
-@Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode" }))
+@Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 @DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
 public abstract class Station {
@@ -45,8 +49,9 @@ public abstract class Station {
 	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 	@Id
-	@GeneratedValue(generator = "incrementstation", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name="incrementstation", sequenceName = "station_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "station_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('station_seq')")
 	protected Long id;
 
 	protected String name;
@@ -57,6 +62,7 @@ public abstract class Station {
 
 	protected Point pointprojection;
 
+	@Column(nullable = false)
 	protected String stationcode;
 
 	protected Boolean active;
@@ -108,10 +114,50 @@ public abstract class Station {
 
 	public abstract List<String[]> findDataTypes(EntityManager em, String stationId);
 	public abstract List<TypeDto> findTypes(EntityManager em, String stationId);
-	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type,Integer period);
-	public abstract RecordDto findLastRecord(EntityManager em, String cname, Integer period);
-	public abstract List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period);
+
+	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
+			BDPRole role);
+
+	public abstract RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role);
+
+	public abstract List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period,
+			BDPRole role);
 	public abstract Object pushRecords(EntityManager em, Object... object);
+
+	protected static Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period,
+			BDPRole role, String table) {
+		if (station == null)
+			return null;
+
+		if (!table.matches("[a-zA-Z_]+")) {
+			throw new IllegalArgumentException("Table '" + table + "' contains illegal characters.");
+		}
+
+		String queryString = "select record.timestamp "
+				+ "from " + table + " record, BDPPermissions p "
+				+ "WHERE (record.station = p.station OR p.station = null) "
+				+ "AND (record.type = p.type OR p.type = null) "
+				+ "AND (record.period = p.period OR p.period = null) "
+				+ "AND p.role = :role "
+				+ "AND record.station=:station";
+
+		if (type != null) {
+			queryString += " AND record.type = :type";
+		}
+		if (period != null) {
+			queryString += " AND record.period=:period";
+		}
+		queryString += " ORDER BY record.timestamp DESC";
+		TypedQuery<Date> query = em.createQuery(queryString, Date.class);
+		query.setParameter("station", station);
+		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+		if (type != null)
+			query.setParameter("type", type);
+		if (period != null)
+			query.setParameter("period", period);
+		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
+	}
+
 
 	public String getName() {
 		return name;
@@ -216,19 +262,20 @@ public abstract class Station {
 	}
 
 	public static Station findStation(EntityManager em, Integer integer) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from Station station where station.stationcode=:stationcode", Station.class);
 		stationquery.setParameter("stationcode", integer);
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",
+				Station.class);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
 		List<String[]> stringlist = new ArrayList<String[]>();
@@ -357,10 +404,11 @@ public abstract class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from "+stationType+" station where station.stationcode=:stationcode",Station.class).setMaxResults(1);
+		TypedQuery<Station> stationquery = em.createQuery(
+				"select station from " + stationType + " station where station.stationcode=:stationcode",
+				Station.class);
 		stationquery.setParameter("stationcode", id);
-		List<Station> resultList = stationquery.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
 }

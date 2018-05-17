@@ -1,17 +1,16 @@
 package it.bz.idm.bdp.dal;
 
-import it.bz.idm.bdp.dal.bluetooth.StreetBasicData;
-import it.bz.idm.bdp.dal.meteo.Meteostation;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.bluetooth.StreetStationDto;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
+import it.bz.idm.bdp.dal.bluetooth.StreetBasicData;
+import it.bz.idm.bdp.dal.meteo.Meteostation;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.bluetooth.StreetStationDto;
 
 @Entity
 public class Streetstation extends ElaborationStation{
@@ -50,35 +49,11 @@ public class Streetstation extends ElaborationStation{
 			query.setParameter("stationType", this.getClass().getSimpleName());
 			query.setParameter("station",stationId);
 		}
-		
+
 		List<Object[]> resultList = query.getResultList();
 		if (resultList.isEmpty())
 			return new Meteostation().findDataTypes(em,stationId);
 		return getDataTypesFromQuery(resultList);
-	}
-
-	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period) {
-		Date date = null;
-		if (station != null){
-			String queryString = "select record.timestamp from Elaboration record where record.station=:station";
-			if (type != null){
-				queryString += " AND record.type = :type";
-			}
-			if (period != null){
-				queryString += " AND record.period=:period";
-			}
-			queryString += " ORDER BY record.timestamp DESC";
-			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-			query.setParameter("station", station);
-			if (type!=null)
-				query.setParameter("type", type);
-			if (period!=null)
-				query.setParameter("period", period);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}
-		return date;
 	}
 
 	@Override
@@ -90,7 +65,7 @@ public class Streetstation extends ElaborationStation{
 	@Override
 	public void sync(EntityManager em, Station station, StationDto dto) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

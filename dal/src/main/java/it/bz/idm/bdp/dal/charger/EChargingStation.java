@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -88,13 +89,14 @@ public class EChargingStation extends MeasurementStation{
 			if (station!= null && station instanceof EChargingStation)
 				plugs = new EChargingPlug().findByParent(em,station);
 		}
+		BDPRole role = BDPRole.fetchGuestRole(em);
 		if (! plugs.isEmpty())
 			for (Station s : plugs){
 				EChargingPlug plug = (EChargingPlug) s;
 				EChargingPlugBasicData basic = (EChargingPlugBasicData) new EChargingPlugBasicData().findByStation(em, plug);
 				ChildPlugDto dto = new ChildPlugDto();
 				dto.setIdentifier(plug.getStationcode());
-				SimpleRecordDto record = (SimpleRecordDto) plug.findLastRecord(em,null, null);
+				SimpleRecordDto record = (SimpleRecordDto) plug.findLastRecord(em, null, null, role);
 				Integer value = ((Double) record.getValue()).intValue();
 				dto.setAvailable(value == 1);
 

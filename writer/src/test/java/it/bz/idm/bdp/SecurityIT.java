@@ -1,15 +1,18 @@
 package it.bz.idm.bdp;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,16 +33,18 @@ import it.bz.idm.bdp.writer.DataManager;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
 public class SecurityIT extends AbstractJUnit4SpringContextTests{
-	private static EntityManager entityManager;
+	private EntityManager em;
 	private BDPRole role,role2;
 	private Station station;
 	private DataType type;
 	private BDPRules rule;
+	private Measurement measurement;
+	private static boolean firstrun = true;
 
-	@PostConstruct
+	@Before
 	public void setup() {
-		entityManager = JPAUtil.createEntityManager();
-		entityManager.getTransaction().begin();
+		em = JPAUtil.createEntityManager();
+		em.getTransaction().begin();
 		role = new BDPRole();
 		role.setName("Holla");
 		role.setDescription("The Parent Role");
@@ -54,19 +59,47 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		rule.setRole(role);
 		rule.setStation(station);
 		rule.setType(type);
+		measurement = new Measurement(station, type, 1.11, new Date(), 500);
+
+		if (firstrun) {
+			em.persist(role);
+			em.persist(role2);
+			em.persist(station);
+			em.persist(type);
+			em.persist(measurement);
+			firstrun = false;
+		}
+	}
+
+	@Test
+	public void testInitialData() {
+		/* Admin and guest roles must always be present */
+		BDPRole admin = BDPRole.fetchAdminRole(em);
+		assertTrue(BDPRole.ROLE_ADMIN.equals(admin.getName()));
+		BDPRole guest = BDPRole.fetchGuestRole(em);
+		assertTrue(BDPRole.ROLE_GUEST.equals(guest.getName()));
+
+		/* Admin roles must have a rule to see everything */
+		TypedQuery<BDPRules> query = em.createQuery("select r from BDPRules r where r.role = :role", BDPRules.class);
+		query.setParameter("role", admin);
+		BDPRules rule = JPAUtil.getSingleResultOrNull(query);
+		assertNotNull(rule);
+		assertNull(rule.getPeriod());
+		assertNull(rule.getStation());
+		assertNull(rule.getType());
 	}
 
 	@Test
 	public void testJPAUtilInit() {
-		assertNotNull(entityManager);
+		assertNotNull(em);
 	}
 
 	@Test
 	public void testGetRulesForRole() {
-		BDPRole r = BDPRole.findByName(entityManager, role.getName());
+		BDPRole r = BDPRole.findByName(em, role.getName());
 		//JOIN between unrelated entities https://www.thoughts-on-java.org/how-to-join-unrelated-entities/
 		//had to upgrade hibernate to resolve this known issue https://hibernate.atlassian.net/browse/HHH-2772
-		TypedQuery<Measurement> query = entityManager.createQuery(
+		TypedQuery<Measurement> query = em.createQuery(
 				"select m from Measurement m join BDPPermissions ru on (m.station = ru.station or ru.station = null)"
 				+ " and (m.type = ru.type or ru.type = null) and (m.period = ru.period or ru.period = null) where ru.role = :role",
 				Measurement.class);
@@ -78,11 +111,18 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 
 	@Test
 	public void testRulesForLastRecord() {
-		BDPRole r = BDPRole.findByName(entityManager, role.getName());
-		Station station = new Environmentstation().findStation(entityManager, this.station.getName());
-		DataType type = DataType.findByCname(entityManager, this.type.getCname());
-		Measurement m = Measurement.findLatestEntry(entityManager, station, type, null, r);
+		BDPRole r = BDPRole.findByName(em, role.getName());
+		BDPRole r2 = BDPRole.fetchAdminRole(em);
+		assertNotNull(r);
+		assertNotNull(r2);
+		Station station = new Environmentstation().findStation(em, this.station.getName());
+		assertNotNull(station);
+		DataType type = DataType.findByCname(em, this.type.getCname());
+		assertNotNull(type);
+		Measurement m = Measurement.findLatestEntry(em, station, null, null, r2);
 		assertNotNull(m);
+		Measurement m2 = Measurement.findLatestEntry(em, station, null, null, r);
+		assertNull(m2);
 	}
 
 	@Test
@@ -103,7 +143,9 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		m.syncDataTypes(dtos);
 	}
 
-	@AfterClass
-	public static void cleanup() {
+	@After
+	public void cleanup() {
+		em.getTransaction().rollback();
+		em.close();
 	}
 }

@@ -19,7 +19,7 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String JSON_ENDPOINT = "json_endpoint";
 
 	protected RestTemplate restTemplate = new RestTemplate();
-	
+
 	private String url;
 	public JSONPusher() {
 		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
@@ -30,13 +30,14 @@ public abstract class JSONPusher extends DataPusher {
 			return null;
 		return restTemplate.postForObject(url + PUSH_RECORDS + "{datasourceName}", dto, Object.class, datasourceName);
 	}
-	
-	
+
+
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
 		return pushData(this.integreenTypology, dto);
 	}
-	public void syncStations(StationList data) {
-		this.syncStations(this.integreenTypology, data);
+
+	public Object syncStations(StationList data) {
+		return this.syncStations(this.integreenTypology, data);
 	}
 	@Override
 	public Object syncStations(String datasourceName, StationList data) {
