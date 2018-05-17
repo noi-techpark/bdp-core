@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -81,35 +82,15 @@ public abstract class MeasurementStation extends Station {
 	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type,
-			Integer period) {
-		Date date = null;
-		if (station != null){
-			String queryString = "select record.timestamp from Measurement record where record.station=:station";
-			if (type != null){
-				queryString += " AND record.type = :type";
-			}
-			if (period != null){
-				queryString += " AND record.period=:period";
-			}
-			queryString += " ORDER BY record.timestamp DESC";
-			TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-			query.setParameter("station", station);
-			if (type!=null)
-				query.setParameter("type", type);
-			if (period!=null)
-				query.setParameter("period", period);
-			List<Date> resultList = query.getResultList();
-			date = resultList.isEmpty() ? new Date(0) : resultList.get(0);
-		}
-		return date;
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return getDateOfLastRecordImpl(em, station, type, period, role, "Measurement");
 	}
 
 	@Override
-	public RecordDto findLastRecord(EntityManager em, String stringType, Integer period) {
+	public RecordDto findLastRecord(EntityManager em, String stringType, Integer period, BDPRole role) {
 		SimpleRecordDto dto = null;
-		DataType type = DataType.findByCname(em,stringType);
-		Measurement latestEntry = Measurement.findLatestEntry(em,this, type, period);
+		DataType type = DataType.findByCname(em, stringType);
+		Measurement latestEntry = Measurement.findLatestEntry(em, this, type, period, role);
 		if (latestEntry != null){
 			dto = new SimpleRecordDto(latestEntry.getTimestamp().getTime(),latestEntry.getValue());
 			dto.setPeriod(latestEntry.getPeriod());
@@ -118,28 +99,30 @@ public abstract class MeasurementStation extends Station {
 	}
 
 	@Override
-	public List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end,
-			Integer period) {
-		List<RecordDto> records = MeasurementHistory.findRecords(em,this.getClass().getSimpleName(), this.stationcode, type, start,end,period);
+	public List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period,
+			BDPRole role) {
+		List<RecordDto> records = MeasurementHistory.findRecords(em, this.getClass().getSimpleName(), this.stationcode,
+				type, start, end, period, role);
 		return records;
 	}
 
 	@Override
-	public Object pushRecords(EntityManager em,Object... objects) {
+	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
 		if (object instanceof DataMapDto) {
 			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
 			try{
 				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
-					Station station = findStation(em,entry.getKey());
+					Station station = findStation(em, entry.getKey());
 					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
+							BDPRole role = BDPRole.fetchAdminRole(em);
 							DataType type = DataType.findByCname(em, typeEntry.getKey());
 							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry =  Measurement.findLatestEntry(em, station,type,null);
+								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, role);
 								Date created_on = new Date();
 								Collections.sort(dataRecords);
 								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
@@ -189,6 +172,7 @@ public abstract class MeasurementStation extends Station {
 			List<Object> dtos = Arrays.asList((Object[]) object);
 			try{
 				em.getTransaction().begin();
+				BDPRole role = BDPRole.fetchAdminRole(em);
 				Station station = null;
 				DataType type = null;
 				String tempSS = null,tempTS = null;
@@ -196,7 +180,7 @@ public abstract class MeasurementStation extends Station {
 					FullRecordDto full = (FullRecordDto)dto;
 					if (full.validate()){
 						if (!full.getStation().equals(tempSS)){
-							station = findStation(em,full.getStation());
+							station = findStation(em, full.getStation());
 							if (station == null)
 								continue;
 							tempSS = station.getStationcode();
@@ -207,7 +191,7 @@ public abstract class MeasurementStation extends Station {
 								continue;
 							tempTS = full.getType();
 						}
-						Measurement lastEntry = Measurement.findLatestEntry(em, station,type,full.getPeriod());
+						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), role);
 						Number value = (Number) full.getValue();
 						if (lastEntry == null){
 							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());

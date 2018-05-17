@@ -9,18 +9,19 @@ import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Entity
 public class EChargingPlugBasicData extends BasicData{
 
 	@ManyToOne
 	private EChargingStation eStation;
-	
-	
+
+
 	public EChargingStation geteStation() {
 		return eStation;
 	}
-	
+
 	public void seteStation(EChargingStation eStation) {
 		this.eStation = eStation;
 	}
@@ -37,9 +38,8 @@ public class EChargingPlugBasicData extends BasicData{
 		TypedQuery<EChargingPlugBasicData> typedQuery = em.createQuery("select basic from EChargingPlugBasicData basic where basic.station = :station and basic.station.active=:active",EChargingPlugBasicData.class);
 		typedQuery.setParameter("station", station);
 		typedQuery.setParameter("active",true);
-		List<EChargingPlugBasicData> resultList = typedQuery.getResultList();
-		return resultList.isEmpty() ? null : resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(typedQuery);
 	}
 
-	
+
 }

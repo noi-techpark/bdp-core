@@ -6,15 +6,18 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 public abstract class Translation {
-	
+
 	@Id
-	@GeneratedValue(generator="translationvalue",strategy=GenerationType.SEQUENCE)
-    @SequenceGenerator(name="translationvalue", sequenceName = "translation_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "translation_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "translation_gen", sequenceName = "translation_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('translation_seq')")
 	private Long id;
-	
+
 	public Translation() {
 	}
-	
+
 }

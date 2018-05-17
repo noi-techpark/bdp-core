@@ -1,11 +1,5 @@
 package it.bz.idm.bdp.dal.carsharing;
 
-import it.bz.idm.bdp.dal.MeasurementStation;
-import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.carsharing.CarsharingCarDetailsDto;
-import it.bz.idm.bdp.dto.carsharing.CarsharingVehicleDto;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,14 +7,20 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import it.bz.idm.bdp.dal.MeasurementStation;
+import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.carsharing.CarsharingCarDetailsDto;
+import it.bz.idm.bdp.dto.carsharing.CarsharingVehicleDto;
+
 @Entity
 public class Carsharingcar extends MeasurementStation {
 
 	private static Long getCarCount(EntityManager em, Carsharingstation station) {
 		TypedQuery<Long> query = em.createQuery("Select count(basicdata) from CarsharingCarStationBasicData basicdata where basicdata.carsharingStation = :carsharing", Long.class);
 		query.setParameter("carsharing", station);
-		List<Long> resultList = query.getResultList();
-		return resultList.isEmpty()? null : resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 	@Override
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
@@ -61,7 +61,7 @@ public class Carsharingcar extends MeasurementStation {
 			basicData.setBrand(vehicleDto.getBrand());
 			basicData.setLicensePlate(vehicleDto.getLicensePlate());
 			em.merge(basicData);
-		} 
+		}
 	}
 
 	public List<Station> findByParent(EntityManager em, Station station) {

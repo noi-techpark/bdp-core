@@ -17,6 +17,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.annotations.ColumnDefault;
+
+import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 
 
@@ -25,8 +28,9 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 public class DataType {
 
 	@Id
-	@GeneratedValue(generator="type_seq",strategy=GenerationType.SEQUENCE)
-	@SequenceGenerator(name="type_seq", sequenceName = "type_seq",schema="intime",allocationSize=1)
+	@GeneratedValue(generator = "type_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "type_gen", sequenceName = "type_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('type_seq')")
 	protected Long id;
 	private String cname;
 	private Date created_on;
@@ -99,13 +103,13 @@ public class DataType {
 	public static DataType findByCname(EntityManager manager, String cname) {
 		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class);
 		query.setParameter("cname",cname);
-		List<DataType> resultList = query.getResultList();
-		return resultList.isEmpty()?null:resultList.get(0);
+		return JPAUtil.getSingleResultOrNull(query);
+
 	}
 
 	public static Object sync(EntityManager em, List<DataTypeDto> data) {
 		em.getTransaction().begin();
-		for (DataTypeDto dto : data){
+		for (DataTypeDto dto : data) {
 			DataType type = DataType.findByCname(em,dto.getName());
 			if (type != null){
 				if (dto.getDescription() != null)

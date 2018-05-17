@@ -11,19 +11,20 @@ import javax.persistence.TypedQuery;
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Entity
 public class Bicyclebasicdata extends BasicData {
 
 	@ManyToOne(cascade=CascadeType.MERGE)
 	private DataType type;
-	
+
 	@ManyToOne(cascade = CascadeType.MERGE)
 	private BikesharingStation bikeSharingStation;
-	
+
 	public Bicyclebasicdata() {
 	}
-	
+
 	public DataType getType() {
 		return type;
 	}
@@ -43,8 +44,8 @@ public class Bicyclebasicdata extends BasicData {
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<Bicyclebasicdata> query = em.createQuery("Select basicData from Bicyclebasicdata basicData where basicData.station=:station", Bicyclebasicdata.class);
 		query.setParameter("station", station);
-		List<Bicyclebasicdata> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return JPAUtil.getSingleResultOrNull(query);
+
 	}
 	public static List<Bicyclebasicdata> findAllBikes(
 			EntityManager em) {

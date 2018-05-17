@@ -8,6 +8,7 @@ import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Entity
 public class CarsharingStationBasicData extends BasicData{
@@ -17,7 +18,7 @@ public class CarsharingStationBasicData extends BasicData{
 	private Boolean spontaneously;
 	private Integer parking;
 	private String companyShortName;
-	
+
 	public Boolean isHasFixedParking() {
 		return hasFixedParking;
 	}
@@ -51,8 +52,7 @@ public class CarsharingStationBasicData extends BasicData{
 	public static CarsharingStationBasicData findBasicByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station=:station", CarsharingStationBasicData.class);
 		query.setParameter("station", station);
-		List<CarsharingStationBasicData> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 	public static List<CarsharingStationBasicData> findAllCarsharingStations(EntityManager em) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station.active=true", CarsharingStationBasicData.class);
@@ -63,7 +63,6 @@ public class CarsharingStationBasicData extends BasicData{
 	public BasicData findByStation(EntityManager em, Station station) {
 		TypedQuery<CarsharingStationBasicData> query = em.createQuery("Select basic from CarsharingStationBasicData basic where basic.station=:station", CarsharingStationBasicData.class);
 		query.setParameter("station", station);
-		List<CarsharingStationBasicData> resultList = query.getResultList();
-		return !resultList.isEmpty()?resultList.get(0):null;
+		return JPAUtil.getSingleResultOrNull(query);
 	}
 }
