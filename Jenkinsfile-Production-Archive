@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BDP_DATABASE_CONFIG = credentials('bdp-core-test-persistence.xml')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence.xml')
     }
 
     stages {
@@ -32,9 +32,10 @@ pipeline {
         }
         stage('Archive') {
             steps {
-               sh 'mkdir -p /var/builds/test-server'
-               sh 'cp -f reader/target/reader.war /var/builds/test-server/'
-               sh 'cp -f writer/target/writer.war /var/builds/test-server/'
+               sh 'mkdir -p /var/builds/prod-server-dc'
+               sh 'mkdir -p /var/builds/prod-server-ws'
+               sh 'cp -f reader/target/reader.war /var/builds/prod-server-ws/'
+               sh 'cp -f writer/target/writer.war /var/builds/prod-server-dc/'
             }
         }
     }
