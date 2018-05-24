@@ -1,6 +1,5 @@
 package it.bz.idm.bdp.dal.authentication;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -37,7 +36,7 @@ public class BDPUser {
 
 	@ManyToMany
 	@JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-	private Collection<BDPRole> roles;
+	private List<BDPRole> roles;
 
 	public BDPUser() {
 	}
@@ -52,7 +51,7 @@ public class BDPUser {
 	}
 
 	public BDPUser(String firstName, String lastName, String email, String password, boolean enabled,
-			boolean tokenExpired, Collection<BDPRole> roles) {
+			boolean tokenExpired, List<BDPRole> roles) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -118,16 +117,16 @@ public class BDPUser {
 		this.tokenExpired = tokenExpired;
 	}
 
-	public Collection<BDPRole> getRoles() {
+	public List<BDPRole> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(Collection<BDPRole> roles) {
+	public void setRoles(List<BDPRole> roles) {
 		this.roles = roles;
 	}
 
 	public static BDPUser findByEmail(EntityManager manager, String email) {
-		TypedQuery<BDPUser> query = manager.createQuery("SELECT id FROM BDPUser where email = :email", BDPUser.class);
+		TypedQuery<BDPUser> query = manager.createQuery("SELECT u FROM BDPUser u where email = :email", BDPUser.class);
 		query.setParameter("email", email);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
