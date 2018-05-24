@@ -11,8 +11,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<xmlrpc.version>3.1.2</xmlrpc.version>
-		<spring.version>5.0.2.RELEASE</spring.version>
+		<spring.version>5.0.5.RELEASE</spring.version>
+		<springsecurity.version>5.0.5.RELEASE</springsecurity.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -24,6 +24,11 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -38,18 +43,44 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.xmlrpc</groupId>
-			<artifactId>xmlrpc-server</artifactId>
-			<version>${xmlrpc.version}</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${springsecurity.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.xmlrpc</groupId>
-			<artifactId>xmlrpc-common</artifactId>
-			<version>${xmlrpc.version}</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jackson-databind</artifactId>
+					<groupId>com.fasterxml.jackson.core</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -67,15 +98,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<configuration>
-					<url>http://localhost:8080/manager/text</url>
-					<server>TomcatServer</server>
-					<path>/reader</path>
 				</configuration>
 			</plugin>
 		</plugins>

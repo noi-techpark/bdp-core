@@ -1,6 +1,7 @@
 package it.bz.idm.bdp.reader;
 
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.persistence.EntityManager;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.authentication.BDPUser;
 import it.bz.idm.bdp.dal.bluetooth.Linkstation;
 import it.bz.idm.bdp.dal.parking.ParkingStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -167,10 +169,10 @@ public class DataRetriever {
 		}
 		return dto;
 	}
-	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period) {
+	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
 		RecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = getRoleByPrincipal(principal, em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
 			if (s != null){
@@ -184,22 +186,24 @@ public class DataRetriever {
 		}
 		return dto;
 	}
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period){
+
+
+	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period, Principal p){
 		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
-		return getRecords(stationtypology, identifier, type, start, end, period,seconds);
+		return getRecords(stationtypology, identifier, type, start, end, period,seconds, p);
 	}
 
 	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end,
-			Integer period, Integer seconds) {
+			Integer period, Integer seconds, Principal p) {
 		if (start == null && end == null) {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
 			start = new Date(end.getTime() - (seconds * 1000l));
 		}
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = getRoleByPrincipal(p, em);
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtypology);
@@ -248,5 +252,12 @@ public class DataRetriever {
 			String datePattern) {
 		return ParkingStation.findFreeSlotsByTimeFrame(identifier,startDateString, endDateString,datePattern);
 	}
-
+	
+	private BDPRole getRoleByPrincipal(Principal principal, EntityManager em) {
+		BDPUser user = BDPUser.findByEmail(em, principal.getName());
+		BDPRole role = user==null || user.getRoles().isEmpty() ? null : user.getRoles().get(0);
+		if (role == null)
+			role = BDPRole.fetchGuestRole(em);
+		return role;
+	}
 }
