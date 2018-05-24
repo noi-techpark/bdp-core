@@ -12,7 +12,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 public class JPAUtil {
 
-	private static EntityManagerFactory emFactory;
+	public static EntityManagerFactory emFactory;
 	private static final Properties properties = new Properties();
 	static {
 		try {

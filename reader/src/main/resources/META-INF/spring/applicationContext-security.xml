@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+
+	<http pattern="/refreshToken" security="none"/>
+	<http pattern="/**" auto-config="false"
+		entry-point-ref="restAuthenticationEntryPoint"
+		create-session="stateless"
+		authentication-manager-ref="authenticationManager">
+		<csrf disabled="true" />
+		<custom-filter ref="jwtAuthenticationFilter"
+			before="FORM_LOGIN_FILTER" />
+	</http>
+	<global-method-security
+		pre-post-annotations="enabled" />
+
+	<beans:bean id="jwtAuthenticationFilter"
+		class="it.bz.idm.bdp.reader.security.JWTTokenAuthFilter">
+		<beans:constructor-arg value="/**" />
+		<beans:property name="authenticationManager"
+			ref="authenticationManager" />
+		<beans:property name="authenticationSuccessHandler"
+			ref="jwtAuthenticationSuccessHandler" />
+	</beans:bean>
+
+	<authentication-manager
+		alias="authenticationManager">
+		<authentication-provider
+			ref="jwtAuthenticationProvider" />
+		<authentication-provider
+			ref="jpaAuthenticationProvider" />
+	</authentication-manager>
+
+	<beans:bean id="jwtAuthenticationSuccessHandler"
+		class="it.bz.idm.bdp.reader.security.TokenSimpleUrlAuthenticationSuccessHandler" />
+	<beans:bean id="restAuthenticationEntryPoint"
+		class="it.bz.idm.bdp.reader.security.RestAuthenticationEntryPoint" />
+	<beans:bean id="jwtAuthenticationProvider"
+		class="it.bz.idm.bdp.reader.security.JWTAuthenticationProvider" />
+	<beans:bean id="jpaAuthenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="userDetailsService"
+			ref="BDPUserDetailService"></beans:property>
+			<beans:property name="passwordEncoder" ref="pwencoder"/>
+	</beans:bean>
+	<beans:bean id="pwencoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+	<beans:constructor-arg value="5"/>
+	</beans:bean>
+	<beans:bean id="jwtUtil"
+		class="it.bz.idm.bdp.reader.security.JwtUtil" />
+
+</beans:beans>
