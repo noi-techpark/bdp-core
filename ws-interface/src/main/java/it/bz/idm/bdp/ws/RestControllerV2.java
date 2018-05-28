@@ -5,13 +5,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.ws.security.JwtUtil;
+import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.ws.util.IntegreenException;
 
 public abstract class RestControllerV2 {
@@ -30,12 +25,6 @@ public abstract class RestControllerV2 {
 	protected DataRetriever retriever;
 	
 	public abstract DataRetriever initDataRetriever();
-	
-	@Autowired
-	private JwtUtil util;
-	
-	@Autowired
-	AuthenticationManager authenticationManager;
 	
 	@PostConstruct
 	public void init(){
@@ -57,10 +46,8 @@ public abstract class RestControllerV2 {
 	 * @param user the user to auth with
 	 */
 	@RequestMapping(value = "auth-token", method = RequestMethod.GET)
-	public @ResponseBody String token(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
-		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
-		UserDetails principal = (UserDetails) authentication.getPrincipal();
-		return util.generateToken(principal);
+	public @ResponseBody JwtTokenDto token(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
+		return retriever.fetchRefreshToken(user, pw);
 	}
 	@RequestMapping(value = "station-ids", method = RequestMethod.GET)
 	public @ResponseBody String[] stationIds(HttpServletResponse response) {

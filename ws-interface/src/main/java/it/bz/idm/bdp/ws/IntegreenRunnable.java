@@ -5,8 +5,10 @@ import java.util.List;
 
 import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 public interface IntegreenRunnable {
 
 	public abstract String[] fetchStations();
@@ -26,4 +28,7 @@ public interface IntegreenRunnable {
 	
 	public abstract List<? extends ChildDto> fetchChildStations(String id);
 
+	public AccessTokenDto fetchAccessToken(String refreshToken);
+	
+	public JwtTokenDto fetchRefreshToken(String userName, String password);
 }

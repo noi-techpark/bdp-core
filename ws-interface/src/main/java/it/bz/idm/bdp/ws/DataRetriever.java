@@ -30,7 +30,6 @@ public abstract class DataRetriever implements IntegreenRunnable{
 		connect();
 		this.integreenTypology = initIntegreenTypology();
 	}
-
 	private void initConfig() {
 		if (config == null)
 			try {
@@ -43,5 +42,6 @@ public abstract class DataRetriever implements IntegreenRunnable{
 				e1.printStackTrace();
 			}
 	}
+	
 
 }
