@@ -9,6 +9,7 @@
 		<xmlrpc.version>3.1.2</xmlrpc.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.2.5.RELEASE</spring.version>
+		<dependency.locations.enabled>false</dependency.locations.enabled>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -44,6 +45,15 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>			
 		</plugins>
 	</build>
 </project>
