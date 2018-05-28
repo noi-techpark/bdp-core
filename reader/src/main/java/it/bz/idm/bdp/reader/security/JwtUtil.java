@@ -17,7 +17,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import it.bz.idm.bdp.reader.JwtToken;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
 @Component
 public class JwtUtil {
@@ -62,8 +63,8 @@ public class JwtUtil {
 	 * @param userDetails the user for which the token will be generated
 	 * @return the JWT token object containing AccessToken and RefreshToken
 	 */
-	public JwtToken generateToken(UserDetails userDetails) {
-		JwtToken token = new JwtToken();
+	public JwtTokenDto generateToken(UserDetails userDetails) {
+		JwtTokenDto token = new JwtTokenDto();
 		Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
 		String roles =""; 
 		for (GrantedAuthority auth: userDetails.getAuthorities()){
@@ -81,12 +82,12 @@ public class JwtUtil {
 		return token;
 	}
 
-	public AccessToken generateAccessToken(UsernamePasswordAuthenticationToken principal) {
-		AccessToken accessToken = getAccessToken(principal.getName(),principal.getAuthorities());
+	public AccessTokenDto generateAccessToken(UsernamePasswordAuthenticationToken principal) {
+		AccessTokenDto accessToken = getAccessToken(principal.getName(),principal.getAuthorities());
 		return accessToken;
 	}
 
-	private AccessToken getAccessToken(String name, Collection<? extends GrantedAuthority> collection) {
+	private AccessTokenDto getAccessToken(String name, Collection<? extends GrantedAuthority> collection) {
 		Date nowPlusMinutes= Timestamp.valueOf(LocalDateTime.now().plusMinutes(accessTokenValidityInMinutes));
 		Claims claims = Jwts.claims().setSubject(name).setExpiration(nowPlusMinutes);
 		String roles =""; 
@@ -100,7 +101,7 @@ public class JwtUtil {
 				.setClaims(claims)
 				.signWith(TOKEN_SIGNATURE_ALGOITHM, secret)
 				.compact();
-		AccessToken accessToken = new AccessToken();
+		AccessTokenDto accessToken = new AccessTokenDto();
 		accessToken.setToken(token);
 		accessToken.setExpireDate(nowPlusMinutes.getTime());
 		return accessToken;
