@@ -1,5 +1,8 @@
 package it.bz.idm.bdp.reader;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
@@ -10,21 +13,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.ChildDto;
+import it.bz.idm.bdp.dto.ExceptionDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.reader.security.AccessToken;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.reader.security.JwtUtil;
 
 @Controller
@@ -36,23 +42,39 @@ public class JsonController extends DataRetriever{
 	@Autowired
 	private JwtUtil util;
 	
+	@ExceptionHandler(value = Throwable.class)
+	public @ResponseBody ResponseEntity<ExceptionDto> handleExceptions(
+			Throwable exception) {
+		ExceptionDto dto = new ExceptionDto();
+		dto.setName(exception.getMessage());
+		dto.setStackTrace(getStackTrace(exception));
+		HttpStatus statusError = HttpStatus.INTERNAL_SERVER_ERROR;
+		if (exception instanceof ServletRequestBindingException)
+			statusError = HttpStatus.BAD_REQUEST;
+		return new ResponseEntity<ExceptionDto>(dto,
+				statusError);
+	}
+	
+	private String getStackTrace(Throwable exception) {
+		Writer sw = new StringWriter();
+		PrintWriter pW = new PrintWriter(sw);
+		exception.printStackTrace(pW);
+		return sw.toString();
+	}
+
 	@RequestMapping(value = "refreshToken", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<JwtToken> getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
-		try {
+	public @ResponseBody JwtTokenDto getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
 		UserDetails principal = (UserDetails) authentication.getPrincipal();
-		JwtToken token = util.generateToken(principal);
-		return new ResponseEntity<JwtToken>(token,HttpStatus.OK);
-		}catch(BadCredentialsException bad) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
+		JwtTokenDto token = util.generateToken(principal);
+		return token;
 	}
 	@RequestMapping(value = "accessToken", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<AccessToken> getRefreshToken(HttpServletRequest request, Principal principal) {
+	public @ResponseBody AccessTokenDto getRefreshToken(HttpServletRequest request, Principal principal) {
 		if (principal != null) {
-			return new ResponseEntity<AccessToken>(util.generateAccessToken((UsernamePasswordAuthenticationToken) principal),HttpStatus.OK);
+			return util.generateAccessToken((UsernamePasswordAuthenticationToken) principal);
 		}
-		return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		return null;
 	}
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	@Override
