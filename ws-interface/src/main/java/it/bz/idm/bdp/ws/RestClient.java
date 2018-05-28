@@ -1,11 +1,13 @@
 package it.bz.idm.bdp.ws;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -13,14 +15,22 @@ import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import reactor.core.publisher.Mono;
 
 public abstract class RestClient extends DataRetriever{
-
+	
+	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10;
 	protected WebClient webClient;
 	private String url;
 
-	
+	@Override
+	public void connect() {
+		String sslString = DEFAULT_SSL?"https":"http";
+		this.url = sslString+"://"+DEFAULT_HOST+":"+DEFAULT_PORT+DEFAULT_ENDPOINT;
+		webClient = WebClient.create(url);
+	}
 	@Override
 	public String[] fetchStations() {
 		Map<String,String> params = new HashMap<>();
@@ -113,10 +123,18 @@ public abstract class RestClient extends DataRetriever{
 	}
 
 	@Override
-	public void connect() {
-		String sslString = DEFAULT_SSL?"https":"http";
-		this.url = sslString+"://"+DEFAULT_HOST+":"+DEFAULT_PORT+DEFAULT_ENDPOINT;
-		webClient = WebClient.create(url);
+	public AccessTokenDto fetchAccessToken(String refreshToken) {
+		Mono<AccessTokenDto> mono = webClient.get().uri("/accessToken").header(HttpHeaders.AUTHORIZATION, refreshToken).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<AccessTokenDto>() {});
+		return mono.block(Duration.ofSeconds(config.getLong("requestTimeoutInSeconds",DEFAULT_HTTP_REQUEST_TIMEOUT)));
+	}
+	
+	@Override
+	public JwtTokenDto fetchRefreshToken(String username, String password) {
+		Map<String,String> map = new HashMap<>();
+		map.put("username", username);
+		map.put("password", password);
+		Mono<JwtTokenDto> mono = webClient.get().uri("/refreshToken?user={username}&password={password}",map).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(new ParameterizedTypeReference<JwtTokenDto>() {});
+		return mono.block(Duration.ofSeconds(config.getLong("requestTimeoutInSeconds",DEFAULT_HTTP_REQUEST_TIMEOUT)));
 	}
 
 }

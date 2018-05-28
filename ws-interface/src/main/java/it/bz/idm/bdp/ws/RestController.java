@@ -4,14 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.ws.security.JwtUtil;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.ws.util.DtoParser;
 import it.bz.idm.bdp.ws.util.IntegreenException;
 
@@ -30,12 +27,6 @@ public abstract class RestController {
 	protected DataRetriever retriever;
 	
 	public abstract DataRetriever initDataRetriever();
-
-	@Autowired
-	private JwtUtil util;
-	
-	@Autowired
-	public AuthenticationManager authenticationManager;
 	
 	@PostConstruct
 	public void init(){
@@ -55,9 +46,11 @@ public abstract class RestController {
 	
 	@RequestMapping(value = "request-token", method = RequestMethod.GET)
 	public @ResponseBody String getToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="pw",required=true)String pw) {
-		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
-		UserDetails principal = (UserDetails) authentication.getPrincipal();
-		return util.generateToken(principal);
+		return null;
+	}
+	@RequestMapping(value = "access-token", method = RequestMethod.GET)
+	public @ResponseBody AccessTokenDto getAccessToken(HttpServletRequest request) {
+		return retriever.fetchAccessToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 	}
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
 	public @ResponseBody String[] getStationIds() {
