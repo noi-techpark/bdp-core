@@ -5,59 +5,39 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import io.swagger.annotations.ApiParam;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.ws.security.JwtUtil;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.ws.util.DtoParser;
-import it.bz.idm.bdp.ws.util.IntegreenException;
 
 public abstract class RestController {
 	
+	private static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)";
 	protected DataRetriever retriever;
 	
 	public abstract DataRetriever initDataRetriever();
-
-	@Autowired
-	private JwtUtil util;
-	
-	@Autowired
-	public AuthenticationManager authenticationManager;
 	
 	@PostConstruct
 	public void init(){
 		this.retriever = initDataRetriever();
 	}
-	@ExceptionHandler(value = Throwable.class)
-	public @ResponseBody ResponseEntity<IntegreenException> handleExceptions(
-			Throwable exception) {
-		IntegreenException integreenException = new IntegreenException(
-				exception);
-		HttpStatus statusError = HttpStatus.INTERNAL_SERVER_ERROR;
-		if (exception instanceof ServletRequestBindingException)
-			statusError = HttpStatus.BAD_REQUEST;
-		return new ResponseEntity<IntegreenException>(integreenException,
-				statusError);
-	}
 	
-	@RequestMapping(value = "request-token", method = RequestMethod.GET)
-	public @ResponseBody String getToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="pw",required=true)String pw) {
-		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
-		UserDetails principal = (UserDetails) authentication.getPrincipal();
-		return util.generateToken(principal);
+	@RequestMapping(value = "refresh-token", method = RequestMethod.GET)
+	public @ResponseBody JwtTokenDto getToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="pw",required=true)String pw) {
+		return retriever.fetchRefreshToken(user, pw);
+	}
+	@RequestMapping(value = "access-token", method = RequestMethod.GET)
+	public @ResponseBody AccessTokenDto getAccessToken(@RequestHeader(required=true,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String refreshToken) {
+		return retriever.fetchAccessToken(refreshToken);
 	}
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
 	public @ResponseBody String[] getStationIds() {
@@ -76,39 +56,43 @@ public abstract class RestController {
 	}
 	
 	@RequestMapping(value = {"get-records"}, method = RequestMethod.GET)
-	public @ResponseBody List<SlimRecordDto> getRecords(
+	public @ResponseBody List<SlimRecordDto> getRecords(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
 			@RequestParam("name") String cname,
 			@RequestParam("seconds") Integer seconds,
 			@RequestParam(value = "period", required = false) Integer period) {
+		retriever.setAccessToken(accessToken);
 		List<RecordDto> records = retriever.fetchRecords(station, cname, seconds, period);
 		List<SlimRecordDto> list = DtoParser.reduce(records);
 		return list;
 	}
 	
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
-	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(
+	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
 			@RequestParam("name") String cname,
 			@RequestParam("from") Long from, @RequestParam("to") Long to,
 			@RequestParam(value = "period", required = false) Integer period) {
+		retriever.setAccessToken(accessToken);
 		List<RecordDto> records = retriever.fetchRecords(station, cname, from, to, period);
 		List<SlimRecordDto> list = DtoParser.reduce(records);
 		return list;
 	}
 
 	@RequestMapping(value = {"get-date-of-last-record"}, method = RequestMethod.GET)
-	public @ResponseBody Date getDateOfLastRecord(
+	public @ResponseBody Date getDateOfLastRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
+		retriever.setAccessToken(accessToken);
 		return retriever.fetchDateOfLastRecord(station, type,period);
 	}
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
-	public @ResponseBody RecordDto getNewestRecord(
+	public @ResponseBody RecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
+		retriever.setAccessToken(accessToken);
 		return retriever.fetchNewestRecord(station, type,period);
 	}
 }

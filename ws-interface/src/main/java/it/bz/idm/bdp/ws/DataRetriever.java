@@ -21,6 +21,7 @@ public abstract class DataRetriever implements IntegreenRunnable{
 	
 	protected Configuration config;
 	protected String integreenTypology;
+	protected String accessToken;
 
 	public abstract void connect();
 	public abstract String initIntegreenTypology();
@@ -30,7 +31,6 @@ public abstract class DataRetriever implements IntegreenRunnable{
 		connect();
 		this.integreenTypology = initIntegreenTypology();
 	}
-
 	private void initConfig() {
 		if (config == null)
 			try {
@@ -43,5 +43,7 @@ public abstract class DataRetriever implements IntegreenRunnable{
 				e1.printStackTrace();
 			}
 	}
-
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
 }
