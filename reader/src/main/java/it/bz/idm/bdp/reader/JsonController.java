@@ -7,10 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +21,8 @@ import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.reader.security.AccessToken;
+import it.bz.idm.bdp.dto.security.AccessTokenDto;
+import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.reader.security.JwtUtil;
 
 @Controller
@@ -36,23 +34,20 @@ public class JsonController extends DataRetriever{
 	@Autowired
 	private JwtUtil util;
 	
+
 	@RequestMapping(value = "refreshToken", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<JwtToken> getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
-		try {
+	public @ResponseBody JwtTokenDto getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
 		UserDetails principal = (UserDetails) authentication.getPrincipal();
-		JwtToken token = util.generateToken(principal);
-		return new ResponseEntity<JwtToken>(token,HttpStatus.OK);
-		}catch(BadCredentialsException bad) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
+		JwtTokenDto token = util.generateToken(principal);
+		return token;
 	}
 	@RequestMapping(value = "accessToken", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<AccessToken> getRefreshToken(HttpServletRequest request, Principal principal) {
+	public @ResponseBody AccessTokenDto getRefreshToken(HttpServletRequest request, Principal principal) {
 		if (principal != null) {
-			return new ResponseEntity<AccessToken>(util.generateAccessToken((UsernamePasswordAuthenticationToken) principal),HttpStatus.OK);
+			return util.generateAccessToken((UsernamePasswordAuthenticationToken) principal);
 		}
-		return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		return null;
 	}
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	@Override

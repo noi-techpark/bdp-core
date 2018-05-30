@@ -1,20 +1,18 @@
-package it.bz.idm.bdp.reader;
+package it.bz.idm.bdp.dto.security;
 
 import java.io.Serializable;
 
-import it.bz.idm.bdp.reader.security.AccessToken;
-
-public class JwtToken implements Serializable{
+public class JwtTokenDto implements Serializable{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4803002714159014982L;
-	private AccessToken accessToken;
+	private AccessTokenDto accessToken;
 	private String refreshToken;
-	public AccessToken getAccessToken() {
+	public AccessTokenDto getAccessToken() {
 		return accessToken;
 	}
-	public void setAccessToken(AccessToken accessToken) {
+	public void setAccessToken(AccessTokenDto accessToken) {
 		this.accessToken = accessToken;
 	}
 	public String getRefreshToken() {

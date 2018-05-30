@@ -23,8 +23,8 @@ import it.bz.idm.bdp.dto.authentication.RoleDto;
 @Entity
 public class BDPRole {
 
-	public static final String ROLE_GUEST = "ROLE_GUEST";
-	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+	public static final String ROLE_GUEST = "GUEST";
+	public static final String ROLE_ADMIN = "ADMIN";
 
 	@Id
 	@GeneratedValue(generator = "bdprole_gen", strategy = GenerationType.SEQUENCE)

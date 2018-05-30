@@ -1,8 +1,8 @@
-package it.bz.idm.bdp.reader.security;
+package it.bz.idm.bdp.dto.security;
 
 import java.io.Serializable;
 
-public class AccessToken implements Serializable{
+public class AccessTokenDto implements Serializable{
 	/**
 	 * 
 	 */
