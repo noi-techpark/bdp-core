@@ -13,7 +13,10 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.DocExpansion;
+import springfox.documentation.swagger.web.OperationsSorter;
 import springfox.documentation.swagger.web.UiConfiguration;
+import springfox.documentation.swagger.web.UiConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
@@ -46,14 +49,8 @@ public class SwaggerConfig{
 	    }
 	    @Bean
 	    UiConfiguration uiConfig() {
-	    	return new UiConfiguration(
-	    			null,// url
-	    			"list",       // docExpansion          => none | list
-	    			"alpha",      // apiSorter             => alpha
-	    			"schema",     // defaultModelRendering => schema
-	    			UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS,
-	    			false,        // enableJsonEditor      => true | false
-	    			true,
-	    			3000l);
+	    	UiConfigurationBuilder builder = UiConfigurationBuilder.builder();
+	    	builder.docExpansion(DocExpansion.LIST).operationsSorter(OperationsSorter.ALPHA);
+	    	return builder.build();
 	    }
 }
