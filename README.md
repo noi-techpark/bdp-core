@@ -10,15 +10,15 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
 
 ## Table of contents
 1. [CORE](#core)
-  1. [DAL (data access layer)](#dal)
-    1. [Entity Structure](#entity-structure)
-  2. [DTO (data transfer object)](#dto)
-  3. [Writer (data persister)](#writer)
-    1. [dc-interface](#dc-interface)
-  4. [Reader (data dispatcher)](#reader)
-    1. [ws-interface](#ws-interface)
-  5. [Installation guide](#installation-guide)
-  6. [License updates](#license-updates)
+    1. [DAL (data access layer)](#dal)
+        1. [Entity Structure](#entity-structure)
+    2. [DTO (data transfer object)](#dto)
+    3. [Writer (data persister)](#writer)
+        1. [dc-interface](#dc-interface)
+    4. [Reader (data dispatcher)](#reader)
+        1. [ws-interface](#ws-interface)
+    5. [Installation guide](#installation-guide)
+    6. [Licenses](#licenses)
 
 ## CORE
 
