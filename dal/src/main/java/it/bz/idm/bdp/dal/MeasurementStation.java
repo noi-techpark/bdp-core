@@ -109,6 +109,7 @@ public abstract class MeasurementStation extends Station {
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
+		BDPRole adminRole = BDPRole.fetchAdminRole(em);
 		if (object instanceof DataMapDto) {
 			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
@@ -118,11 +119,10 @@ public abstract class MeasurementStation extends Station {
 					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
-							BDPRole role = BDPRole.fetchAdminRole(em);
 							DataType type = DataType.findByCname(em, typeEntry.getKey());
 							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, role);
+								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, adminRole);
 								Date created_on = new Date();
 								Collections.sort(dataRecords);
 								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
@@ -172,7 +172,6 @@ public abstract class MeasurementStation extends Station {
 			List<Object> dtos = Arrays.asList((Object[]) object);
 			try{
 				em.getTransaction().begin();
-				BDPRole role = BDPRole.fetchAdminRole(em);
 				Station station = null;
 				DataType type = null;
 				String tempSS = null,tempTS = null;
@@ -191,7 +190,7 @@ public abstract class MeasurementStation extends Station {
 								continue;
 							tempTS = full.getType();
 						}
-						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), role);
+						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), adminRole);
 						Number value = (Number) full.getValue();
 						if (lastEntry == null){
 							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
