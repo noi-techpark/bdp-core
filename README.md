@@ -18,6 +18,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
   4. [Reader (data dispatcher)](#reader)
     1. [ws-interface](#ws-interface)
   5. [Installation guide](#installation-guide)
+  6. [License updates](#license-updates)
 
 ## CORE
 
@@ -71,13 +72,13 @@ It uses the persistence-unit of the DAL which has permissions to read all data a
 ### dc-interface
 The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing json client implementation(JSONPusher.java).
 The API is compact and easy to use:
-	
+
   - `Object syncStations(String dataStationTypology, StationList data)` : This method is used to create,update,delete stations of a specific typology data must be a StationList(List of StationDto's)
-  
+
   If, for example dataStationTypology = "Meteostation", the array can contain StationDto but also MeteostationDto
-	
+
   - `Object syncDataTypes(String dataStationTypology, List<DataTypeDto> data)` : This method is used to create and update data types. Data must be a list of DataTypeDto
-  
+
   - `Object pushData(String datasourceName,  DataMapDto<? extends RecordDtoImpl> dto)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. The data in here gets saved in form of a tree.
 Each branch can have multiple child branches but can also have data itself, which means it can have indefinitive depth.
 Right now, by our internal conventions we store everything on the second level, like this:
@@ -126,8 +127,7 @@ More informations will be available soon.
   > GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA intime TO bdreadonly;
   > create extension postgis
   psql -U bd bd < schema.dump
-
-  ```
+```
 
 ### Step2: Configure and deploy your big data platform
   - clone git repo bdp-core
@@ -135,7 +135,8 @@ More informations will be available soon.
   - Setup and install your dal module
   - Compile and package your writer and reader module
   - Deploy the generated writer.war and reader.war on your application server
-  ```
+
+```
   git clone https://github.com/idm-suedtirol/bdp-core.git
   cd bdp-core
   cd dto
@@ -147,12 +148,29 @@ More informations will be available soon.
   mvn clean package
   cd../reader
   mvn clean package
-  ```
+```
+
 ### Step 3: Check endpoints
-To check the endpoints of the 2 apps go to http://{host}:{port}/writer/json and http://{host}:{port}/reader/json. There you should get 405 method GET not allowed as response. 
-  ```
+To check the endpoints of the 2 apps go to `http://{host}:{port}/writer/json`
+and `http://{host}:{port}/reader/json`. There you should get
+`405 method GET not allowed` as response.
 
 If this works you made it.
 
 You deployed your bd-core and now will be able to add modules or develop your own.
 For more informations read the modules manual.
+
+
+## Licenses
+
+### Source file updates
+To update license headers in each source code file run `mvn license:format`.
+To configure the header template edit `LICENSE/templates/` files, and
+set the correct attributes inside each `pom.xml`. See the plugin
+[license-maven-plugin](http://code.mycila.com/license-maven-plugin/)
+homepage for details.
+
+### Details of this project
+Run `mvn site` to create a HTML page with all details of this project.
+Results can be found under `<project>/target/site/`, entrypoint is as
+usual `index.html`.
