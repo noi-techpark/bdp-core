@@ -9,13 +9,13 @@ public class DataTypeDto implements Serializable{
 	public static final String AVAILABILITY = "availability";
 	public static final String FUTURE_AVAILABILITY = "future-availability";
 	public static final String PARKING_FORECAST = "parking-forecast";
-	
+
 	private String name;
 	private String unit;
 	private String description;
 	private String rtype;
 	private Integer period;
-	
+
 	public DataTypeDto() {
 	}
 	public DataTypeDto(String name, String unit, String description, String rtype) {
@@ -25,7 +25,7 @@ public class DataTypeDto implements Serializable{
 		this.description = description;
 		this.rtype = rtype;
 	}
-	
+
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
 		super();
 		this.name = name;
@@ -76,5 +76,10 @@ public class DataTypeDto implements Serializable{
 	@Override
 	public int hashCode() {
 		return 1;
+	}
+
+	@Override
+	public String toString() {
+		return "DataTypeDto [name=" + name + ", unit=" + unit + ", description=" + description + ", rtype=" + rtype + ", period=" + period + "]";
 	}
 }
