@@ -154,6 +154,5 @@ public class JPAUtil {
 			System.err.println("Execution from input stream successful: " + cmd);
 		}
 		em.getTransaction().commit();
-
 	}
 }

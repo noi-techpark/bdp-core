@@ -147,7 +147,14 @@ public class DataManager {
 	 */
 	@EventListener(ContextRefreshedEvent.class)
 	public void afterStartup() throws IOException {
-		JPAUtil.executeNativeQueries(sql.getInputStream());
+		/*
+		 * XXX It is not safe to run this query on every startup, we must fix an
+		 * issue where Postgres fails because a table should be dropped that is
+		 * a view instead or vice-versa. Until this is fixed, we must run the
+		 * init.sql script manually choosing between "DROP TABLE" or "DROP VIEW"
+		 * based on the actual database content.
+		 */
+		// JPAUtil.executeNativeQueries(sql.getInputStream());
 	}
 
 }
