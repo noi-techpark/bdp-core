@@ -22,8 +22,8 @@ create view intime.bdpfilters_unrolled as
         join intime.bdproles_unrolled x on f.role_id = x.sr
         order by x.role;
 
-drop view if exists intime.bdppermissions cascade;
 drop table if exists intime.bdppermissions;
+drop view if exists intime.bdppermissions cascade;
 create view intime.bdppermissions as
 with x as (
     select row_number() over (order by role asc) as uuid
