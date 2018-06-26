@@ -18,8 +18,11 @@
  */
 package it.bz.idm.bdp.dal.util;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -96,5 +99,59 @@ public class JPAUtil {
 			return alternative;
 		}
 		return list.get(0);
+	}
+
+	/**
+	 * Execute all native SQL commands from a given file (InputStream). It assumes -- as
+	 * comment marker, and ; as command separator. It will also automatically check, if it
+	 * is a DDL (data definition language) or DML (data manipulation language) construct
+	 * and calls either executeUpdate or getSingleResult.
+	 *
+	 * @param query
+	 *            The query input stream
+	 */
+	public static void executeNativeQueries(final InputStream query) {
+		List<String> commands = new ArrayList<String>();
+		String finalSQL = "";
+
+		// Remove all comments from SQL
+		try (Scanner scanner = new Scanner(query)) {
+			scanner.useDelimiter("\\n");
+
+			while (scanner.hasNext()) {
+				String line = scanner.next();
+				int offset = line.indexOf("--");
+				offset = (offset == -1) ? line.length() : offset;
+				finalSQL += line.substring(0, offset) + " ";
+			}
+		}
+
+		// Fill an array with found SQL commands
+		try (Scanner scanner = new Scanner(finalSQL)) {
+			scanner.useDelimiter(";");
+			while (scanner.hasNext()) {
+				String cmd = scanner.next();
+				/*
+				 * Colons must be escaped, because the would mark an injected variable.
+				 * Clean up some whitespace overkill to make the queries human-readable.
+				 */
+				cmd = cmd.trim().replaceAll("\\s+", " ").replace(":", "\\:");
+				if (cmd.length() > 0)
+					commands.add(cmd + ";");
+			}
+		}
+
+		// Execute all remaining commands
+		EntityManager em = JPAUtil.createEntityManager();
+		em.getTransaction().begin();
+		for (String cmd : commands) {
+			if (cmd.toLowerCase().startsWith("select")) {
+				em.createNativeQuery(cmd).getSingleResult();
+			} else {
+				em.createNativeQuery(cmd).executeUpdate();
+			}
+		}
+		em.getTransaction().commit();
+
 	}
 }
