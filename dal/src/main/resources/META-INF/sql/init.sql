@@ -1,30 +1,30 @@
 ------------------------------------------------------------------------------------------------------------------------
 -- Permission handling
 ------------------------------------------------------------------------------------------------------------------------
-drop view if exists bdproles_unrolled cascade;
-create view bdproles_unrolled as
+drop view if exists intime.bdproles_unrolled cascade;
+create view intime.bdproles_unrolled as
     with recursive roles(role, subroles) as (
         select id, ARRAY[id]::bigint[]
-            from bdprole
+            from intime.bdprole
             where parent_id is null
         union all
         select t.id, roles.subroles || t.id
-            from bdprole t, roles
+            from intime.bdprole t, roles
             where t.parent_id = roles.role
     ) select role, unnest(subroles) as sr
         from roles;
 
 
-drop view if exists bdpfilters_unrolled cascade;
-create view bdpfilters_unrolled as
+drop view if exists intime.bdpfilters_unrolled cascade;
+create view intime.bdpfilters_unrolled as
     select distinct x.role, station_id, type_id, period
-        from bdprules f
-        join bdproles_unrolled x on f.role_id = x.sr
+        from intime.bdprules f
+        join intime.bdproles_unrolled x on f.role_id = x.sr
         order by x.role;
 
-drop view if exists bdppermissions cascade;
-drop table if exists bdppermissions;
-create view bdppermissions as
+drop view if exists intime.bdppermissions cascade;
+drop table if exists intime.bdppermissions;
+create view intime.bdppermissions as
 with x as (
     select row_number() over (order by role asc) as uuid
         , role as role_id
@@ -34,7 +34,7 @@ with x as (
         , bool_or(station_id is null) over (partition by role) as e_stationid
         , bool_or(type_id is null) over (partition by role, station_id) as e_typeid
         , bool_or(period is null) over (partition by role, station_id, type_id) as e_period
-        from bdpfilters_unrolled
+        from intime.bdpfilters_unrolled
         order by role, station_id, type_id, period
 ) select uuid, role_id, station_id, type_id, period
     from x
@@ -51,11 +51,11 @@ with x as (
 -- Add GUEST (sees nothing, used to define open-data), and ADMIN (sees everything) role.
 -- If you change something here, please make sure that the documentation is also updated.
 -- See https://github.com/idm-suedtirol/documentation/wiki/ODH-Permission-handling
-INSERT INTO bdprole(name, description) VALUES ('GUEST', 'Default role, that sees open data')
+INSERT INTO intime.bdprole(name, description) VALUES ('GUEST', 'Default role, that sees open data')
     ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description;
-INSERT INTO bdprole(name, description) VALUES ('ADMIN', 'Default role, that sees all data')
+INSERT INTO intime.bdprole(name, description) VALUES ('ADMIN', 'Default role, that sees all data')
     ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description;
-INSERT INTO bdprules(role_id, station_id, type_id, period)
+INSERT INTO intime.bdprules(role_id, station_id, type_id, period)
     VALUES ((SELECT id FROM bdprole WHERE name = 'ADMIN'), null, null, null)
     ON CONFLICT DO NOTHING;
 
@@ -68,7 +68,7 @@ INSERT INTO bdprules(role_id, station_id, type_id, period)
 -- do that automatically at startup. It just queries the max value of each sequence
 -- to get the next value. XXX Currently only a few hard-coded values here, this list
 -- should probably be generated and updated with a script.
-select setval('station_seq', (select max(id) from station));
-select setval('type_seq', (select max(id) from type));
-select setval('measurement_id_seq', (select max(id) from measurement));
+select setval('intime.station_seq', (select max(id) from intime.station));
+select setval('intime.type_seq', (select max(id) from intime.type));
+select setval('intime.measurement_id_seq', (select max(id) from intime.measurement));
 
