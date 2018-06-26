@@ -2,14 +2,13 @@
 -- Permission handling
 ------------------------------------------------------------------------------------------------------------------------
 drop view if exists bdproles_unrolled cascade;
---test2
 create view bdproles_unrolled as
     with recursive roles(role, subroles) as (
         select id, ARRAY[id]::bigint[]
             from bdprole
             where parent_id is null
         union all
-        select t.id, roles.subroles || t.id --test
+        select t.id, roles.subroles || t.id
             from bdprole t, roles
             where t.parent_id = roles.role
     ) select role, unnest(subroles) as sr
@@ -23,8 +22,8 @@ create view bdpfilters_unrolled as
         join bdproles_unrolled x on f.role_id = x.sr
         order by x.role;
 
-drop table if exists bdppermissions;
 drop view if exists bdppermissions cascade;
+drop table if exists bdppermissions;
 create view bdppermissions as
 with x as (
     select row_number() over (order by role asc) as uuid
