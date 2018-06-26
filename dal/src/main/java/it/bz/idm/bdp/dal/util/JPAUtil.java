@@ -31,6 +31,7 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+
 public class JPAUtil {
 
 	public static EntityManagerFactory emFactory;
@@ -150,6 +151,7 @@ public class JPAUtil {
 			} else {
 				em.createNativeQuery(cmd).executeUpdate();
 			}
+			System.err.println("Execution from input stream successful: " + cmd);
 		}
 		em.getTransaction().commit();
 
