@@ -14,8 +14,10 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program (see LICENSE/GPLv3). If not, see
+    along with this program (see LICENSES/GPL-3.0.txt). If not, see
     <http://www.gnu.org/licenses/>.
+
+    SPDX-License-Identifier: GPL-3.0
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -158,7 +160,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>../LICENSE/templates/GPLv3-header</header>
+                    <header>../LICENSES/templates/GPL-3.0-header.txt</header>
                     <properties>
                         <owner>OpenDataHub</owner>
                         <email>info@opendatahub.bz.it</email>

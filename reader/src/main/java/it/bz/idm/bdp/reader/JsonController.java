@@ -13,8 +13,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program (see LICENSE/GPLv3). If not, see
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
  * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
  */
 package it.bz.idm.bdp.reader;
 
