@@ -168,7 +168,8 @@ To update license headers in each source code file run `mvn license:format`.
 To configure the header template edit `LICENSE/templates/` files, and
 set the correct attributes inside each `pom.xml`. See the plugin
 [license-maven-plugin](http://code.mycila.com/license-maven-plugin/)
-homepage for details.
+homepage for details. Use the `quicklicense.sh` script to update all
+source code license headers at once.
 
 ### Details of this project
 Run `mvn site` to create a HTML page with all details of this project.

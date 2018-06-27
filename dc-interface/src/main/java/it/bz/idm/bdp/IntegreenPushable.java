@@ -1,6 +1,6 @@
 /**
  * dc-interface - Data Collector Interface for the Big Data Platform
- * Copyright © 2018 OpenDataHub (info@opendatahub.bz.it)
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
