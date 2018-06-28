@@ -8,17 +8,30 @@ The Big Data Platform Core is free software. It is licensed under GNU GENERAL
 PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
 
 
-## Table of contents
-1. [CORE](#core)
-    1. [DAL (data access layer)](#dal)
-        1. [Entity Structure](#entity-structure)
-    2. [DTO (data transfer object)](#dto)
-    3. [Writer (data persister)](#writer)
-        1. [dc-interface](#dc-interface)
-    4. [Reader (data dispatcher)](#reader)
-        1. [ws-interface](#ws-interface)
-    5. [Installation guide](#installation-guide)
-    6. [Licenses](#licenses)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
+
+- [CORE](#core)
+  - [DAL](#dal)
+    - [Entity structure](#entity-structure)
+    - [More about entities to come ...](#more-about-entities-to-come-)
+- [DTO](#dto)
+- [WRITER](#writer)
+  - [dc-interface](#dc-interface)
+- [READER](#reader)
+  - [ws-interface](#ws-interface)
+- [Installation guide](#installation-guide)
+  - [Prerequisits](#prerequisits)
+  - [Step1: Set up your database](#step1-set-up-your-database)
+  - [Step2: Configure and deploy your big data platform](#step2-configure-and-deploy-your-big-data-platform)
+  - [Step 3: Check endpoints](#step-3-check-endpoints)
+- [Licenses](#licenses)
+  - [Source file updates](#source-file-updates)
+  - [Details of this project](#details-of-this-project)
+  - [Update CONTRIBUTORS.rst](#update-contributorsrst)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## CORE
 
@@ -117,7 +130,7 @@ More informations will be available soon.
   - create a user with full permissions on the db
   - create a user with read only permissions on the db
   - import the database schema
-  ```
+```
   createdb bd
   createuser bd
   createuser bdreadonly
