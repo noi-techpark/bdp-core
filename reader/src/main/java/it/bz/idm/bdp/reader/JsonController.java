@@ -97,12 +97,12 @@ public class JsonController extends DataRetriever{
 	@RequestMapping(value = "/date-of-last-record", method = RequestMethod.GET)
 	@Override
 	public @ResponseBody Date getDateOfLastRecord(@RequestParam String stationType,@RequestParam String stationId, @RequestParam(required=false) String typeId, @RequestParam(required=false) Integer period,Principal principal) {
-		return super.getDateOfLastRecord(stationType, stationId, typeId, period);
+		return super.getDateOfLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/last-record", method = RequestMethod.GET)
 	@Override
 	public @ResponseBody RecordDto getLastRecord(@RequestParam String stationType, @RequestParam String stationId, @RequestParam(required=false)String typeId, @RequestParam(required=false)Integer period,Principal principal) {
-		return super.getLastRecord(stationType, stationId, typeId, period);
+		return super.getLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/newest-record", method = RequestMethod.GET)
 	@Override
