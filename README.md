@@ -1,16 +1,21 @@
 # Big Data Platform
 
+The Big Data Platform is part of the [Open Data Hub](http://opendatahub.bz.it/) project.
+It collects and exposes mobility data sources.
+
 This platform collects heterogeneous data of different sources and different
 types, does elaborations on it and serves the raw and elaborated data through
 a REST interface.
 
 The Big Data Platform Core is free software. It is licensed under GNU GENERAL
-PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
+PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 
+----
 
+#### Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of Contents
+
 
 - [CORE](#core)
   - [DAL](#dal)
@@ -30,8 +35,11 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
   - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
   - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
   - [I want to update the CONTRIBUTORS.rst file](#i-want-to-update-the-contributorsrst-file)
+  - [Third party components](#third-party-components)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+----
 
 ## CORE
 
@@ -190,7 +198,10 @@ Results can be found under `<project>/target/site/`, entrypoint is as
 usual `index.html`.
 
 ### I want to update the CONTRIBUTORS.rst file
-Just run `bash CONTRIBUTORS.rst` and check the output inside the file 
-itself. Configure any mail or name mappings inside `.mailmap`. See 
+Just run `bash CONTRIBUTORS.rst` and check the output inside the file
+itself. Configure any mail or name mappings inside `.mailmap`. See
 `man git shortlog` for further details.
 
+### Third party components
+
+- `CONTRIBUTORS.rst` script done by [Daniele Gobbetti](https://github.com/danielegobbetti)
