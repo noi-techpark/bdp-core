@@ -175,3 +175,9 @@ source code license headers at once.
 Run `mvn site` to create a HTML page with all details of this project.
 Results can be found under `<project>/target/site/`, entrypoint is as
 usual `index.html`.
+
+### Update CONTRIBUTORS.rst
+Just run `bash CONTRIBUTORS.rst` and check the output inside the file 
+itself. Configure any mail or name mappings inside `.mailmap`. See 
+`man git shortlog` for further details.
+
