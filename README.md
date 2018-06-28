@@ -8,7 +8,7 @@ types, does elaborations on it and serves the raw and elaborated data through
 a REST interface.
 
 The Big Data Platform Core is free software. It is licensed under GNU GENERAL
-PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSE/GPLv3).
+PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 
 ----
 
