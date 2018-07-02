@@ -134,6 +134,14 @@ public class DataManager {
 		em.close();
 		return stationsDtos;
 	}
+	public List<StationDto> getStations(String stationType, String origin) {
+		List<StationDto> stationsDtos = new ArrayList<StationDto>();
+		EntityManager em = JPAUtil.createEntityManager();
+		List<Station> stations = Station.findStations(em,stationType,origin);
+		if (!stations.isEmpty())
+			stationsDtos = stations.get(0).convertToDtos(em, stations);
+		return stationsDtos;
+	}
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
 		em.getTransaction().begin();
