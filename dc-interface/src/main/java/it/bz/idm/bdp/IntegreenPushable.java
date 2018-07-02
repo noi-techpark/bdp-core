@@ -25,6 +25,7 @@ import java.util.List;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
 public interface IntegreenPushable {
@@ -34,4 +35,5 @@ public interface IntegreenPushable {
 	public abstract Object syncStations(String datasourceName, StationList dtos);
 	public abstract Object syncDataTypes(String datasourceName,List<DataTypeDto> data);
 	public abstract Object getDateOfLastRecord(String stationCode,String dataType,Integer period);
+	public abstract List<StationDto> fetchStations(String datasourceName, String origin);
 }
