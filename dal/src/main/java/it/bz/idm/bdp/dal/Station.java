@@ -431,4 +431,15 @@ public abstract class Station {
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
+	public static List<Station> findStations(EntityManager em, String type, String origin) {
+		String baseQuery = "Select station from "+type+" station where station.active = :active";
+		if (origin != null)
+			baseQuery += " and origin = :origin";
+		TypedQuery<Station> query = em.createQuery(baseQuery,Station.class);
+		query.setParameter("active", true);
+		if (origin != null)
+			query.setParameter("origin", origin);
+		return query.getResultList();
+	}
+
 }
