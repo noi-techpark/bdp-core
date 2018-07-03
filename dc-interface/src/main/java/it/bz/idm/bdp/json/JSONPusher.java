@@ -1,4 +1,25 @@
+/**
+ * dc-interface - Data Collector Interface for the Big Data Platform
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.json;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -8,6 +29,7 @@ import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
 
@@ -17,6 +39,7 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String PUSH_RECORDS = "/pushRecords/";
 	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
 	private static final String JSON_ENDPOINT = "json_endpoint";
+	private static final String STATIONS = "/stations/";
 
 	protected RestTemplate restTemplate = new RestTemplate();
 
@@ -63,5 +86,10 @@ public abstract class JSONPusher extends DataPusher {
 	@Override
 	public void connectToDataCenterCollector() {
 		// TODO authentification to writer
+	}
+	@Override
+	public List<StationDto> fetchStations(String datasourceName, String origin) {
+		StationDto[] object = restTemplate.getForObject(url + STATIONS +"{datasourceName}/?origin={origin}",StationDto[].class,datasourceName, origin);
+		return Arrays.asList(object);
 	}
 }

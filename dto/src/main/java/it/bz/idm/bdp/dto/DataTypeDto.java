@@ -1,3 +1,23 @@
+/**
+ * dto - Data Transport Objects for an object-relational mapping
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
@@ -9,13 +29,13 @@ public class DataTypeDto implements Serializable{
 	public static final String AVAILABILITY = "availability";
 	public static final String FUTURE_AVAILABILITY = "future-availability";
 	public static final String PARKING_FORECAST = "parking-forecast";
-	
+
 	private String name;
 	private String unit;
 	private String description;
 	private String rtype;
 	private Integer period;
-	
+
 	public DataTypeDto() {
 	}
 	public DataTypeDto(String name, String unit, String description, String rtype) {
@@ -25,7 +45,7 @@ public class DataTypeDto implements Serializable{
 		this.description = description;
 		this.rtype = rtype;
 	}
-	
+
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
 		super();
 		this.name = name;
@@ -76,5 +96,10 @@ public class DataTypeDto implements Serializable{
 	@Override
 	public int hashCode() {
 		return 1;
+	}
+
+	@Override
+	public String toString() {
+		return "DataTypeDto [name=" + name + ", unit=" + unit + ", description=" + description + ", rtype=" + rtype + ", period=" + period + "]";
 	}
 }

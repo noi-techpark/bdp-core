@@ -1,6 +1,25 @@
+/**
+ * BDP data - Data Access Layer for the Big Data Platform
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.dal.authentication;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -45,7 +64,7 @@ public class BDPUser {
 
 	@ManyToMany
 	@JoinTable(name = "bdpusers_bdproles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-	private Collection<BDPRole> roles;
+	private List<BDPRole> roles;
 
 	public BDPUser() {
 	}
@@ -58,7 +77,8 @@ public class BDPUser {
 		this(email, password, enabled, tokenExpired, null);
 	}
 
-	public BDPUser(String email, String password, boolean enabled, boolean tokenExpired, Collection<BDPRole> roles) {
+	public BDPUser(String email, String password, boolean enabled,
+			boolean tokenExpired, List<BDPRole> roles) {
 		this.email = email;
 		this.password = password;
 		this.enabled = enabled;
@@ -106,16 +126,16 @@ public class BDPUser {
 		this.tokenExpired = tokenExpired;
 	}
 
-	public Collection<BDPRole> getRoles() {
+	public List<BDPRole> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(Collection<BDPRole> roles) {
+	public void setRoles(List<BDPRole> roles) {
 		this.roles = roles;
 	}
 
 	public static BDPUser findByEmail(EntityManager manager, String email) {
-		TypedQuery<BDPUser> query = manager.createQuery("SELECT id FROM BDPUser where email = :email", BDPUser.class);
+		TypedQuery<BDPUser> query = manager.createQuery("SELECT u FROM BDPUser u where email = :email", BDPUser.class);
 		query.setParameter("email", email);
 		return JPAUtil.getSingleResultOrNull(query);
 	}

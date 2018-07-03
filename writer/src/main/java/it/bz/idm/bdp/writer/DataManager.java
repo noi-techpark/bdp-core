@@ -1,13 +1,36 @@
+/**
+ * Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.writer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -20,6 +43,9 @@ import it.bz.idm.bdp.dto.StationDto;
 
 @Component
 public class DataManager {
+
+	@Value("classpath:META-INF/sql/init.sql")
+	private Resource sql;
 
 	public Object pushRecords(String stationType, Object... data){
 		EntityManager em = JPAUtil.createEntityManager();
@@ -108,6 +134,14 @@ public class DataManager {
 		em.close();
 		return stationsDtos;
 	}
+	public List<StationDto> getStations(String stationType, String origin) {
+		List<StationDto> stationsDtos = new ArrayList<StationDto>();
+		EntityManager em = JPAUtil.createEntityManager();
+		List<Station> stations = Station.findStations(em,stationType,origin);
+		if (!stations.isEmpty())
+			stationsDtos = stations.get(0).convertToDtos(em, stations);
+		return stationsDtos;
+	}
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
 		em.getTransaction().begin();
@@ -118,22 +152,19 @@ public class DataManager {
 	}
 
 	/*
-	 * Updating sequences to be at the top of any serial id, because Hibernate does not
-	 * do that automatically at startup. It just queries the max value of each sequence
-	 * to get the next value. In addition, Hibernate does not generate a proper schema to
-	 * auto increment on each insertion.
-	 * XXX workaround to prevent unique key constraint violations during insertion: Should
-	 * be changed ASAP because we need to hard-code DB specific sequence updates here!
+	 * Permission handling, initial inserts and some native database fixes
+	 * must be executed at each startup of the big data platform.
 	 */
 	@EventListener(ContextRefreshedEvent.class)
-	public void afterStartup() {
-		EntityManager em = JPAUtil.createEntityManager();
-		em.getTransaction().begin();
-		em.createNativeQuery("select setval('station_seq', (select max(id) from station))").getSingleResult();
-		em.createNativeQuery("select setval('type_seq', (select max(id) from type))").getSingleResult();
-		em.createNativeQuery("select setval('measurement_id_seq', (select max(id) from measurement))")
-				.getSingleResult();
-		em.getTransaction().commit();
+	public void afterStartup() throws IOException {
+		/*
+		 * XXX It is not safe to run this query on every startup, we must fix an
+		 * issue where Postgres fails because a table should be dropped that is
+		 * a view instead or vice-versa. Until this is fixed, we must run the
+		 * init.sql script manually choosing between "DROP TABLE" or "DROP VIEW"
+		 * based on the actual database content.
+		 */
+		// JPAUtil.executeNativeQueries(sql.getInputStream());
 	}
 
 }

@@ -1,3 +1,23 @@
+/**
+ * BDP data - Data Access Layer for the Big Data Platform
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
@@ -109,6 +129,7 @@ public abstract class MeasurementStation extends Station {
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
+		BDPRole adminRole = BDPRole.fetchAdminRole(em);
 		if (object instanceof DataMapDto) {
 			@SuppressWarnings("unchecked")
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
@@ -118,11 +139,10 @@ public abstract class MeasurementStation extends Station {
 					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
-							BDPRole role = BDPRole.fetchAdminRole(em);
 							DataType type = DataType.findByCname(em, typeEntry.getKey());
 							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, role);
+								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, adminRole);
 								Date created_on = new Date();
 								Collections.sort(dataRecords);
 								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
@@ -172,7 +192,6 @@ public abstract class MeasurementStation extends Station {
 			List<Object> dtos = Arrays.asList((Object[]) object);
 			try{
 				em.getTransaction().begin();
-				BDPRole role = BDPRole.fetchAdminRole(em);
 				Station station = null;
 				DataType type = null;
 				String tempSS = null,tempTS = null;
@@ -191,7 +210,7 @@ public abstract class MeasurementStation extends Station {
 								continue;
 							tempTS = full.getType();
 						}
-						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), role);
+						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), adminRole);
 						Number value = (Number) full.getValue();
 						if (lastEntry == null){
 							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());

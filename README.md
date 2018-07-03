@@ -1,16 +1,45 @@
 # Big Data Platform
 
-This platform was developed to collect heterogeneous data of different sources and different types, do elaborations on it and serve the raw and elaborated data through a REST interface.
-## Table of contents
-1. [CORE](#core)
-  1. [DAL (data access layer)](#dal)
-    1. [Entity Structure](#entity-structure)
-  2. [DTO (data transfer object)](#dto)
-  3. [Writer (data persister)](#writer)
-    1. [dc-interface](#dc-interface)
-  4. [Reader (data dispatcher)](#reader)
-    1. [ws-interface](#ws-interface)
-  5. [Installation guide](#installation-guide)
+The Big Data Platform is part of the [Open Data Hub](http://opendatahub.bz.it/) project.
+It collects and exposes mobility data sources.
+
+This platform collects heterogeneous data of different sources and different
+types, does elaborations on it and serves the raw and elaborated data through
+a REST interface.
+
+The Big Data Platform Core is free software. It is licensed under GNU GENERAL
+PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
+
+----
+
+#### Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [CORE](#core)
+  - [DAL](#dal)
+    - [Entity structure](#entity-structure)
+    - [More about entities to come ...](#more-about-entities-to-come-)
+  - [DTO](#dto)
+  - [WRITER](#writer)
+    - [dc-interface](#dc-interface)
+  - [READER](#reader)
+    - [ws-interface](#ws-interface)
+- [Installation guide](#installation-guide)
+  - [Prerequisits](#prerequisits)
+  - [Step1: Set up your database](#step1-set-up-your-database)
+  - [Step2: Configure and deploy your big data platform](#step2-configure-and-deploy-your-big-data-platform)
+  - [Step 3: Check endpoints](#step-3-check-endpoints)
+- [Licenses](#licenses)
+  - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
+  - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
+  - [I want to update the CONTRIBUTORS.rst file](#i-want-to-update-the-contributorsrst-file)
+  - [Third party components](#third-party-components)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+----
 
 ## CORE
 
@@ -49,28 +78,28 @@ The core strutcture of the bdp is quiet simple. There exists 3 entities on which
 
 #### More about entities to come ...
 
-## DTO
+### DTO
 Data transfer objects are used as format for exchanging the data. They are used between data provider and data persister(writer) but also between data dispatcher and data reader (reader). This dto module is a java library contained in all modules of the big data platform, simply because it contains the structure of communication between the modules.
 - dtos between data collectors and writer: //TODO add definitive dtos
 - dtos between webservices and reader: //TODO add definitive dtos
 
-## WRITER
+### WRITER
 The writer is a simple interface exposing rest endpoints, where data can be pushed as json in the structures defined in dto.
 The DAL is a big and shared part between writer and reader and saves and retrieves the data through abstraction.
 The writer himself implements the methods to write data to the bdp and is therefore the endpoint for all datacollectors.
 It uses the persistence-unit of the DAL which has permissions to read all data and also to write everything.
 
 
-### dc-interface
+#### dc-interface
 The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing json client implementation(JSONPusher.java).
 The API is compact and easy to use:
-	
+
   - `Object syncStations(String dataStationTypology, StationList data)` : This method is used to create,update,delete stations of a specific typology data must be a StationList(List of StationDto's)
-  
+
   If, for example dataStationTypology = "Meteostation", the array can contain StationDto but also MeteostationDto
-	
+
   - `Object syncDataTypes(String dataStationTypology, List<DataTypeDto> data)` : This method is used to create and update data types. Data must be a list of DataTypeDto
-  
+
   - `Object pushData(String datasourceName,  DataMapDto<? extends RecordDtoImpl> dto)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. The data in here gets saved in form of a tree.
 Each branch can have multiple child branches but can also have data itself, which means it can have indefinitive depth.
 Right now, by our internal conventions we store everything on the second level, like this:
@@ -88,12 +117,12 @@ https://github.com/idm-suedtirol/bdp-core/blob/master/dto/src/main/java/it/bz/id
 
 **datasourceName** identifies which kind of data needs to be saved
 
-## READER
+### READER
 The reader is a simple interface exposing calls through a json service (RestClient).
 It depends on the DAL and retrieves the data through abstraction.
 It uses the persistence unit which has read only access on the db.
 
-### ws-interface
+#### ws-interface
 Luckily on the reader side there exists already a Java implementation for the API to get the data you need. To be able to use it you need to include the ws-interface jar file in your dependencies and than use the RestClient implementation. If you want to serve the data as json throught the provided API you can also use the spring web-mvc Rest implementation with jwt authentication.
 
 More informations will be available soon.
@@ -109,7 +138,7 @@ More informations will be available soon.
   - create a user with full permissions on the db
   - create a user with read only permissions on the db
   - import the database schema
-  ```
+```
   createdb bd
   createuser bd
   createuser bdreadonly
@@ -119,8 +148,7 @@ More informations will be available soon.
   > GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA intime TO bdreadonly;
   > create extension postgis
   psql -U bd bd < schema.dump
-
-  ```
+```
 
 ### Step2: Configure and deploy your big data platform
   - clone git repo bdp-core
@@ -128,7 +156,8 @@ More informations will be available soon.
   - Setup and install your dal module
   - Compile and package your writer and reader module
   - Deploy the generated writer.war and reader.war on your application server
-  ```
+
+```
   git clone https://github.com/idm-suedtirol/bdp-core.git
   cd bdp-core
   cd dto
@@ -140,12 +169,39 @@ More informations will be available soon.
   mvn clean package
   cd../reader
   mvn clean package
-  ```
+```
+
 ### Step 3: Check endpoints
-To check the endpoints of the 2 apps go to http://{host}:{port}/writer/json and http://{host}:{port}/reader/json. There you should get 405 method GET not allowed as response. 
-  ```
+To check the endpoints of the 2 apps go to `http://{host}:{port}/writer/json`
+and `http://{host}:{port}/reader/json`. There you should get
+`405 method GET not allowed` as response.
 
 If this works you made it.
 
 You deployed your bd-core and now will be able to add modules or develop your own.
 For more informations read the modules manual.
+
+
+## Licenses
+
+### I want to update license headers of each source file
+To update license headers in each source code file run `mvn license:format`.
+To configure the header template edit `LICENSE/templates/` files, and
+set the correct attributes inside each `pom.xml`. See the plugin
+[license-maven-plugin](http://code.mycila.com/license-maven-plugin/)
+homepage for details. Use the `quicklicense.sh` script to update all
+source code license headers at once.
+
+### I want to see details of this project as HTML page
+Run `mvn site` to create a HTML page with all details of this project.
+Results can be found under `<project>/target/site/`, entrypoint is as
+usual `index.html`.
+
+### I want to update the CONTRIBUTORS.rst file
+Just run `bash CONTRIBUTORS.rst` and check the output inside the file
+itself. Configure any mail or name mappings inside `.mailmap`. See
+`man git shortlog` for further details.
+
+### Third party components
+
+- `CONTRIBUTORS.rst` script done by [Daniele Gobbetti](https://github.com/danielegobbetti)

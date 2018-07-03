@@ -1,3 +1,23 @@
+/**
+ * ws-interface - Web Service Interface for the Big Data Platform
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.ws.util;
 
 import java.util.ArrayList;
@@ -13,7 +33,10 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.DocExpansion;
+import springfox.documentation.swagger.web.OperationsSorter;
 import springfox.documentation.swagger.web.UiConfiguration;
+import springfox.documentation.swagger.web.UiConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
@@ -46,14 +69,8 @@ public class SwaggerConfig{
 	    }
 	    @Bean
 	    UiConfiguration uiConfig() {
-	    	return new UiConfiguration(
-	    			null,// url
-	    			"list",       // docExpansion          => none | list
-	    			"alpha",      // apiSorter             => alpha
-	    			"schema",     // defaultModelRendering => schema
-	    			UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS,
-	    			false,        // enableJsonEditor      => true | false
-	    			true,
-	    			3000l);
+	    	UiConfigurationBuilder builder = UiConfigurationBuilder.builder();
+	    	builder.docExpansion(DocExpansion.LIST).operationsSorter(OperationsSorter.ALPHA);
+	    	return builder.build();
 	    }
 }

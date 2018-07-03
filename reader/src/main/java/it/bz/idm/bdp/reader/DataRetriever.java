@@ -1,6 +1,27 @@
+/**
+ * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
 package it.bz.idm.bdp.reader;
 
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +32,7 @@ import javax.persistence.EntityManager;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.authentication.BDPUser;
 import it.bz.idm.bdp.dal.bluetooth.Linkstation;
 import it.bz.idm.bdp.dal.parking.ParkingStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -135,9 +157,9 @@ public class DataRetriever {
 		return getDataTypes(type, null);
 	}
 
-	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
+	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
 		Date dateOfLastRecord = null;
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
@@ -152,10 +174,10 @@ public class DataRetriever {
 		return dateOfLastRecord;
 	}
 
-	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period) {
+	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		ParkingRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
@@ -167,10 +189,10 @@ public class DataRetriever {
 		}
 		return dto;
 	}
-	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period) {
+	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
 		RecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
 			if (s != null){
@@ -184,22 +206,25 @@ public class DataRetriever {
 		}
 		return dto;
 	}
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period){
+
+
+	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period, Principal p){
 		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
-		return getRecords(stationtypology, identifier, type, start, end, period,seconds);
+		return getRecords(stationtypology, identifier, type, start, end, period,seconds, p);
 	}
 
 	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end,
-			Integer period, Integer seconds) {
+			Integer period, Integer seconds, Principal p) {
 		if (start == null && end == null) {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
 			start = new Date(end.getTime() - (seconds * 1000l));
 		}
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchGuestRole(em);
+		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em); 
+
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtypology);
@@ -248,5 +273,12 @@ public class DataRetriever {
 			String datePattern) {
 		return ParkingStation.findFreeSlotsByTimeFrame(identifier,startDateString, endDateString,datePattern);
 	}
-
+	
+	private BDPRole getRoleByPrincipal(Principal principal, EntityManager em) {
+		BDPUser user = BDPUser.findByEmail(em, principal.getName());
+		BDPRole role = user==null || user.getRoles().isEmpty() ? null : user.getRoles().get(0);
+		if (role == null)
+			role = BDPRole.fetchGuestRole(em);
+		return role;
+	}
 }
