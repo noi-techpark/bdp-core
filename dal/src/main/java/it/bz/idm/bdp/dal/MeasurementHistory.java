@@ -56,7 +56,7 @@ public class MeasurementHistory {
     @Id
 	@GeneratedValue(generator = "measurementhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementhistory_gen", sequenceName = "measurementhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('measurementhistory_seq')")
+	@ColumnDefault(value = "nextval('intime.measurementhistory_seq')")
 	private Long id;
 
 	private Date timestamp;

@@ -178,7 +178,7 @@ public class TrafficVehicleRecord {
 	@Id
 	@GeneratedValue(generator = "trafficvehiclerecord_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "trafficvehiclerecord_gen", sequenceName = "trafficvehiclerecord_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('trafficvehiclerecord_seq')")
+	@ColumnDefault(value = "nextval('intime.trafficvehiclerecord_seq')")
 	private Long id;
 
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")
