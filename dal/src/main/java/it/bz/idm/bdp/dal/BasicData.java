@@ -44,7 +44,7 @@ public abstract class BasicData {
 	@Id
 	@GeneratedValue(generator = "basicdata_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "basicdata_gen", sequenceName = "basicdata_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('basicdata_seq')")
+	@ColumnDefault(value = "nextval('intime.basicdata_seq')")
 	private Long id;
 
 	@ManyToOne

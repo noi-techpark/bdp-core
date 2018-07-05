@@ -46,7 +46,7 @@ public class ElaborationHistory {
 	@Id
 	@GeneratedValue(generator = "elaborationhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "elaborationhistory_gen", sequenceName = "elaborationhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('elaborationhistory_seq')")
+	@ColumnDefault(value = "nextval('intime.elaborationhistory_seq')")
 	protected Long id;
 	private Date created_on;
 	private Date timestamp;
