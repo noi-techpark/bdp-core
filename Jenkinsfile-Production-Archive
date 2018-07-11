@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence.xml')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
     }
 
     stages {
