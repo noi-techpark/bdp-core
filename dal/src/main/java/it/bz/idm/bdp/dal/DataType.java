@@ -50,7 +50,7 @@ public class DataType {
 	@Id
 	@GeneratedValue(generator = "type_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "type_gen", sequenceName = "type_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('type_seq')")
+	@ColumnDefault(value = "nextval('intime.type_seq')")
 	protected Long id;
 	private String cname;
 	private Date created_on;

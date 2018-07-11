@@ -46,7 +46,7 @@ public class CarParkingDynamic {
 	@Id
 	@GeneratedValue(generator = "carparkingdynamic_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "carparkingdynamic_gen", sequenceName = "carparkingdynamic_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('carparkingdynamic_seq')")
+	@ColumnDefault(value = "nextval('intime.carparkingdynamic_seq')")
 	private Integer id;
 
 	@OneToOne(cascade = CascadeType.ALL)

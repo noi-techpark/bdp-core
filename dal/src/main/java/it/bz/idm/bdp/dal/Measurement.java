@@ -52,7 +52,7 @@ public class Measurement {
     @Id
 	@GeneratedValue(generator = "measurement_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('measurement_seq')")
+	@ColumnDefault(value = "nextval('intime.measurement_seq')")
 	private Integer id;
 
 	private Date timestamp;

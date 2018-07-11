@@ -186,7 +186,7 @@ public class TrafficVehicleRecordHistory {
 	@Id
 	@GeneratedValue(generator = "trafficvehiclerecordhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "trafficvehiclerecordhistory_gen", sequenceName = "trafficvehiclerecordhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('trafficvehiclerecordhistory_seq')")
+	@ColumnDefault(value = "nextval('intime.trafficvehiclerecordhistory_seq')")
 	private Long id;
 
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")

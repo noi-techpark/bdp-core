@@ -43,7 +43,7 @@ public class Alarm {
 	@Id
 	@GeneratedValue(generator = "alarm_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "alarm_gen", sequenceName = "alarm_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('alarm_seq')")
+	@ColumnDefault(value = "nextval('intime.alarm_seq')")
 	private Long id;
 
 	@ManyToOne(cascade=CascadeType.ALL)
