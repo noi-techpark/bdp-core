@@ -26,6 +26,7 @@ import java.util.List;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordExtendedDto;
+import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 import it.bz.idm.bdp.ws.SlimRecordDto;
 
 public class DtoParser {
@@ -38,7 +39,9 @@ public class DtoParser {
 			}else if (dto instanceof BluetoothRecordExtendedDto){
 				BluetoothRecordExtendedDto bDto = (BluetoothRecordExtendedDto) dto;
 				list.add(new SlimRecordDto(bDto.getTimestamp(), bDto.getValue(), null, bDto.getCreated_on()));
-
+			}else if (dto instanceof ParkingRecordExtendedDto) {
+				ParkingRecordExtendedDto pdto = (ParkingRecordExtendedDto) dto;
+				list.add(new SlimRecordDto(pdto.getTimestamp(),pdto.getValue(),null,pdto.getCreated_on()));
 			}
 				
 		}
