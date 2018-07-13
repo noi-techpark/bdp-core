@@ -22,7 +22,9 @@ package it.bz.idm.bdp.dal.authentication;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Immutable;
 
@@ -31,6 +33,7 @@ import it.bz.idm.bdp.dal.Station;
 
 @Immutable
 @Entity
+@Table(name = "bdppermissions", schema = "intime", indexes = { @Index(columnList = "station_id, type_id, period", name = "bdppermissions_stp_idx") })
 public class BDPPermissions {
 
 	@Id
