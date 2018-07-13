@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -42,7 +43,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
-@Table(name="measurement")
+@Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
 public class Measurement {
 
@@ -53,7 +54,7 @@ public class Measurement {
 	@GeneratedValue(generator = "measurement_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurement_seq')")
-	private Integer id;
+	private Long id;
 
 	private Date timestamp;
 	private Double value;
@@ -88,10 +89,11 @@ public class Measurement {
 		this.created_on = new Date();
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public Date getTimestamp() {

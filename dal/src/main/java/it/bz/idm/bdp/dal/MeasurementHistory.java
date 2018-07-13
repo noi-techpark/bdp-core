@@ -46,7 +46,7 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
-@Table(name="measurementhistory",indexes={@Index(columnList="station_id,type_id,timestamp,period",unique=true)})
+@Table(name = "measurementhistory", indexes = { @Index(columnList = "station_id,type_id,timestamp,period", unique = true), @Index(columnList = "timestamp desc", name = "measurementhistory_tsdesc_idx") })
 @Entity
 
 public class MeasurementHistory {
