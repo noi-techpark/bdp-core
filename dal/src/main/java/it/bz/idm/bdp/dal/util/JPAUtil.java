@@ -44,6 +44,7 @@ public class JPAUtil {
 			emFactory = Persistence.createEntityManagerFactory(properties.getProperty("persistenceunit"));
 		}catch(Throwable ex){
 			System.err.println("Cannot create EntityManagerFactory.");
+			ex.printStackTrace(System.err);
 			throw new ExceptionInInitializerError(ex);
 		}
 	}
