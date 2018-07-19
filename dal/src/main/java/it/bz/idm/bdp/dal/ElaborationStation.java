@@ -48,7 +48,7 @@ public abstract class ElaborationStation extends Station {
 	@Override
 	public List<String[]> findDataTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
-		if (stationId == null) {
+		if (stationId == null || stationId.isEmpty()) {
 			query = em
 					.createQuery(
 							"SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.class=:stationType "
