@@ -108,11 +108,12 @@ public abstract class RestController {
 		return retriever.fetchDateOfLastRecord(station, type,period);
 	}
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
-	public @ResponseBody RecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
+	public @ResponseBody SlimRecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
 		retriever.setAccessToken(accessToken);
-		return retriever.fetchNewestRecord(station, type,period);
+		SlimRecordDto dto = DtoParser.reduce(retriever.fetchNewestRecord(station, type,period));
+		return dto;
 	}
 }

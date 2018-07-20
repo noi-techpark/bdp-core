@@ -59,11 +59,11 @@ public class SwaggerConfig{
 			ApiInfo apiInfo = new ApiInfo(
 	            "Big data platform REST API",
 	            "This API contains all documentation about the big data platform ",
-	            "",
+	            "1.0",
 	            "API TOS",
 	            new Contact("","",""),
-	            "API License",
-	            "API License URL", extensions
+	            "Data License: CC0",
+	            "https://creativecommons.org/publicdomain/zero/1.0/deed.en", extensions
 	        );
 	        return apiInfo;
 	    }
