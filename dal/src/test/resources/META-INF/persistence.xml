@@ -16,6 +16,7 @@
            <property name="hibernate.hikari.dataSource.databaseName" value=""/>
 		   <property name="hibernate.hikari.dataSource.user" value=""/>
 		   <property name="hibernate.hikari.dataSource.password" value=""/>
+		   <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
        </properties>
     </persistence-unit>
     <persistence-unit name="jpa-persistence-write" transaction-type="RESOURCE_LOCAL">
@@ -31,6 +32,7 @@
            <property name="hibernate.hikari.dataSource.databaseName" value=""/>
 		   <property name="hibernate.hikari.dataSource.user" value=""/>
 		   <property name="hibernate.hikari.dataSource.password" value=""/>
+		   <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
        </properties>
     </persistence-unit>
 </persistence>
