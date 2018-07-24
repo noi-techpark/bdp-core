@@ -42,14 +42,14 @@ import it.bz.idm.bdp.ws.util.DtoParser;
 
 public abstract class RestController {
 	
-	private static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)";
-	private static final String STATION_PARAM = "The unique ID of the station.";
-	private static final String TYPE_PARAM = "";
-	private static final String PERIOD_PARAM = "An integer number denoting the last seconds that have passed.";
-	private static final String NAME_PARAM = "The name of the station.";
-	private static final String SECONDS_PARAM= "An integer amount of seconds.";
-	private static final String FROM_PARAM= "The start of the required interval.";
-	private static final String TO_PARAM= "The end of the required interval.";
+	protected static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)";
+	protected static final String STATION_PARAM = "The unique ID of the station.";
+	protected static final String TYPE_PARAM = "";
+	protected static final String PERIOD_PARAM = "An integer number denoting the last seconds that have passed.";
+	protected static final String NAME_PARAM = "The name of the station.";
+	protected static final String SECONDS_PARAM= "An integer amount of seconds.";
+	protected static final String FROM_PARAM= "The start of the required interval.";
+	protected static final String TO_PARAM= "The end of the required interval.";
 	
 	protected DataRetriever retriever;
 	
