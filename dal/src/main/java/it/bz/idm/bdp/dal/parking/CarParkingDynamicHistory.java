@@ -50,7 +50,7 @@ public class CarParkingDynamicHistory {
 	@Id
 	@GeneratedValue(generator = "carparkingdynamichistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "carparkingdynamichistory_gen", sequenceName = "carparkingdynamichistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.parkingdynamichistory_seq')")
+	@ColumnDefault(value = "nextval('carparkingdynamichistory_seq')")
 	private Integer id;
 
 	@ManyToOne
