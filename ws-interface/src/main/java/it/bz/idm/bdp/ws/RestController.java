@@ -88,14 +88,14 @@ public abstract class RestController {
 		return retriever.fetchStationDetails(null);
 	}
 
-	@ApiOperation(value="Return the available data types for that station.")
+	@ApiOperation(value="Return the available data types for that station.", notes="")
 	@RequestMapping(value = {"get-data-types"}, method = RequestMethod.GET)
 	public @ResponseBody List<List<String>> getDataTypes(
 			@ApiParam(STATION_PARAM) @RequestParam(value = "station", required = false) String station) {
 		return retriever.fetchDataTypes(station);
 	}
 	
-	@ApiOperation(value="Returns all the data in the last given seconds.")
+	@ApiOperation(value="Returns all the data in the last given seconds.",notes="")
 	@RequestMapping(value = {"get-records"}, method = RequestMethod.GET)
 	public @ResponseBody List<SlimRecordDto> getRecords(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
@@ -108,7 +108,7 @@ public abstract class RestController {
 		return list;
 	}
 	
-	@ApiOperation(value="Return the latest recorded data for a station.")
+	@ApiOperation(value="Return for a given station the data acquired in a given interval.", notes="Show all the data recorded in the given interval. Remeber to convert any date into milliseconds from epoch.")
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
 	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
@@ -132,7 +132,7 @@ public abstract class RestController {
 		return retriever.fetchDateOfLastRecord(station, type,period);
 	}
 	
-	@ApiOperation(value="Return the record from the given period", notes="Given an integer number, retrieve all the records in the last number of seconds.")
+	@ApiOperation(value="Return the timestamp and value of the latest recorded data.", notes="")
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
 	public @ResponseBody SlimRecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
 			@RequestParam("station") String station,
