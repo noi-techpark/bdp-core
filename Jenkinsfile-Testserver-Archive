@@ -4,6 +4,7 @@ pipeline {
     environment {
         BDP_DATABASE_CONFIG = credentials('bdp-core-test-persistence.xml')
         BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
+        TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
     }
 
     stages {
