@@ -40,5 +40,11 @@ pipeline {
                sh 'cp -f writer/target/writer.war /var/builds/test-server/'
             }
         }
+	stage('Deploy') {
+            steps{
+                sh 'cd writer && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+            }
+        }
     }
 }
