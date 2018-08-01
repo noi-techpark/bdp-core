@@ -42,9 +42,9 @@ import it.bz.idm.bdp.ws.util.DtoParser;
 
 public abstract class RestController {
 	
-	protected static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1) - Authentication is not yet available in this version of the API.";
+	protected static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).";
 	protected static final String STATION_PARAM = "The unique ID of the station.";
-	protected static final String TYPE_PARAM = "The data type of the parameter.";
+	protected static final String TYPE_PARAM = "The name of the data-type you are searching for.";
 	protected static final String PERIOD_PARAM = "The interval in time between two successive data acquisitions.";
 	protected static final String SECONDS_PARAM= "How many seconds in the past (from now) the search must be started.";
 	protected static final String FROM_PARAM= "The timestamp in milliseconds of the start of the interval.";
@@ -70,7 +70,7 @@ public abstract class RestController {
 		return retriever.fetchRefreshToken(user, pw);
 	}
 	
-	@ApiOperation(value="")
+	@ApiOperation(value="Request a new access token", notes="This method would give you a new token to access protected data.")
 	@RequestMapping(value = "access-token", method = RequestMethod.GET)
 	public @ResponseBody AccessTokenDto getAccessToken(@RequestHeader(required=true,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY, required=true) String refreshToken) {
 		return retriever.fetchAccessToken(refreshToken);
