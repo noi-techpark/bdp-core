@@ -41,7 +41,7 @@ import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.ws.util.DtoParser;
 
 public abstract class RestController {
-	
+
 	protected static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).";
 	protected static final String STATION_PARAM = "The unique ID of the station.";
 	protected static final String TYPE_PARAM = "The name of the data-type you are searching for.";
@@ -51,16 +51,16 @@ public abstract class RestController {
 	protected static final String TO_PARAM= "The timestamp in milliseconds of the end of the interval.";
 	protected static final String USER_PARAM = "The username of the user to which to grant the new token.";
 	protected static final String PW_PARAM = "The password corresponding to the user.";
-	
+
 	protected DataRetriever retriever;
-	
+
 	public abstract DataRetriever initDataRetriever();
-	
+
 	@PostConstruct
 	public void init(){
 		this.retriever = initDataRetriever();
 	}
-	
+
 	@ApiOperation(value="Request a new authorisation token to access protected data.", 
 			notes="If you need to access protected, closed data and you have been given a username and password, invoke this method to receive a new token.")
 	@RequestMapping(value = "refresh-token", method = RequestMethod.GET)
@@ -69,19 +69,19 @@ public abstract class RestController {
 			@ApiParam(value=PW_PARAM, required=true) @RequestParam(value="pw",required=true)String pw) {
 		return retriever.fetchRefreshToken(user, pw);
 	}
-	
+
 	@ApiOperation(value="Request a new access token", notes="This method would give you a new token to access protected data.")
 	@RequestMapping(value = "access-token", method = RequestMethod.GET)
 	public @ResponseBody AccessTokenDto getAccessToken(@RequestHeader(required=true,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY, required=true) String refreshToken) {
 		return retriever.fetchAccessToken(refreshToken);
 	}
-	
+
 	@ApiOperation(value="Retrieve all stations in the dataset.", notes="This method returns all the ID of the stations listed in the dataset.")
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
 	public @ResponseBody String[] getStationIds() {
 		return retriever.fetchStations();
 	}
-	
+
 	@ApiOperation(value="Retrieve all information about all stations.", notes="This method returns the list of all stations in the dataset, including all available information about them.")
 	@RequestMapping(value = "get-station-details", method = RequestMethod.GET)
 	public @ResponseBody List<StationDto> getStationDetails() {
@@ -94,7 +94,7 @@ public abstract class RestController {
 			@ApiParam(STATION_PARAM) @RequestParam(value = "station", required = false) String station) {
 		return retriever.fetchDataTypes(station);
 	}
-	
+
 	@ApiOperation(value="Returns all the data in the last given seconds.",notes="")
 	@RequestMapping(value = {"get-records"}, method = RequestMethod.GET)
 	public @ResponseBody List<SlimRecordDto> getRecords(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
@@ -107,7 +107,7 @@ public abstract class RestController {
 		List<SlimRecordDto> list = DtoParser.reduce(records);
 		return list;
 	}
-	
+
 	@ApiOperation(value="Return for a given station the data acquired in a given interval.", notes="Show all the data recorded in the given interval. Remeber to convert any date into milliseconds from epoch.")
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
 	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
@@ -131,13 +131,13 @@ public abstract class RestController {
 		retriever.setAccessToken(accessToken);
 		return retriever.fetchDateOfLastRecord(station, type,period);
 	}
-	
+
 	@ApiOperation(value="Return the timestamp and value of the latest recorded data.", notes="")
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
-	public @ResponseBody SlimRecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(TOKEN_POLICY) String accessToken,
-			@RequestParam("station") String station,
-			@RequestParam(value="type",required=false) String type,
-			@RequestParam(value="period",required=false) Integer period) {
+	public @ResponseBody SlimRecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
+			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
+			@ApiParam(TYPE_PARAM) @RequestParam(value="type",required=false) String type,
+			@ApiParam(PERIOD_PARAM) @RequestParam(value="period",required=false) Integer period) {
 		retriever.setAccessToken(accessToken);
 		SlimRecordDto dto = DtoParser.reduce(retriever.fetchNewestRecord(station, type,period));
 		return dto;
