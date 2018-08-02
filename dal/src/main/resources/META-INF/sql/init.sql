@@ -59,6 +59,9 @@ INSERT INTO intime.bdprules(role_id, station_id, type_id, period)
     VALUES ((SELECT id FROM bdprole WHERE name = 'ADMIN'), null, null, null)
     ON CONFLICT DO NOTHING;
 
+-- create default admin user and association to admin role
+insert into bdpuser(email,enabled,password,tokenexpired) values('admin',true,'Z.MezJ8Y8HVtsgNMrFBKCOAz3CCaVkKawHBIhUj.wSdElYHb/KcZS',false);
+insert into bdpusers_bdproles(user_id,role_id) select u.id,r.id from bdpuser u cross join bdprole r  where u.email='admin' and r.name ='ADMIN';
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Fix sequences
@@ -72,6 +75,3 @@ select setval('intime.station_seq', (select max(id) from intime.station));
 select setval('intime.type_seq', (select max(id) from intime.type));
 select setval('intime.measurement_id_seq', (select max(id) from intime.measurement));
 
--- create default admin user and association to admin role
-insert into bdpuser(email,enabled,password,tokenexpired) values('admin',true,'Z.MezJ8Y8HVtsgNMrFBKCOAz3CCaVkKawHBIhUj.wSdElYHb/KcZS',false);
-insert into bdpusers_bdproles(user_id,role_id) select u.id,r.id from bdpuser u cross join bdprole r  where u.email='admin' and r.name ='ADMIN';

@@ -57,13 +57,15 @@ public class SwaggerConfig{
 		@SuppressWarnings("rawtypes")
 		Collection<VendorExtension> extensions = new ArrayList<VendorExtension>();
 			ApiInfo apiInfo = new ApiInfo(
-	            "Big data platform REST API",
-	            "This API contains all documentation about the big data platform ",
-	            "",
-	            "API TOS",
+	            "Big Data Platform REST API",
+	            "This page contains the documentation about the API REST calls of the Big Data Platform, the core component of the ODH Project.\n"
+	            + "More information about the project in its homepage: http://opendatahub.bz.it/ \n"
+	            + "Tutorials and technical documentation can be found at http://opendatahub.readthedocs.io/en/latest/index.html\n\n",
+	            "v1",
+	            "http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
 	            new Contact("","",""),
 	            "API License",
-	            "API License URL", extensions
+	            "http://opendatahub.readthedocs.io/en/latest/licenses.html", extensions
 	        );
 	        return apiInfo;
 	    }

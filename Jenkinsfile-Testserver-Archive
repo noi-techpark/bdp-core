@@ -4,6 +4,7 @@ pipeline {
     environment {
         BDP_DATABASE_CONFIG = credentials('bdp-core-test-persistence.xml')
         BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
+        TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
     }
 
     stages {
@@ -38,6 +39,12 @@ pipeline {
                sh 'mkdir -p /var/builds/test-server'
                sh 'cp -f reader/target/reader.war /var/builds/test-server/'
                sh 'cp -f writer/target/writer.war /var/builds/test-server/'
+            }
+        }
+	stage('Deploy') {
+            steps{
+                sh 'cd writer && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }

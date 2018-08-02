@@ -57,18 +57,22 @@ To configure the DAL module to communicate with your database you need to provid
 >`src/main/resources/META-INF/persistence.xml`
 
 As you will see 2 persistence-units are configured. One is meant for the reader with preferably a read-only user and the other one for the writer which performs all the transactions.
-You can either import the schema
 
-  `psql [database] < schema.dump`
-
-or let the ORM automaticaly create it for you by replacing
-> hibernate.hbm2ddl.autohibernate.hbm2ddl.auto `validate` to `update`
+Let the ORM handle the schema creation which will create all tables, views, sequences, primary keys, foreign keys, constraints etc.  automatically. Do so by changing the property
+> hibernate.hbm2ddl.auto `validate` to `update`
 
 #### Entity structure
 The core strutcture of the bdp is quiet simple. There exists 3 entities on which all relies on
   - **Station** : Represents the origin of the data which only needs an idenfier, a coordinate and a so called stationtype. Additional fields are the provider of the data, a name and description.
 
-  *Example*: station can be of stationtype `MeteoStation`, have a identifier `89935GW` and a position `latitude":46.24339407235059,"longitude":11.199431152658656`
+	Station is an abstract class containing generic operations and fields, valid for all type of stations. **MeasurementStation** extends Station and contains the business logic on how DataRecords which are measurements get stored to the database through the entities **Measurement** and **MeasurementHistory**. Measurements are identified by a timestamp, a double precision value, a reference to the type and a reference to the station.
+	**ElaborationStation** works quite similar but handles data which are elaborations created with data already contained inside the bigdataplatform. **Elaboration** and **ElaborationHistory** get used to store this data and are quite similar to Measurement and MeasurementHistory.
+	ElaborationStation and MeasurementStation are abstract classes which get extended by different classes containing the identifier of a stationtype.
+
+	Sometimes incoming data data might be not numbers, but Strings. These kind of data is stored throught the entities **MeasurementString** and **MeasurementStringHistory**.
+
+  *Example*: station can be of stationtype **MeteoStation**, have a identifier `89935GW` and a position `latitude":46.24339407235059,"longitude":11.199431152658656`
+	It extends MeasurementStation and therefore needs close to no additional implementation to store data.
   - **DataType**: Represents the typology of the data in form of a unique name and a unit. Description and type of measurement can also be provided.
 
   *Example*: temperature can have a unit `°C` and can be an `average` value of the last 5 minutes.
@@ -103,6 +107,7 @@ The API is compact and easy to use:
   - `Object pushData(String datasourceName,  DataMapDto<? extends RecordDtoImpl> dto)` : Here comes the most important one. This is the place where you place all the data you want to pass to the bdp. The data in here gets saved in form of a tree.
 Each branch can have multiple child branches but can also have data itself, which means it can have indefinitive depth.
 Right now, by our internal conventions we store everything on the second level, like this:
+
 ```
 ----Station
 
@@ -137,34 +142,45 @@ More informations will be available soon.
   - create a database and add postgis extension
   - create a user with full permissions on the db
   - create a user with read only permissions on the db
-  - import the database schema
+
+
 ```
   createdb bd
   createuser bd
   createuser bdreadonly
   psql bd
-  > alter database bd owner to bd
+  > alter database bd owner to bd;
+	> create schema intime authorization bd;
   > GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdreadonly;
   > GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA intime TO bdreadonly;
-  > create extension postgis
-  psql -U bd bd < schema.dump
+  > create extension postgis;
 ```
 
 ### Step2: Configure and deploy your big data platform
   - clone git repo bdp-core
   - Install the dto module
-  - Setup and install your dal module
-  - Compile and package your writer and reader module
-  - Deploy the generated writer.war and reader.war on your application server
+	- configure persistence layer and install dal
+	- deploy and start the writer module
+	- trigger the schema auto creation
+	- reconfigure your persistence.xml to avoid drop of data
+	- deploy and start the reader module
 
 ```
   git clone https://github.com/idm-suedtirol/bdp-core.git
-  cd bdp-core
-  cd dto
+  cd bdp-core/dto
   mvn install
-  cd dal
+  cd ../dal
   vim src/main/resources/META-INF/persistence.xml
+	> <property name="hibernate.hbm2ddl.auto" value="create"/>
+	> <property name="hibernate.hikari.dataSource.databaseName" value="bd"/>
+	> <property name="hibernate.hikari.dataSource.user" value="bd"/>
+	> <property name="hibernate.hikari.dataSource.password" value=""/>
   mvn clean install
+  cd ../writer
+  mvn clean package
+	curl -i 127.0.0.1:8080/writer/json/stationsWithoutMunicipality
+	vim src/main/resources/META-INF/persistence.xml
+	> <property name="hibernate.hbm2ddl.auto" value="validate"/>
   cd ../writer
   mvn clean package
   cd../reader
@@ -172,13 +188,16 @@ More informations will be available soon.
 ```
 
 ### Step 3: Check endpoints
-To check the endpoints of the 2 apps go to `http://{host}:{port}/writer/json`
-and `http://{host}:{port}/reader/json`. There you should get
-`405 method GET not allowed` as response.
+To check the endpoints of the 2 apps go to `http://{host}:{port}/writer/json/stationsWithoutMunicipality`. Here you should get an empty array, if no stations exist yet.
+and `http://{host}:{port}/reader/stations`. There you should get
+`400 BadRequest for missing parameter stationType` as response.
 
 If this works you made it.
 
-You deployed your bd-core and now will be able to add modules or develop your own.
+You deployed your bdp-core and now will be able to add modules or develop your own.
+If you want to fill your db with data, you will either create your own module, which works with the writer API or you can follow the guide on https://github.com/idm-suedtirol/bdp-helloworld/tree/master/data-collectors/my-first-data-collector where it's shown hot to use an already existing JAVA-client.
+If you also need to expose this data you can either use the reader API or use the existing client interface ws-interface.
+
 For more informations read the modules manual.
 
 

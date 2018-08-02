@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence.xml')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
     }
 
     stages {
         stage('Configure') {
             steps {
-               sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
+               sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
             }
         }
         stage('Test - Install') {
