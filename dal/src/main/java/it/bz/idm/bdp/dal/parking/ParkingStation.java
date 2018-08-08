@@ -51,7 +51,6 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordDto;
 import it.bz.idm.bdp.dto.parking.CarParkingDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 import it.bz.idm.bdp.dto.parking.ParkingStationDto;
@@ -311,20 +310,9 @@ public class ParkingStation extends Station{
 		if (dataType != null) {
 			records = ElaborationHistory.findRecords(em, ParkingStation.class.getSimpleName(), this.stationcode, type,
 					start, end, period, role);
-			records = changeToFree(records);
 		}else
 			records = CarParkingDynamicHistory.findRecords(em,this.stationcode,type,start,end);
 		return records;
-	}
-	private List<RecordDto> changeToFree(List<RecordDto> records) {
-		List<RecordDto> recordDtos = new ArrayList<RecordDto>();
-		Integer capacity = getParkingStationCapacity(stationcode);
-		for (RecordDto dto : records){
-			BluetoothRecordDto pdto = (BluetoothRecordDto) dto;
-			pdto.setValue(capacity-pdto.getValue());
-			recordDtos.add(pdto);
-		}
-		return recordDtos;
 	}
 
 	@Override
