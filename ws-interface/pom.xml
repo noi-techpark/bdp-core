@@ -157,7 +157,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>../LICENSES/templates/GPL-3.0-header.txt</header>
+                    <header>../GPL-3.0-header.txt</header>
                     <properties>
                         <owner>IDM Südtirol - Alto Adige</owner>
                         <email>info@idm-suedtirol.com</email>
