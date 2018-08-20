@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: idm-suedtirol/bdp-core
+Upstream-Contact: Open Data Hub Team <info@opendatahub.bz.it>
+Source: https://github.com/idm-suedtirol/bdp-core
+
+Files: *.properties *.sql *.xml */MANIFEST.MF Jenkinsfile-* *.sh
+Copyright: 2016-2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+License: GPL-3.0-or-later
+
+Files: *.md *.txt .mailmap */package.json schema.dump */LICENSES/templates/* 
+Copyright: 2016-2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+License: CC0-1.0
+
+Files: CONTRIBUTORS.rst
+Copyright: 2018 Daniele Gobbetti (d.gobbetti@peer.biz)
+License: GPL-3.0-or-later
