@@ -24,5 +24,7 @@
 
 * Patrick Bertolla <patrick.bertolla@idm-suedtirol.com>
 * Peter Moser <peter.moser@idm-suedtirol.com>
+* Stefano David <stefano.david.bz@gmail.com>
+* Patrick Ohnewein <patrick.ohnewein@idm-suedtirol.com>
 
 *To update the contributors list just run this file with bash. Prefix a name with % in .mailmap to set a contact as preferred*
