@@ -26,7 +26,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dal</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>BDP data</name>
     <url>http://maven.apache.org</url>
@@ -162,7 +162,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>../LICENSES/templates/GPL-3.0-header.txt</header>
+                    <header>../GPL-3.0-header.txt</header>
                     <properties>
                         <owner>IDM Südtirol - Alto Adige</owner>
                         <email>info@idm-suedtirol.com</email>

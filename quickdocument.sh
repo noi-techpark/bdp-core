@@ -2,13 +2,7 @@
 
 set -xeuo pipefail
 
-cd dto && mvn clean site
-cd ../dal && mvn clean site
-cd ../dc-interface && mvn clean site
-cd ../ws-interface && mvn clean site
-cd ../writer && mvn clean site
-cd ../reader && mvn clean site
-cd ..
+./exec4all.sh mvn clean site
 
 TMP=$(mktemp -d /tmp/bdpcoredoc.XXXXXX)
 
