@@ -26,7 +26,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dal</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
     <name>BDP data</name>
     <url>http://maven.apache.org</url>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
