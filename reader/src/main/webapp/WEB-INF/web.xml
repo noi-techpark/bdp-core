@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     reader - Data Reader for the Big Data Platform, that queries the database for web-services
@@ -37,18 +37,6 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-	<filter>
-		<filter-name>Remote Address Filter</filter-name>
-		<filter-class>org.apache.catalina.filters.RemoteAddrFilter</filter-class>
-		<init-param>
-			<param-name>allow</param-name>
-			<param-value>127.0.0.1</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>Remote Address Filter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
 	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
