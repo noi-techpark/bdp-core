@@ -31,7 +31,7 @@
             <property name="hibernate.hikari.dataSource.portNumber" value="5432"/>
       <property name="hibernate.hikari.dataSource.databaseName" value="bdptest"/>
             <property name="hibernate.hikari.dataSource.user" value="bdp"/>
-      <property name="hibernate.hikari.dataSource.password" value="bdp"/>
+            <property name="hibernate.hikari.dataSource.password" value="bdp"/>
       <property name="hibernate.id.new_generator_mappings" value="true"/>
       <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
