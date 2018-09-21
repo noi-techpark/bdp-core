@@ -52,7 +52,6 @@ public class Streetstation extends ElaborationStation{
 			dto.setOld_idstr(basicData.getOld_idstr());
 			dto.setSpeed_default(basicData.getSpeed_default());
 			dto.setLength(basicData.getLength());
-			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
 		}
 		return stationList;
@@ -80,12 +79,6 @@ public class Streetstation extends ElaborationStation{
 	public Object pushRecords(EntityManager em, Object... object) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

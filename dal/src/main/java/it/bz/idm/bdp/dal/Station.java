@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -32,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
@@ -40,6 +42,9 @@ import javax.persistence.UniqueConstraint;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -51,6 +56,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -60,6 +66,10 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
+@TypeDefs({
+    @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
+
+})
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 @DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
@@ -73,12 +83,11 @@ public abstract class Station {
 	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.station_seq')")
 	protected Long id;
+	
+	@ManyToOne
+	protected Station parent;
 
 	protected String name;
-
-	protected String description;
-
-	protected String shortname;
 
 	protected Point pointprojection;
 
@@ -90,8 +99,10 @@ public abstract class Station {
 	protected Boolean available;
 
 	private String origin;
-
-	private String municipality;
+	
+	@Type(type = "jsonb")
+	@Column(columnDefinition = "jsonb")
+	private Map<String,Object> metaData;
 
 	public Station() {
 		this.available = true;
@@ -110,12 +121,11 @@ public abstract class Station {
 	};
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
-		if (resultList.isEmpty())
-			return new ArrayList<StationDto>();
-		for (Station s: resultList){
-			StationDto dto = convertToDto(s);
-			stationList.add(dto);
-		}
+		if (! resultList.isEmpty())
+			for (Station s: resultList){
+				StationDto dto = convertToDto(s);
+				stationList.add(dto);
+			}
 		return stationList;
 	}
 
@@ -126,9 +136,9 @@ public abstract class Station {
 			x = s.getPointprojection().getX();
 		}
 		StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
-		dto.setCrs(GEOM_CRS);
+		dto.setCoordinateReferenceSystem(GEOM_CRS);
 		dto.setOrigin(s.getOrigin());
-		dto.setMunicipality(s.getMunicipality());
+		dto.setMetaData(s.getMetaData());
 		return dto;
 	}
 
@@ -195,14 +205,6 @@ public abstract class Station {
 		this.id = id;
 	}
 
-	public String getShortname() {
-		return shortname;
-	}
-
-	public void setShortname(String shortname) {
-		this.shortname = shortname;
-	}
-
 	public Point getPointprojection() {
 		return pointprojection;
 	}
@@ -226,13 +228,6 @@ public abstract class Station {
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
 
 	public Boolean getAvailable() {
 		return available;
@@ -249,12 +244,12 @@ public abstract class Station {
 		this.origin = origin;
 	}
 
-	public String getMunicipality() {
-		return municipality;
+	public Map<String, Object> getMetaData() {
+		return metaData;
 	}
 
-	public void setMunicipality(String municipality) {
-		this.municipality = municipality;
+	public void setMetaData(Map<String, Object> metaData) {
+		this.metaData = metaData;
 	}
 
 	public List<Station> findStations(EntityManager em){
@@ -316,7 +311,6 @@ public abstract class Station {
 			dtos.add(parseCoordinate(coordinate));
 		}
 		return dtos;
-
 	}
 
 	protected CoordinateDto parseCoordinate(Coordinate coordinate) {
@@ -338,7 +332,6 @@ public abstract class Station {
 				existingStation.setStationcode(dto.getId());
 				em.persist(existingStation);
 			}
-			this.sync(em,existingStation,dto);									//sync instance specific metadata
 			if (existingStation.getName() == null)
 				existingStation.setName(dto.getName());
 			if (dto.getLatitude() != null && dto.getLongitude() != null){
@@ -346,8 +339,8 @@ public abstract class Station {
 				CoordinateReferenceSystem crs;
 				try {
 					crs = CRS.decode(GEOM_CRS,true);
-					if (dto.getCrs() != null && !GEOM_CRS.equals(dto.getCrs())){
-						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCrs(),true);
+					if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
+						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
 						Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
 						point = geometry.getCentroid();
 					}
@@ -365,13 +358,12 @@ public abstract class Station {
 
 			}
 			existingStation.setOrigin(dto.getOrigin());
+			existingStation.setMetaData(dto.getMetaData());
 			em.merge(existingStation);
 		}
 		em.getTransaction().commit();
 		return null;
 	};
-
-	public abstract void sync(EntityManager em,Station station, StationDto dto);
 
 	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		List<Station> stations = this.findStationsByOrigin(em, dtos);
@@ -411,21 +403,21 @@ public abstract class Station {
 	public List<ChildDto> findChildren(EntityManager em, String parent) {
 		return null;
 	}
-
+	public void sync(EntityManager em, Station station, StationDto dto) {
+	}
 	public static List<Station> findStationsWithoutMunicipality(EntityManager em) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.municipality is null and pointprojection is not null",Station.class);
 		return stationquery.getResultList();
 	}
 
 	public static void patch(EntityManager em, StationDto dto) {
-		Station station = Station.findStationByIdentifier(em,dto.getId(),dto.getStationType());
-		station.setMunicipality(dto.getMunicipality());
+		Station station = Station.findStationByIdentifier(em,dto.getId());
 		em.merge(station);
 	}
 
-	private static Station findStationByIdentifier(EntityManager em, String id, String stationType) {
+	private static Station findStationByIdentifier(EntityManager em, String id) {
 		TypedQuery<Station> stationquery = em.createQuery(
-				"select station from " + stationType + " station where station.stationcode=:stationcode",
+				"select station from station s where s.stationcode=:stationcode",
 				Station.class);
 		stationquery.setParameter("stationcode", id);
 		return JPAUtil.getSingleResultOrNull(stationquery);

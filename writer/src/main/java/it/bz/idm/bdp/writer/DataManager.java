@@ -124,7 +124,6 @@ public class DataManager {
 			try {
 				StationDto dto = station.convertToDto(station);
 				String name = JPAUtil.getEntityNameByObject(station);
-				dto.setStationType(name);
 				stationsDtos.add(dto);
 			} catch (Exception e) {
 				// FIXME Give the error back to be handled in writer...

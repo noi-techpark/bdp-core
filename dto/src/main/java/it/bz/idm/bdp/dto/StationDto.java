@@ -21,14 +21,14 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonInclude(value=Include.NON_EMPTY)
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="_t",visible=true)
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
@@ -36,10 +36,10 @@ public class StationDto implements Serializable {
 	protected String name;
 	protected Double latitude;
 	protected Double longitude;
-	protected String crs;
+	protected Double elevation;
+	protected String coordinateReferenceSystem;
 	private String origin;
-	private String municipality;
-	private String stationType;
+	private Map<String,Object> metaData = new HashMap<>();
 
 	public StationDto() {
 	}
@@ -49,13 +49,6 @@ public class StationDto implements Serializable {
 		this.name = name;
 		this.longitude = longitude ;
 		this.latitude = latitude;
-	}
-	public StationDto(String id, String name, Double latitude, Double longitude, String municipality ) {
-		this.id = id;
-		this.name = name;
-		this.longitude = longitude ;
-		this.latitude = latitude;
-		this.municipality = municipality;
 	}
 
 
@@ -83,30 +76,35 @@ public class StationDto implements Serializable {
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public String getCrs() {
-		return crs;
+
+	public Double getElevation() {
+		return elevation;
 	}
-	public void setCrs(String crs) {
-		this.crs = crs;
+
+	public void setElevation(Double elevation) {
+		this.elevation = elevation;
 	}
+
+	public String getCoordinateReferenceSystem() {
+		return coordinateReferenceSystem;
+	}
+
+	public void setCoordinateReferenceSystem(String coordinateReferenceSystem) {
+		this.coordinateReferenceSystem = coordinateReferenceSystem;
+	}
+
 	public String getOrigin() {
 		return origin;
 	}
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
-	public String getMunicipality() {
-		return municipality;
-	}
-	public void setMunicipality(String municipality) {
-		this.municipality = municipality;
-	}
-	public String getStationType() {
-		return stationType;
+	public Map<String, Object> getMetaData() {
+		return metaData;
 	}
 
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
+	public void setMetaData(Map<String, Object> metaData) {
+		this.metaData = metaData;
 	}
 
 	@JsonIgnore
@@ -132,8 +130,7 @@ public class StationDto implements Serializable {
 	@Override
 	public String toString() {
 		return "StationDto [id=" + id + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude
-				+ ", crs=" + crs + ", origin=" + origin + ", municipality=" + municipality + ", stationType="
-				+ stationType + "]";
+				+ ", crs=" + coordinateReferenceSystem + ", origin=" + origin + "]";
 	}
 
 }

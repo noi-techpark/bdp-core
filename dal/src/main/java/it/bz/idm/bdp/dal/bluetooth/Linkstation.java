@@ -60,7 +60,6 @@ public class Linkstation extends ElaborationStation {
 				continue;
 
 			LinkStationDto dto = generateDto(station, basics);
-			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
 
 		}

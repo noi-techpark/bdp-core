@@ -57,7 +57,6 @@ public class EChargingStation extends MeasurementStation{
 				dto.setLocationServiceInfo(basic.getLocationServiceInfo());
 				dto.setPaymentInfo(basic.getPaymentInfo());
 				dto.setReservable(basic.getReservable());
-				dto.setMunicipality(station.getMunicipality());
 				dto.setCategories((basic.getCategories()!= null) ? basic.getCategories().split(",") : null);
 				stationList.add(dto);
 			}

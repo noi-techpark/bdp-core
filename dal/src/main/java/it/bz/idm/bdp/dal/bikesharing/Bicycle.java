@@ -130,7 +130,6 @@ public class Bicycle extends MeasurementStation{
 			Bicyclebasicdata basic = (Bicyclebasicdata) new Bicyclebasicdata().findByStation(em, bike);
 			String bikesharingCode = (basic.getBikeSharingStation() == null) ? null : basic.getBikeSharingStation().getStationcode();
 			BikeSharingBikeDto dto = new BikeSharingBikeDto(bikesharingCode,bike.getStationcode(),bike.getName(),basic.getType().getCname());
-			dto.setMunicipality(station.getMunicipality());
 			stationList.add(dto);
 		}
 		return stationList;

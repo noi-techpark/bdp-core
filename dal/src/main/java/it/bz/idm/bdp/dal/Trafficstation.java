@@ -31,7 +31,6 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.meteo.Meteostation;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
-import it.bz.idm.bdp.dto.StationDto;
 
 
 @Entity
@@ -81,10 +80,6 @@ public class Trafficstation extends ElaborationStation{
 	@Override
 	public Object pushRecords(EntityManager em, Object... object) {
 		return null;
-	}
-
-	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
 	}
 
 }

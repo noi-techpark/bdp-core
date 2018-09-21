@@ -60,7 +60,6 @@ public class Carpoolinghub extends MeasurementStation{
 				
 			}
 			CarpoolingHubDto dto = new CarpoolingHubDto(station.getStationcode(),station.getName(),y,x,translationDtos);
-			dto.setMunicipality(station.getMunicipality());
 			dtos.add(dto);
 		}
 		return dtos;

@@ -35,7 +35,6 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.opengis.geometry.MismatchedDimensionException;
 
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.DataType;
@@ -98,38 +97,10 @@ public class ParkingStation extends Station{
 			dto.setState(basicData.getState());
 			dto.setToiletsavailable(basicData.getToiletsavailable());
 			dto.setUrl(basicData.getUrl());
-			dto.setMunicipality(station.getMunicipality());
 			parkingList.add(dto);
 		}
 		return parkingList;
 
-	}
-	public static Map<String, Object> findParkingStation(String identifier){
-		Map<String, Object> areaMap= new HashMap<String, Object>();
-		EntityManager em = JPAUtil.createEntityManager();
-		try {
-			TypedQuery<CarParkingBasicData> query = em.createQuery(
-					"select basicdata from CarParkingBasicData basicdata where basicdata.station.stationcode=:code and basicdata.station.active=:active",
-					CarParkingBasicData.class);
-			query.setParameter("code", identifier);
-			query.setParameter("active",true);
-			CarParkingBasicData basicData = JPAUtil.getSingleResultOrNull(query);
-			if (basicData != null) {
-				areaMap.put("name", basicData.getStation().getName());
-				areaMap.put("slots", basicData.getCapacity());
-				areaMap.put("latitude", basicData.getStation().getPointprojection().getY());
-				areaMap.put("longitude", basicData.getStation().getPointprojection().getX());
-				areaMap.put("address", basicData.getMainaddress());
-				areaMap.put("phone", basicData.getPhonenumber());
-				areaMap.put("description", basicData.getStation().getDescription());
-			}
-			return areaMap;
-		} catch (MismatchedDimensionException e) {
-			e.printStackTrace();
-			return areaMap;
-		}finally{
-			em.close();
-		}
 	}
 	public static List<ParkingStationDto> findParkingStationsMetadata() {
 		EntityManager em = JPAUtil.createEntityManager();
@@ -395,22 +366,4 @@ public class ParkingStation extends Station{
 		}
 		return "";
 	}
-	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
-		if (dto instanceof ParkingStationDto){
-			ParkingStationDto stationDto = (ParkingStationDto) dto;
-			CarParkingBasicData basic = CarParkingBasicData.findBasicByStation(em, station);
-			if (basic == null)  {
-				basic = new CarParkingBasicData();
-				basic.setStation(station);
-				em.persist(basic);
-			}
-			basic.setCapacity(stationDto.getSlots());
-			if (stationDto.getAddress() != null)
-				basic.setMainaddress(stationDto.getAddress());
-			em.merge(basic);
-		}
-	}
-
-
 }
