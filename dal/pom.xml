@@ -36,7 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <geotools.version>14.4</geotools.version>
-        <hibernate.version>5.1.14.Final</hibernate.version>
+        <hibernate.version>5.3.6.Final</hibernate.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
