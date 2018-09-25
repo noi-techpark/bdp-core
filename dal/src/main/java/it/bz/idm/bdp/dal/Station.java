@@ -82,7 +82,7 @@ public abstract class Station {
 	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.station_seq')")
 	protected Long id;
-
+	
 	@ManyToOne
 	protected Station parent;
 
@@ -98,7 +98,7 @@ public abstract class Station {
 	protected Boolean available;
 
 	private String origin;
-
+	
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
 	private Map<String,Object> metaData;
@@ -121,10 +121,10 @@ public abstract class Station {
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
 		if (! resultList.isEmpty())
-		for (Station s: resultList){
-			StationDto dto = convertToDto(s);
-			stationList.add(dto);
-		}
+			for (Station s: resultList){
+				StationDto dto = convertToDto(s);
+				stationList.add(dto);
+			}
 		return stationList;
 	}
 
@@ -353,8 +353,8 @@ public abstract class Station {
 				CoordinateReferenceSystem crs;
 				try {
 					crs = CRS.decode(GEOM_CRS,true);
-				if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
-					CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
+					if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
+						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
 						Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
 						point = geometry.getCentroid();
 					}
@@ -379,7 +379,7 @@ public abstract class Station {
 				existingStation.setParent(parent);
 		}
 		existingStation.syncByMetaData(em,dto.getMetaData());
-			em.merge(existingStation);
+		em.merge(existingStation);
 	};
 
 	protected void syncByMetaData(EntityManager em, Map<String, Object> metaData) {
