@@ -55,12 +55,6 @@ public class traffic extends Station{
 	}
 
 	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		// TODO Auto-generated method stub
 		return null;

@@ -37,7 +37,6 @@ import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.vehicles.Car;
 import it.bz.idm.bdp.dto.vehicles.CarValue;
@@ -168,10 +167,6 @@ public class Mobilestation extends Station {
 		return retval;
 	}
 
-	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
-
-	}
 
 	@Override
 	public List<TypeDto> findTypes(EntityManager em,String stationId) {

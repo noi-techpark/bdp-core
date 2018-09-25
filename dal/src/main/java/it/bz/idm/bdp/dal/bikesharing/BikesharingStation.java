@@ -20,44 +20,10 @@
  */
 package it.bz.idm.bdp.dal.bikesharing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
-import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dto.ChildDto;
-import it.bz.idm.bdp.dto.bikesharing.BikeDto;
 
 @Entity
 public class BikesharingStation extends MeasurementStation{
-
-	@Override
-	public List<ChildDto> findChildren(EntityManager em, String parent) {
-		List<ChildDto> dtos = new ArrayList<ChildDto>();
-		List<Station> bicycles = new ArrayList<Station>();
-		if (parent == null)
-			bicycles = new Bicycle().findStations(em);
-		else {
-			Station station = findStation(em, parent);
-			if (station!= null && station instanceof BikesharingStation)
-			bicycles = new Bicycle().findByParent(em,station);
-		}
-		if (! bicycles.isEmpty())
-			for (Station s : bicycles){
-				Bicycle bike = (Bicycle) s;
-				Bicyclebasicdata basic = (Bicyclebasicdata) new Bicyclebasicdata().findByStation(em, bike);
-				BikeDto dto = new BikeDto();
-				dto.setIdentifier(bike.getStationcode());
-				if (basic!= null){
-					if (basic.getBikeSharingStation() != null)
-						dto.setStation(basic.getBikeSharingStation().getStationcode());
-					dto.setType(basic.getType().getCname());
-				}
-				dtos.add(dto);
-			}
-		return dtos;
-	}
 }

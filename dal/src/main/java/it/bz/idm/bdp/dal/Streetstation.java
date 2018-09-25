@@ -20,42 +20,16 @@
  */
 package it.bz.idm.bdp.dal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import it.bz.idm.bdp.dal.bluetooth.StreetBasicData;
 import it.bz.idm.bdp.dal.meteo.Meteostation;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.bluetooth.StreetStationDto;
 
 @Entity
 public class Streetstation extends ElaborationStation{
-
-	@Override
-	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
-		List<StationDto> stationList = new ArrayList<StationDto>();
-		for (Station station: resultList){
-			Double x = null,y = null;
-			if (station.getPointprojection() != null){
-				y = station.getPointprojection().getY();
-				x = station.getPointprojection().getX();
-			}
-			StreetBasicData basicData = (StreetBasicData) new StreetBasicData().findByStation(em, station);
-			if (basicData == null)
-				continue;
-			StreetStationDto dto = new StreetStationDto(station.getStationcode(),station.getName(),y,x);
-			dto.setDescription(basicData.getDescription());
-			dto.setOld_idstr(basicData.getOld_idstr());
-			dto.setSpeed_default(basicData.getSpeed_default());
-			dto.setLength(basicData.getLength());
-			stationList.add(dto);
-		}
-		return stationList;
-	}
 
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {

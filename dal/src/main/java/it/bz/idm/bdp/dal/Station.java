@@ -60,7 +60,6 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -137,6 +136,7 @@ public abstract class Station {
 		}
 		StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
 		dto.setCoordinateReferenceSystem(GEOM_CRS);
+		dto.setParentId(s.getParent().getStationcode());
 		dto.setOrigin(s.getOrigin());
 		dto.setMetaData(s.getMetaData());
 		return dto;
@@ -251,6 +251,13 @@ public abstract class Station {
 	public void setMetaData(Map<String, Object> metaData) {
 		this.metaData = metaData;
 	}
+	public Station getParent() {
+		return parent;
+	}
+
+	public void setParent(Station parent) {
+		this.parent = parent;
+	}
 
 	public List<Station> findStations(EntityManager em){
 		TypedQuery<Station> query = em.createQuery("select station from "+this.getClass().getSimpleName()+" station where station.active=:active",Station.class);
@@ -320,51 +327,63 @@ public abstract class Station {
 		syncActiveOfExistingStations(em, data);
 		em.getTransaction().begin();
 		for (StationDto dto:data){
-			Station existingStation = findStation(em,dto.getId());
-			if (existingStation == null){
-				try {
-					existingStation = this.getClass().newInstance();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-				existingStation.setStationcode(dto.getId());
-				em.persist(existingStation);
-			}
-			if (existingStation.getName() == null)
-				existingStation.setName(dto.getName());
-			if (dto.getLatitude() != null && dto.getLongitude() != null){
-				Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
-				CoordinateReferenceSystem crs;
-				try {
-					crs = CRS.decode(GEOM_CRS,true);
-					if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
-						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
-						Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
-						point = geometry.getCentroid();
-					}
-					point.setSRID(4326);
-					existingStation.setPointprojection(point);
-				} catch (NoSuchAuthorityCodeException e) {
-					e.printStackTrace();
-				} catch (FactoryException e) {
-					e.printStackTrace();
-				} catch (MismatchedDimensionException e) {
-					e.printStackTrace();
-				} catch (TransformException e) {
-					e.printStackTrace();
-				}
-
-			}
-			existingStation.setOrigin(dto.getOrigin());
-			existingStation.setMetaData(dto.getMetaData());
-			em.merge(existingStation);
+			sync(em, dto);
 		}
 		em.getTransaction().commit();
 		return null;
+	}
+
+	private void sync(EntityManager em, StationDto dto) {
+		Station existingStation = findStation(em,dto.getId());
+		if (existingStation == null){
+			try {
+				existingStation = this.getClass().newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			existingStation.setStationcode(dto.getId());
+			em.persist(existingStation);
+		}
+		if (existingStation.getName() == null)
+			existingStation.setName(dto.getName());
+		if (dto.getLatitude() != null && dto.getLongitude() != null){
+			Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
+			CoordinateReferenceSystem crs;
+			try {
+				crs = CRS.decode(GEOM_CRS,true);
+				if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
+					CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
+					Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
+					point = geometry.getCentroid();
+				}
+				point.setSRID(4326);
+				existingStation.setPointprojection(point);
+			} catch (NoSuchAuthorityCodeException e) {
+				e.printStackTrace();
+			} catch (FactoryException e) {
+				e.printStackTrace();
+			} catch (MismatchedDimensionException e) {
+				e.printStackTrace();
+			} catch (TransformException e) {
+				e.printStackTrace();
+			}
+
+		}
+		existingStation.setOrigin(dto.getOrigin());
+		existingStation.setMetaData(dto.getMetaData());		
+		if (dto.getParentId() != null) {
+			Station parent = Station.findStationByIdentifier(em, dto.getParentId());
+			if (parent != null)
+				existingStation.setParent(parent);
+		}
+		existingStation.syncByMetaData(em,dto.getMetaData());
+		em.merge(existingStation);
 	};
 
+	protected void syncByMetaData(EntityManager em, Map<String, Object> metaData) {
+	};
 	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		List<Station> stations = this.findStationsByOrigin(em, dtos);
 		if (stations != null){
@@ -400,11 +419,14 @@ public abstract class Station {
 		return resultList;
 	}
 
-	public List<ChildDto> findChildren(EntityManager em, String parent) {
-		return null;
+	public List<StationDto> findChildren(EntityManager em, String stationId) {
+		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.parent.stationcode = :parentId",Station.class);
+		stationquery.setParameter("parentId", stationId);
+		List<StationDto> dtos = convertToDtos(em, stationquery.getResultList());
+		return dtos;
+
 	}
-	public void sync(EntityManager em, Station station, StationDto dto) {
-	}
+
 	public static List<Station> findStationsWithoutMunicipality(EntityManager em) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.municipality is null and pointprojection is not null",Station.class);
 		return stationquery.getResultList();
@@ -417,7 +439,7 @@ public abstract class Station {
 
 	private static Station findStationByIdentifier(EntityManager em, String id) {
 		TypedQuery<Station> stationquery = em.createQuery(
-				"select station from station s where s.stationcode=:stationcode",
+				"select s from Station s where s.stationcode=:stationcode",
 				Station.class);
 		stationquery.setParameter("stationcode", id);
 		return JPAUtil.getSingleResultOrNull(stationquery);

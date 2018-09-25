@@ -36,7 +36,6 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
-import it.bz.idm.bdp.dto.StationDto;
 
 @Entity
 public class Bluetoothstation extends ElaborationStation {
@@ -101,9 +100,4 @@ public class Bluetoothstation extends ElaborationStation {
 		}
 		return "";
 	}
-
-	@Override
-	public void sync(EntityManager em, Station station, StationDto dto) {
-	}
-
 }

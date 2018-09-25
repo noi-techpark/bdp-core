@@ -36,7 +36,6 @@ import javax.persistence.TypedQuery;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Elaboration;
 import it.bz.idm.bdp.dal.ElaborationHistory;
@@ -48,11 +47,8 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
-import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.dto.parking.CarParkingDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
-import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 @Entity
 public class ParkingStation extends Station{
@@ -71,59 +67,6 @@ public class ParkingStation extends Station{
 	private static final TypeDto staticAddtition1 = new TypeDto("occupied",300);
 	private static final TypeDto staticAddtition2 = new TypeDto("free",300);
 
-	@Override
-	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
-		List<StationDto> parkingList = new ArrayList<StationDto>();
-		for (Station s:resultList){
-			ParkingStation station = (ParkingStation) s;
-			CarParkingBasicData basicData = new CarParkingBasicData().findByStation(em, station);
-			if (basicData == null)
-				continue;
-			Double x = null,y = null;
-			if (station.getPointprojection() != null){
-				y = station.getPointprojection().getY();
-				x = station.getPointprojection().getX();
-			}
-			CarParkingDto dto = new CarParkingDto(station.getStationcode(),station.getName(),y,x);
-			dto.setCapacity(basicData.getCapacity());
-			dto.setDisabledcapacity(basicData.getDisabledcapacity());
-			dto.setDisabledtoiletavailable(basicData.getDisabledtoiletavailable());
-			dto.setEmail(basicData.getEmail());
-			dto.setMainaddress(basicData.getMainaddress());
-			dto.setOwneroperator(basicData.getOwneroperator());
-			dto.setParkingtype(basicData.getParkingtype());
-			dto.setPermittedvehicletypes(basicData.getPermittedvehicletypes());
-			dto.setPhonenumber(basicData.getPhonenumber());
-			dto.setState(basicData.getState());
-			dto.setToiletsavailable(basicData.getToiletsavailable());
-			dto.setUrl(basicData.getUrl());
-			parkingList.add(dto);
-		}
-		return parkingList;
-
-	}
-	public static List<ParkingStationDto> findParkingStationsMetadata() {
-		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<CarParkingBasicData> query =em.createQuery("select basicdata from CarParkingBasicData basicdata where basicdata.station.active=:active",CarParkingBasicData.class);
-		query.setParameter("active",true);
-		List<CarParkingBasicData> resultList = query.getResultList();
-		em.close();
-		List<ParkingStationDto> parkingList = new ArrayList<ParkingStationDto>();
-		if (resultList.isEmpty())
-			return new ArrayList<ParkingStationDto>();
-		for (CarParkingBasicData basicData: resultList){
-			ParkingStationDto dto = new ParkingStationDto();
-			dto.setId(basicData.getStation().getStationcode());
-			dto.setName(basicData.getStation().getName());
-			dto.setSlots(basicData.getCapacity());
-			dto.setLatitude(basicData.getStation().getPointprojection().getY());
-			dto.setLongitude(basicData.getStation().getPointprojection().getX());
-			dto.setAddress(basicData.getMainaddress());
-			dto.setPhone(basicData.getPhonenumber());
-			parkingList.add(dto);
-		}
-		return parkingList;
-	}
 
 	public static Integer findNumberOfFreeSlots(String identifier) {
 		EntityManager em = JPAUtil.createEntityManager();
@@ -256,8 +199,7 @@ public class ParkingStation extends Station{
 		DataType type = DataType.findByCname(em,cname);
 		int capacity = 0;
 		if (!"occupied".equals(cname)){
-			CarParkingBasicData data =  new CarParkingBasicData().findByStation(em,this);
-			capacity = data.getCapacity();
+			capacity = Integer.valueOf(this.getMetaData().get("capacity").toString());
 		}
 		ParkingRecordExtendedDto dto;
 		//TODO: change if condition, once free and occupied are in db "Parking forecast".equals(cname)
@@ -296,8 +238,7 @@ public class ParkingStation extends Station{
 			for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()) {
 				ParkingStation station = (ParkingStation) findStation(em,entry.getKey());
 				if (!entry.getValue().getData().isEmpty()) {
-					BasicData basicData = new CarParkingBasicData().findByStation(em,station);
-					if (station == null || ! station.getActive() || basicData == null)
+					if (station == null || ! station.getActive())
 						return new IllegalStateException("Station does not exist");
 					CarParkingDynamic lastRecord = CarParkingDynamic.findByParkingStation(em,station);
 					em.getTransaction().begin();
@@ -308,11 +249,10 @@ public class ParkingStation extends Station{
 					}
 					List<? extends RecordDtoImpl> data = entry.getValue().getData();
 					Collections.sort(data);
-					CarParkingBasicData carData = (CarParkingBasicData) basicData;
-
 					Integer slots = (Integer) data.get(0).getValue();
-					int occupacy = carData.getCapacity() - slots;
-					int occupacypercentage = Math.round(100f * occupacy/carData.getCapacity());
+					Integer capacity = Integer.parseInt(this.getMetaData().get("capacity").toString());
+					int occupacy = capacity - slots;
+					int occupacypercentage = Math.round(100f * occupacy/capacity);
 					lastRecord.setOccupacy(occupacy);
 					lastRecord.setOccupacypercentage(occupacypercentage);
 					lastRecord.setLastupdate(new Date(data.get(0).getTimestamp()));
@@ -320,8 +260,8 @@ public class ParkingStation extends Station{
 					em.merge(lastRecord);
 					for (RecordDtoImpl record : data) {
 						Integer free = (Integer) record.getValue();
-						int occup = carData.getCapacity() - free;
-						int percentage = Math.round(100f * occup/carData.getCapacity());
+						int occup = capacity - free;
+						int percentage = Math.round(100f * occup/capacity);
 						CarParkingDynamicHistory historyRecord = CarParkingDynamicHistory.findRecord(em, station, record.getTimestamp());
 						if (historyRecord == null){
 							historyRecord = new CarParkingDynamicHistory(station,occup,new Date(record.getTimestamp()),percentage);
