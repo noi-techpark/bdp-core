@@ -1,0 +1,256 @@
+#!/bin/bash
+
+###############################################################################
+# WARNING
+# This script is provided AS IS and has been tested on a Ubuntu 18.04 and
+# Debian 9. If you are using it on a different Linux distro or on a different
+# platform, you must verify the correctness of paths on your workstation and
+# that the commands used are the same on your PC.
+# You need to provide your password during the execution of this script.
+#
+# Prerequisites:
+#   - sudo
+#   - git
+#   - postgresql-9.5 (or higher)
+#   - postgis
+#   - xmlstarlet
+#   - maven
+#   - openjdk-8-jdk
+#   - tomcat8
+#
+# This script sets up your workstation to develop core components of the BDP.
+# More information about this script and a complete guide to its components
+# can be found in its official documentation:
+#
+# http://opendatahub.readthedocs.io/en/latest/howto/development.html
+#
+###############################################################################
+
+set -euo pipefail
+
+###############################################################################
+# CONFIGURATION
+###############################################################################
+
+# Root directory of your bdp-core source
+BDPROOT=$(pwd)
+
+# Log files folder
+LOGS=/var/log/opendatahub
+LOGSDC=$LOGS/data-collectors
+LOGSWS=$LOGS/webservices
+
+# Log files owner/group
+# If you use tomcat as standalone installation, choose user tomcat or tomcat8,
+# depending on your system. $USER should be choosen, if you start the
+# server from an IDE (ex., Eclipse). If you use any other application server,
+# make sure that logs are writeable for that instance.
+APPSERVER=tomcat8
+APPSERVER_USER=tomcat8
+APPSERVER_GROUP=tomcat8
+APPSERVER_WEBAPPS=/var/lib/tomcat8/webapps
+
+# -- Postgres config ----------------------------------------------------------
+# PGADMIN is a role in Postgres with createdb and create-user privileges
+# You need to know the password for this role, or configure it that you have
+# above privileges without a password.
+PGADMIN=postgres
+
+# PGUSER1 is a role in Postgres with write access
+PGUSER1=bdp			# DO NOT CHANGE
+PGPASS1=bdp
+
+# PGUSER2 is a role in Postgres with read-only access
+PGUSER2=bdpreadonly	# DO NOT CHANGE
+PGPASS2=bdpreadonly
+
+# We will create a new database $PGDBNAME for you inside your Postgres instance
+PGDBNAME=bdptest
+PGPORT=5432
+PGSCHEMA=intime 	# DO NOT CHANGE
+
+# Persistence.xml file is used for db access and contains all PG* variables above
+PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
+
+# DUMPSQL is what we've got from pg_dump after a Hibernate create execution
+DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-dump.sql
+
+# MODSSQL is what we need to modify manually, to have a complete usable schema
+# for bdp-core to run correctly.
+MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-modifications.sql
+
+
+###############################################################################
+# EXECUTION (Do not change anything below this line)
+###############################################################################
+
+psql_call() {
+    sudo -u $PGADMIN -- psql -v ON_ERROR_STOP=1 -p $PGPORT "$@"
+}
+
+psql_createuser() {
+    psql_call -tc "SELECT 1 FROM pg_user WHERE usename = '$1'" | grep -q 1 || \
+        psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+
+    psql_call -d $PGDBNAME <<EOF
+ALTER ROLE $1 PASSWORD '$2';
+GRANT CONNECT ON DATABASE $PGDBNAME TO $1;
+COMMENT ON ROLE $1 IS '$3';
+EOF
+}
+
+psql_createdb() {
+    psql_call -tc "SELECT 1 FROM pg_database WHERE datname = '$PGDBNAME'" | grep -q 1 || \
+        psql_call -c "CREATE DATABASE $PGDBNAME"
+}
+
+give_consent() {
+    # make sure user knows limits of the script
+    echo
+    echo "This script sets up the BDP on this workstation. For a thourough"
+    echo "description of this script check also the official documentation at:"
+    echo
+    echo "http://opendatahub.readthedocs.io/en/latest/howto/development.html"
+    echo
+    echo "Please make sure that you:"
+    echo "1. run this script from the directory in which you clone the repository"
+    echo "2. modified the variables in this script according to your needs & local setup"
+    echo
+    echo "We tested it on Ubuntu 18.04 and Debian 9."
+    tput bold
+    echo
+    read -p "Please write 'yes' to continue or any other character to exit: "  answer
+    echo
+    tput sgr0
+}
+
+db_setup() {
+    # Postgres setup
+    # Look at https://wiki.postgresql.org/wiki/First_steps
+    psql_createdb
+    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+    psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
+    psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
+
+    psql_call -d $PGDBNAME -1 < $DUMPSQL
+    psql_call -d $PGDBNAME -1 < $MODSSQL
+
+	psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
+	psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
+	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+}
+
+create_log_files() {
+    # Log file permissions
+    sudo mkdir -p $LOGS/webservices
+    sudo mkdir -p $LOGS/data-collectors
+    sudo touch $LOGS/writer.log
+    sudo touch $LOGS/reader.log
+    sudo chown -R $APPSERVER_USER:$APPSERVER_GROUP $LOGS
+}
+
+update_persistence() {
+    # Update values in persistence - values common for reader and writer
+
+    xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v 'localhost' $PXMLFILE
+    xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.portNumber']/@value" -v ${PGPORT} $PXMLFILE
+    xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.databaseName']/@value" -v ${PGDBNAME} $PXMLFILE
+
+    # update values for reader
+
+    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER2} $PXMLFILE
+    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS2} $PXMLFILE
+
+    # update values for writer
+
+    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER1} $PXMLFILE
+    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
+
+    # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
+    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+}
+
+final_message(){
+	echo
+    echo "Set up is now complete. It should be accessible in short time on "
+    echo "the address you configured for your application server. Try:"
+    echo
+    echo "curl http://127.0.0.1:8080/writer/json/stations/Meteostation/"
+    echo
+    echo "...which should return an empty array, i.e., []"
+    echo
+    echo "READY."
+}
+
+
+deploy_war_files() {
+    # Build libs and war files
+    cd $BDPROOT
+
+    for FOLDER in dto dal dc-interface ws-interface; do
+	    cd $FOLDER
+	    mvn clean install
+	    cd ..
+    done
+
+    for FOLDER in writer reader; do
+	    cd $FOLDER
+	    mvn clean package
+	    cd ..
+    done
+
+    echo "Builds made, install reader.war and writer.war on your application"
+    echo "server, i.e., tomcat"
+
+    sudo cp $BDPROOT/reader/target/reader.war $APPSERVER_WEBAPPS
+    sudo cp $BDPROOT/writer/target/writer.war $APPSERVER_WEBAPPS
+    sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/reader.war
+    sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/writer.war
+
+    sudo service $APPSERVER restart
+}
+
+
+# execute script
+give_consent
+
+if [ "$answer" == "yes" ]
+
+then
+    db_setup
+    create_log_files
+    update_persistence
+    deploy_war_files
+    final_message
+    tput sgr0
+    exit 0
+
+else
+    echo "BDP-core not set up."
+    echo "Please remember to change the variables in the script to suit your needs!"
+    exit 127
+fi
+
+exit 0
+
+
+##changelog
+
+# v.0.1
+## 22 Jun 2018 - initial version by Peter
+#
+# v 0.2 25
+## Jun 2018 - by stefanodavid
+## grouped commands in functions
+## added git commands
+## added warning before running the commands
+## added a note for a command to run after stopping tomcat.
+## added changelog
+## added BDPROOT variable
+#
+# v 0.9
+## Sep 2018 - Peter
