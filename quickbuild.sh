@@ -51,10 +51,12 @@ APPSERVER_GROUP=tomcat8
 APPSERVER_WEBAPPS=/var/lib/tomcat8/webapps
 
 # -- Postgres config ----------------------------------------------------------
-# PGADMIN is a role in Postgres with createdb and create-user privileges
-# You need to know the password for this role, or configure it that you have
-# above privileges without a password.
-PGADMIN=postgres
+# PGUSER is a role in Postgres with createdb and create-user privileges
+# PGPASSWORD is the password for the above role
+# ...both must be set outside this script (reassigning here to check for
+#    unbound variables)
+PGUSER=$PGUSER
+PGPASSWORD=$PGPASSWORD
 
 # PGUSER1 is a role in Postgres with write access
 PGUSER1=bdp			# DO NOT CHANGE
@@ -84,8 +86,15 @@ MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-modifications.
 # EXECUTION (Do not change anything below this line)
 ###############################################################################
 
+echo_bold() {
+	tput bold
+    echo "$1"
+    tput sgr0
+}
+
 psql_call() {
-    sudo -u $PGADMIN -- psql -v ON_ERROR_STOP=1 -p $PGPORT "$@"
+	# PGUSER and PGPASSWORD must be set outside the script
+    psql -v ON_ERROR_STOP=1 -p $PGPORT -h localhost "$@"
 }
 
 psql_createuser() {
@@ -107,6 +116,8 @@ psql_createdb() {
 give_consent() {
     # make sure user knows limits of the script
     echo
+    echo_bold "!!! BDP-CORE SETUP !!!"
+    echo
     echo "This script sets up the BDP on this workstation. For a thourough"
     echo "description of this script check also the official documentation at:"
     echo
@@ -125,7 +136,10 @@ give_consent() {
 }
 
 db_setup() {
-    # Postgres setup
+	echo
+    echo_bold "Postgres setup"
+    echo
+
     # Look at https://wiki.postgresql.org/wiki/First_steps
     psql_createdb
     psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
@@ -142,19 +156,30 @@ db_setup() {
 	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
 	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
 	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+
+	echo_bold "...DONE."
 }
 
 create_log_files() {
-    # Log file permissions
+	echo
+    echo_bold "Log file permissions"
+    echo
+
     sudo mkdir -p $LOGS/webservices
     sudo mkdir -p $LOGS/data-collectors
     sudo touch $LOGS/writer.log
     sudo touch $LOGS/reader.log
     sudo chown -R $APPSERVER_USER:$APPSERVER_GROUP $LOGS
+
+    echo_bold "...DONE."
 }
 
 update_persistence() {
-    # Update values in persistence - values common for reader and writer
+	echo
+    echo_bold "Update values in persistence.xml"
+    echo
+
+    # - values common for reader and writer
 
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v 'localhost' $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.portNumber']/@value" -v ${PGPORT} $PXMLFILE
@@ -172,22 +197,39 @@ update_persistence() {
 
     # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+
+    echo_bold "...DONE."
 }
 
 final_message(){
 	echo
-    echo "Set up is now complete. It should be accessible in short time on "
-    echo "the address you configured for your application server. Try:"
+	echo
+    echo_bold "!!! The BDP-CORE SETUP is now complete !!!"
     echo
-    echo "curl http://127.0.0.1:8080/writer/json/stations/Meteostation/"
     echo
-    echo "...which should return an empty array, i.e., []"
+    echo "The service should be accessible in short time on "
+    echo "the address you configured for your application server."
     echo
-    echo "READY."
+    echo "To get started, let's insert a new Environmentstation and read it afterwards:"
+    echo
+    echo "curl -i -X POST -H 'Content-Type:application/json' -d '[{\"id\":\"Hello world\",\"_t\":\"it.bz.idm.bdp.dto.StationDto\"}]' http://127.0.0.1:8080/writer/json/syncStations/Environmentstation"
+    echo
+    echo "...which sould return: HTTP/1.1 200 Content-Length: 0 Date: ..."
+    echo
+    echo "curl http://127.0.0.1:8080/reader/stations?stationType=Environmentstation"
+    echo
+    echo '...which should return ["Hello world"]'
+    echo
+    echo_bold "--> READY."
 }
 
 
 deploy_war_files() {
+
+	echo
+    echo_bold "Build artifacts and deploy reader.war and writer.war to $APPSERVER"
+    echo
+
     # Build libs and war files
     cd $BDPROOT
 
@@ -203,40 +245,64 @@ deploy_war_files() {
 	    cd ..
     done
 
-    echo "Builds made, install reader.war and writer.war on your application"
-    echo "server, i.e., tomcat"
-
     sudo cp $BDPROOT/reader/target/reader.war $APPSERVER_WEBAPPS
     sudo cp $BDPROOT/writer/target/writer.war $APPSERVER_WEBAPPS
     sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/reader.war
     sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/writer.war
 
+	echo
+    echo_bold "DONE... restarting $APPSERVER. Please wait!"
+    echo
+
     sudo service $APPSERVER restart
+
+    echo_bold "...DONE."
+}
+
+test_first() {
+
+	echo
+    echo_bold "Testing file permissions and installed commands/services"
+    echo
+
+	set -x
+	which sudo
+	which mvn
+	which psql
+	which xmlstarlet
+	which git
+	java -version 2>&1 | grep "1.8"
+	test -w $PXMLFILE
+	test -r $MODSSQL
+	test -r $DUMPSQL
+
+	sudo which service
+	sudo service $APPSERVER status | grep running
+	set +x
+
+	echo_bold "...DONE."
 }
 
 
 # execute script
 give_consent
 
-if [ "$answer" == "yes" ]
-
-then
+if [ "$answer" == "yes" ]; then
+	test_first
     db_setup
     create_log_files
     update_persistence
     deploy_war_files
     final_message
-    tput sgr0
-    exit 0
-
 else
-    echo "BDP-core not set up."
+    echo_bold "BDP-core not installed."
     echo "Please remember to change the variables in the script to suit your needs!"
+    tput sgr0
     exit 127
 fi
 
+tput sgr0
 exit 0
-
 
 ##changelog
 
