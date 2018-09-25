@@ -262,8 +262,18 @@ deploy_war_files() {
 test_first() {
 
 	echo
-    echo_bold "Testing file permissions and installed commands/services"
+    echo_bold "Testing file permissions, PostgreSQL version and installed commands/services"
     echo
+
+	PGVERSION=$(psql_call -tc "SHOW server_version_num")
+	V=$(psql_call -tc "SHOW server_version")
+	if (( $PGVERSION < 90500 )); then
+		echo "ERROR: PostgreSQL must be at least version 9.5, but installed version is $V."
+		echo "Terminating..."
+		exit 1
+	else
+		echo "SUCCESS: PostgreSQL version:  $V"
+	fi
 
 	set -x
 	which sudo
