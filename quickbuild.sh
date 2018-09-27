@@ -203,24 +203,32 @@ update_persistence() {
     echo_bold "...DONE."
 }
 
-final_message(){
+final_message() {
 	echo
 	echo
     echo_bold "!!! The BDP-CORE SETUP is now complete !!!"
     echo
     echo
-    echo "The service should be accessible in short time on "
-    echo "the address you configured for your application server."
+    echo_bold "The service should be accessible in short time on "
+    echo_bold "the address you configured for your application server."
     echo
-    echo "To get started, let's insert a new Environmentstation and read it afterwards:"
+    echo_bold "To get started, let's insert a new Environmentstation and read it afterwards:"
     echo
-    echo "curl -i -X POST -H 'Content-Type:application/json' -d '[{\"id\":\"Hello world\",\"_t\":\"it.bz.idm.bdp.dto.StationDto\"}]' http://127.0.0.1:8080/writer/json/syncStations/Environmentstation"
+    echo_bold "curl -i -X POST -H 'Content-Type:application/json' -d '[{\"id\":\"Hello world\",\"_t\":\"it.bz.idm.bdp.dto.StationDto\"}]' http://127.0.0.1:8080/writer/json/syncStations/Environmentstation"
     echo
-    echo "...which sould return: HTTP/1.1 200 Content-Length: 0 Date: ..."
+    echo_bold "...which sould return: HTTP/1.1 200 Content-Length: 0 Date: ..."
     echo
-    echo "curl http://127.0.0.1:8080/reader/stations?stationType=Environmentstation"
+    echo_bold "curl http://127.0.0.1:8080/reader/stations?stationType=Environmentstation"
     echo
-    echo '...which should return ["Hello world"]'
+    echo_bold '...which should return ["Hello world"]'.
+    echo
+    echo_bold "Finally, you can get an access/refresh token with the default admin account:"
+    echo
+    echo_bold "curl 'http://127.0.0.1:8080/reader/refreshToken?user=admin&password=123456789'"
+    echo
+    echo_bold "...make sure, you change that password as soon as possible!"
+    echo
+    echo_bold "See http://opendatahub.readthedocs.io/en/latest/howto/development.html"
     echo
     echo_bold "--> READY."
 }
