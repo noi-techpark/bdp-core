@@ -82,7 +82,8 @@ INSERT INTO intime.bdprules(role_id, station_id, type_id, period)
     VALUES ((SELECT id FROM intime.bdprole WHERE name = 'ADMIN'), null, null, null);
 
 -- create default admin user and association to admin role
-insert into intime.bdpuser(email,enabled,password,tokenexpired) values('admin',true,'Z.MezJ8Y8HVtsgNMrFBKCOAz3CCaVkKawHBIhUj.wSdElYHb/KcZS',false);
+insert into intime.bdpuser(email, enabled, password, tokenexpired)
+	values('admin', true, crypt('123456789', gen_salt('bf')), false);
 insert into intime.bdpusers_bdproles(user_id,role_id)
     select u.id, r.id from intime.bdpuser u
     cross join intime.bdprole r

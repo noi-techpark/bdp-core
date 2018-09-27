@@ -13,6 +13,7 @@
 #   - git
 #   - postgresql-9.5 (or higher)
 #   - postgis
+#   - pgcrypto
 #   - xmlstarlet
 #   - maven
 #   - openjdk-8-jdk
@@ -143,6 +144,7 @@ db_setup() {
     # Look at https://wiki.postgresql.org/wiki/First_steps
     psql_createdb
     psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
 
     psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
     psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
