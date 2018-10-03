@@ -67,7 +67,6 @@ import it.bz.idm.bdp.dto.TypeDto;
 
 @TypeDefs({
     @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
-
 })
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
@@ -82,7 +81,7 @@ public abstract class Station {
 	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.station_seq')")
 	protected Long id;
-	
+
 	@ManyToOne
 	protected Station parent;
 
@@ -98,10 +97,10 @@ public abstract class Station {
 	protected Boolean available;
 
 	private String origin;
-	
+
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private Map<String,Object> metaData;
+	private Map<String, Object> metaData;
 
 	public Station() {
 		this.available = true;
@@ -136,7 +135,7 @@ public abstract class Station {
 		}
 		StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
 		dto.setCoordinateReferenceSystem(GEOM_CRS);
-		dto.setParentId(s.getParent().getStationcode());
+		dto.setParentId(s.getParent() == null ? null : s.getParent().getStationcode());
 		dto.setOrigin(s.getOrigin());
 		dto.setMetaData(s.getMetaData());
 		return dto;
@@ -372,7 +371,7 @@ public abstract class Station {
 
 			}
 			existingStation.setOrigin(dto.getOrigin());
-		existingStation.setMetaData(dto.getMetaData());		
+		existingStation.setMetaData(dto.getMetaData());
 		if (dto.getParentId() != null) {
 			Station parent = Station.findStationByIdentifier(em, dto.getParentId());
 			if (parent != null)

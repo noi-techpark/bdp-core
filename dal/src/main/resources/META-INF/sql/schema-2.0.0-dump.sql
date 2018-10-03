@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.10
--- Dumped by pg_dump version 9.6.10
+-- Dumped from database version 9.5.14
+-- Dumped by pg_dump version 10.5 (Ubuntu 10.5-1.pgdg18.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -82,20 +82,6 @@ CREATE TABLE intime.alarmspecification (
 
 
 ALTER TABLE intime.alarmspecification OWNER TO bdp;
-
---
--- Name: basicdata_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.basicdata_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.basicdata_seq OWNER TO bdp;
 
 --
 -- Name: bdppermissions; Type: TABLE; Schema: intime; Owner: bdp
@@ -211,74 +197,6 @@ CREATE TABLE intime.bdpusers_bdproles (
 ALTER TABLE intime.bdpusers_bdproles OWNER TO bdp;
 
 --
--- Name: bicyclebasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.bicyclebasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    bikesharingstation_id bigint,
-    type_id bigint
-);
-
-
-ALTER TABLE intime.bicyclebasicdata OWNER TO bdp;
-
---
--- Name: bikesharingstationbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.bikesharingstationbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    max_available integer,
-    type_id bigint
-);
-
-
-ALTER TABLE intime.bikesharingstationbasicdata OWNER TO bdp;
-
---
--- Name: bluetoothbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.bluetoothbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    sim_number character varying(255),
-    sim_serial character varying(255)
-);
-
-
-ALTER TABLE intime.bluetoothbasicdata OWNER TO bdp;
-
---
--- Name: carparkingbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carparkingbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    area public.geometry,
-    capacity integer,
-    disabledcapacity integer,
-    disabledtoiletavailable boolean,
-    email character varying(255),
-    mainaddress character varying(255),
-    owneroperator character varying(255),
-    parkingtype character varying(255),
-    permittedvehicletypes character varying(255),
-    phonenumber character varying(255),
-    state integer,
-    toiletsavailable boolean,
-    url character varying(255),
-    womencapacity integer
-);
-
-
-ALTER TABLE intime.carparkingbasicdata OWNER TO bdp;
-
---
 -- Name: carparkingdynamic_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -347,96 +265,6 @@ CREATE TABLE intime.carparkingdynamichistory (
 ALTER TABLE intime.carparkingdynamichistory OWNER TO bdp;
 
 --
--- Name: carpoolinghubbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carpoolinghubbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.carpoolinghubbasicdata OWNER TO bdp;
-
---
--- Name: carpoolinghubbasicdata_translation; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carpoolinghubbasicdata_translation (
-    carpoolinghubbasicdata_id bigint NOT NULL,
-    i18n_id bigint NOT NULL,
-    i18n_key character varying(255) NOT NULL
-);
-
-
-ALTER TABLE intime.carpoolinghubbasicdata_translation OWNER TO bdp;
-
---
--- Name: carpoolinguserbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carpoolinguserbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    arrival character varying(255),
-    cartype character varying(255),
-    departure character varying(255),
-    gender character(1),
-    name character varying(255),
-    pendular boolean,
-    type character varying(255),
-    hub_id bigint
-);
-
-
-ALTER TABLE intime.carpoolinguserbasicdata OWNER TO bdp;
-
---
--- Name: carpoolinguserbasicdata_translation; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carpoolinguserbasicdata_translation (
-    carpoolinguserbasicdata_id bigint NOT NULL,
-    location_id bigint NOT NULL,
-    location_key character varying(255) NOT NULL
-);
-
-
-ALTER TABLE intime.carpoolinguserbasicdata_translation OWNER TO bdp;
-
---
--- Name: carsharingcarstationbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carsharingcarstationbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    brand character varying(255),
-    licenseplate character varying(255),
-    carsharingstation_id bigint
-);
-
-
-ALTER TABLE intime.carsharingcarstationbasicdata OWNER TO bdp;
-
---
--- Name: carsharingstationbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carsharingstationbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    canbookahead boolean,
-    companyshortname character varying(255),
-    hasfixedparking boolean,
-    parking integer,
-    spontaneously boolean
-);
-
-
-ALTER TABLE intime.carsharingstationbasicdata OWNER TO bdp;
-
---
 -- Name: datatype_i18n; Type: TABLE; Schema: intime; Owner: bdp
 --
 
@@ -448,19 +276,6 @@ CREATE TABLE intime.datatype_i18n (
 
 
 ALTER TABLE intime.datatype_i18n OWNER TO bdp;
-
---
--- Name: echargingplugbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.echargingplugbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    estation_id bigint
-);
-
-
-ALTER TABLE intime.echargingplugbasicdata OWNER TO bdp;
 
 --
 -- Name: echargingplugoutlet_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -493,30 +308,6 @@ CREATE TABLE intime.echargingplugoutlet (
 
 
 ALTER TABLE intime.echargingplugoutlet OWNER TO bdp;
-
---
--- Name: echargingstationbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.echargingstationbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    accessinfo character varying(255),
-    accesstype character varying(255),
-    address character varying(255),
-    assetprovider character varying(255),
-    categories character varying(255),
-    chargingpointscount integer,
-    city character varying(255),
-    flashinfo character varying(255),
-    locationserviceinfo character varying(255),
-    paymentinfo text,
-    reservable boolean,
-    state character varying(255)
-);
-
-
-ALTER TABLE intime.echargingstationbasicdata OWNER TO bdp;
 
 --
 -- Name: elaboration_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -579,24 +370,6 @@ CREATE TABLE intime.elaborationhistory (
 
 
 ALTER TABLE intime.elaborationhistory OWNER TO bdp;
-
---
--- Name: linkbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.linkbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    elapsed_time_default integer,
-    length double precision,
-    linegeometry public.geometry,
-    street_ids_ref character varying(255),
-    destination_id bigint,
-    origin_id bigint
-);
-
-
-ALTER TABLE intime.linkbasicdata OWNER TO bdp;
 
 --
 -- Name: measurement_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -895,20 +668,6 @@ CREATE TABLE intime.measurementstringhistory (
 ALTER TABLE intime.measurementstringhistory OWNER TO bdp;
 
 --
--- Name: meteostationbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.meteostationbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    area character varying(255),
-    zeus character varying(255)
-);
-
-
-ALTER TABLE intime.meteostationbasicdata OWNER TO bdp;
-
---
 -- Name: station_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -931,34 +690,16 @@ CREATE TABLE intime.station (
     id bigint DEFAULT nextval('intime.station_seq'::regclass) NOT NULL,
     active boolean,
     available boolean,
-    description character varying(255),
-    municipality character varying(255),
+    metadata jsonb,
     name character varying(255),
     origin character varying(255),
     pointprojection public.geometry,
-    shortname character varying(255),
-    stationcode character varying(255) NOT NULL
+    stationcode character varying(255) NOT NULL,
+    parent_id bigint
 );
 
 
 ALTER TABLE intime.station OWNER TO bdp;
-
---
--- Name: streetbasicdata; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.streetbasicdata (
-    id bigint DEFAULT nextval('intime.basicdata_seq'::regclass) NOT NULL,
-    station_id bigint,
-    description character varying(255),
-    length double precision,
-    linegeometry public.geometry,
-    old_idstr smallint,
-    speed_default integer
-);
-
-
-ALTER TABLE intime.streetbasicdata OWNER TO bdp;
 
 --
 -- Name: translation_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -1068,38 +809,6 @@ ALTER TABLE ONLY intime.bdpuser
 
 
 --
--- Name: bicyclebasicdata bicyclebasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bicyclebasicdata
-    ADD CONSTRAINT bicyclebasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: bikesharingstationbasicdata bikesharingstationbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bikesharingstationbasicdata
-    ADD CONSTRAINT bikesharingstationbasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: bluetoothbasicdata bluetoothbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bluetoothbasicdata
-    ADD CONSTRAINT bluetoothbasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: carparkingbasicdata carparkingbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingbasicdata
-    ADD CONSTRAINT carparkingbasicdata_pkey PRIMARY KEY (id);
-
-
---
 -- Name: carparkingdynamic carparkingdynamic_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1116,54 +825,6 @@ ALTER TABLE ONLY intime.carparkingdynamichistory
 
 
 --
--- Name: carpoolinghubbasicdata carpoolinghubbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata
-    ADD CONSTRAINT carpoolinghubbasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: carpoolinghubbasicdata_translation carpoolinghubbasicdata_translation_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata_translation
-    ADD CONSTRAINT carpoolinghubbasicdata_translation_pkey PRIMARY KEY (carpoolinghubbasicdata_id, i18n_key);
-
-
---
--- Name: carpoolinguserbasicdata carpoolinguserbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata
-    ADD CONSTRAINT carpoolinguserbasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: carpoolinguserbasicdata_translation carpoolinguserbasicdata_translation_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata_translation
-    ADD CONSTRAINT carpoolinguserbasicdata_translation_pkey PRIMARY KEY (carpoolinguserbasicdata_id, location_key);
-
-
---
--- Name: carsharingcarstationbasicdata carsharingcarstationbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carsharingcarstationbasicdata
-    ADD CONSTRAINT carsharingcarstationbasicdata_pkey PRIMARY KEY (id);
-
-
---
--- Name: carsharingstationbasicdata carsharingstationbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carsharingstationbasicdata
-    ADD CONSTRAINT carsharingstationbasicdata_pkey PRIMARY KEY (id);
-
-
---
 -- Name: datatype_i18n datatype_i18n_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1172,27 +833,11 @@ ALTER TABLE ONLY intime.datatype_i18n
 
 
 --
--- Name: echargingplugbasicdata echargingplugbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingplugbasicdata
-    ADD CONSTRAINT echargingplugbasicdata_pkey PRIMARY KEY (id);
-
-
---
 -- Name: echargingplugoutlet echargingplugoutlet_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.echargingplugoutlet
     ADD CONSTRAINT echargingplugoutlet_pkey PRIMARY KEY (id);
-
-
---
--- Name: echargingstationbasicdata echargingstationbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingstationbasicdata
-    ADD CONSTRAINT echargingstationbasicdata_pkey PRIMARY KEY (id);
 
 
 --
@@ -1209,14 +854,6 @@ ALTER TABLE ONLY intime.elaboration
 
 ALTER TABLE ONLY intime.elaborationhistory
     ADD CONSTRAINT elaborationhistory_pkey PRIMARY KEY (id);
-
-
---
--- Name: linkbasicdata linkbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.linkbasicdata
-    ADD CONSTRAINT linkbasicdata_pkey PRIMARY KEY (id);
 
 
 --
@@ -1268,27 +905,11 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 
 --
--- Name: meteostationbasicdata meteostationbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.meteostationbasicdata
-    ADD CONSTRAINT meteostationbasicdata_pkey PRIMARY KEY (id);
-
-
---
 -- Name: station station_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
     ADD CONSTRAINT station_pkey PRIMARY KEY (id);
-
-
---
--- Name: streetbasicdata streetbasicdata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.streetbasicdata
-    ADD CONSTRAINT streetbasicdata_pkey PRIMARY KEY (id);
 
 
 --
@@ -1316,14 +937,6 @@ ALTER TABLE ONLY intime.measurementhistory
 
 
 --
--- Name: carpoolinghubbasicdata_translation uk_3m4xdkq0ub9i16b756rmkrrub; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata_translation
-    ADD CONSTRAINT uk_3m4xdkq0ub9i16b756rmkrrub UNIQUE (i18n_id);
-
-
---
 -- Name: bdprole uk_47fpix67ktrhok7ee98qr4h9j; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1337,14 +950,6 @@ ALTER TABLE ONLY intime.bdprole
 
 ALTER TABLE ONLY intime.measurement
     ADD CONSTRAINT uk_6tvbxvtiou8witoj88k9jp48r UNIQUE (period, station_id, type_id);
-
-
---
--- Name: carpoolinguserbasicdata_translation uk_cf78jl8o9ay9e0qjys8oxbm34; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata_translation
-    ADD CONSTRAINT uk_cf78jl8o9ay9e0qjys8oxbm34 UNIQUE (location_id);
 
 
 --
@@ -1401,43 +1006,11 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
--- Name: bicyclebasicdata fk3gyvu9e5k94rx6dy5npnl8pj6; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bicyclebasicdata
-    ADD CONSTRAINT fk3gyvu9e5k94rx6dy5npnl8pj6 FOREIGN KEY (bikesharingstation_id) REFERENCES intime.station(id);
-
-
---
--- Name: echargingplugbasicdata fk3rd3lm3eceksp7b9fy1fgpgq6; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingplugbasicdata
-    ADD CONSTRAINT fk3rd3lm3eceksp7b9fy1fgpgq6 FOREIGN KEY (estation_id) REFERENCES intime.station(id);
-
-
---
--- Name: bikesharingstationbasicdata fk4f134epnmuntunab746r66vgv; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bikesharingstationbasicdata
-    ADD CONSTRAINT fk4f134epnmuntunab746r66vgv FOREIGN KEY (type_id) REFERENCES intime.type(id);
-
-
---
 -- Name: bdppermissions fk4ne8r7ss0r4eufg7qx3bdcybi; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdppermissions
     ADD CONSTRAINT fk4ne8r7ss0r4eufg7qx3bdcybi FOREIGN KEY (type_id) REFERENCES intime.type(id);
-
-
---
--- Name: carsharingcarstationbasicdata fk4sskxcenm2boj6rli581ov2dc; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carsharingcarstationbasicdata
-    ADD CONSTRAINT fk4sskxcenm2boj6rli581ov2dc FOREIGN KEY (carsharingstation_id) REFERENCES intime.station(id);
 
 
 --
@@ -1481,14 +1054,6 @@ ALTER TABLE ONLY intime.bdprules
 
 
 --
--- Name: carpoolinghubbasicdata_translation fk8bg2cr872cl7bpl1xlm7gbrme; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata_translation
-    ADD CONSTRAINT fk8bg2cr872cl7bpl1xlm7gbrme FOREIGN KEY (i18n_id) REFERENCES intime.translation(id);
-
-
---
 -- Name: measurementstringhistory fk9dpm4i4fnimhnxw80k7tfqox0; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1502,110 +1067,6 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 ALTER TABLE ONLY intime.alarm
     ADD CONSTRAINT fk9w0ph05u8x3louer75d8d6g0t FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: echargingplugbasicdata fk_4jocxfkbgifv7nuegafam1646; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingplugbasicdata
-    ADD CONSTRAINT fk_4jocxfkbgifv7nuegafam1646 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: meteostationbasicdata fk_dclq4pqlin82mp08ypayegvp0; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.meteostationbasicdata
-    ADD CONSTRAINT fk_dclq4pqlin82mp08ypayegvp0 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carpoolinghubbasicdata fk_denjym4bibvsqtnj6uhh1yhnw; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata
-    ADD CONSTRAINT fk_denjym4bibvsqtnj6uhh1yhnw FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carparkingbasicdata fk_du6n60nd0ltuy2l0p4byo9tno; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingbasicdata
-    ADD CONSTRAINT fk_du6n60nd0ltuy2l0p4byo9tno FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: bikesharingstationbasicdata fk_eyme20c34nvso7l79kmyyg8q3; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bikesharingstationbasicdata
-    ADD CONSTRAINT fk_eyme20c34nvso7l79kmyyg8q3 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carsharingcarstationbasicdata fk_gd4fjxeuhk02yg6bjgees79s6; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carsharingcarstationbasicdata
-    ADD CONSTRAINT fk_gd4fjxeuhk02yg6bjgees79s6 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: linkbasicdata fk_kbxohrwokjxqvk2v2hq2h2t7q; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.linkbasicdata
-    ADD CONSTRAINT fk_kbxohrwokjxqvk2v2hq2h2t7q FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: bicyclebasicdata fk_kd6cluti67bvjsnon5ane961x; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bicyclebasicdata
-    ADD CONSTRAINT fk_kd6cluti67bvjsnon5ane961x FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carpoolinguserbasicdata fk_knt96vdxugt1opmbg3l4goku7; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata
-    ADD CONSTRAINT fk_knt96vdxugt1opmbg3l4goku7 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: echargingstationbasicdata fk_litvoxxj0dp67mt9v0j5wg7fh; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingstationbasicdata
-    ADD CONSTRAINT fk_litvoxxj0dp67mt9v0j5wg7fh FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: bluetoothbasicdata fk_pyqilmrqxl9gxwpr8ui7jexij; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bluetoothbasicdata
-    ADD CONSTRAINT fk_pyqilmrqxl9gxwpr8ui7jexij FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carsharingstationbasicdata fk_qhe8k3ekrkq81hib4u039e6mr; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carsharingstationbasicdata
-    ADD CONSTRAINT fk_qhe8k3ekrkq81hib4u039e6mr FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: streetbasicdata fk_qq8vbw6c0asj0wo1mycuwil93; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.streetbasicdata
-    ADD CONSTRAINT fk_qq8vbw6c0asj0wo1mycuwil93 FOREIGN KEY (station_id) REFERENCES intime.station(id);
 
 
 --
@@ -1641,35 +1102,11 @@ ALTER TABLE ONLY intime.elaboration
 
 
 --
--- Name: carpoolinguserbasicdata_translation fkdq581wabl1levlfsq4pyjpjw5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata_translation
-    ADD CONSTRAINT fkdq581wabl1levlfsq4pyjpjw5 FOREIGN KEY (carpoolinguserbasicdata_id) REFERENCES intime.carpoolinguserbasicdata(id);
-
-
---
 -- Name: bdprules fkdten6vp3aa3r30ixmaxr0qcj1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprules
     ADD CONSTRAINT fkdten6vp3aa3r30ixmaxr0qcj1 FOREIGN KEY (role_id) REFERENCES intime.bdprole(id);
-
-
---
--- Name: linkbasicdata fketmcfal9cr1pyv8f2kvwelm44; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.linkbasicdata
-    ADD CONSTRAINT fketmcfal9cr1pyv8f2kvwelm44 FOREIGN KEY (origin_id) REFERENCES intime.station(id);
-
-
---
--- Name: bicyclebasicdata fkeu76hkyyutdvnr78grwuvd2qt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.bicyclebasicdata
-    ADD CONSTRAINT fkeu76hkyyutdvnr78grwuvd2qt FOREIGN KEY (type_id) REFERENCES intime.type(id);
 
 
 --
@@ -1694,14 +1131,6 @@ ALTER TABLE ONLY intime.elaborationhistory
 
 ALTER TABLE ONLY intime.echargingplugoutlet
     ADD CONSTRAINT fkhce8yoanxbbeurhseaf2pu80j FOREIGN KEY (plug_id) REFERENCES intime.station(id);
-
-
---
--- Name: carpoolinguserbasicdata fkhf0s6h0u5gkbu7jn49sq62tnt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata
-    ADD CONSTRAINT fkhf0s6h0u5gkbu7jn49sq62tnt FOREIGN KEY (hub_id) REFERENCES intime.station(id);
 
 
 --
@@ -1753,35 +1182,11 @@ ALTER TABLE ONLY intime.datatype_i18n
 
 
 --
--- Name: carpoolinghubbasicdata_translation fko7bkcktpodp3yst428317ipuk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinghubbasicdata_translation
-    ADD CONSTRAINT fko7bkcktpodp3yst428317ipuk FOREIGN KEY (carpoolinghubbasicdata_id) REFERENCES intime.carpoolinghubbasicdata(id);
-
-
---
--- Name: linkbasicdata fkorulsos70qv0goe1gpqmog7q5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.linkbasicdata
-    ADD CONSTRAINT fkorulsos70qv0goe1gpqmog7q5 FOREIGN KEY (destination_id) REFERENCES intime.station(id);
-
-
---
 -- Name: measurementstring fkpi0ege52d6f86n8o6l6s75irm; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstring
     ADD CONSTRAINT fkpi0ege52d6f86n8o6l6s75irm FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carpoolinguserbasicdata_translation fkq8p7bo9hwkfk8h3b7fhf3xflp; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carpoolinguserbasicdata_translation
-    ADD CONSTRAINT fkq8p7bo9hwkfk8h3b7fhf3xflp FOREIGN KEY (location_id) REFERENCES intime.translation(id);
 
 
 --
@@ -1817,9 +1222,20 @@ ALTER TABLE ONLY intime.bdppermissions
 
 
 --
+-- Name: station fkrwkpfeoxfhn1rks97k6wlanpk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.station
+    ADD CONSTRAINT fkrwkpfeoxfhn1rks97k6wlanpk FOREIGN KEY (parent_id) REFERENCES intime.station(id);
+
+
+--
 -- Name: SCHEMA intime; Type: ACL; Schema: -; Owner: postgres
 --
 
+REVOKE ALL ON SCHEMA intime FROM PUBLIC;
+REVOKE ALL ON SCHEMA intime FROM postgres;
+GRANT ALL ON SCHEMA intime TO postgres;
 GRANT ALL ON SCHEMA intime TO bdp;
 GRANT USAGE ON SCHEMA intime TO bdpreadonly;
 
