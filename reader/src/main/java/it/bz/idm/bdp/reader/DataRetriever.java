@@ -25,7 +25,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -33,15 +32,11 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPUser;
-import it.bz.idm.bdp.dal.bluetooth.Linkstation;
-import it.bz.idm.bdp.dal.parking.ParkingStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordDto;
-import it.bz.idm.bdp.dto.parking.ParkingStationDto;
 
 public class DataRetriever {
 
@@ -57,22 +52,6 @@ public class DataRetriever {
 	}
 
 	//API additions for V2
-	public List<ChildDto> getChildren(String type, String parent){
-		EntityManager em = JPAUtil.createEntityManager();
-		try{
-			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			List<ChildDto> children = null;
-			if (station != null) {
-				children = station.findChildren(em, parent);
-				return children;
-			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
-		}
-		return null;
-	}
 	public List<TypeDto> getTypes(String type, String stationId) {
 		List<TypeDto> dataTypes = null;
 		EntityManager em = JPAUtil.createEntityManager();
@@ -121,21 +100,6 @@ public class DataRetriever {
 			em.close();
 		}
 		return stations;
-	}
-
-
-	public List<StationDto> getAvailableStations(){
-		List<StationDto> availableStations = new ArrayList<StationDto>();
-		EntityManager em = JPAUtil.createEntityManager();
-		try{
-			availableStations = new Linkstation().findAvailableStations(em);
-
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
-		}
-		return availableStations;
 	}
 
 	public List<String[]> getDataTypes(String type, String stationId) {
@@ -242,38 +206,6 @@ public class DataRetriever {
 		return records;
 	}
 
-	//LEGACY API FOR PARKING
-	@Deprecated
-	public List<String> fetchParkingIds(){
-		EntityManager em = JPAUtil.createEntityManager();
-		List<String> stations = Station.findActiveStations(em,"ParkingStation");
-		em.close();
-		return stations ;
-	}
-	@Deprecated
-	public Map<String,Object> fetchParkingStation(String identifier){
-		return ParkingStation.findParkingStation(identifier);
-	}
-
-	@Deprecated
-	public List<ParkingStationDto> fetchParkingStations(){
-		return ParkingStation.findParkingStationsMetadata();
-	}
-	@Deprecated
-	public Integer getNumberOfFreeSlots(String identifier){
-		return ParkingStation.findNumberOfFreeSlots(identifier);
-	}
-	@Deprecated
-	public List<Object[]> fetchStoricData(String identifier,Integer minutes){
-		return ParkingStation.findStoricData(identifier,minutes);
-
-	}
-	@Deprecated
-	public List<Object> fetchFreeSlotsByTimeFrame(String identifier, String startDateString, String endDateString,
-			String datePattern) {
-		return ParkingStation.findFreeSlotsByTimeFrame(identifier,startDateString, endDateString,datePattern);
-	}
-	
 	private BDPRole getRoleByPrincipal(Principal principal, EntityManager em) {
 		BDPUser user = BDPUser.findByEmail(em, principal.getName());
 		BDPRole role = user==null || user.getRoles().isEmpty() ? null : user.getRoles().get(0);

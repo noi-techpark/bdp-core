@@ -20,17 +20,12 @@
  */
 package it.bz.idm.bdp.writer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -43,9 +38,6 @@ import it.bz.idm.bdp.dto.StationDto;
 
 @Component
 public class DataManager {
-
-	@Value("classpath:META-INF/sql/init.sql")
-	private Resource sql;
 
 	public Object pushRecords(String stationType, Object... data){
 		EntityManager em = JPAUtil.createEntityManager();
@@ -123,7 +115,10 @@ public class DataManager {
 		for (Station station : stations) {
 			try {
 				StationDto dto = station.convertToDto(station);
-				String name = JPAUtil.getEntityNameByObject(station);
+
+				/* XXX Check if the entity exists: Is this still needed? Overhead? */
+				JPAUtil.getEntityNameByObject(station);
+
 				stationsDtos.add(dto);
 			} catch (Exception e) {
 				// FIXME Give the error back to be handled in writer...
@@ -149,21 +144,4 @@ public class DataManager {
 		}
 		em.getTransaction().commit();
 	}
-
-	/*
-	 * Permission handling, initial inserts and some native database fixes
-	 * must be executed at each startup of the big data platform.
-	 */
-	@EventListener(ContextRefreshedEvent.class)
-	public void afterStartup() throws IOException {
-		/*
-		 * XXX It is not safe to run this query on every startup, we must fix an
-		 * issue where Postgres fails because a table should be dropped that is
-		 * a view instead or vice-versa. Until this is fixed, we must run the
-		 * init.sql script manually choosing between "DROP TABLE" or "DROP VIEW"
-		 * based on the actual database content.
-		 */
-		// JPAUtil.executeNativeQueries(sql.getInputStream());
-	}
-
 }

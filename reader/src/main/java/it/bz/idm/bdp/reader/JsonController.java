@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import it.bz.idm.bdp.dto.ChildDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
@@ -73,16 +72,6 @@ public class JsonController extends DataRetriever{
 	@Override
 	public @ResponseBody List<String> getStations(@RequestParam String stationType) {
 		return super.getStations(stationType);
-	}
-	@RequestMapping(value = "/link-stations", method = RequestMethod.GET)
-	@Override
-	public @ResponseBody List<StationDto> getAvailableStations() {
-		return super.getAvailableStations();
-	}
-	@RequestMapping(value = "/child-stations", method = RequestMethod.GET)
-	@Override
-	public @ResponseBody List<ChildDto> getChildren(@RequestParam String stationType,@RequestParam String parent) {
-		return super.getChildren(stationType, parent);
 	}
 	@RequestMapping(value = "/data-types", method = RequestMethod.GET)
 	@Override
