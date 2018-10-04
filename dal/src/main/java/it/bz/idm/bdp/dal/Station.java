@@ -21,10 +21,12 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -34,6 +36,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
@@ -42,7 +46,6 @@ import javax.persistence.UniqueConstraint;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -98,9 +101,11 @@ public abstract class Station {
 
 	private String origin;
 
-	@Type(type = "jsonb")
-	@Column(columnDefinition = "jsonb")
-	private Map<String, Object> metaData;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "station")
+	private Collection<MetaData> metaDataHistory;
+
+	@OneToOne
+	private MetaData metaData;
 
 	public Station() {
 		this.available = true;
@@ -119,11 +124,10 @@ public abstract class Station {
 	};
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
-		if (! resultList.isEmpty())
-			for (Station s: resultList){
-				StationDto dto = convertToDto(s);
-				stationList.add(dto);
-			}
+		for (Station s : resultList) {
+			StationDto dto = convertToDto(s);
+			stationList.add(dto);
+		}
 		return stationList;
 	}
 
@@ -137,11 +141,13 @@ public abstract class Station {
 		dto.setCoordinateReferenceSystem(GEOM_CRS);
 		dto.setParentId(s.getParent() == null ? null : s.getParent().getStationcode());
 		dto.setOrigin(s.getOrigin());
-		dto.setMetaData(s.getMetaData());
+		if (s.getMetaData() != null)
+			dto.setMetaData(s.getMetaData().getJson());
 		return dto;
 	}
 
 	public abstract List<String[]> findDataTypes(EntityManager em, String stationId);
+
 	public abstract List<TypeDto> findTypes(EntityManager em, String stationId);
 
 	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
@@ -187,7 +193,6 @@ public abstract class Station {
 		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 	}
 
-
 	public String getName() {
 		return name;
 	}
@@ -231,6 +236,7 @@ public abstract class Station {
 	public Boolean getAvailable() {
 		return available;
 	}
+
 	public void setAvailable(Boolean available) {
 		this.available = available;
 	}
@@ -243,19 +249,24 @@ public abstract class Station {
 		this.origin = origin;
 	}
 
-	public Map<String, Object> getMetaData() {
-		return metaData;
-	}
-
-	public void setMetaData(Map<String, Object> metaData) {
-		this.metaData = metaData;
-	}
 	public Station getParent() {
 		return parent;
 	}
 
 	public void setParent(Station parent) {
 		this.parent = parent;
+	}
+
+	public MetaData getMetaData() {
+		return metaData;
+	}
+
+	public void setMetaData(MetaData metaData) {
+		this.metaData = metaData;
+	}
+
+	public Collection<MetaData> getMetaDataHistory() {
+		return metaDataHistory;
 	}
 
 	public List<Station> findStations(EntityManager em){
@@ -269,13 +280,13 @@ public abstract class Station {
 		List<Station> resultList = query.getResultList();
 		return resultList;
 	}
+
 	public static List<String> findActiveStations(EntityManager em, String type) {
 		TypedQuery<String> query = em.createQuery("Select station.stationcode from "+type+" station where station.active = :active",String.class);
 		query.setParameter("active", true);
 		List<String> resultList = query.getResultList();
 		return resultList;
 	}
-
 
 	public static List<String> findStationTypes(EntityManager em) {
 		TypedQuery<String> query = em.createQuery("select station.class from Station station GROUP BY type(station)",String.class);
@@ -288,6 +299,7 @@ public abstract class Station {
 		stationquery.setParameter("stationcode", integer);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
+
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
@@ -298,6 +310,7 @@ public abstract class Station {
 		stationquery.setParameter("stationtype", this.getClass());
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
+
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
 		List<String[]> stringlist = new ArrayList<String[]>();
 		for(Object[] objects : resultList){
@@ -377,12 +390,27 @@ public abstract class Station {
 			if (parent != null)
 				existingStation.setParent(parent);
 		}
-		existingStation.syncByMetaData(em,dto.getMetaData());
+		existingStation.syncMetaData(em);
 		em.merge(existingStation);
-	};
+	}
 
-	protected void syncByMetaData(EntityManager em, Map<String, Object> metaData) {
-	};
+	/**
+	 * Always create a new MetaData, since we want to persist a new record
+	 * and not update an existing one, to keep the history of all meta data
+	 * changes.
+	 *
+	 * @param metaData
+	 */
+	private void setMetaData(Map<String, Object> metaData) {
+		this.metaData = new MetaData();
+		this.metaData.setStation(this);
+		this.metaData.setJson(metaData);
+	}
+
+	protected void syncMetaData(EntityManager em) {
+		em.persist(metaData);
+	}
+
 	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		List<Station> stations = this.findStationsByOrigin(em, dtos);
 		if (stations != null){

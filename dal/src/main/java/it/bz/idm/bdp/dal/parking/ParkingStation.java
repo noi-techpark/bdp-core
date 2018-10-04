@@ -199,7 +199,7 @@ public class ParkingStation extends Station{
 		DataType type = DataType.findByCname(em,cname);
 		int capacity = 0;
 		if (!"occupied".equals(cname)){
-			capacity = Integer.valueOf(this.getMetaData().get("capacity").toString());
+			capacity = Integer.valueOf(this.getMetaData().getJson().get("capacity").toString());
 		}
 		ParkingRecordExtendedDto dto;
 		//TODO: change if condition, once free and occupied are in db "Parking forecast".equals(cname)
@@ -250,7 +250,7 @@ public class ParkingStation extends Station{
 					List<? extends RecordDtoImpl> data = entry.getValue().getData();
 					Collections.sort(data);
 					Integer slots = (Integer) data.get(0).getValue();
-					Integer capacity = Integer.parseInt(this.getMetaData().get("capacity").toString());
+					Integer capacity = Integer.parseInt(this.getMetaData().getJson().get("capacity").toString());
 					int occupacy = capacity - slots;
 					int occupacypercentage = Math.round(100f * occupacy/capacity);
 					lastRecord.setOccupacy(occupacy);

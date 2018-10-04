@@ -40,7 +40,7 @@ public class StationDto implements Serializable {
 	protected String coordinateReferenceSystem;
 	private String origin;
 	private String parentId;
-	private Map<String,Object> metaData = new HashMap<>();
+	private Map<String, Object> metaData = new HashMap<String, Object>();
 
 	public StationDto() {
 	}
@@ -59,7 +59,7 @@ public class StationDto implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public String getParentId() {
 		return parentId;
 	}
