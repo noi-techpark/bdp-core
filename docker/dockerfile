@@ -12,6 +12,6 @@ RUN groupadd --gid $JENKINS_GROUP_ID jenkins && \
 RUN apt-get update && \
     apt-get install -y git openjdk-8-jdk maven
 
-COPY entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
