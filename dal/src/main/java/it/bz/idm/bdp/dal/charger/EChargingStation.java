@@ -20,18 +20,22 @@
  */
 package it.bz.idm.bdp.dal.charger;
 
+import java.util.Map;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
+import it.bz.idm.bdp.dal.Station;
 
 @Entity
-public class EChargingStation extends MeasurementStation{
-
+public class EChargingStation extends MeasurementStation {
 
 	@Override
-	public void syncMetaData(EntityManager em) {
-		String state = this.getMetaData().getJson().get("state").toString();
+	public void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
+		super.syncMetaData(em, metaData, existingStation);
+
+		String state = metaData.get("state").toString();
 		if ("REMOVED".equals(state))
 			this.setActive(false);
 		if ("ACTIVE".equals(state))

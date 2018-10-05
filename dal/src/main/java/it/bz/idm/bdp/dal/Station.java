@@ -32,6 +32,7 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,8 +47,6 @@ import javax.persistence.UniqueConstraint;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -59,7 +58,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -68,9 +66,6 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
-@TypeDefs({
-    @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
-})
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 @DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
@@ -101,7 +96,7 @@ public abstract class Station {
 
 	private String origin;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "station")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "station", fetch = FetchType.LAZY)
 	private Collection<MetaData> metaDataHistory;
 
 	@OneToOne
@@ -121,7 +116,8 @@ public abstract class Station {
 			resultList.add(station);
 		dtos = this.convertToDtos(em,resultList);
 		return dtos;
-	};
+	}
+
 	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
 		for (Station s : resultList) {
@@ -345,53 +341,74 @@ public abstract class Station {
 		return null;
 	}
 
+	/**
+	 * @param em
+	 * @param dto
+	 */
 	private void sync(EntityManager em, StationDto dto) {
-			Station existingStation = findStation(em,dto.getId());
-			if (existingStation == null){
-				try {
-					existingStation = this.getClass().newInstance();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-				existingStation.setStationcode(dto.getId());
-				em.persist(existingStation);
+		Station existingStation = findStation(em, dto.getId());
+		if (existingStation == null) {
+			try {
+				existingStation = this.getClass().newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 			}
-			if (existingStation.getName() == null)
-				existingStation.setName(dto.getName());
-			if (dto.getLatitude() != null && dto.getLongitude() != null){
-				Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
-				CoordinateReferenceSystem crs;
-				try {
-					crs = CRS.decode(GEOM_CRS,true);
-					if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())){
-						CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(),true);
-						Geometry geometry = JTS.transform(point,CRS.findMathTransform(thirdPartyCRS, crs));
-						point = geometry.getCentroid();
-					}
-					point.setSRID(4326);
-					existingStation.setPointprojection(point);
-				} catch (NoSuchAuthorityCodeException e) {
-					e.printStackTrace();
-				} catch (FactoryException e) {
-					e.printStackTrace();
-				} catch (MismatchedDimensionException e) {
-					e.printStackTrace();
-				} catch (TransformException e) {
-					e.printStackTrace();
+			existingStation.setStationcode(dto.getId());
+			em.persist(existingStation);
+		}
+		if (existingStation.getName() == null)
+			existingStation.setName(dto.getName());
+		if (dto.getLatitude() != null && dto.getLongitude() != null) {
+			Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(), dto.getLatitude()));
+			CoordinateReferenceSystem crs;
+			try {
+				crs = CRS.decode(GEOM_CRS, true);
+				if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS
+						.equals(dto.getCoordinateReferenceSystem())) {
+					CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(), true);
+					Geometry geometry = JTS.transform(point, CRS.findMathTransform(thirdPartyCRS, crs));
+					point = geometry.getCentroid();
 				}
+				point.setSRID(4326);
+				existingStation.setPointprojection(point);
+			} catch (NoSuchAuthorityCodeException e) {
+				e.printStackTrace();
+			} catch (FactoryException e) {
+				e.printStackTrace();
+			} catch (MismatchedDimensionException e) {
+				e.printStackTrace();
+			} catch (TransformException e) {
+				e.printStackTrace();
+			}
 
-			}
-			existingStation.setOrigin(dto.getOrigin());
-		existingStation.setMetaData(dto.getMetaData());
+		}
+		existingStation.setOrigin(dto.getOrigin());
 		if (dto.getParentId() != null) {
 			Station parent = Station.findStationByIdentifier(em, dto.getParentId());
 			if (parent != null)
 				existingStation.setParent(parent);
 		}
-		existingStation.syncMetaData(em);
+
+		syncMetaData(em, dto.getMetaData(), existingStation);
+
 		em.merge(existingStation);
+	}
+
+	/**
+	 * Create a new meta data entry, if it does not yet exist or if it is different from
+	 * the previously inserted one.
+	 */
+	protected void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
+		if (metaData == null)
+			return;
+
+		boolean metaDataExists = (existingStation.getMetaData() != null && existingStation.getMetaData().getJson() != null);
+		if (!metaDataExists || (metaDataExists && !existingStation.getMetaData().getJson().equals(metaData))) {
+			existingStation.setMetaData(metaData);
+			em.persist(existingStation.getMetaData());
+		}
 	}
 
 	/**
@@ -405,10 +422,6 @@ public abstract class Station {
 		this.metaData = new MetaData();
 		this.metaData.setStation(this);
 		this.metaData.setJson(metaData);
-	}
-
-	protected void syncMetaData(EntityManager em) {
-		em.persist(metaData);
 	}
 
 	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
@@ -451,7 +464,6 @@ public abstract class Station {
 		stationquery.setParameter("parentId", stationId);
 		List<StationDto> dtos = convertToDtos(em, stationquery.getResultList());
 		return dtos;
-
 	}
 
 	public static List<Station> findStationsWithoutMunicipality(EntityManager em) {

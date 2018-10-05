@@ -21,7 +21,6 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -40,7 +39,7 @@ public class StationDto implements Serializable {
 	protected String coordinateReferenceSystem;
 	private String origin;
 	private String parentId;
-	private Map<String, Object> metaData = new HashMap<String, Object>();
+	private Map<String, Object> metaData;
 
 	public StationDto() {
 	}
