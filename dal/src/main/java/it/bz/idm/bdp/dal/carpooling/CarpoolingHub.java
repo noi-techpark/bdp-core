@@ -18,18 +18,12 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.dal.bluetooth;
+package it.bz.idm.bdp.dal.carpooling;
 
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 
-import it.bz.idm.bdp.dal.ElaborationStation;
+import it.bz.idm.bdp.dal.MeasurementStation;
 
 @Entity
-public class Linkstation extends ElaborationStation {
-
-	@Override
-	public Object pushRecords(EntityManager em, Object... object) {
-		return null;
-	}
+public class CarpoolingHub extends MeasurementStation{
 }

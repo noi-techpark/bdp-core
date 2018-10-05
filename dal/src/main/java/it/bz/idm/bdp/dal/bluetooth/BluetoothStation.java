@@ -38,17 +38,17 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 @Entity
-public class Bluetoothstation extends ElaborationStation {
+public class BluetoothStation extends ElaborationStation {
 
 	public static final String VEHICLE_DETECTION = "vehicle detection";
 	public static final String STATION_TYPE="Bluetoothstation";
 	public static final Integer PERIOD = 1;
 
-	public Bluetoothstation() {
+	public BluetoothStation() {
 		super();
 	}
 
-	public Bluetoothstation(String stationcode) {
+	public BluetoothStation(String stationcode) {
 		this.stationcode = stationcode;
 		this.name = stationcode;
 	}
@@ -73,7 +73,7 @@ public class Bluetoothstation extends ElaborationStation {
 				em.getTransaction().begin();
 				Station station = findStation(em, entry.getKey());
 				if (station == null){
-					station = new Bluetoothstation(entry.getKey());
+					station = new BluetoothStation(entry.getKey());
 					em.persist(station);
 				}
 				List<? extends RecordDtoImpl> data = entry.getValue().getBranch().get(VEHICLE_DETECTION).getData();

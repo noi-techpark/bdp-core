@@ -18,13 +18,22 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.dal.meteo;
+package it.bz.idm.bdp.dal.environment;
+
 
 import javax.persistence.Entity;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
 
 @Entity
-public class Meteostation extends MeasurementStation {
+public class EnvironmentStation extends MeasurementStation {
 
+	public EnvironmentStation() {
+		super();
+	}
+	public EnvironmentStation(String stationcode) {
+		super();
+		this.stationcode = stationcode;
+		this.name = stationcode;
+	}
 }

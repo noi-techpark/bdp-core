@@ -43,16 +43,16 @@ import it.bz.idm.bdp.dto.vehicles.CarValue;
 import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
 
 @Entity
-public class Mobilestation extends Station {
+public class MobileStation extends Station {
 	private void addTrafficVehicleRecord(EntityManager em ,Car car) {
-		Mobilestation trafficVehicle;
+		MobileStation trafficVehicle;
 		Station station = this.findStation(em,car.getVehicle_id());
 		if (station != null){
-			trafficVehicle = (Mobilestation)station;
+			trafficVehicle = (MobileStation)station;
 			trafficVehicle.persistRecords(em,car.getValues());
 			trafficVehicle.persistNewestRecord(em,car.getValues(),trafficVehicle);
 		}else{
-			trafficVehicle = new Mobilestation();
+			trafficVehicle = new MobileStation();
 			trafficVehicle.setStationcode(car.getVehicle_id());
 			trafficVehicle.setActive(true);
 			trafficVehicle.setName(car.getVehicle_id());
@@ -64,7 +64,7 @@ public class Mobilestation extends Station {
 	}
 
 	private void persistNewestRecord(
-			EntityManager em, List<CarValue> values, Mobilestation trafficVehicle) {
+			EntityManager em, List<CarValue> values, MobileStation trafficVehicle) {
 		CarValue value = filterNewestRecord(values);
 		if (value != null){
 			TrafficVehicleRecord record = TrafficVehicleRecord.findRecordByVehicle(em,trafficVehicle);

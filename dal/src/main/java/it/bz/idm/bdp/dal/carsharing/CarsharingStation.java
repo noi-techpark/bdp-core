@@ -25,6 +25,6 @@ import javax.persistence.Entity;
 import it.bz.idm.bdp.dal.MeasurementStation;
 
 @Entity
-public class Carsharingstation extends MeasurementStation {
+public class CarsharingStation extends MeasurementStation {
 
 }

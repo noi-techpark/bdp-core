@@ -18,13 +18,13 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.dal.carpooling;
+package it.bz.idm.bdp.dal.meteo;
 
 import javax.persistence.Entity;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
 
 @Entity
-public class Carpoolingservice extends MeasurementStation{
+public class MeteoStation extends MeasurementStation {
 
 }

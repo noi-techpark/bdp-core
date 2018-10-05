@@ -28,13 +28,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.meteo.Meteostation;
+import it.bz.idm.bdp.dal.meteo.MeteoStation;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 
 @Entity
-public class Trafficstation extends ElaborationStation{
+public class TrafficStation extends ElaborationStation{
 
 	@Override
 	public List<String[]> findDataTypes(EntityManager em, String stationId) {
@@ -50,7 +50,7 @@ public class Trafficstation extends ElaborationStation{
 
 		List<Object[]> resultList = query.getResultList();
 		if (resultList.isEmpty())
-			return new Meteostation().findDataTypes(em,stationId);
+			return new MeteoStation().findDataTypes(em,stationId);
 		return getDataTypesFromQuery(resultList);
 	}
 

@@ -18,22 +18,13 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.dal.environment;
-
+package it.bz.idm.bdp.dal.carpooling;
 
 import javax.persistence.Entity;
 
 import it.bz.idm.bdp.dal.MeasurementStation;
 
-@Entity(name="Environmentstation")
-public class Environmentstation extends MeasurementStation{
+@Entity
+public class CarpoolingService extends MeasurementStation {
 
-	public Environmentstation() {
-		super();
-	}
-	public Environmentstation(String stationcode) {
-		super();
-		this.stationcode = stationcode;
-		this.name = stationcode;
-	}
 }

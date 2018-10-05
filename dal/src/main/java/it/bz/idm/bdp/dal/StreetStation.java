@@ -26,10 +26,10 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import it.bz.idm.bdp.dal.meteo.Meteostation;
+import it.bz.idm.bdp.dal.meteo.MeteoStation;
 
 @Entity
-public class Streetstation extends ElaborationStation{
+public class StreetStation extends ElaborationStation{
 
 	@Override
 	public List<String[]> findDataTypes(EntityManager em,String stationId) {
@@ -45,7 +45,7 @@ public class Streetstation extends ElaborationStation{
 
 		List<Object[]> resultList = query.getResultList();
 		if (resultList.isEmpty())
-			return new Meteostation().findDataTypes(em,stationId);
+			return new MeteoStation().findDataTypes(em,stationId);
 		return getDataTypesFromQuery(resultList);
 	}
 

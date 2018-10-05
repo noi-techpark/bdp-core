@@ -44,7 +44,7 @@ import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
-import it.bz.idm.bdp.dal.environment.Environmentstation;
+import it.bz.idm.bdp.dal.environment.EnvironmentStation;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -72,7 +72,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		role2.setName("Halla");
 		role2.setDescription("The Child Role");
 		role2.setParent(role);
-		station= new Environmentstation("BLuesky");
+		station= new EnvironmentStation("BLuesky");
 		type = new DataType("NO2","mg","Fake type","Instants");
 		rule = new BDPRules();
 		rule.setPeriod(500);
@@ -135,7 +135,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		BDPRole r2 = BDPRole.fetchAdminRole(em);
 		assertNotNull(r);
 		assertNotNull(r2);
-		Station station = new Environmentstation().findStation(em, this.station.getName());
+		Station station = new EnvironmentStation().findStation(em, this.station.getName());
 		assertNotNull(station);
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		assertNotNull(type);

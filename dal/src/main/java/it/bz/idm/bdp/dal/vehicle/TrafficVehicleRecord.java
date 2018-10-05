@@ -293,7 +293,7 @@ public class TrafficVehicleRecord {
 	private Boolean imu_valid_b;
 
     @OneToOne(cascade=CascadeType.ALL)
-    private Mobilestation station;
+    private MobileStation station;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date ts_ms;
@@ -755,11 +755,11 @@ public class TrafficVehicleRecord {
 		this.imu_valid_b = imu_valid_b;
 	}
 
-	public Mobilestation getStation() {
+	public MobileStation getStation() {
 		return station;
 	}
 
-	public void setStation(Mobilestation station) {
+	public void setStation(MobileStation station) {
 		this.station = station;
 	}
 
@@ -806,7 +806,7 @@ public class TrafficVehicleRecord {
 	public TrafficVehicleRecord() {
 	}
 
-	public TrafficVehicleRecord(CarValue value, Mobilestation station) {
+	public TrafficVehicleRecord(CarValue value, MobileStation station) {
 		super();
     	this.o3_1_ppb = value.getO3_1_ppb();
     	this.o3_1_runtime_s = value.getO3_1_runtime_s();
@@ -878,7 +878,7 @@ public class TrafficVehicleRecord {
 	}
 
 	private List<TrafficVehicleRecord> findTrafficVehicleRecordsByVehicleAndTs_msEquals(
-			Mobilestation station, Date ts_ms) {
+			MobileStation station, Date ts_ms) {
 		EntityManager em = JPAUtil.createEntityManager();
 		TypedQuery<TrafficVehicleRecord> query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station AND record.ts_ms= :ts_ms",TrafficVehicleRecord.class);
 		query.setParameter("station", station);
@@ -899,12 +899,12 @@ public class TrafficVehicleRecord {
 		return result;
 	}
 
-	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Mobilestation trafficVehicle){
+	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, MobileStation trafficVehicle){
 		TypedQuery<TrafficVehicleRecord > query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station",TrafficVehicleRecord.class);
 		query.setParameter("station", trafficVehicle);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
-	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Mobilestation trafficVehicle, String cname, Integer period){
+	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, MobileStation trafficVehicle, String cname, Integer period){
 		TrafficVehicleRecord vehicleRecord = null;
 		if (trafficVehicle != null ){
 			if (period==null && cname != null)
@@ -916,7 +916,7 @@ public class TrafficVehicleRecord {
 	}
 
 	private static TrafficVehicleRecord findRecordByVehicle(EntityManager em,
-			Mobilestation trafficVehicle, String type) {
+			MobileStation trafficVehicle, String type) {
 		TypedQuery<TrafficVehicleRecord> query = em.createQuery(
 				"select record from TrafficVehicleRecord record where record.station= :station and :type is not null",
 				TrafficVehicleRecord.class);
