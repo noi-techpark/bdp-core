@@ -26,18 +26,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
+@Table(name = "bdprules", schema = "intime")
 @Entity
 public class BDPRules {
     @Id
 	@GeneratedValue(generator = "bdprules_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "bdprules_gen", sequenceName = "bdprules_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('bdprules_seq')")
+	@ColumnDefault(value = "nextval('intime.bdprules_seq')")
     private Long id;
 
     @ManyToOne

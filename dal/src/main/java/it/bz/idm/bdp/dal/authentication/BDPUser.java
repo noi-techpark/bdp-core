@@ -32,6 +32,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -39,13 +40,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
+@Table(name = "bdpuser", schema = "intime")
 @Entity
 public class BDPUser {
 
 	@Id
 	@GeneratedValue(generator = "bdpuser_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "bdpuser_gen", sequenceName = "bdpuser_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('bdpuser_seq')")
+	@ColumnDefault(value = "nextval('intime.bdpuser_seq')")
 	private Long id;
 
 	@Column(unique = true, nullable = false)

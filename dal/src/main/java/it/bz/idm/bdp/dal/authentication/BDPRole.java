@@ -32,6 +32,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -39,7 +40,7 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
-
+@Table(name = "bdprole", schema = "intime")
 @Entity
 public class BDPRole {
 
@@ -49,7 +50,7 @@ public class BDPRole {
 	@Id
 	@GeneratedValue(generator = "bdprole_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "bdprole_gen", sequenceName = "bdprole_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('bdprole_seq')")
+	@ColumnDefault(value = "nextval('intime.bdprole_seq')")
 	private Long id;
 
 	@Column(unique = true, nullable = false)
