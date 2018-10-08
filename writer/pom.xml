@@ -26,7 +26,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>writer</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <packaging>war</packaging>
     <name>Big data platform</name>
     <inceptionYear>2018</inceptionYear>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dal</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
