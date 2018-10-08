@@ -70,7 +70,7 @@ PGPASS2=bdpreadonly
 # We will create a new database $PGDBNAME for you inside your Postgres instance
 PGDBNAME=bdptest
 PGPORT=5432
-PGSCHEMA=intime     # DO NOT CHANGE
+PGSCHEMA=intime        # DO NOT CHANGE
 
 # Which database should be used for version tests and other read-only
 # operations, before installing the new database $PGDBNAME. Please not, your
@@ -274,6 +274,14 @@ deploy_war_files() {
     echo_bold "...DONE."
 }
 
+test_installation() {
+    MSG_ERR=$1
+    shift
+    CMD="$@"
+    echo -n "Check '$CMD'... "
+    $CMD && echo "--> OK" || echo "--> ERROR: $MSG_ERR"
+}
+
 test_first() {
 
     echo
@@ -290,20 +298,16 @@ test_first() {
         echo "SUCCESS: PostgreSQL version:  $V"
     fi
 
-    set -x
-    which sudo || echo "sudo missing... please install it."
-    which mvn || echo "mvn missing... please install it."
-    which psql || echo "psql missing... please install it."
-    which xmlstarlet || echo "xmlstarlet missing... please install it."
-    which git || echo "git missing... please install it."
-    java -version 2>&1 | grep "1.8" || echo "java (1.8+) missing... please install it."
-    test -w $PXMLFILE || echo "File $PXMLFILE not writeable."
-    test -r $MODSSQL || echo "File $MODSSQL not readable."
-    test -r $DUMPSQL || echo "File $DUMPSQL not readable."
-
-    sudo which service || echo "service command missing... please install it."
-    sudo service $APPSERVER status | grep running || echo "Service $APPSERVER not running... install and/or start it."
-    set +x
+    test_installation "missing... please install it" which sudo
+    test_installation "missing... please install it" which mvn
+    test_installation "missing... please install it" which psql
+    test_installation "missing... please install it" which xmlstarlet
+    test_installation "missing... please install it" java -version 2>&1 | grep 1.8
+    test_installation "File $PXMLFILE not writeable." test -w $PXMLFILE
+    test_installation "File $MODSSQL not readable." test -r $MODSSQL
+    test_installation "File $DUMPSQL not readable." test -r $DUMPSQL
+    test_installation "/usr/sbin/service not executable." test -x /usr/sbin/service
+    test_installation "Service $APPSERVER not running... install and/or start it." /usr/sbin/service $APPSERVER status | grep running
 
     echo_bold "...DONE."
 }
