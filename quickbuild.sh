@@ -130,8 +130,8 @@ give_consent() {
     echo "http://opendatahub.readthedocs.io/en/latest/howto/development.html"
     echo
     echo "Please make sure that you:"
-    echo "1. run this script from the directory in which you clone the repository"
-    echo "2. modified the variables in this script according to your needs & local setup"
+    echo "- run this script from the directory in which you clone the repository"
+    echo "- modify the variables in this script according to your needs & local setup"
     echo
     echo "We tested it on Ubuntu 18.04 and Debian 9."
     tput bold
