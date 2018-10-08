@@ -60,17 +60,22 @@ PGUSER=$PGUSER
 PGPASSWORD=$PGPASSWORD
 
 # PGUSER1 is a role in Postgres with write access
-PGUSER1=bdp			# DO NOT CHANGE
+PGUSER1=bdp            # DO NOT CHANGE
 PGPASS1=bdp
 
 # PGUSER2 is a role in Postgres with read-only access
-PGUSER2=bdpreadonly	# DO NOT CHANGE
+PGUSER2=bdpreadonly    # DO NOT CHANGE
 PGPASS2=bdpreadonly
 
 # We will create a new database $PGDBNAME for you inside your Postgres instance
 PGDBNAME=bdptest
 PGPORT=5432
-PGSCHEMA=intime 	# DO NOT CHANGE
+PGSCHEMA=intime     # DO NOT CHANGE
+
+# Which database should be used for version tests and other read-only
+# operations, before installing the new database $PGDBNAME. Please not, your
+# user $PGUSER must have read access to that database.
+PGDBDEFAULT=postgres
 
 # Persistence.xml file is used for db access and contains all PG* variables above
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
@@ -88,18 +93,18 @@ MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-modifications.
 ###############################################################################
 
 echo_bold() {
-	tput bold
+    tput bold
     echo "$1"
     tput sgr0
 }
 
 psql_call() {
-	# PGUSER and PGPASSWORD must be set outside the script
+    # PGUSER and PGPASSWORD must be set outside the script
     psql -v ON_ERROR_STOP=1 -p $PGPORT -h localhost "$@"
 }
 
 psql_createuser() {
-    psql_call -tc "SELECT 1 FROM pg_user WHERE usename = '$1'" | grep -q 1 || \
+    psql_call -d $PGDBNAME -tc "SELECT 1 FROM pg_user WHERE usename = '$1'" | grep -q 1 || \
         psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
 
     psql_call -d $PGDBNAME <<EOF
@@ -110,7 +115,7 @@ EOF
 }
 
 psql_createdb() {
-    psql_call -tc "SELECT 1 FROM pg_database WHERE datname = '$PGDBNAME'" | grep -q 1 || \
+    psql_call -d $PGDBDEFAULT -tc "SELECT 1 FROM pg_database WHERE datname = '$PGDBNAME'" | grep -q 1 || \
         psql_call -c "CREATE DATABASE $PGDBNAME"
 }
 
@@ -125,8 +130,8 @@ give_consent() {
     echo "http://opendatahub.readthedocs.io/en/latest/howto/development.html"
     echo
     echo "Please make sure that you:"
-    echo "1. run this script from the directory in which you clone the repository"
-    echo "2. modified the variables in this script according to your needs & local setup"
+    echo "- run this script from the directory in which you clone the repository"
+    echo "- modify the variables in this script according to your needs & local setup"
     echo
     echo "We tested it on Ubuntu 18.04 and Debian 9."
     tput bold
@@ -137,7 +142,7 @@ give_consent() {
 }
 
 db_setup() {
-	echo
+    echo
     echo_bold "Postgres setup"
     echo
 
@@ -152,18 +157,18 @@ db_setup() {
     psql_call -d $PGDBNAME -1 < $DUMPSQL
     psql_call -d $PGDBNAME -1 < $MODSSQL
 
-	psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
-	psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
-	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
-	psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
 
-	echo_bold "...DONE."
+    echo_bold "...DONE."
 }
 
 create_log_files() {
-	echo
+    echo
     echo_bold "Log file permissions"
     echo
 
@@ -177,7 +182,7 @@ create_log_files() {
 }
 
 update_persistence() {
-	echo
+    echo
     echo_bold "Update values in persistence.xml"
     echo
 
@@ -204,8 +209,8 @@ update_persistence() {
 }
 
 final_message() {
-	echo
-	echo
+    echo
+    echo
     echo_bold "!!! The BDP-CORE SETUP is now complete !!!"
     echo
     echo
@@ -236,7 +241,7 @@ final_message() {
 
 deploy_war_files() {
 
-	echo
+    echo
     echo_bold "Build artifacts and deploy reader.war and writer.war to $APPSERVER"
     echo
 
@@ -244,15 +249,15 @@ deploy_war_files() {
     cd $BDPROOT
 
     for FOLDER in dto dal dc-interface ws-interface; do
-	    cd $FOLDER
-	    mvn clean install
-	    cd ..
+        cd $FOLDER
+        mvn clean install
+        cd ..
     done
 
     for FOLDER in writer reader; do
-	    cd $FOLDER
-	    mvn clean package
-	    cd ..
+        cd $FOLDER
+        mvn clean package
+        cd ..
     done
 
     sudo cp $BDPROOT/reader/target/reader.war $APPSERVER_WEBAPPS
@@ -260,7 +265,7 @@ deploy_war_files() {
     sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/reader.war
     sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/writer.war
 
-	echo
+    echo
     echo_bold "DONE... restarting $APPSERVER. Please wait!"
     echo
 
@@ -271,36 +276,36 @@ deploy_war_files() {
 
 test_first() {
 
-	echo
+    echo
     echo_bold "Testing file permissions, PostgreSQL version and installed commands/services"
     echo
 
-	PGVERSION=$(psql_call -tc "SHOW server_version_num")
-	V=$(psql_call -tc "SHOW server_version")
-	if (( $PGVERSION < 90500 )); then
-		echo "ERROR: PostgreSQL must be at least version 9.5, but installed version is $V."
-		echo "Terminating..."
-		exit 1
-	else
-		echo "SUCCESS: PostgreSQL version:  $V"
-	fi
+    PGVERSION=$(psql_call -d $PGDBDEFAULT -tc "SHOW server_version_num")
+    V=$(psql_call -d $PGDBDEFAULT -tc "SHOW server_version")
+    if (( $PGVERSION < 90500 )); then
+        echo "ERROR: PostgreSQL must be at least version 9.5, but installed version is $V."
+        echo "Terminating..."
+        exit 1
+    else
+        echo "SUCCESS: PostgreSQL version:  $V"
+    fi
 
-	set -x
-	which sudo
-	which mvn
-	which psql
-	which xmlstarlet
-	which git
-	java -version 2>&1 | grep "1.8"
-	test -w $PXMLFILE
-	test -r $MODSSQL
-	test -r $DUMPSQL
+    set -x
+    which sudo || echo "sudo missing... please install it."
+    which mvn || echo "mvn missing... please install it."
+    which psql || echo "psql missing... please install it."
+    which xmlstarlet || echo "xmlstarlet missing... please install it."
+    which git || echo "git missing... please install it."
+    java -version 2>&1 | grep "1.8" || echo "java (1.8+) missing... please install it."
+    test -w $PXMLFILE || echo "File $PXMLFILE not writeable."
+    test -r $MODSSQL || echo "File $MODSSQL not readable."
+    test -r $DUMPSQL || echo "File $DUMPSQL not readable."
 
-	sudo which service
-	sudo service $APPSERVER status | grep running
-	set +x
+    sudo which service || echo "service command missing... please install it."
+    sudo service $APPSERVER status | grep running || echo "Service $APPSERVER not running... install and/or start it."
+    set +x
 
-	echo_bold "...DONE."
+    echo_bold "...DONE."
 }
 
 
@@ -308,7 +313,7 @@ test_first() {
 give_consent
 
 if [ "$answer" == "yes" ]; then
-	test_first
+    test_first
     db_setup
     create_log_files
     update_persistence
