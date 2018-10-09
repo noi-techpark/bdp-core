@@ -108,26 +108,7 @@ public class DataManager {
 		em.close();
 		return date;
 	}
-	public List<StationDto> getStationsWithoutMunicipality(){
-		List<StationDto> stationsDtos = new ArrayList<StationDto>();
-		EntityManager em = JPAUtil.createEntityManager();
-		List<Station> stations = Station.findStationsWithoutMunicipality(em);
-		for (Station station : stations) {
-			try {
-				StationDto dto = station.convertToDto(station);
 
-				/* XXX Check if the entity exists: Is this still needed? Overhead? */
-				JPAUtil.getEntityNameByObject(station);
-
-				stationsDtos.add(dto);
-			} catch (Exception e) {
-				// FIXME Give the error back to be handled in writer...
-				e.printStackTrace();
-			}
-		}
-		em.close();
-		return stationsDtos;
-	}
 	public List<StationDto> getStations(String stationType, String origin) {
 		List<StationDto> stationsDtos = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
@@ -136,6 +117,7 @@ public class DataManager {
 			stationsDtos = stations.get(0).convertToDtos(em, stations);
 		return stationsDtos;
 	}
+
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
 		em.getTransaction().begin();

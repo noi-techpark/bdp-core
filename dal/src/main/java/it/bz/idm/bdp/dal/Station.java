@@ -466,11 +466,6 @@ public abstract class Station {
 		return dtos;
 	}
 
-	public static List<Station> findStationsWithoutMunicipality(EntityManager em) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.municipality is null and pointprojection is not null",Station.class);
-		return stationquery.getResultList();
-	}
-
 	public static void patch(EntityManager em, StationDto dto) {
 		Station station = Station.findStationByIdentifier(em,dto.getId());
 		em.merge(station);
