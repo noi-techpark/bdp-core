@@ -116,7 +116,7 @@ EOF
 
 psql_createdb() {
     psql_call -d $PGDBDEFAULT -tc "SELECT 1 FROM pg_database WHERE datname = '$PGDBNAME'" | grep -q 1 || \
-        psql_call -c "CREATE DATABASE $PGDBNAME"
+        psql_call -d $PGDBDEFAULT -c "CREATE DATABASE $PGDBNAME"
 }
 
 give_consent() {
