@@ -33,7 +33,7 @@
     <properties>
         <xmlrpc.version>3.1.2</xmlrpc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.2.5.RELEASE</spring.version>
+        <spring.version>5.0.5.RELEASE</spring.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 

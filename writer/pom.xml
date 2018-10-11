@@ -26,16 +26,16 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>writer</artifactId>
-    <version>1.0.2</version>
+    <version>2.0.0</version>
     <packaging>war</packaging>
-    <name>Big data platform</name>
+    <name>writer</name>
     <inceptionYear>2018</inceptionYear>
-    <description>Data Writer for the Big Data Platform, that writes changes to the database</description>
+    <description>Data Writer for the Big Data Platform</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xmlrpc.version>3.1.2</xmlrpc.version>
-        <spring.version>4.2.5.RELEASE</spring.version>
+        <spring.version>5.0.5.RELEASE</spring.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
@@ -85,7 +85,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
