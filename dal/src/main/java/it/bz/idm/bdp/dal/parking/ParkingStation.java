@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: GPL-3.0
  */
 package it.bz.idm.bdp.dal.parking;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,6 +42,7 @@ import it.bz.idm.bdp.dal.Elaboration;
 import it.bz.idm.bdp.dal.ElaborationHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
@@ -70,16 +72,20 @@ public class ParkingStation extends Station{
 
 	public static Integer findNumberOfFreeSlots(String identifier) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Integer> query = em.createQuery(
-				"SELECT dynamic.occupacy from CarParkingDynamic dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?2",
-				Integer.class);
-		query.setParameter(1, identifier);
-		query.setParameter(2,true);
-		Integer occupiedSlots = JPAUtil.getSingleResultOrNull(query);
-		em.close();
-		if (occupiedSlots != null) {
-			Integer parkingStationCapacity = getParkingStationCapacity(identifier);
-			return parkingStationCapacity-occupiedSlots;
+		try {
+			TypedQuery<Integer> query = em.createQuery(
+					"SELECT dynamic.occupacy from CarParkingDynamic dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?2",
+					Integer.class);
+			query.setParameter(1, identifier);
+			query.setParameter(2,true);
+			Integer occupiedSlots = JPAUtil.getSingleResultOrNull(query);
+			if (occupiedSlots != null) {
+				Integer parkingStationCapacity = getParkingStationCapacity(identifier);
+				return parkingStationCapacity-occupiedSlots;
+			}
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
 		return -1;
 	}
@@ -88,13 +94,15 @@ public class ParkingStation extends Station{
 		Calendar cal = Calendar.getInstance();
 		Date longAgo = new Date(cal.getTimeInMillis()-(minutes*60l*1000l));
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Object[]> query = em.createQuery("SELECT dynamic.occupacy,dynamic.lastupdate FROM CarParkingDynamicHistory dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?3 AND dynamic.lastupdate > ?2 order by dynamic.lastupdate",Object[].class);
-		query.setParameter(1, identifier);
-		query.setParameter(2, longAgo,TemporalType.TIMESTAMP);
-		query.setParameter(3,true);
-		List<Object[]> results = query.getResultList();
-		em.close();
-		return results;
+		try {
+			TypedQuery<Object[]> query = em.createQuery("SELECT dynamic.occupacy,dynamic.lastupdate FROM CarParkingDynamicHistory dynamic WHERE dynamic.station.stationcode=?1 AND dynamic.station.active=?3 AND dynamic.lastupdate > ?2 order by dynamic.lastupdate",Object[].class);
+			query.setParameter(1, identifier);
+			query.setParameter(2, longAgo,TemporalType.TIMESTAMP);
+			query.setParameter(3,true);
+			return query.getResultList();
+		} finally {
+			em.close();
+		}
 	}
 
 	public static List<Object> findFreeSlotsByTimeFrame(String identifier,
@@ -114,23 +122,28 @@ public class ParkingStation extends Station{
 			query.setParameter(3, endDate,TemporalType.TIMESTAMP);
 			query.setParameter(2, startDate,TemporalType.TIMESTAMP);
 			results = query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			em.close();
+		} catch (ParseException e) {
+			// XXX PEMOSER The caller must handle continuing of execution flows...
+			throw new JPAException("Unable to parse dates [" + startDateString + ", " + endDateString + "]", e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
 		return results;
 	}
 
 	public static Integer getParkingStationCapacity(String identifier) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Integer> query = em.createQuery(
-				"select basic.capacity from CarParkingBasicData basic where basic.station.stationcode=:station_id",
-				Integer.class);
-		query.setParameter("station_id",identifier);
-		Integer result = JPAUtil.getSingleResultOrNull(query);
-		em.close();
-		return result;
+		try {
+			TypedQuery<Integer> query = em.createQuery(
+					"select basic.capacity from CarParkingBasicData basic where basic.station.stationcode=:station_id",
+					Integer.class);
+			query.setParameter("station_id",identifier);
+			return JPAUtil.getSingleResultOrNull(query);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
 	@Override

@@ -29,7 +29,7 @@
 
 	<!-- The controllers are autodetected POJOs labeled with the @Controller 
 		annotation. -->
-	<context:component-scan base-package="it.bz.idm.bdp.writer"
+	<context:component-scan base-package="it.bz.idm.bdp"
 		use-default-filters="false">
 		<context:include-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
@@ -38,7 +38,5 @@
 	<!-- Turns on support for mapping requests to Spring MVC @Controller methods 
 		Also registers default Formatters and Validators for use across all @Controllers -->
 	<mvc:annotation-driven />
-
-	<mvc:default-servlet-handler />
 
 </beans>

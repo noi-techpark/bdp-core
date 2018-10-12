@@ -154,6 +154,7 @@ public class MobileStation extends Station {
 			}
 			em.getTransaction().commit();
 		} catch(IllegalStateException state){
+			// XXX PEMOSER Should we do this for all transactions? Isn't it already handled automatically on failure?
 			if (em.getTransaction().isActive())
 				em.getTransaction().rollback();
 			retval = state.getMessage();
@@ -162,7 +163,8 @@ public class MobileStation extends Station {
 			retval = exception.getMessage();
 		}
 		finally {
-			em.close();
+			if (em.isOpen())
+				em.close();
 		}
 		return retval;
 	}

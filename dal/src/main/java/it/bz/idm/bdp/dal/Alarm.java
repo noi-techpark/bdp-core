@@ -93,7 +93,7 @@ public class Alarm {
 		this.station = station;
 	}
 
-	public static void createAllarm(EntityManager manager, String alarmName,
+	public static void createAlarm(EntityManager manager, String alarmName,
 			String description, Station station, Date slotsTS) {
 		AlarmSpecification spec = AlarmSpecification.findSpecificationByName(manager,alarmName);
 		if (spec == null)

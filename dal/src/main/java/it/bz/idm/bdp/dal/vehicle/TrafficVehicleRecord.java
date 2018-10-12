@@ -880,23 +880,29 @@ public class TrafficVehicleRecord {
 	private List<TrafficVehicleRecord> findTrafficVehicleRecordsByVehicleAndTs_msEquals(
 			MobileStation station, Date ts_ms) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<TrafficVehicleRecord> query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station AND record.ts_ms= :ts_ms",TrafficVehicleRecord.class);
-		query.setParameter("station", station);
-		query.setParameter("ts_ms", ts_ms);
-		List<TrafficVehicleRecord> resultList = query.getResultList();
-		em.close();
-		return resultList;
+		try {
+			TypedQuery<TrafficVehicleRecord> query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station AND record.ts_ms= :ts_ms",TrafficVehicleRecord.class);
+			query.setParameter("station", station);
+			query.setParameter("ts_ms", ts_ms);
+			return query.getResultList();
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
 	public static Date findRecordTimestampByVehicle(String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
-		TypedQuery<Date> query = em.createQuery(
-				"select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
-				Date.class);
-		query.setParameter("station", stationId);
-		Date result = JPAUtil.getSingleResultOrNull(query);
-		em.close();
-		return result;
+		try {
+			TypedQuery<Date> query = em.createQuery(
+					"select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
+					Date.class);
+			query.setParameter("station", stationId);
+			return JPAUtil.getSingleResultOrNull(query);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, MobileStation trafficVehicle){

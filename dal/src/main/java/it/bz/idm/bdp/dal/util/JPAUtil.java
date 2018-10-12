@@ -57,15 +57,33 @@ public class JPAUtil {
 		emFactory.close();
 	}
 
-	public static Object getInstanceByType(EntityManager em, String type)
-			throws Exception {
+	public static List<String> getInstanceTypes(EntityManager em) {
 		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
-		for (ManagedType<?> entity: managedTypes){
-			if (entity.getJavaType().getSimpleName().equals(type)){
-				return entity.getJavaType().newInstance();
-			}
+		List<String> types = new ArrayList<String>();
+		for (ManagedType<?> entity : managedTypes) {
+			types.add(entity.getJavaType().getSimpleName());
 		}
-		throw new Exception("ERROR: Cannot get any instance of type " + type + ". Type not found.");
+		return types;
+	}
+
+	public static Object getInstanceByType(EntityManager em, String type) {
+		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
+		try {
+			for (ManagedType<?> entity : managedTypes){
+				if (entity.getJavaType().getSimpleName().equals(type)){
+					return entity.getJavaType().newInstance();
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			/* Nothing to do here, we fail either way if not found or with an error is not important */
+		}
+		List<String> types = new ArrayList<String>();
+		for (ManagedType<?> entity : managedTypes) {
+			types.add(entity.getJavaType().getSimpleName());
+		}
+
+		throw new JPAException("Cannot get any instance of type '" + type + "'. Type not found.",
+							   "Possible types are " + types.toString());
 	}
 
 	public static String getEntityNameByObject(Object obj) throws Exception {

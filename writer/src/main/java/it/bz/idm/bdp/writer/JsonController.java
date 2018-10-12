@@ -20,9 +20,11 @@
  */
 package it.bz.idm.bdp.writer;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,18 +40,24 @@ import it.bz.idm.bdp.dto.StationDto;
 
 @RequestMapping("/json")
 @Controller
-public class JsonController extends DataManager{
+public class JsonController extends DataManager {
 	@Override
-	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}/", method = RequestMethod.GET)
+	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody Date getDateOfLastRecord(@PathVariable("integreenTypology") String stationType,@RequestParam("stationId") String stationId,
 			@RequestParam(value="typeId") String typeId, @RequestParam(value="period",required=false) Integer period) {
 		return (Date) super.getDateOfLastRecord(stationType, stationId, typeId, period);
 	}
 
 	@Override
-	@RequestMapping(value = "/stations/{integreenTypology}/", method = RequestMethod.GET)
+	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody List<StationDto> getStations(@PathVariable("integreenTypology") String stationType, @RequestParam(value="origin",required=false) String origin) {
 		return super.getStations(stationType,origin);
+	}
+
+	@Override
+	@RequestMapping(value = "/stations", method = RequestMethod.GET)
+	public @ResponseBody List<String> getStationTypes() {
+		return super.getStationTypes();
 	}
 
 	@RequestMapping(value = "/pushRecords/{integreenTypology}", method = RequestMethod.POST)
@@ -57,15 +65,19 @@ public class JsonController extends DataManager{
 			@PathVariable String integreenTypology) {
 		return super.pushRecords(integreenTypology, stationData);
 	}
+
 	@Override
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
 		super.patchStations(stations);
 	}
-	@RequestMapping(value = "/syncStations/{integreenTypology}", method = RequestMethod.POST)
-	public @ResponseBody Object syncStations(@RequestBody(required = true) List<StationDto> data,
-			@PathVariable String integreenTypology) {
-		return super.syncStations(integreenTypology, data);
+
+	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> syncStations(@RequestBody(required = true) List<StationDto> stationDtos,
+														@PathVariable String stationType) {
+		super.syncStations(stationType, stationDtos);
+		URI location = getURIMapping("/stations/{stationType}", stationType);
+		return ResponseEntity.created(location).build();
 	}
 
 	@Override

@@ -20,6 +20,7 @@
  */
 package it.bz.idm.bdp.writer;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,11 +28,14 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -45,85 +49,108 @@ public class DataManager {
 		try {
 			station = (Station) JPAUtil.getInstanceByType(em,stationType);
 			return station.pushRecords(em, data);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
+		} finally {
 			if (em.isOpen())
 				em.close();
 		}
-		return null;
 	}
 
-	public Object syncStations(String stationType, List<StationDto> dtos) {
+	public void syncStations(String stationType, List<StationDto> dtos) {
 		EntityManager em = JPAUtil.createEntityManager();
-		try{
+		try {
 			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			return station.syncStations(em, dtos);
-		} catch (Exception e) {
-			// FIXME Add error handling to report back to the writer method caller
-			e.printStackTrace();
+			station.syncStations(em, dtos);
 		} finally {
-			em.close();
+			if (em.isOpen())
+				em.close();
 		}
-		return null;
 	}
 
 	public Object syncDataTypes(List<DataTypeDto> dtos) {
-		Object object = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		try{
-			object = DataType.sync(em,dtos);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			em.close();
+		try {
+			return DataType.sync(em,dtos);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return object;
 	}
 
 	public Object getDateOfLastRecord(String stationtype,String stationcode,String type,Integer period){
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchAdminRole(em);
 		Date date = new Date(-1);
-		try{
+		try {
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationtype);
 			Station station = s.findStation(em,stationcode);
-			DataType dataType = DataType.findByCname(em,type);
 			if (station != null) {
+				DataType dataType = DataType.findByCname(em,type);
+				BDPRole role = BDPRole.fetchAdminRole(em);
 				date = station.getDateOfLastRecord(em, station, dataType, period, role);
 			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
-		finally{
-			em.close();
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
 		return date;
 	}
 
 	public Object getLatestMeasurementStringRecord(String stationtype, String id, BDPRole role) {
-		Date date = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		date = MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em, stationtype, id, role);
-		em.close();
-		return date;
+		try {
+			return MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em, stationtype, id, role);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
-	public List<StationDto> getStations(String stationType, String origin) {
-		List<StationDto> stationsDtos = new ArrayList<StationDto>();
+	public List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
-		List<Station> stations = Station.findStations(em,stationType,origin);
-		if (!stations.isEmpty())
-			stationsDtos = stations.get(0).convertToDtos(em, stations);
-		return stationsDtos;
+		List<StationDto> stationsDtos = new ArrayList<StationDto>();
+		try {
+			List<Station> stations = Station.findStations(em,stationType,origin);
+			if (!stations.isEmpty())
+				stationsDtos = stations.get(0).convertToDtos(em, stations);
+			return stationsDtos;
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
+	public List<String> getStationTypes() {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			return Station.findStationTypes(em);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
-		em.getTransaction().begin();
-		for (StationDto dto:stations) {
-			Station.patch(em,dto);
+		try {
+			em.getTransaction().begin();
+			for (StationDto dto:stations) {
+				Station.patch(em, dto);
+			}
+			em.getTransaction().commit();
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		em.getTransaction().commit();
+	}
+
+	protected URI getURIMapping(String mapping, Object... uriVariableValues) {
+		if (mapping == null)
+			mapping = "";
+		else if (mapping.length() > 0)
+			mapping = "/" + mapping;
+		String mappingController = this.getClass().getAnnotation(RequestMapping.class).value()[0];
+		return ServletUriComponentsBuilder.fromCurrentContextPath()
+										  .path(mappingController + mapping)
+										  .buildAndExpand(uriVariableValues)
+										  .toUri();
 	}
 }

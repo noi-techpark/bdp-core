@@ -49,7 +49,6 @@ import org.geotools.referencing.CRS;
 import org.hibernate.annotations.ColumnDefault;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
@@ -60,6 +59,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -285,13 +285,11 @@ public abstract class Station {
 	}
 
 	public static List<String> findStationTypes(EntityManager em) {
-		TypedQuery<String> query = em.createQuery("select station.class from Station station GROUP BY type(station)",String.class);
-		return query.getResultList();
+		return em.createQuery("SELECT station.class FROM Station station GROUP BY type(station)", String.class).getResultList();
 	}
 
 	public static Station findStation(EntityManager em, Integer integer) {
-		TypedQuery<Station> stationquery = em.createQuery(
-				"select station from Station station where station.stationcode=:stationcode", Station.class);
+		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode=:stationcode", Station.class);
 		stationquery.setParameter("stationcode", integer);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
@@ -299,9 +297,7 @@ public abstract class Station {
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery(
-				"select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype",
-				Station.class);
+		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype", Station.class);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
 		return JPAUtil.getSingleResultOrNull(stationquery);
@@ -331,29 +327,32 @@ public abstract class Station {
 	protected CoordinateDto parseCoordinate(Coordinate coordinate) {
 		return new CoordinateDto(coordinate.x,coordinate.y);
 	}
-	public Object syncStations(EntityManager em, List<StationDto> data){
+
+	public void syncStations(EntityManager em, List<StationDto> data) {
 		syncActiveOfExistingStations(em, data);
 		em.getTransaction().begin();
-		for (StationDto dto:data){
-			sync(em, dto);
+		for (StationDto dto : data){
+			try {
+				sync(em, dto);
+			} catch (Exception e) {
+				/* continue */
+			}
 		}
 		em.getTransaction().commit();
-		return null;
 	}
 
 	/**
 	 * @param em
 	 * @param dto
+	 * @throws JPAException
 	 */
 	private void sync(EntityManager em, StationDto dto) {
 		Station existingStation = findStation(em, dto.getId());
 		if (existingStation == null) {
 			try {
 				existingStation = this.getClass().newInstance();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new JPAException(e.getMessage(), e);
 			}
 			existingStation.setStationcode(dto.getId());
 			em.persist(existingStation);
@@ -362,27 +361,21 @@ public abstract class Station {
 			existingStation.setName(dto.getName());
 		if (dto.getLatitude() != null && dto.getLongitude() != null) {
 			Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(), dto.getLatitude()));
-			CoordinateReferenceSystem crs;
-			try {
-				crs = CRS.decode(GEOM_CRS, true);
-				if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS
-						.equals(dto.getCoordinateReferenceSystem())) {
-					CoordinateReferenceSystem thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(), true);
+			if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())) {
+				CoordinateReferenceSystem thirdPartyCRS;
+				try {
+					thirdPartyCRS = CRS.decode(dto.getCoordinateReferenceSystem(), true);
+					CoordinateReferenceSystem crs = CRS.decode(GEOM_CRS, true);
 					Geometry geometry = JTS.transform(point, CRS.findMathTransform(thirdPartyCRS, crs));
 					point = geometry.getCentroid();
+				} catch (FactoryException | MismatchedDimensionException | TransformException e) {
+					throw new JPAException("Unable to create a valid coordinate reference system for station " + existingStation.getName(), e);
+					// XXX PEMOSER Continue here: Should an invalid CRS terminate any insertion or continue without?
+					// Should we return an message that some station had problems with their CRS, but were nevertheless inserted
 				}
-				point.setSRID(4326);
-				existingStation.setPointprojection(point);
-			} catch (NoSuchAuthorityCodeException e) {
-				e.printStackTrace();
-			} catch (FactoryException e) {
-				e.printStackTrace();
-			} catch (MismatchedDimensionException e) {
-				e.printStackTrace();
-			} catch (TransformException e) {
-				e.printStackTrace();
 			}
-
+			point.setSRID(4326);
+			existingStation.setPointprojection(point);
 		}
 		existingStation.setOrigin(dto.getOrigin());
 		if (dto.getParentId() != null) {
@@ -390,9 +383,7 @@ public abstract class Station {
 			if (parent != null)
 				existingStation.setParent(parent);
 		}
-
 		syncMetaData(em, dto.getMetaData(), existingStation);
-
 		em.merge(existingStation);
 	}
 
@@ -483,11 +474,17 @@ public abstract class Station {
 		String baseQuery = "Select station from "+type+" station where station.active = :active";
 		if (origin != null)
 			baseQuery += " and origin = :origin";
-		TypedQuery<Station> query = em.createQuery(baseQuery,Station.class);
-		query.setParameter("active", true);
-		if (origin != null)
-			query.setParameter("origin", origin);
-		return query.getResultList();
+		try {
+			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class);
+			query.setParameter("active", true);
+			if (origin != null)
+				query.setParameter("origin", origin);
+			return query.getResultList();
+		} catch (Exception e) {
+			List<String> types = JPAUtil.getInstanceTypes(em);
+			throw new JPAException("Unable to create query for station type '" + type + "'",
+								   "Possible types are " + types.toString(), e);
+		}
 	}
 
 }

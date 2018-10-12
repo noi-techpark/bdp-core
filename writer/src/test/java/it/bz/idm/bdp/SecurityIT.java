@@ -151,7 +151,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		DataManager m = new DataManager();
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		m.syncStations("Environmentstation", dtos);
+		m.syncStations("EnvironmentStation", dtos);
 	}
 
 	@Test
