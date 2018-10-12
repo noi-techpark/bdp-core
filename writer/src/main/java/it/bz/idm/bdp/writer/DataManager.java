@@ -1,5 +1,5 @@
 /**
- * Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+ * writer - Data Writer for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify

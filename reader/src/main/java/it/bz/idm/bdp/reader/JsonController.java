@@ -1,5 +1,5 @@
 /**
- * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ * reader - Data Reader for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
