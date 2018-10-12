@@ -27,7 +27,6 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>ws-interface</artifactId>
-    <version>1.0.2</version>
     <inceptionYear>2018</inceptionYear>
     <description>Web Service Interface for the Big Data Platform</description>
 
@@ -179,4 +178,5 @@
             </plugin>
         </plugins>
     </build>
+    <version>2.0.0</version>
 </project>
