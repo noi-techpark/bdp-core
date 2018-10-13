@@ -39,6 +39,7 @@ public class StationDto implements Serializable {
 	protected String coordinateReferenceSystem;
 	private String origin;
 	private String parentId;
+	private String stationType;
 	private Map<String, Object> metaData;
 
 	public StationDto() {
@@ -140,6 +141,14 @@ public class StationDto implements Serializable {
 	public String toString() {
 		return "StationDto [id=" + id + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude
 				+ ", crs=" + coordinateReferenceSystem + ", origin=" + origin + "]";
+	}
+
+	public String getStationType() {
+		return stationType;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
 	}
 
 }
