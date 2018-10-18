@@ -1,5 +1,5 @@
 /**
- * dto - Data Transport Objects for the Big Data Platform
+ * dto - Data Transport Objects for an object-relational mapping
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
