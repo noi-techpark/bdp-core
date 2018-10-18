@@ -1,6 +1,6 @@
 <!--
 
-    Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+    writer - Data Writer for the Big Data Platform
     Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -26,16 +26,16 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>writer</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>war</packaging>
-    <name>Big data platform</name>
+    <name>writer</name>
     <inceptionYear>2018</inceptionYear>
-    <description>Data Writer for the Big Data Platform, that writes changes to the database</description>
+    <description>Data Writer for the Big Data Platform</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xmlrpc.version>3.1.2</xmlrpc.version>
-        <spring.version>4.2.5.RELEASE</spring.version>
+        <spring.version>5.0.10.RELEASE</spring.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dal</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -85,7 +85,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
