@@ -27,12 +27,13 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>ws-interface</artifactId>
+    <version>2.0.0</version>
     <inceptionYear>2018</inceptionYear>
     <description>Web Service Interface for the Big Data Platform</description>
 
     <properties>
         <xmlrpc.version>3.1.2</xmlrpc.version>
-        <spring.version>5.0.3.RELEASE</spring.version>
+        <spring.version>5.0.10.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
@@ -178,5 +179,4 @@
             </plugin>
         </plugins>
     </build>
-    <version>2.0.0</version>
 </project>

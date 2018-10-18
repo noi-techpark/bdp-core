@@ -1,6 +1,6 @@
 <!--
 
-    reader - Data Reader for the Big Data Platform
+    reader - Data Reader for the Big Data Platform, that queries the database for web-services
     Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -31,21 +31,16 @@
     <name>reader</name>
     <url>http://maven.apache.org</url>
     <inceptionYear>2018</inceptionYear>
-    <description>Data Reader for the Big Data Platform</description>
+    <description>Data Reader for the Big Data Platform, that queries the database for web-services</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.0.5.RELEASE</spring.version>
-        <springsecurity.version>5.0.5.RELEASE</springsecurity.version>
+        <spring.version>5.0.10.RELEASE</spring.version>
+        <springsecurity.version>5.0.9.RELEASE</springsecurity.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dal</artifactId>
@@ -72,16 +67,15 @@
             <artifactId>spring-core</artifactId>
             <version>${spring.version}</version>
         </dependency>
-		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -90,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <dependency>
@@ -113,6 +107,11 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
         </dependency>
     </dependencies>
 
