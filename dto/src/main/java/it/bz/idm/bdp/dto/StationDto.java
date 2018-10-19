@@ -1,5 +1,5 @@
 /**
- * dto - Data Transport Objects for the Big Data Platform
+ * dto - Data Transport Objects for an object-relational mapping
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -40,7 +41,7 @@ public class StationDto implements Serializable {
 	private String origin;
 	private String parentId;
 	private String stationType;
-	private Map<String, Object> metaData;
+	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {
 	}
