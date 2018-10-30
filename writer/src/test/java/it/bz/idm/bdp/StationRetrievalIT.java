@@ -54,14 +54,4 @@ public class StationRetrievalIT {
 		List<Station> stations = Station.findStations(em, type, null);
 		assertNotNull(stations);
 	}
-	
-	@Test
-	public void testDataManagerStationRetrival() {
-		List<StationDto> stationDtos = manager.getStations(type, origin);
-		assertNotNull(stationDtos);
-		if (!stationDtos.isEmpty()) {
-			assertTrue(stationDtos.get(0).getOrigin().equals(origin));
-		}
-	}
-
 }
