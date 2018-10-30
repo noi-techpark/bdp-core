@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Temporary Folder') {
             steps {
-                sh 'mkdir -p tmp'
+                sh 'mkdir -p docker/tmp'
             }
         }
         stage('Test - DTO') {
