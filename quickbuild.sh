@@ -10,7 +10,6 @@
 #
 # Prerequisites:
 #   - sudo
-#   - git
 #   - postgresql-9.5 (or higher)
 #   - postgis
 #   - pgcrypto
