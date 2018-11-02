@@ -24,14 +24,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-	<groupId>it.bz.idm.bdp</groupId>
-	<artifactId>dal</artifactId>
+    <groupId>it.bz.idm.bdp</groupId>
+    <artifactId>dal</artifactId>
 	<version>2.0.0</version>
-	<packaging>jar</packaging>
-	<name>BDP data</name>
-	<url>http://maven.apache.org</url>
-	<inceptionYear>2018</inceptionYear>
-	<description>Data Access Layer for the Big Data Platform</description>
+    <packaging>jar</packaging>
+    <name>BDP data</name>
+    <url>http://maven.apache.org</url>
+    <inceptionYear>2018</inceptionYear>
+    <description>Data Access Layer for the Big Data Platform</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -114,34 +114,34 @@
 	    <version>4.1</version>
 	</dependency>
 
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
-		</dependency>
-		<!-- connection pooling -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-hikaricp</artifactId>
-			<version>${hibernate.version}</version>
-		</dependency>
-		<!-- geotools dependencies -->
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-api</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-epsg-hsql</artifactId>
-			<version>${geotools.version}</version>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.3</version>
+        </dependency>
+        <!-- connection pooling -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <!-- geotools dependencies -->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-api</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.3.0</version>
-		</dependency>
-	</dependencies>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

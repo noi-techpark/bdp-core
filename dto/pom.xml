@@ -78,8 +78,8 @@
 					allow relative path names (and Debian activated the future behavior already).
 					-->
 					<useSystemClassLoader>false</useSystemClassLoader>
-                </configuration>
-            </plugin>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
