@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 
-    Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+    writer - Data Writer for the Big Data Platform
     Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -20,8 +21,7 @@
     SPDX-License-Identifier: GPL-3.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.bz.idm.bdp</groupId>
@@ -85,7 +85,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -124,6 +123,7 @@
                         <exclude>**/README</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>**/*.java.orig</exclude>
                     </excludes>
                 </configuration>
                 <executions>
