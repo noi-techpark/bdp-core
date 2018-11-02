@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 
     dto - Data Transport Objects for an object-relational mapping
@@ -20,13 +21,12 @@
     SPDX-License-Identifier: GPL-3.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dto</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <inceptionYear>2018</inceptionYear>
     <description>Data Transport Objects for an object-relational mapping</description>
 
@@ -60,6 +60,26 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.1</version>
+				<configuration>
+					<!--
+					ISSUE: org.apache.maven.surefire.booter.SurefireBooterForkException: The forked VM terminated
+					       without properly saying goodbye
+					SOLUTION: Override Spring Boot's maven-surefire-plugin definition
+					See https://stackoverflow.com/a/50661649 and https://stackoverflow.com/a/53016532
+					for the reason why we are doing this here.
+					This is a bug in the openjdk-8 package (behavior deviates from upstream significantly
+					without need; missing the upstream patch to revert back to disabling a security check)
+					that you just upgraded to. But it is also a bug in the surefire plugin, SUREFIRE-1588:
+					it apparently is using absolute paths in a place where Java will in the future only
+					allow relative path names (and Debian activated the future behavior already).
+					-->
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -83,6 +103,7 @@
                         <exclude>**/README</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>**/*.java.orig</exclude>
                     </excludes>
                 </configuration>
                 <executions>
