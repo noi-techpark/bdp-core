@@ -123,7 +123,7 @@ public class DataRetriever {
 
 	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		Date dateOfLastRecord = null;
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
@@ -141,7 +141,7 @@ public class DataRetriever {
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		ParkingRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
@@ -156,7 +156,7 @@ public class DataRetriever {
 	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
 		RecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em); 
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
 			if (s != null){
@@ -187,7 +187,7 @@ public class DataRetriever {
 			start = new Date(end.getTime() - (seconds * 1000l));
 		}
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em); 
+		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em);
 
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{

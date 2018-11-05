@@ -68,7 +68,7 @@ import it.bz.idm.bdp.dto.TypeDto;
 
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
-@DiscriminatorColumn(name="stationtype", discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "stationcategory", discriminatorType = DiscriminatorType.STRING)
 public abstract class Station {
 
 	public static final String GEOM_CRS = "EPSG:4326";
@@ -89,6 +89,9 @@ public abstract class Station {
 
 	@Column(nullable = false)
 	protected String stationcode;
+
+	@Column(nullable = false)
+	protected String stationtype;
 
 	protected Boolean active;
 
@@ -221,6 +224,14 @@ public abstract class Station {
 		this.stationcode = stationcode;
 	}
 
+	public String getStationtype() {
+		return stationtype;
+	}
+
+	public void setStationtype(String stationtype) {
+		this.stationtype = stationtype;
+	}
+
 	public Boolean getActive() {
 		return active;
 	}
@@ -285,7 +296,7 @@ public abstract class Station {
 	}
 
 	public static List<String> findStationTypes(EntityManager em) {
-		return em.createQuery("SELECT station.class FROM Station station GROUP BY type(station)", String.class).getResultList();
+		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class).getResultList();
 	}
 
 	public static Station findStation(EntityManager em, Integer integer) {
@@ -297,7 +308,7 @@ public abstract class Station {
 	public Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode=:stationcode AND type(station)= :stationtype", Station.class);
+		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode = :stationcode AND station.stationtype = :stationtype", Station.class);
 		stationquery.setParameter("stationcode", stationcode);
 		stationquery.setParameter("stationtype", this.getClass());
 		return JPAUtil.getSingleResultOrNull(stationquery);
@@ -442,7 +453,7 @@ public abstract class Station {
 		if (dtos != null && !dtos.isEmpty()){
 			String origin = dtos.get(0).getOrigin();
 			if (origin != null){
-				TypedQuery<Station> query = em.createQuery("select station from "+this.getClass().getSimpleName()+" station where station.origin = :origin",Station.class);
+				TypedQuery<Station> query = em.createQuery("select station from Station station where station.origin = :origin", Station.class);
 				query.setParameter("origin", origin);
 				resultList = query.getResultList();
 			}
@@ -471,7 +482,7 @@ public abstract class Station {
 	}
 
 	public static List<Station> findStations(EntityManager em, String type, String origin) {
-		String baseQuery = "Select station from "+type+" station where station.active = :active";
+		String baseQuery = "Select station from Station station where station.active = :active and station.stationtype = :type";
 		if (origin != null)
 			baseQuery += " and origin = :origin";
 		try {

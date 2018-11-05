@@ -118,6 +118,10 @@ psql_createdb() {
         psql_call -d $PGDBDEFAULT -c "CREATE DATABASE $PGDBNAME"
 }
 
+psql_dropdb() {
+    psql_call -d $PGDBDEFAULT -c "DROP DATABASE IF EXISTS $PGDBNAME"
+}
+
 give_consent() {
     # make sure user knows limits of the script
     echo
@@ -140,9 +144,35 @@ give_consent() {
     tput sgr0
 }
 
-db_setup() {
+db_setup_import_sqlfiles() {
     echo
-    echo_bold "Postgres setup"
+    echo_bold "Postgres: Import dumped SQL files"
+    echo
+
+	psql_call -d $PGDBNAME -1 < $DUMPSQL
+	psql_call -d $PGDBNAME -1 < $MODSSQL
+
+	echo_bold "...DONE."
+}
+
+db_setup_privileges() {
+    echo
+    echo_bold "Postgres: Grant privileges to USERS"
+    echo
+
+	psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+
+    echo_bold "...DONE."
+}
+
+db_setup_db_and_users() {
+    echo
+    echo_bold "Postgres: Create DB and USERS"
     echo
 
     # Look at https://wiki.postgresql.org/wiki/First_steps
@@ -153,18 +183,11 @@ db_setup() {
     psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
     psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
 
-    psql_call -d $PGDBNAME -1 < $DUMPSQL
-    psql_call -d $PGDBNAME -1 < $MODSSQL
-
-    psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
-
     echo_bold "...DONE."
 }
+
+
+
 
 create_log_files() {
     echo
@@ -202,7 +225,11 @@ update_persistence() {
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
 
     # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
-    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+    if [[ ${DUMPING+x} ]]; then
+		xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "create" $PXMLFILE
+	else
+		xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+	fi
 
     echo_bold "...DONE."
 }
@@ -311,13 +338,28 @@ test_first() {
     echo_bold "...DONE."
 }
 
+if [[ ${DUMPING+x} ]]; then
+	PGDBNAME=__justfordumps__
+    test_first
+	psql_dropdb
+    db_setup_db_and_users
+    create_log_files
+    update_persistence
+    deploy_war_files
+
+    curl -i -X GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
+
+    exit 0
+fi
 
 # execute script
 give_consent
 
 if [ "$answer" == "yes" ]; then
     test_first
-    db_setup
+    db_setup_db_and_users
+    db_setup_import_sqlfiles
+    db_setup_privileges
     create_log_files
     update_persistence
     deploy_war_files

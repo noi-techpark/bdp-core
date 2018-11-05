@@ -58,7 +58,7 @@ public class DataManager {
 	public void syncStations(String stationType, List<StationDto> dtos) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
+			Station station = (Station) JPAUtil.getInstanceByType(em, stationType);
 			station.syncStations(em, dtos);
 		} finally {
 			if (em.isOpen())

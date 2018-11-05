@@ -40,42 +40,36 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
 
-public abstract class MeasurementStation extends Station {
+public class MeasurementStation extends Station {
 
 	@Override
-	public List<String[]> findDataTypes(EntityManager em,String stationId) {
+	public List<String[]> findDataTypes(EntityManager em, String stationId) {
+		String queryBase = "SELECT m.type.cname, m.type.cunit, m.type.description, m.period FROM Measurement m INNER JOIN m.type WHERE m.station.stationtype = :stationtype";
+		String queryGrouping = " GROUP BY m.type.cname, m.type.cunit, m.type.description, m.period";
 		TypedQuery<Object[]> query;
 		if (stationId != null && !stationId.isEmpty()){
-			query = em
-					.createQuery(
-							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type  "
-									+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
-									Object[].class);
+			query = em.createQuery(queryBase + " AND m.station.stationcode = :station" + queryGrouping, Object[].class);
 			query.setParameter("station", stationId);
-		}else
-			query = em
-			.createQuery(
-					"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type "
-							+ " where record.station.class=:stationtype GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
-							Object[].class);
-		query.setParameter("stationtype", this.getClass().getSimpleName());
-		List<Object[]> resultList = query.getResultList();
-		return getDataTypesFromQuery(resultList);
+		} else {
+			query = em.createQuery(queryBase + queryGrouping, Object[].class);
+		}
+		query.setParameter("stationtype", this.stationtype);
+		return getDataTypesFromQuery(query.getResultList());
 	}
 
 	@Override
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
+		String queryBase = "SELECT type, m.period FROM Measurement m INNER JOIN m.type type WHERE m.station.stationtype = :stationtype";
+		String queryGrouping = " GROUP BY type, m.period";
 		TypedQuery<Object[]> query;
 		if (stationId == null || stationId.isEmpty()) {
-			query = em.createQuery("SELECT type,record.period FROM Measurement record INNER JOIN record.type type  "
-					+ "where record.station.class=:stationType GROUP BY type,record.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery(queryBase + queryGrouping, Object[].class);
 		} else {
-			query = em.createQuery("SELECT type,record.period FROM Measurement record INNER JOIN record.type type "
-					+ "where record.station.class=:stationType AND record.station.stationcode=:station GROUP BY type,record.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery(queryBase + " AND m.station.stationcode = :station" + queryGrouping, Object[].class);
 			query.setParameter("station",stationId);
 		}
+		query.setParameter("stationType", this.stationtype);
+
 		List<Object[]> resultList = query.getResultList();
 		List<TypeDto> types = new ArrayList<TypeDto>();
 		Map<String,TypeDto> dtos = new HashMap<String, TypeDto>();

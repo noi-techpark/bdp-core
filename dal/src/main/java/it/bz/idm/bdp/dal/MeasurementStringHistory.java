@@ -159,7 +159,7 @@ public class MeasurementStringHistory {
 				+ "AND (record.period = p.period OR p.period = null) "
 				+ "AND p.role = :role "
 				+ "AND record.station.stationcode=:stationcode ";
-		String sql2 = "record.class=:stationtype";
+		String sql2 = "record.station.stationtype=:stationtype";
 
 		TypedQuery<Date> query;
 		if (stationtype == null) {

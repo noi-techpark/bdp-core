@@ -123,7 +123,7 @@ public class ElaborationHistory {
 				+ "AND (record.type = p.type OR p.type = null) "
 				+ "AND (record.period = p.period OR p.period = null) "
 				+ "AND p.role = :role "
-				+ "AND record.station.class= :stationtype "
+				+ "AND record.station.stationtype = :stationtype "
 				+ "AND record.station.stationcode= :stationid "
 				+ "AND record.type.cname=:type "
 				+ "AND record.timestamp between :start AND :end ";

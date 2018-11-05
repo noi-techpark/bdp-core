@@ -151,7 +151,7 @@ public class MeasurementHistory {
 						+ " AND (record.type = p.type OR p.type = null)"
 						+ " AND (record.period = p.period OR p.period = null)"
 						+ " AND p.role = :role"
-						+ " AND record.station.class=:stationtype"
+						+ " AND record.station.stationtype = :stationtype"
 						+ " AND record.station.stationcode= :stationcode"
 						+ " AND record.type.cname = :cname"
 						+ " AND record.timestamp > :date";
@@ -192,7 +192,7 @@ public class MeasurementHistory {
 						 + " AND (record.type = p.type OR p.type = null)"
 						 + " AND (record.period = p.period OR p.period = null)"
 						 + " AND p.role = :role"
-						 + " AND record.station.class=:stationtype"
+						 + " AND record.station.stationtype = :stationtype"
 						 + " AND record.station.stationcode= :stationcode"
 						 + " AND record.type.cname = :cname"
 						 + " AND record.timestamp between :start AND :end ";

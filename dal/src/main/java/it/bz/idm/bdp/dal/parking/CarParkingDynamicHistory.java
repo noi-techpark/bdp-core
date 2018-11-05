@@ -169,7 +169,7 @@ public class CarParkingDynamicHistory {
 		if (!"free".equals(type)&&!"occupied".equals(type))
 			return new ArrayList<RecordDto>();
 		Date past = new Date(Calendar.getInstance().getTimeInMillis()-(1000*seconds));
-		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station.class=:stationtype AND record.station.stationcode=:station_id AND record.station.active=:isactive AND record.lastupdate > :date order by record.lastupdate asc" ,CarParkingDynamicHistory.class);
+		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station.stationtype = :stationtype AND record.station.stationcode=:station_id AND record.station.active=:isactive AND record.lastupdate > :date order by record.lastupdate asc" ,CarParkingDynamicHistory.class);
 		query.setParameter("stationtype", stationtype);
 		query.setParameter("station_id", identifier);
 		query.setParameter("isactive", true);

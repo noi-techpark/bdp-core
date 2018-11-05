@@ -98,7 +98,7 @@ public class MobileStation extends Station {
 	}
 
 	@Override
-	public List<String[]> findDataTypes(EntityManager em,String stationId) {
+	public List<String[]> findDataTypes(EntityManager em, String stationId) {
 		return TrafficVehicleRecord.DATATYPES;
 	}
 	@Override
@@ -171,11 +171,12 @@ public class MobileStation extends Station {
 
 
 	@Override
-	public List<TypeDto> findTypes(EntityManager em,String stationId) {
+	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		List<TypeDto> dtos = new ArrayList<TypeDto>();
 		for (String[] type:TrafficVehicleRecord.DATATYPES){
 			dtos.add(new TypeDto(type[0], null));
 		}
 		return dtos;
 	}
+
 }

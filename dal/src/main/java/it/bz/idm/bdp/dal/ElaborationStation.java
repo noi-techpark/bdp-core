@@ -35,14 +35,11 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
-public abstract class ElaborationStation extends Station {
+public class ElaborationStation extends Station {
 
 	@Override
-	public List<RecordDto> getRecords(EntityManager em, String type,
-			Date start, Date end, Integer period, BDPRole role) {
-		List<RecordDto> records = ElaborationHistory.findRecords(em, this.getClass().getSimpleName(), this.stationcode,
-				type, start, end, period, role);
-		return records;
+	public List<RecordDto> getRecords(EntityManager em, String dataType, Date start, Date end, Integer period, BDPRole role) {
+		return ElaborationHistory.findRecords(em, this.stationtype, this.stationcode, dataType, start, end, period, role);
 	}
 
 	@Override
@@ -51,19 +48,19 @@ public abstract class ElaborationStation extends Station {
 		if (stationId == null || stationId.isEmpty()) {
 			query = em
 					.createQuery(
-							"SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.class=:stationType "
+							"SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.stationtype = :stationtype "
 							+ "GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",
 							Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
 		} else {
 			query = em
 					.createQuery(
 							"SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type "
-							+ "WHERE elab.station.class=:stationType AND elab.station.stationcode=:station GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",
+							+ "WHERE elab.station.stationtype = :stationtype AND elab.station.stationcode=:station GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",
 							Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
 			query.setParameter("station", stationId);
 		}
+		query.setParameter("stationtype", this.stationtype);
+
 		List<Object[]> resultList = query.getResultList();
 		return getDataTypesFromQuery(resultList);
 	}
@@ -87,16 +84,16 @@ public abstract class ElaborationStation extends Station {
 		if (stationId == null) {
 			query = em
 					.createQuery(
-							"SELECT type,record.period FROM Elaboration record INNER JOIN record.type type  where record.station.class=:stationType GROUP BY type,record.period",
+							"SELECT type,record.period FROM Elaboration record INNER JOIN record.type type  where record.station.stationtype = :stationType GROUP BY type,record.period",
 							Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query.setParameter("stationType", this.stationtype);
 		} else {
 			query = em
 					.createQuery(
 							"SELECT type,record.period FROM Elaboration record INNER JOIN record.type type "
-							+ "where record.station.class=:stationType AND record.station.stationcode=:station GROUP BY type,record.period",
+							+ "where record.station.stationtype = :stationtype AND record.station.stationcode=:station GROUP BY type,record.period",
 							Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query.setParameter("stationtype", this.stationtype);
 			query.setParameter("station", stationId);
 		}
 		List<Object[]> resultList = query.getResultList();
@@ -126,5 +123,11 @@ public abstract class ElaborationStation extends Station {
 	@Override
 	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		return getDateOfLastRecordImpl(em, station, type, period, role, "Elaboration");
+	}
+
+	@Override
+	public Object pushRecords(EntityManager em, Object... object) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

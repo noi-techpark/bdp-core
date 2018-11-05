@@ -21,7 +21,6 @@
 package it.bz.idm.bdp;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -34,16 +33,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
 public class StationRetrievalIT {
-	
+
 	private EntityManager em = JPAUtil.createEntityManager();
-	
-	private DataManager manager = new DataManager();
+
 	private String type = "TrafficSensor";
 	private String origin = "FAMAS-traffic";
 

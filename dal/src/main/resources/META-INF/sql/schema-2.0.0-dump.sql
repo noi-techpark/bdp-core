@@ -3,10 +3,11 @@
 --
 
 -- Dumped from database version 9.5.14
--- Dumped by pg_dump version 9.5.14
+-- Dumped by pg_dump version 11.0 (Ubuntu 11.0-1.pgdg18.04+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+--SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -22,34 +23,6 @@ CREATE SCHEMA intime;
 
 
 ALTER SCHEMA intime OWNER TO bdp;
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
-
-
---
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
-
 
 --
 -- Name: alarm_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -112,6 +85,21 @@ CREATE TABLE intime.alarmspecification (
 ALTER TABLE intime.alarmspecification OWNER TO bdp;
 
 --
+-- Name: bdppermissions; Type: TABLE; Schema: intime; Owner: bdp
+--
+
+CREATE TABLE intime.bdppermissions (
+    uuid bigint NOT NULL,
+    period integer,
+    role_id bigint,
+    station_id bigint,
+    type_id bigint
+);
+
+
+ALTER TABLE intime.bdppermissions OWNER TO bdp;
+
+--
 -- Name: bdprole_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -138,30 +126,6 @@ CREATE TABLE intime.bdprole (
 
 
 ALTER TABLE intime.bdprole OWNER TO bdp;
-
---
--- Name: bdproles_unrolled; Type: VIEW; Schema: intime; Owner: bdp
---
-
-CREATE VIEW intime.bdproles_unrolled AS
- WITH RECURSIVE roles(role, subroles) AS (
-         SELECT bdprole.id,
-            ARRAY[bdprole.id] AS "array"
-           FROM intime.bdprole
-          WHERE (bdprole.parent_id IS NULL)
-        UNION ALL
-         SELECT t.id,
-            (roles_1.subroles || t.id)
-           FROM intime.bdprole t,
-            roles roles_1
-          WHERE (t.parent_id = roles_1.role)
-        )
- SELECT roles.role,
-    unnest(roles.subroles) AS sr
-   FROM roles;
-
-
-ALTER TABLE intime.bdproles_unrolled OWNER TO bdp;
 
 --
 -- Name: bdprules_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -191,58 +155,6 @@ CREATE TABLE intime.bdprules (
 
 
 ALTER TABLE intime.bdprules OWNER TO bdp;
-
---
--- Name: bdpfilters_unrolled; Type: VIEW; Schema: intime; Owner: bdp
---
-
-CREATE VIEW intime.bdpfilters_unrolled AS
- SELECT DISTINCT x.role,
-    f.station_id,
-    f.type_id,
-    f.period
-   FROM (intime.bdprules f
-     JOIN intime.bdproles_unrolled x ON ((f.role_id = x.sr)))
-  ORDER BY x.role;
-
-
-ALTER TABLE intime.bdpfilters_unrolled OWNER TO bdp;
-
---
--- Name: bdppermissions; Type: MATERIALIZED VIEW; Schema: intime; Owner: bdp
---
-
-CREATE MATERIALIZED VIEW intime.bdppermissions AS
- WITH x AS (
-         SELECT row_number() OVER (ORDER BY bdpfilters_unrolled.role) AS uuid,
-            bdpfilters_unrolled.role AS role_id,
-            bdpfilters_unrolled.station_id,
-            bdpfilters_unrolled.type_id,
-            bdpfilters_unrolled.period,
-            bool_or((bdpfilters_unrolled.station_id IS NULL)) OVER (PARTITION BY bdpfilters_unrolled.role) AS e_stationid,
-            bool_or((bdpfilters_unrolled.type_id IS NULL)) OVER (PARTITION BY bdpfilters_unrolled.role, bdpfilters_unrolled.station_id) AS e_typeid,
-            bool_or((bdpfilters_unrolled.period IS NULL)) OVER (PARTITION BY bdpfilters_unrolled.role, bdpfilters_unrolled.station_id, bdpfilters_unrolled.type_id) AS e_period
-           FROM intime.bdpfilters_unrolled
-          ORDER BY bdpfilters_unrolled.role, bdpfilters_unrolled.station_id, bdpfilters_unrolled.type_id, bdpfilters_unrolled.period
-        )
- SELECT x.uuid,
-    x.role_id,
-    x.station_id,
-    x.type_id,
-    x.period
-   FROM x
-  WHERE (((x.station_id IS NULL) AND (x.type_id IS NULL) AND (x.period IS NULL)) OR ((x.station_id IS NOT NULL) AND (x.type_id IS NULL) AND (x.period IS NULL) AND (NOT x.e_stationid)) OR ((x.station_id IS NOT NULL) AND (x.type_id IS NOT NULL) AND (x.period IS NULL) AND (NOT x.e_stationid) AND (NOT x.e_typeid)) OR ((x.station_id IS NOT NULL) AND (x.type_id IS NOT NULL) AND (x.period IS NOT NULL) AND (NOT x.e_stationid) AND (NOT x.e_typeid) AND (NOT x.e_period)))
-  WITH NO DATA;
-
-
-ALTER TABLE intime.bdppermissions OWNER TO bdp;
-
---
--- Name: MATERIALIZED VIEW bdppermissions; Type: COMMENT; Schema: intime; Owner: bdp
---
-
-COMMENT ON MATERIALIZED VIEW intime.bdppermissions IS 'Materialized view to simulate row-level-security';
-
 
 --
 -- Name: bdpuser_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -785,24 +697,6 @@ CREATE TABLE intime.metadata (
 ALTER TABLE intime.metadata OWNER TO bdp;
 
 --
--- Name: schemaversion; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.schemaversion (
-    version character varying NOT NULL
-);
-
-
-ALTER TABLE intime.schemaversion OWNER TO bdp;
-
---
--- Name: TABLE schemaversion; Type: COMMENT; Schema: intime; Owner: bdp
---
-
-COMMENT ON TABLE intime.schemaversion IS 'Version of the current schema (used for scripted updates)';
-
-
---
 -- Name: station_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -821,7 +715,7 @@ ALTER TABLE intime.station_seq OWNER TO bdp;
 --
 
 CREATE TABLE intime.station (
-    stationtype character varying(31) NOT NULL,
+    stationcategory character varying(31) NOT NULL,
     id bigint DEFAULT nextval('intime.station_seq'::regclass) NOT NULL,
     active boolean,
     available boolean,
@@ -829,6 +723,7 @@ CREATE TABLE intime.station (
     origin character varying(255),
     pointprojection public.geometry,
     stationcode character varying(255) NOT NULL,
+    stationtype character varying(255) NOT NULL,
     metadata_id bigint,
     parent_id bigint
 );
@@ -896,7 +791,7 @@ CREATE TABLE intime.type (
 ALTER TABLE intime.type OWNER TO bdp;
 
 --
--- Name: alarm_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: alarm alarm_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.alarm
@@ -904,7 +799,7 @@ ALTER TABLE ONLY intime.alarm
 
 
 --
--- Name: alarmspecification_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: alarmspecification alarmspecification_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.alarmspecification
@@ -912,7 +807,15 @@ ALTER TABLE ONLY intime.alarmspecification
 
 
 --
--- Name: bdprole_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdppermissions bdppermissions_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.bdppermissions
+    ADD CONSTRAINT bdppermissions_pkey PRIMARY KEY (uuid);
+
+
+--
+-- Name: bdprole bdprole_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprole
@@ -920,7 +823,7 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: bdprules_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprules bdprules_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprules
@@ -928,7 +831,7 @@ ALTER TABLE ONLY intime.bdprules
 
 
 --
--- Name: bdpuser_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdpuser bdpuser_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdpuser
@@ -936,7 +839,7 @@ ALTER TABLE ONLY intime.bdpuser
 
 
 --
--- Name: carparkingdynamic_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: carparkingdynamic carparkingdynamic_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.carparkingdynamic
@@ -944,7 +847,7 @@ ALTER TABLE ONLY intime.carparkingdynamic
 
 
 --
--- Name: carparkingdynamichistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: carparkingdynamichistory carparkingdynamichistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.carparkingdynamichistory
@@ -952,7 +855,7 @@ ALTER TABLE ONLY intime.carparkingdynamichistory
 
 
 --
--- Name: datatype_i18n_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: datatype_i18n datatype_i18n_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.datatype_i18n
@@ -960,7 +863,7 @@ ALTER TABLE ONLY intime.datatype_i18n
 
 
 --
--- Name: echargingplugoutlet_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: echargingplugoutlet echargingplugoutlet_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.echargingplugoutlet
@@ -968,7 +871,7 @@ ALTER TABLE ONLY intime.echargingplugoutlet
 
 
 --
--- Name: elaboration_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaboration elaboration_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaboration
@@ -976,7 +879,7 @@ ALTER TABLE ONLY intime.elaboration
 
 
 --
--- Name: elaborationhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaborationhistory elaborationhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaborationhistory
@@ -984,7 +887,7 @@ ALTER TABLE ONLY intime.elaborationhistory
 
 
 --
--- Name: measurement_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurement measurement_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurement
@@ -992,7 +895,7 @@ ALTER TABLE ONLY intime.measurement
 
 
 --
--- Name: measurementhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementhistory measurementhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementhistory
@@ -1000,7 +903,7 @@ ALTER TABLE ONLY intime.measurementhistory
 
 
 --
--- Name: measurementmobile_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementmobile measurementmobile_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementmobile
@@ -1008,7 +911,7 @@ ALTER TABLE ONLY intime.measurementmobile
 
 
 --
--- Name: measurementmobilehistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementmobilehistory measurementmobilehistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementmobilehistory
@@ -1016,7 +919,7 @@ ALTER TABLE ONLY intime.measurementmobilehistory
 
 
 --
--- Name: measurementstring_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstring measurementstring_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstring
@@ -1024,7 +927,7 @@ ALTER TABLE ONLY intime.measurementstring
 
 
 --
--- Name: measurementstringhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstringhistory measurementstringhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstringhistory
@@ -1032,7 +935,7 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 
 --
--- Name: metadata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: metadata metadata_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.metadata
@@ -1040,7 +943,7 @@ ALTER TABLE ONLY intime.metadata
 
 
 --
--- Name: station_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: station station_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
@@ -1048,7 +951,7 @@ ALTER TABLE ONLY intime.station
 
 
 --
--- Name: translation_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: translation translation_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.translation
@@ -1056,7 +959,7 @@ ALTER TABLE ONLY intime.translation
 
 
 --
--- Name: type_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: type type_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.type
@@ -1064,7 +967,7 @@ ALTER TABLE ONLY intime.type
 
 
 --
--- Name: uk46ymdfj63griskpxoou335uqn; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementhistory uk46ymdfj63griskpxoou335uqn; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementhistory
@@ -1072,7 +975,7 @@ ALTER TABLE ONLY intime.measurementhistory
 
 
 --
--- Name: uk_47fpix67ktrhok7ee98qr4h9j; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprole uk_47fpix67ktrhok7ee98qr4h9j; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprole
@@ -1080,7 +983,7 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: uk_6tvbxvtiou8witoj88k9jp48r; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurement uk_6tvbxvtiou8witoj88k9jp48r; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurement
@@ -1088,7 +991,7 @@ ALTER TABLE ONLY intime.measurement
 
 
 --
--- Name: uk_mrv0fdjjst8g4daq6l9vj5mk4; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdpuser uk_mrv0fdjjst8g4daq6l9vj5mk4; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdpuser
@@ -1096,7 +999,7 @@ ALTER TABLE ONLY intime.bdpuser
 
 
 --
--- Name: ukhfn4lbwi40pp9clr4faewciqh; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: station ukhfn4lbwi40pp9clr4faewciqh; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
@@ -1104,24 +1007,10 @@ ALTER TABLE ONLY intime.station
 
 
 --
--- Name: bdppermissions_role_id_idx; Type: INDEX; Schema: intime; Owner: bdp
---
-
-CREATE INDEX bdppermissions_role_id_idx ON intime.bdppermissions USING btree (role_id);
-
-
---
 -- Name: bdppermissions_stp_idx; Type: INDEX; Schema: intime; Owner: bdp
 --
 
 CREATE INDEX bdppermissions_stp_idx ON intime.bdppermissions USING btree (station_id, type_id, period);
-
-
---
--- Name: bdppermissions_uuid_idx; Type: INDEX; Schema: intime; Owner: bdp
---
-
-CREATE UNIQUE INDEX bdppermissions_uuid_idx ON intime.bdppermissions USING btree (uuid);
 
 
 --
@@ -1139,7 +1028,7 @@ CREATE INDEX measurementhistory_tsdesc_idx ON intime.measurementhistory USING bt
 
 
 --
--- Name: fk1dnojfv99vxielbkj9vv3u9wa; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementmobile fk1dnojfv99vxielbkj9vv3u9wa; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementmobile
@@ -1147,7 +1036,7 @@ ALTER TABLE ONLY intime.measurementmobile
 
 
 --
--- Name: fk20veioqa371nn7pk4r8j23hgq; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdpusers_bdproles fk20veioqa371nn7pk4r8j23hgq; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdpusers_bdproles
@@ -1155,7 +1044,23 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
--- Name: fk64udi2ccjmedklvdikvey77n2; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdppermissions fk4ne8r7ss0r4eufg7qx3bdcybi; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.bdppermissions
+    ADD CONSTRAINT fk4ne8r7ss0r4eufg7qx3bdcybi FOREIGN KEY (type_id) REFERENCES intime.type(id);
+
+
+--
+-- Name: bdppermissions fk56emtbay781h58xpfe2phfdgn; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.bdppermissions
+    ADD CONSTRAINT fk56emtbay781h58xpfe2phfdgn FOREIGN KEY (station_id) REFERENCES intime.station(id);
+
+
+--
+-- Name: bdpusers_bdproles fk64udi2ccjmedklvdikvey77n2; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdpusers_bdproles
@@ -1163,7 +1068,7 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
--- Name: fk67hmoh6okqgqcv0j0ia04jsks; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: alarm fk67hmoh6okqgqcv0j0ia04jsks; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.alarm
@@ -1171,7 +1076,7 @@ ALTER TABLE ONLY intime.alarm
 
 
 --
--- Name: fk6ft0if5pwoff43uyhh4g6mrv5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementhistory fk6ft0if5pwoff43uyhh4g6mrv5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementhistory
@@ -1179,7 +1084,7 @@ ALTER TABLE ONLY intime.measurementhistory
 
 
 --
--- Name: fk7g1l7gs66xvo687ar19utlyp9; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: metadata fk7g1l7gs66xvo687ar19utlyp9; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.metadata
@@ -1187,7 +1092,7 @@ ALTER TABLE ONLY intime.metadata
 
 
 --
--- Name: fk7ptqedikeqqbqmqlpspy0fny1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprules fk7ptqedikeqqbqmqlpspy0fny1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprules
@@ -1195,7 +1100,7 @@ ALTER TABLE ONLY intime.bdprules
 
 
 --
--- Name: fk9dpm4i4fnimhnxw80k7tfqox0; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstringhistory fk9dpm4i4fnimhnxw80k7tfqox0; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstringhistory
@@ -1203,7 +1108,7 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 
 --
--- Name: fk9w0ph05u8x3louer75d8d6g0t; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: alarm fk9w0ph05u8x3louer75d8d6g0t; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.alarm
@@ -1211,7 +1116,7 @@ ALTER TABLE ONLY intime.alarm
 
 
 --
--- Name: fka9v6xc44bmdp6ngcev8w6qxr5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprole fka9v6xc44bmdp6ngcev8w6qxr5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprole
@@ -1219,7 +1124,7 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: fkav5dnq85ljasqix0nnjhbcoy8; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaboration fkav5dnq85ljasqix0nnjhbcoy8; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaboration
@@ -1227,7 +1132,7 @@ ALTER TABLE ONLY intime.elaboration
 
 
 --
--- Name: fkdc8h2uo6mi73f6sho1cbc4qqt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementmobilehistory fkdc8h2uo6mi73f6sho1cbc4qqt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementmobilehistory
@@ -1235,7 +1140,7 @@ ALTER TABLE ONLY intime.measurementmobilehistory
 
 
 --
--- Name: fkdi3xmx3ick2mh5tf5kga91evx; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaboration fkdi3xmx3ick2mh5tf5kga91evx; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaboration
@@ -1243,7 +1148,7 @@ ALTER TABLE ONLY intime.elaboration
 
 
 --
--- Name: fkdten6vp3aa3r30ixmaxr0qcj1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprules fkdten6vp3aa3r30ixmaxr0qcj1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprules
@@ -1251,7 +1156,7 @@ ALTER TABLE ONLY intime.bdprules
 
 
 --
--- Name: fkgn083v6hfhqnguemmu0tqm1wp; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementhistory fkgn083v6hfhqnguemmu0tqm1wp; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementhistory
@@ -1259,7 +1164,7 @@ ALTER TABLE ONLY intime.measurementhistory
 
 
 --
--- Name: fkh3qi0htd1jkshh1ep377fovo4; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaborationhistory fkh3qi0htd1jkshh1ep377fovo4; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaborationhistory
@@ -1267,7 +1172,7 @@ ALTER TABLE ONLY intime.elaborationhistory
 
 
 --
--- Name: fkhce8yoanxbbeurhseaf2pu80j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: echargingplugoutlet fkhce8yoanxbbeurhseaf2pu80j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.echargingplugoutlet
@@ -1275,7 +1180,7 @@ ALTER TABLE ONLY intime.echargingplugoutlet
 
 
 --
--- Name: fkj13h3be4x0l41ge05ltnxmrax; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurement fkj13h3be4x0l41ge05ltnxmrax; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurement
@@ -1283,7 +1188,7 @@ ALTER TABLE ONLY intime.measurement
 
 
 --
--- Name: fkjnjrf7o7u7da0nefthimj167y; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurement fkjnjrf7o7u7da0nefthimj167y; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurement
@@ -1291,7 +1196,7 @@ ALTER TABLE ONLY intime.measurement
 
 
 --
--- Name: fkjopbglno7qpm4sv8w43oacmur; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstringhistory fkjopbglno7qpm4sv8w43oacmur; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstringhistory
@@ -1299,7 +1204,7 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 
 --
--- Name: fkkk0k0on8scofrsfmsr9o577gk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstring fkkk0k0on8scofrsfmsr9o577gk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstring
@@ -1307,7 +1212,7 @@ ALTER TABLE ONLY intime.measurementstring
 
 
 --
--- Name: fkkno932ygx9q10x5s4hdt43eu5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: carparkingdynamichistory fkkno932ygx9q10x5s4hdt43eu5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.carparkingdynamichistory
@@ -1315,7 +1220,7 @@ ALTER TABLE ONLY intime.carparkingdynamichistory
 
 
 --
--- Name: fkkuxk6ww2a8dxcub3iw9byny1k; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: datatype_i18n fkkuxk6ww2a8dxcub3iw9byny1k; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.datatype_i18n
@@ -1323,7 +1228,7 @@ ALTER TABLE ONLY intime.datatype_i18n
 
 
 --
--- Name: fkl75nk4972jo3defhqu6l23o9j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: station fkl75nk4972jo3defhqu6l23o9j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
@@ -1331,7 +1236,7 @@ ALTER TABLE ONLY intime.station
 
 
 --
--- Name: fkpi0ege52d6f86n8o6l6s75irm; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: measurementstring fkpi0ege52d6f86n8o6l6s75irm; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementstring
@@ -1339,7 +1244,7 @@ ALTER TABLE ONLY intime.measurementstring
 
 
 --
--- Name: fkq90lpabiye1scahh0pa6drni7; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: carparkingdynamic fkq90lpabiye1scahh0pa6drni7; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.carparkingdynamic
@@ -1347,7 +1252,7 @@ ALTER TABLE ONLY intime.carparkingdynamic
 
 
 --
--- Name: fkqkj3j3kx7yctkubhil9a9kkqs; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: elaborationhistory fkqkj3j3kx7yctkubhil9a9kkqs; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.elaborationhistory
@@ -1355,7 +1260,7 @@ ALTER TABLE ONLY intime.elaborationhistory
 
 
 --
--- Name: fkqno7vwsq5oovnaxfun2sjmcc3; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdprules fkqno7vwsq5oovnaxfun2sjmcc3; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.bdprules
@@ -1363,21 +1268,19 @@ ALTER TABLE ONLY intime.bdprules
 
 
 --
--- Name: fkrwkpfeoxfhn1rks97k6wlanpk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: bdppermissions fkr9mxonrm4l54hop1l8r4pxedn; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.bdppermissions
+    ADD CONSTRAINT fkr9mxonrm4l54hop1l8r4pxedn FOREIGN KEY (role_id) REFERENCES intime.bdprole(id);
+
+
+--
+-- Name: station fkrwkpfeoxfhn1rks97k6wlanpk; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
     ADD CONSTRAINT fkrwkpfeoxfhn1rks97k6wlanpk FOREIGN KEY (parent_id) REFERENCES intime.station(id);
-
-
---
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

@@ -151,13 +151,12 @@ public class ParkingStation extends Station{
 		List<String[]> dataTypes;
 		TypedQuery<Object[]> query;
 		if (stationId == null) {
-			query = em.createQuery("SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.class=:stationType GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery("SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.stationtype = :stationtype GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",Object[].class);
 		} else {
-			query = em.createQuery("SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.class=:stationType AND elab.station.stationcode=:station GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery("SELECT elab.type.cname,elab.type.cunit,elab.type.description,elab.period FROM Elaboration elab INNER JOIN elab.type where elab.station.stationtype = :stationtype AND elab.station.stationcode=:station GROUP BY elab.type.cname,elab.type.cunit,elab.type.description,elab.period",Object[].class);
 			query.setParameter("station",stationId);
 		}
+		query.setParameter("stationtype", this.stationtype);
 		List<Object[]> resultList = query.getResultList();
 		dataTypes= getDataTypesFromQuery(resultList);
 		dataTypes.addAll(ParkingStation.DATATYPES);
@@ -167,13 +166,12 @@ public class ParkingStation extends Station{
 	public List<TypeDto> findTypes(EntityManager em, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null) {
-			query = em.createQuery("SELECT type,elab.period FROM Elaboration elab INNER JOIN elab.type type  where elab.station.class=:stationType GROUP BY type,elab.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery("SELECT type,elab.period FROM Elaboration elab INNER JOIN elab.type type  where elab.station.stationtype = :stationtype GROUP BY type,elab.period",Object[].class);
 		} else {
-			query = em.createQuery("SELECT type,elab.period FROM Elaboration elab INNER JOIN elab.type type where elab.station.class=:stationType AND elab.station.stationcode=:station GROUP BY type,elab.period",Object[].class);
-			query.setParameter("stationType", this.getClass().getSimpleName());
+			query = em.createQuery("SELECT type,elab.period FROM Elaboration elab INNER JOIN elab.type type where elab.station.stationtype = :stationtype AND elab.station.stationcode=:station GROUP BY type,elab.period",Object[].class);
 			query.setParameter("station",stationId);
 		}
+		query.setParameter("stationType", this.stationtype);
 		List<Object[]> resultList = query.getResultList();
 
 		List<TypeDto> types = new ArrayList<TypeDto>();
