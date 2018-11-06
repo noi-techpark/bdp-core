@@ -200,10 +200,6 @@ public class ParkingStation extends Station{
 
 		return types;
 	}
-	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return getDateOfLastRecordImpl(em, station, type, period, role, "Elaboration");
-	}
 
 	@Override
 	public RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role) {
@@ -316,5 +312,11 @@ public class ParkingStation extends Station{
 			}
 		}
 		return "";
+	}
+
+	@Override
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

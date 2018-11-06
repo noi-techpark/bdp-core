@@ -121,13 +121,12 @@ public class ElaborationStation extends Station {
 	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return getDateOfLastRecordImpl(em, station, type, period, role, "Elaboration");
+	public Object pushRecords(EntityManager em, Object... object) {
+		return null;
 	}
 
 	@Override
-	public Object pushRecords(EntityManager em, Object... object) {
-		// TODO Auto-generated method stub
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		return null;
 	}
 }

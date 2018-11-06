@@ -22,13 +22,11 @@ package it.bz.idm.bdp.dal;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
@@ -40,36 +38,25 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="measurementstring",schema="intime")
 @Entity
-public class MeasurementString {
+public class MeasurementString extends M{
 
 	@Id
 	@GeneratedValue(generator = "measurementstring_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstring_gen", sequenceName = "measurementstring_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstring_seq')")
 	private Integer id;
-
-	private Date created_on;
-	private Date timestamp;
 	private String value;
-
-	@ManyToOne(cascade=CascadeType.ALL)
-	private Station station;
-
-	@ManyToOne(cascade=CascadeType.ALL)
-	private DataType type;
-
-	private Integer period;
 
 	public MeasurementString() {
 	}
 	public MeasurementString(Station station, DataType type,
 			String value, Date timestamp, Integer period) {
-		this.station = station;
-		this.type = type;
-		this.value = value;
-		this.timestamp = timestamp;
-		this.created_on = new Date();
-		this.period = period;
+		this.setStation(station);
+		this.setType(type);
+		this.setTimestamp(timestamp);
+		this.setCreated_on(new Date());
+		this.setPeriod(period);
+		this.value = value;		
 	}
 
 	public Integer getId() {
@@ -80,50 +67,12 @@ public class MeasurementString {
 		this.id = id;
 	}
 
-	public Date getCreated_on() {
-		return created_on;
-	}
-
-	public void setCreated_on(Date created_on) {
-		this.created_on = created_on;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
 	public String getValue() {
 		return value;
 	}
 
 	public void setValue(String value) {
 		this.value = value;
-	}
-
-	public Station getStation() {
-		return station;
-	}
-
-	public void setStation(Station station) {
-		this.station = station;
-	}
-
-	public DataType getType() {
-		return type;
-	}
-
-	public void setType(DataType type) {
-		this.type = type;
-	}
-	public Integer getPeriod() {
-		return period;
-	}
-	public void setPeriod(Integer period) {
-		this.period = period;
 	}
 
 	public static MeasurementString findLastMeasurementByStationAndType(
@@ -142,5 +91,10 @@ public class MeasurementString {
 		q.setParameter("period", period);
 		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(q);
+	}
+	
+	@Override
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return getDateOfLastRecordImpl(em, station, type, period, role, "MeasurementString");
 	}
 }
