@@ -379,11 +379,10 @@ public abstract class Station {
 			em.getTransaction().begin();
 			for (Station station: stations){
 				boolean isActive = false;
-				for (Object obj: dtos){
-					if (obj instanceof StationDto){
-						StationDto dto = (StationDto) obj;
-						if (station.getStationcode().equals(dto.getId()))
-							isActive = true;
+				for (StationDto dto: dtos){
+					if (station.getStationcode().equals(dto.getId())){
+						isActive = true;
+						break;
 					}
 				}
 				if (station.getActive() == null || isActive != station.getActive()){
