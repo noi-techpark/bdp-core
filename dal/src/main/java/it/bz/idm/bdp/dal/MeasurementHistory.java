@@ -22,18 +22,19 @@ package it.bz.idm.bdp.dal;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -43,13 +44,15 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.DataMapDto;
+import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 @Table(name = "measurementhistory", indexes = { @Index(columnList = "station_id,type_id,timestamp,period", unique = true), @Index(columnList = "timestamp desc", name = "measurementhistory_tsdesc_idx") })
 @Entity
-
-public class MeasurementHistory {
+public class MeasurementHistory extends MHistory {
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
 
@@ -59,28 +62,14 @@ public class MeasurementHistory {
 	@ColumnDefault(value = "nextval('intime.measurementhistory_seq')")
 	private Long id;
 
-	private Date timestamp;
 	private Double value;
-	private Date created_on;
-
-	@ManyToOne(cascade=CascadeType.ALL)
-	private Station station;
-
-	@ManyToOne(cascade = CascadeType.PERSIST)
-	private DataType type;
-
-	private Integer period;
 
 	public MeasurementHistory() {
 	}
 	public MeasurementHistory(Station station, DataType type,
 			Double value, Date timestamp, Integer period,Date created_on) {
-		this.station = station;
-		this.type = type;
+		super(station,type,timestamp,period);
 		this.value = value;
-		this.timestamp = timestamp;
-		this.period = period;
-		this.created_on = created_on;
 	}
 
 	public Long getId() {
@@ -89,13 +78,6 @@ public class MeasurementHistory {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Date getDate() {
-		return timestamp;
-	}
-
-	public void setDate(Date date) {
-		this.timestamp = date;
-	}
 
 	public Double getValue() {
 		return value;
@@ -103,42 +85,6 @@ public class MeasurementHistory {
 
 	public void setValue(Double value) {
 		this.value = value;
-	}
-
-	public Station getStation() {
-		return station;
-	}
-
-	public void setStation(Station station) {
-		this.station = station;
-	}
-	public Date getCreated_on() {
-		return created_on;
-	}
-
-	public void setCreated_on(Date created_on) {
-		this.created_on = created_on;
-	}
-
-	public DataType getType() {
-		return type;
-	}
-
-	public void setType(DataType type) {
-		this.type = type;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-	public Integer getPeriod() {
-		return period;
-	}
-	public void setPeriod(Integer period) {
-		this.period = period;
 	}
 
 	public static List<RecordDto> findRecords(EntityManager em, String stationtype,
@@ -234,4 +180,113 @@ public class MeasurementHistory {
 		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
 	}
+
+	public Object pushRecords(EntityManager em, Object... objects) {
+		Object object = objects[0];
+		BDPRole adminRole = BDPRole.fetchAdminRole(em);
+		if (object instanceof DataMapDto) {
+			@SuppressWarnings("unchecked")
+			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
+			try{
+				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
+					Station station = findStation(em, entry.getKey());
+					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
+						try{
+							em.getTransaction().begin();
+							DataType type = DataType.findByCname(em, typeEntry.getKey());
+							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
+							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
+								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, adminRole);
+								Date created_on = new Date();
+								Collections.sort(dataRecords);
+								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
+								for (RecordDto recordDto : dataRecords){
+									if (recordDto instanceof SimpleRecordDto){
+										SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
+										Long dateOfMeasurement = simpleRecordDto.getTimestamp();
+										Double value = (Double) simpleRecordDto.getValue();
+										if(lastEntryTime < dateOfMeasurement){
+											MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),simpleRecordDto.getPeriod(),created_on);
+											em.persist(record);
+										}
+									}
+								}
+								SimpleRecordDto newestDto = (SimpleRecordDto) dataRecords.get(dataRecords.size()-1);
+								if (lastEntry == null){
+									Double value = (Double) newestDto.getValue();
+									lastEntry = new Measurement(station, type, value, new Date(newestDto.getTimestamp()), newestDto.getPeriod());
+									em.persist(lastEntry);
+								}
+								else if (newestDto != null && newestDto.getTimestamp()>lastEntryTime){
+									Double value = (Double) newestDto.getValue();
+									lastEntry.setTimestamp(new Date(newestDto.getTimestamp()));
+									lastEntry.setValue(value);
+									em.merge(lastEntry);
+								}
+							}
+							em.getTransaction().commit();
+						}catch(Exception ex){
+							ex.printStackTrace();
+							if (em.getTransaction().isActive())
+								em.getTransaction().rollback();
+							continue;
+						}
+					}
+
+				}
+			}catch(Exception ex){
+				ex.printStackTrace();
+				if (em.getTransaction().isActive())
+					em.getTransaction().rollback();
+			}finally{
+				em.clear();
+				em.close();
+			}
+		}else if (object instanceof Object[]){
+			List<Object> dtos = Arrays.asList((Object[]) object);
+			try{
+				em.getTransaction().begin();
+				Station station = null;
+				DataType type = null;
+				String tempSS = null,tempTS = null;
+				for (Object dto : dtos){
+					FullRecordDto full = (FullRecordDto)dto;
+					if (full.validate()){
+						if (!full.getStation().equals(tempSS)){
+							station = findStation(em, full.getStation());
+							if (station == null)
+								continue;
+							tempSS = station.getStationcode();
+						}
+						if (!full.getType().equals(tempTS)){
+							type = DataType.findByCname(em, full.getType());
+							if (type == null)
+								continue;
+							tempTS = full.getType();
+						}
+						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), adminRole);
+						Number value = (Number) full.getValue();
+						if (lastEntry == null){
+							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
+							em.persist(lastEntry);
+						}
+						else if (lastEntry.getTimestamp().getTime()<full.getTimestamp()){
+							lastEntry.setValue(value.doubleValue());
+							lastEntry.setTimestamp(new Date(full.getTimestamp()));
+							em.merge(lastEntry);
+						}
+						MeasurementHistory record = new MeasurementHistory(station,type,value.doubleValue(), new Date(full.getTimestamp()),full.getPeriod(),new Date());
+						em.persist(record);
+					}
+				}
+				em.getTransaction().commit();
+			}catch(Exception ex){
+				ex.printStackTrace();
+				if (em.getTransaction().isActive())
+					em.getTransaction().rollback();
+			}
+		}
+		return null;
+	}
+
 }

@@ -158,40 +158,6 @@ public abstract class Station {
 			BDPRole role);
 	public abstract Object pushRecords(EntityManager em, Object... object);
 
-	protected static Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period,
-			BDPRole role, String table) {
-		if (station == null)
-			return null;
-
-		if (!table.matches("[a-zA-Z_]+")) {
-			throw new IllegalArgumentException("Table '" + table + "' contains illegal characters.");
-		}
-
-		String queryString = "select record.timestamp "
-				+ "from " + table + " record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station=:station";
-
-		if (type != null) {
-			queryString += " AND record.type = :type";
-		}
-		if (period != null) {
-			queryString += " AND record.period=:period";
-		}
-		queryString += " ORDER BY record.timestamp DESC";
-		TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-		query.setParameter("station", station);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		if (type != null)
-			query.setParameter("type", type);
-		if (period != null)
-			query.setParameter("period", period);
-		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
-	}
-
 	public String getName() {
 		return name;
 	}
