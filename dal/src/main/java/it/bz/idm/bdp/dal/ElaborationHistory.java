@@ -39,7 +39,8 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.bluetooth.BluetoothRecordExtendedDto;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
+
 @Entity
 public class ElaborationHistory {
 
@@ -178,7 +179,8 @@ public class ElaborationHistory {
 			Date date = history.getTimestamp();
 			Long created_on = history.getCreated_on().getTime();
 			Double value = history.getValue();
-			BluetoothRecordExtendedDto dto = new BluetoothRecordExtendedDto(date.getTime(), value, created_on);
+			SimpleRecordDto dto = new SimpleRecordDto(date.getTime(), value);
+			dto.setTimestamp(created_on);
 			dtos.add(dto);
 		}
 	}
