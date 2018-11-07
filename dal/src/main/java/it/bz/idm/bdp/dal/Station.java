@@ -488,6 +488,7 @@ public abstract class Station {
 		try {
 			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class);
 			query.setParameter("active", true);
+			query.setParameter("type", type);
 			if (origin != null)
 				query.setParameter("origin", origin);
 			return query.getResultList();

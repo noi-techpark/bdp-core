@@ -45,7 +45,7 @@ public class StationRetrievalIT {
 
 	@Test
 	public void testStationsRetrieval() {
-		List<Station> stationsWithOrigin = Station.findStations(em, type, origin );
+		List<Station> stationsWithOrigin = Station.findStations(em, type, origin);
 		assertNotNull(stationsWithOrigin);
 		List<Station> stations = Station.findStations(em, type, null);
 		assertNotNull(stations);
