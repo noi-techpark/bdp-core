@@ -41,7 +41,6 @@ import org.hibernate.annotations.NaturalId;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
 @Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
@@ -72,11 +71,6 @@ public class Measurement {
 	private Integer period;
 
 	public Measurement() {
-	}
-	public Measurement(SegmentDataPointDto dataPoint) {
-		this.value = dataPoint.getValue();
-		this.created_on = new Date();
-		this.timestamp = dataPoint.getDate();
 	}
 
 	public Measurement(Station station, DataType type,
