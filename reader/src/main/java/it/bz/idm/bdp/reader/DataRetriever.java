@@ -36,7 +36,6 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
-import it.bz.idm.bdp.dto.parking.ParkingRecordDto;
 
 public class DataRetriever {
 
@@ -139,13 +138,13 @@ public class DataRetriever {
 	}
 
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
-		ParkingRecordDto dto = null;
+		RecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		try{
 			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
 			Station station = s.findStation(em, stationcode);
-			dto = (ParkingRecordDto) station.findLastRecord(em, cname, period, role);
+			dto = station.findLastRecord(em, cname, period, role);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
