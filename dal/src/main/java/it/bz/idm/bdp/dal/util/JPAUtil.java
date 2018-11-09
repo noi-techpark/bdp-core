@@ -34,7 +34,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 
-import it.bz.idm.bdp.dal.MeasurementStation;
 import it.bz.idm.bdp.dal.Station;
 
 public class JPAUtil {
@@ -71,7 +70,7 @@ public class JPAUtil {
 
 	public static Object getInstanceByType(EntityManager em, String type) {
 		// XXX PEMOSER How do we distinguish between Measurement and Elaboration here?
-		Station station = new MeasurementStation();
+		Station station = new Station();
 		station.setStationtype(type);
 		return station;
 //		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();

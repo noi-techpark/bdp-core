@@ -40,8 +40,8 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
+import it.bz.idm.bdp.dal.M;
 import it.bz.idm.bdp.dal.Measurement;
-import it.bz.idm.bdp.dal.MeasurementStation;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
@@ -72,7 +72,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		role2.setName("Halla");
 		role2.setDescription("The Child Role");
 		role2.setParent(role);
-		station = new MeasurementStation();
+		station = new Station();
 		station.setName("BLuesky");
 		type = new DataType("NO2","mg","Fake type","Instants");
 		rule = new BDPRules();
@@ -136,13 +136,13 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		BDPRole r2 = BDPRole.fetchAdminRole(em);
 		assertNotNull(r);
 		assertNotNull(r2);
-		Station station = new MeasurementStation().findStation(em, this.station.getName());
+		Station station = Station.findStation(em, this.station.getName());
 		assertNotNull(station);
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		assertNotNull(type);
-		Measurement m = Measurement.findLatestEntry(em, station, null, null, r2);
+		M m = new Measurement().findLatestEntry(em, station, null, null, r2);
 		assertNotNull(m);
-		Measurement m2 = Measurement.findLatestEntry(em, station, null, null, r);
+		M m2 =new Measurement().findLatestEntry(em, station, null, null, r);
 		assertNull(m2);
 	}
 

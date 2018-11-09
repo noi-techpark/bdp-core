@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
+import it.bz.idm.bdp.dal.M;
+import it.bz.idm.bdp.dal.MeasurementHistory;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -45,10 +47,8 @@ public class DataManager {
 
 	public Object pushRecords(String stationType, Object... data){
 		EntityManager em = JPAUtil.createEntityManager();
-		Station station;
 		try {
-			station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			return station.pushRecords(em, data);
+			return new MeasurementHistory().pushRecords(em, data);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -80,12 +80,11 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		Date date = new Date(-1);
 		try {
-			Station s = (Station) JPAUtil.getInstanceByType(em, stationtype);
-			Station station = s.findStation(em,stationcode);
+			Station station = Station.findStation(em,stationcode);
 			if (station != null) {
 				DataType dataType = DataType.findByCname(em,type);
 				BDPRole role = BDPRole.fetchAdminRole(em);
-				date = station.getDateOfLastRecord(em, station, dataType, period, role);
+				date = M.getDateOfLastRecord(em, station, dataType, period, role);
 			}
 		} finally {
 			if (em.isOpen())

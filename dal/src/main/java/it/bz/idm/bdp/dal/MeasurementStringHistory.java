@@ -26,8 +26,14 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
+
+import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
@@ -38,7 +44,13 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
 public class MeasurementStringHistory extends MHistory{
-
+	
+    @Id
+	@GeneratedValue(generator = "measurementstringhistory_gen", strategy = GenerationType.SEQUENCE)
+	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", schema = "intime", allocationSize = 1)
+	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
+	private Long id;
+    
 	private String value;
 
 	public MeasurementStringHistory() {
@@ -54,6 +66,12 @@ public class MeasurementStringHistory extends MHistory{
 		this.value = value;
 	}
 
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getValue() {
 		return value;
 	}
@@ -114,47 +132,7 @@ public class MeasurementStringHistory extends MHistory{
 	}
 	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
-		super.pushRecordsImpl(em,objects,"MeasurementString");
-		BDPRole role = BDPRole.fetchAdminRole(em);
-		if (objects.length>0 && objects[0] instanceof DataMapDto<?>)
-		{
-			@SuppressWarnings("unchecked")
-			DataMapDto<RecordDtoImpl> dataMap = (DataMapDto<RecordDtoImpl>) objects[0];
-			DataType type = DataType.findByCname(em, VEHICLE_DETECTION);
-			if (type == null)
-				type = new DataType(VEHICLE_DETECTION); //create it if it does not exists in DB
-
-			for(Map.Entry<String,DataMapDto<RecordDtoImpl>> entry : dataMap.getBranch().entrySet()){
-				em.getTransaction().begin();
-				Station station = findStation(em, entry.getKey());
-				if (station == null){
-					station = new BluetoothStation(entry.getKey());
-					em.persist(station);
-				}
-				List<? extends RecordDtoImpl> data = entry.getValue().getBranch().get(VEHICLE_DETECTION).getData();
-				for (RecordDtoImpl record: data){
-					SimpleRecordDto dto = (SimpleRecordDto) record;
-					MeasurementStringHistory history = MeasurementStringHistory.findRecord(em, station, type,
-							dto.getValue().toString(), new Date(dto.getTimestamp()), PERIOD, role);
-					if (history == null){
-						history = new MeasurementStringHistory(station, type, dto.getValue().toString(),new Date(dto.getTimestamp()),PERIOD);
-						em.persist(history);
-					}
-					MeasurementString lastMeasurement = MeasurementString.findLastMeasurementByStationAndType(em,
-							station, type, PERIOD, role);
-					if (lastMeasurement != null) {
-						lastMeasurement.setTimestamp(new Date(dto.getTimestamp()));
-						lastMeasurement.setCreated_on(new Date());
-						lastMeasurement.setValue(dto.getValue().toString());
-					} else
-						lastMeasurement = new MeasurementString(station, type, dto.getValue().toString(), new Date(dto.getTimestamp()),PERIOD);
-					em.merge(lastMeasurement);
-				}
-				em.getTransaction().commit();
-			}
-		}
-		return "";
+		// TODO Auto-generated method stub
+		return null;
 	}
-
-
 }

@@ -310,7 +310,7 @@ public class TrafficVehicleRecordHistory {
     private Long realtime_delay;
 
     @ManyToOne(cascade=CascadeType.ALL)
-    private MobileStation station;
+    private Station station;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date ts_ms;
@@ -765,11 +765,11 @@ public class TrafficVehicleRecordHistory {
 		this.imu_valid_b = imu_valid_b;
 	}
 
-	public MobileStation getStation() {
+	public Station getStation() {
 		return station;
 	}
 
-	public void setStation(MobileStation station) {
+	public void setStation(Station station) {
 		this.station = station;
 	}
 
@@ -817,7 +817,7 @@ public class TrafficVehicleRecordHistory {
 	public TrafficVehicleRecordHistory() {
 	}
 
-	public TrafficVehicleRecordHistory(CarValue value, MobileStation station) {
+	public TrafficVehicleRecordHistory(CarValue value, Station station) {
 		super();
     	this.o3_1_ppb = value.getO3_1_ppb();
     	this.o3_1_runtime_s = value.getO3_1_runtime_s();
@@ -889,7 +889,7 @@ public class TrafficVehicleRecordHistory {
 	}
 
 	private List<TrafficVehicleRecordHistory> findTrafficVehicleRecordsByVehicleAndTs_msEquals(
-			MobileStation station, Date ts_ms) {
+			Station station, Date ts_ms) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			TypedQuery<TrafficVehicleRecordHistory> query = em.createQuery("select record from TrafficVehicleRecordHistory record where record.station= :station AND record.ts_ms= :ts_ms",TrafficVehicleRecordHistory.class);

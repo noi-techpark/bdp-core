@@ -18,9 +18,8 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp;
+package it.bz.idm.bdp.dal;
 
 public class PeristenceTests {
-
 
 }

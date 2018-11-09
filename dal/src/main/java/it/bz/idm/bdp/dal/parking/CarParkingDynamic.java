@@ -51,7 +51,7 @@ public class CarParkingDynamic {
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "station_id")
-	private ParkingStation station;
+	private Station station;
 
 	private String carparkstate;
 
@@ -73,7 +73,7 @@ public class CarParkingDynamic {
 		// TODO Auto-generated constructor stub
 	}
 
-	public CarParkingDynamic(ParkingStation area,
+	public CarParkingDynamic(Station area,
 			Integer occupacy, Date lastupdate) {
 		this.station = area;
 		this.occupacy = occupacy;
@@ -88,11 +88,11 @@ public class CarParkingDynamic {
 		this.id = id;
 	}
 
-	public ParkingStation getStation() {
+	public Station getStation() {
 		return station;
 	}
 
-	public void setStation(ParkingStation station) {
+	public void setStation(Station station) {
 		this.station = station;
 	}
 
@@ -160,7 +160,7 @@ public class CarParkingDynamic {
 		this.createdate = createdate;
 	}
 
-	public static CarParkingDynamic findByParkingStation(EntityManager em,ParkingStation area) {
+	public static CarParkingDynamic findByParkingStation(EntityManager em,Station area) {
 		TypedQuery<CarParkingDynamic> typedQuery = em.createQuery("select dynamic from CarParkingDynamic dynamic where dynamic.station.id = :area order by dynamic.lastupdate asc",CarParkingDynamic.class);
 		typedQuery.setParameter("area", area.getId());
 		return JPAUtil.getSingleResultOrNull(typedQuery);
