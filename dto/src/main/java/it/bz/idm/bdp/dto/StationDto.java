@@ -25,6 +25,9 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonInclude(value=Include.NON_EMPTY)
@@ -32,13 +35,19 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
+	@ApiModelProperty (notes = "The unique ID associated to the station.")
 	protected String id;
+	@ApiModelProperty (notes = "The name of the station")
 	protected String name;
+	@ApiModelProperty (notes = "The latitude where this station is located.")
 	protected Double latitude;
+	@ApiModelProperty (notes = "The longitude where this station is located.")
 	protected Double longitude;
 	protected String crs;
 	private String origin;
+	@ApiModelProperty (notes = "The town or city wehre the station is located.")
 	private String municipality;
+	@ApiModelProperty (notes = "The type of station")
 	private String stationType;
 
 	public StationDto() {

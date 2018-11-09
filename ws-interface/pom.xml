@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 
     ws-interface - Web Service Interface for the Big Data Platform
@@ -20,14 +21,12 @@
     SPDX-License-Identifier: GPL-3.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>ws-interface</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.3</version>
     <inceptionYear>2018</inceptionYear>
     <description>Web Service Interface for the Big Data Platform</description>
 
@@ -113,7 +112,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -167,6 +166,7 @@
                         <exclude>**/README</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>**/*.java.orig</exclude>
                     </excludes>
                 </configuration>
                 <executions>
