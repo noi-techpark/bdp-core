@@ -29,11 +29,14 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import it.bz.idm.bdp.dal.DataType;
+import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPUser;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
@@ -55,9 +58,7 @@ public class DataRetriever {
 		List<TypeDto> dataTypes = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			if (station != null)
-				dataTypes = station.findTypes(em, stationId);
+			dataTypes =	DataType.findTypes(em, type, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -105,9 +106,7 @@ public class DataRetriever {
 		List<String[]> dataTypes = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			Station station = (Station) JPAUtil.getInstanceByType(em, type);
-			if (station != null)
-				dataTypes = station.findDataTypes(em, stationId);
+			dataTypes = DataType.findDataTypes(em, type, stationId);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -125,10 +124,9 @@ public class DataRetriever {
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		Date dateOfLastRecord = null;
 		try{
-			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
-			Station station = s.findStation(em, stationcode);
+			Station station = Station.findStation(em, stationcode);
 			DataType type = DataType.findByCname(em,cname);
-			dateOfLastRecord = s.getDateOfLastRecord(em, station, type, period, role);
+			dateOfLastRecord = Measurement.getDateOfLastRecord(em, station, type, period, role);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -138,13 +136,17 @@ public class DataRetriever {
 	}
 
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
-		RecordDto dto = null;
+		SimpleRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		try{
-			Station s = (Station) JPAUtil.getInstanceByType(em, stationTypology);
-			Station station = s.findStation(em, stationcode);
-			dto = station.findLastRecord(em, cname, period, role);
+			Station station = Station.findStation(em, stationcode);
+			DataType type = DataType.findByCname(em,cname);
+			Measurement latestEntry = (Measurement) new Measurement().findLatestEntry(em, station, type, period, role);
+			if (latestEntry != null){
+				dto = new SimpleRecordDto(latestEntry.getTimestamp().getTime(),latestEntry.getValue());
+				dto.setPeriod(latestEntry.getPeriod());
+			}
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
@@ -153,21 +155,7 @@ public class DataRetriever {
 		return dto;
 	}
 	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
-		RecordDto dto = null;
-		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
-		try{
-			Station s = (Station) JPAUtil.getInstanceByType(em, typology);
-			if (s != null){
-				Station station = s.findStation(em, stationId);
-				dto = station.findLastRecord(em, typeId, period, role);
-			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
-		}
-		return dto;
+		return getLastRecord(typology, stationId, typeId, period, principal);
 	}
 
 
@@ -190,10 +178,9 @@ public class DataRetriever {
 
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try{
-			Station s = (Station) JPAUtil.getInstanceByType(em, stationtypology);
-			Station station = s.findStation(em, identifier);
+			Station station = Station.findStation(em, identifier);
 			if (station != null) {
-				records.addAll(station.getRecords(em, type, start, end, period, role));
+				records.addAll(MeasurementHistory.findRecords(em, stationtypology, identifier, type, start, end, period, role));
 				return records;
 			}
 		}catch(Exception ex){

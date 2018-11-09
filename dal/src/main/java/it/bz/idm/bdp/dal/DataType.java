@@ -20,6 +20,7 @@
  */
 package it.bz.idm.bdp.dal;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.TypeDto;
 
 
 @Table(name="type",schema="intime")
@@ -127,6 +129,76 @@ public class DataType {
 
 	}
 
+	public static List<TypeDto> findTypes(EntityManager em, String stationType, String stationId) {
+		TypedQuery<Object[]> query;
+		if (stationId == null || stationId.isEmpty()) {
+			query = em.createQuery("SELECT type,record.period FROM Measurement record INNER JOIN record.type type  "
+					+ "where record.station.class=:stationType GROUP BY type,record.period",Object[].class);
+			query.setParameter("stationType", stationType);
+		} else {
+			query = em.createQuery("SELECT type,record.period FROM Measurement record INNER JOIN record.type type "
+					+ "where record.station.class=:stationType AND record.station.stationcode=:station GROUP BY type,record.period",Object[].class);
+			query.setParameter("stationType", stationType);
+			query.setParameter("station",stationId);
+		}
+		List<Object[]> resultList = query.getResultList();
+		List<TypeDto> types = new ArrayList<TypeDto>();
+		Map<String,TypeDto> dtos = new HashMap<String, TypeDto>();
+
+		for (Object obj:resultList){
+			Object[] results = (Object[]) obj;
+			DataType type = (DataType) results[0];
+			Integer acqIntervall = (Integer) results[1];
+			String id = type.getCname();
+			TypeDto dto = dtos.get(id);
+			if (dto == null){
+				dto = new TypeDto();
+				dto.getDesc().putAll(type.getI18n());
+				dto.setId(id);
+				dto.setUnit(type.getCunit());
+				dto.setTypeOfMeasurement(type.getRtype());
+				dtos.put(id, dto);
+			}
+			dto.getAquisitionIntervalls().add(acqIntervall);
+		}
+		for (Map.Entry<String, TypeDto> entry : dtos.entrySet())
+			types.add(entry.getValue());
+		return types;
+	}
+	
+	public static List<String[]> findDataTypes(EntityManager em,String stationType, String stationId) {
+		TypedQuery<Object[]> query;
+		if (stationId != null && !stationId.isEmpty()){
+			query = em
+					.createQuery(
+							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type  "
+									+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
+									Object[].class);
+			query.setParameter("station", stationId);
+		}else
+			query = em
+			.createQuery(
+					"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type "
+							+ " where record.station.class=:stationtype GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
+							Object[].class);
+		query.setParameter("stationtype", stationType);
+		List<Object[]> resultList = query.getResultList();
+		return getDataTypesFromQuery(resultList);
+	}
+	
+	private static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
+		List<String[]> stringlist = new ArrayList<String[]>();
+		for(Object[] objects : resultList){
+			String[] stringarray= new String[objects.length];
+			for (int i = 0; i< objects.length;i++){
+				String value = String.valueOf(objects[i]);
+				stringarray[i]= "null".equals(value) ? "" : value;
+			}
+			stringlist.add(stringarray);
+		}
+		return stringlist;
+	}
+	
 	public static Object sync(EntityManager em, List<DataTypeDto> data) {
 		em.getTransaction().begin();
 		for (DataTypeDto dto : data) {

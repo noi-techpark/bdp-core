@@ -44,7 +44,7 @@ public class MeasurementString extends M{
 	@GeneratedValue(generator = "measurementstring_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstring_gen", sequenceName = "measurementstring_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstring_seq')")
-	private Integer id;
+	private Long id;
 	private String value;
 
 	public MeasurementString() {
@@ -59,11 +59,11 @@ public class MeasurementString extends M{
 		this.value = value;		
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -94,7 +94,13 @@ public class MeasurementString extends M{
 	}
 	
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return getDateOfLastRecordImpl(em, station, type, period, role, "MeasurementString");
+	public void setValue(Object value) {
+		if (value instanceof String)
+			this.setValue(value);
+	}
+	@Override
+	public M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

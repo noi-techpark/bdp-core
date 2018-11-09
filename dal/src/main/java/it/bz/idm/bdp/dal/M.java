@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
@@ -14,8 +15,11 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance (strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class M {
+	
+	@Id
+	private Long id;
 
 	private Date created_on;
 	private Date timestamp;
@@ -76,17 +80,13 @@ public abstract class M {
 		this.period = period;
 	}
 	
-	protected Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period,
-			BDPRole role, String table) {
+	public static Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
+			BDPRole role) {
 		if (station == null)
 			return null;
 
-		if (!table.matches("[a-zA-Z_]+")) {
-			throw new IllegalArgumentException("Table '" + table + "' contains illegal characters.");
-		}
-
 		String queryString = "select record.timestamp "
-				+ "from " + table + " record, BDPPermissions p "
+				+ "from M record, BDPPermissions p "
 				+ "WHERE (record.station = p.station OR p.station = null) "
 				+ "AND (record.type = p.type OR p.type = null) "
 				+ "AND (record.period = p.period OR p.period = null) "
@@ -109,15 +109,16 @@ public abstract class M {
 			query.setParameter("period", period);
 		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 	}
-	public static <T> M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role, String table) {
+	
+	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role,T table) {
 		if (station == null)
 			return null;
-		String baseQuery = "SELECT record FROM "+table+" record, BDPPermissions p"
-						 + " WHERE (record.station = p.station OR p.station = null)"
-						 + " AND (record.type = p.type OR p.type = null)"
-						 + " AND (record.period = p.period OR p.period = null)"
-					 	 + " AND p.role = :role "
-					 	 + "AND record.station = :station";
+		String baseQuery = "select record from " + table.getClass().getSimpleName() + " record, BDPPermissions p"
+						 + " where (record.station = p.station or p.station = null)"
+						 + " and (record.type = p.type or p.type = null)"
+						 + " and (record.period = p.period or p.period = null)"
+					 	 + " and p.role = :role "
+					 	 + "and record.station = :station";
 		String order = " ORDER BY record.timestamp DESC";
 
 		TypedQuery<? extends M> query = null;
@@ -126,11 +127,11 @@ public abstract class M {
 			if (period == null){
 				query = em.createQuery(baseQuery + order, M.class);
 			}else{
-				query = em.createQuery(baseQuery + " AND record.period=:period" + order, M.class);
+				query = em.createQuery(baseQuery + " AND record.period=:period" + order, table.getClass());
 				query.setParameter("period", period);
 			}
 		}else if (period==null){
-			query = em.createQuery(baseQuery + " AND record.type=:type" + order, M.class);
+			query = em.createQuery(baseQuery + " AND record.type=:type" + order, table.getClass());
 			query.setParameter("type", type);
 
 		}else{
@@ -145,5 +146,6 @@ public abstract class M {
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
-	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract void setValue(Object value); 
 }

@@ -22,7 +22,6 @@ package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -58,18 +57,15 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.CoordinateDto;
-import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.TypeDto;
 
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 @DiscriminatorColumn(name = "stationcategory", discriminatorType = DiscriminatorType.STRING)
-public abstract class Station {
+public class Station {
 
 	public static final String GEOM_CRS = "EPSG:4326";
 	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
@@ -144,19 +140,6 @@ public abstract class Station {
 			dto.setMetaData(s.getMetaData().getJson());
 		return dto;
 	}
-
-	public abstract List<String[]> findDataTypes(EntityManager em, String stationId);
-
-	public abstract List<TypeDto> findTypes(EntityManager em, String stationId);
-
-	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
-			BDPRole role);
-
-	public abstract RecordDto findLastRecord(EntityManager em, String cname, Integer period, BDPRole role);
-
-	public abstract List<RecordDto> getRecords(EntityManager em, String type, Date start, Date end, Integer period,
-			BDPRole role);
-	public abstract Object pushRecords(EntityManager em, Object... object);
 
 	public String getName() {
 		return name;
@@ -271,12 +254,11 @@ public abstract class Station {
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
-	public Station findStation(EntityManager em, String stationcode) {
+	public static Station findStation(EntityManager em, String stationcode) {
 		if(stationcode == null||stationcode.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode = :stationcode AND station.stationtype = :stationtype", Station.class);
+		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode = :stationcode", Station.class);
 		stationquery.setParameter("stationcode", stationcode);
-		stationquery.setParameter("stationtype", this.getClass());
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
@@ -313,6 +295,7 @@ public abstract class Station {
 				sync(em, dto);
 			} catch (Exception e) {
 				/* continue */
+				e.printStackTrace();
 			}
 		}
 		em.getTransaction().commit();
@@ -324,14 +307,11 @@ public abstract class Station {
 	 * @throws JPAException
 	 */
 	private void sync(EntityManager em, StationDto dto) {
-		Station existingStation = findStation(em, dto.getId());
+		Station existingStation = Station.findStation(em, dto.getId());
 		if (existingStation == null) {
-			try {
-				existingStation = this.getClass().newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new JPAException(e.getMessage(), e);
-			}
+			existingStation = new Station();		
 			existingStation.setStationcode(dto.getId());
+			existingStation.setStationtype(dto.getStationType());
 			em.persist(existingStation);
 		}
 		if (existingStation.getName() == null)

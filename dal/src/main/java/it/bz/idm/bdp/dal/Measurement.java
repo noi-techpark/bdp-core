@@ -32,12 +32,10 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
@@ -81,14 +79,18 @@ public class Measurement extends M{
 		this.value = value;
 	}
 
-	public static Measurement findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return findLatestEntry(em, station, type, period, role, MEASUREMENT);
-	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return getDateOfLastRecordImpl(em, station, type, period, role, MEASUREMENT);
+	public void setValue(Object value) {
+		if (value instanceof Number) {
+			Number numberValue =(Number)value;
+			this.setValue(numberValue.doubleValue());
+		}
+		
 	}
-
+	@Override
+	public M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return M.findLatestEntryImpl(em, station, type, period, role, this);
+	}
 
 }

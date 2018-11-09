@@ -34,7 +34,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -50,7 +49,7 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
-@Table(name = "measurementhistory", indexes = { @Index(columnList = "station_id,type_id,timestamp,period", unique = true), @Index(columnList = "timestamp desc", name = "measurementhistory_tsdesc_idx") })
+@Table(name = "measurementhistory")
 @Entity
 public class MeasurementHistory extends MHistory {
 	@Transient
@@ -180,7 +179,7 @@ public class MeasurementHistory extends MHistory {
 		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
 	}
-
+	@Override
 	public Object pushRecords(EntityManager em, Object... objects) {
 		Object object = objects[0];
 		BDPRole adminRole = BDPRole.fetchAdminRole(em);
@@ -189,14 +188,14 @@ public class MeasurementHistory extends MHistory {
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
 			try{
 				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
-					Station station = findStation(em, entry.getKey());
+					Station station = Station.findStation(em, entry.getKey());
 					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
 							DataType type = DataType.findByCname(em, typeEntry.getKey());
 							List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
-							if (station != null && this.getClass().isInstance(station) && type != null && !dataRecords.isEmpty()){
-								Measurement lastEntry = Measurement.findLatestEntry(em, station, type, null, adminRole);
+							if (station != null && type != null && !dataRecords.isEmpty()){
+								M lastEntry = new Measurement().findLatestEntry(em, station, type, null, adminRole);
 								Date created_on = new Date();
 								Collections.sort(dataRecords);
 								long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
@@ -253,7 +252,7 @@ public class MeasurementHistory extends MHistory {
 					FullRecordDto full = (FullRecordDto)dto;
 					if (full.validate()){
 						if (!full.getStation().equals(tempSS)){
-							station = findStation(em, full.getStation());
+							station = Station.findStation(em, full.getStation());
 							if (station == null)
 								continue;
 							tempSS = station.getStationcode();
@@ -264,7 +263,7 @@ public class MeasurementHistory extends MHistory {
 								continue;
 							tempTS = full.getType();
 						}
-						Measurement lastEntry = Measurement.findLatestEntry(em, station, type, full.getPeriod(), adminRole);
+						M lastEntry = new Measurement().findLatestEntry(em, station, type, full.getPeriod(), adminRole);
 						Number value = (Number) full.getValue();
 						if (lastEntry == null){
 							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
@@ -288,5 +287,6 @@ public class MeasurementHistory extends MHistory {
 		}
 		return null;
 	}
+
 
 }

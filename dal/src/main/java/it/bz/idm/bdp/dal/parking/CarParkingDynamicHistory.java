@@ -38,6 +38,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
@@ -55,7 +56,7 @@ public class CarParkingDynamicHistory {
 
 	@ManyToOne
 	@JoinColumn(name = "station_id")
-	private ParkingStation station;
+	private Station station;
 
 	private String carparkstate;
 
@@ -75,7 +76,7 @@ public class CarParkingDynamicHistory {
 
 	public CarParkingDynamicHistory() {
 	}
-	public CarParkingDynamicHistory(ParkingStation station, int occupacy,
+	public CarParkingDynamicHistory(Station station, int occupacy,
 			Date slotsTS, int occupacypercentage) {
 		this.station = station;
 		this.occupacy = occupacy;
@@ -92,11 +93,11 @@ public class CarParkingDynamicHistory {
 		this.id = id;
 	}
 
-	public ParkingStation getStation() {
+	public Station getStation() {
 		return station;
 	}
 
-	public void setStation(ParkingStation station) {
+	public void setStation(Station station) {
 		this.station = station;
 	}
 
@@ -199,7 +200,8 @@ public class CarParkingDynamicHistory {
 		if (!resultList.isEmpty()){
 			Integer capacity = null;
 			if("free".equals(type))
-				capacity = ParkingStation.getParkingStationCapacity(identifier);
+				//TODO fix this so it returns capacity
+				capacity = 0;
 			for (CarParkingDynamicHistory record: resultList){
 				ParkingRecordExtendedDto dto = new ParkingRecordExtendedDto();
 				dto.setTimestamp(record.getLastupdate().getTime());
@@ -213,7 +215,7 @@ public class CarParkingDynamicHistory {
 		}
 		return dtos;
 	}
-	public static CarParkingDynamicHistory findRecord(EntityManager em, ParkingStation station, Long timestamp) {
+	public static CarParkingDynamicHistory findRecord(EntityManager em, Station station, Long timestamp) {
 		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
 		query.setParameter("station", station);
 		query.setParameter("lastupdate", new Date(timestamp));
