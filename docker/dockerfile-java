@@ -1,7 +1,7 @@
 FROM debian:9
 
-ARG JENKINS_GROUP_ID
-ARG JENKINS_USER_ID
+ARG JENKINS_GROUP_ID=200
+ARG JENKINS_USER_ID=200
 
 RUN groupadd --gid $JENKINS_GROUP_ID jenkins && \
     useradd --uid $JENKINS_USER_ID --gid $JENKINS_GROUP_ID --create-home jenkins
@@ -9,6 +9,6 @@ RUN groupadd --gid $JENKINS_GROUP_ID jenkins && \
 RUN apt-get update && \
     apt-get install -y git openjdk-8-jdk maven
 
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint-java.sh /entrypoint-java.sh
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint-java.sh" ]
