@@ -23,6 +23,12 @@ package it.bz.idm.bdp.dto;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * StationList as a DTO got added due to the following reason:<br>
+ * "There was an issue with the serialization of polymorfic objets when using generics, which
+ * means the specific implementation of the StationDto did not get serialized correctly.
+ * For example a CarsharingStationDto got serialized as StationDto instead."
+ */
 public class StationList extends ArrayList<StationDto>{
 
 	public StationList(Collection<? extends StationDto> stations) {
