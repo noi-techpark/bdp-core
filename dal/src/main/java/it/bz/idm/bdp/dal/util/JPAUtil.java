@@ -34,8 +34,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 
-import it.bz.idm.bdp.dal.Station;
-
 public class JPAUtil {
 
 	public static EntityManagerFactory emFactory;
@@ -66,30 +64,6 @@ public class JPAUtil {
 			types.add(entity.getJavaType().getSimpleName());
 		}
 		return types;
-	}
-
-	public static Object getInstanceByType(EntityManager em, String type) {
-		// XXX PEMOSER How do we distinguish between Measurement and Elaboration here?
-		Station station = new Station();
-		station.setStationtype(type);
-		return station;
-//		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
-//		try {
-//			for (ManagedType<?> entity : managedTypes){
-//				if (entity.getJavaType().getSimpleName().equals(type)){
-//					return entity.getJavaType().newInstance();
-//				}
-//			}
-//		} catch (InstantiationException | IllegalAccessException e) {
-//			/* Nothing to do here, we fail either way if not found or with an error is not important */
-//		}
-//		List<String> types = new ArrayList<String>();
-//		for (ManagedType<?> entity : managedTypes) {
-//			types.add(entity.getJavaType().getSimpleName());
-//		}
-//
-//		throw new JPAException("Cannot get any instance of type '" + type + "'. Type not found.",
-//							   "Possible types are " + types.toString());
 	}
 
 	public static String getEntityNameByObject(Object obj) throws Exception {

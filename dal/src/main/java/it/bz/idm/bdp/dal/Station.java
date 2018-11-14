@@ -226,40 +226,42 @@ public class Station {
 	}
 
 	public static List<Station> findStations(EntityManager em, String stationType){
-		TypedQuery<Station> query = em.createQuery("select station from " + stationType + " station where station.active=:active", Station.class);
-		query.setParameter("active",true);
-		List<Station> resultList = query.getResultList();
-		return resultList;
+		return em.createQuery("select station from " + stationType + " station where station.active=:active", Station.class)
+				 .setParameter("active", true)
+				 .getResultList();
 	}
-	public List<Station> findAllStations(EntityManager em){
-		TypedQuery<Station> query = em.createQuery("select station from "+this.getClass().getSimpleName()+" station",Station.class);
-		List<Station> resultList = query.getResultList();
-		return resultList;
+	public static List<Station> findAllStations(EntityManager em, String stationType){
+		return em.createQuery("select station from " + stationType + " station", Station.class)
+				 .getResultList();
 	}
 
-	public static List<String> findActiveStations(EntityManager em, String type) {
-		TypedQuery<String> query = em.createQuery("Select station.stationcode from "+type+" station where station.active = :active",String.class);
-		query.setParameter("active", true);
-		List<String> resultList = query.getResultList();
-		return resultList;
+	public static List<String> findActiveStations(EntityManager em, String stationType) {
+		return em.createQuery("Select station.stationcode from " + stationType + " station where station.active = :active", String.class)
+				 .setParameter("active", true)
+				 .getResultList();
 	}
 
 	public static List<String> findStationTypes(EntityManager em) {
-		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class).getResultList();
+		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class)
+				 .getResultList();
 	}
 
-	public static Station findStation(EntityManager em, Integer integer) {
-		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode=:stationcode", Station.class);
-		stationquery.setParameter("stationcode", integer);
+	private static Station findStation(EntityManager em, Object stationCode) {
+		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode", Station.class)
+											 .setParameter("stationcode", stationCode);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
-	public static Station findStation(EntityManager em, String stationcode) {
-		if(stationcode == null||stationcode.isEmpty())
+	public static Station findStation(EntityManager em, Integer stationCode) {
+		if(stationCode == null)
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.stationcode = :stationcode", Station.class);
-		stationquery.setParameter("stationcode", stationcode);
-		return JPAUtil.getSingleResultOrNull(stationquery);
+		return findStation(em, (Object) stationCode);
+	}
+
+	public static Station findStation(EntityManager em, String stationCode) {
+		if(stationCode == null || stationCode.isEmpty())
+			return null;
+		return findStation(em, (Object) stationCode);
 	}
 
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
@@ -275,7 +277,7 @@ public class Station {
 		return stringlist;
 	}
 
-	protected List<CoordinateDto> parseCoordinates(Coordinate[] coordinates) {
+	protected static List<CoordinateDto> parseCoordinate(Coordinate[] coordinates) {
 		List<CoordinateDto> dtos = new ArrayList<CoordinateDto>();
 		for (Coordinate coordinate: coordinates){
 			dtos.add(parseCoordinate(coordinate));
@@ -283,17 +285,17 @@ public class Station {
 		return dtos;
 	}
 
-	protected CoordinateDto parseCoordinate(Coordinate coordinate) {
+	protected static CoordinateDto parseCoordinate(Coordinate coordinate) {
 		return new CoordinateDto(coordinate.x,coordinate.y);
 	}
 
-	public void syncStations(EntityManager em, List<StationDto> data) {
+	public static void syncStations(EntityManager em, String stationType, List<StationDto> data) {
 		syncActiveOfExistingStations(em, data);
 		em.getTransaction().begin();
 		for (StationDto dto : data){
 			try {
 				if (dto.getStationType() == null) {
-					dto.setStationType(this.getStationtype());
+					dto.setStationType(stationType);
 				}
 				sync(em, dto);
 			} catch (Exception e) {
@@ -309,7 +311,7 @@ public class Station {
 	 * @param dto
 	 * @throws JPAException
 	 */
-	private void sync(EntityManager em, StationDto dto) {
+	private static void sync(EntityManager em, StationDto dto) {
 		Station existingStation = Station.findStation(em, dto.getId());
 		if (existingStation == null) {
 			existingStation = new Station();
@@ -352,7 +354,7 @@ public class Station {
 	 * Create a new meta data entry, if it does not yet exist or if it is different from
 	 * the previously inserted one.
 	 */
-	protected void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
+	protected static void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
 		if (metaData == null)
 			return;
 
@@ -376,39 +378,39 @@ public class Station {
 		this.metaData.setJson(metaData);
 	}
 
-	public void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
-		List<Station> stations = this.findStationsByOrigin(em, dtos);
-		if (stations != null){
-			em.getTransaction().begin();
-			for (Station station: stations){
-				boolean isActive = false;
-				for (Object obj: dtos){
-					if (obj instanceof StationDto){
-						StationDto dto = (StationDto) obj;
-						if (station.getStationcode().equals(dto.getId()))
-							isActive = true;
-					}
-				}
-				if (station.getActive() == null || isActive != station.getActive()){
-					station.setActive(isActive);
-					em.merge(station);
+	public static void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
+		List<Station> stations = findStationsByOrigin(em, dtos);
+		if (stations == null) {
+			return;
+		}
+		em.getTransaction().begin();
+		for (Station station : stations){
+			boolean isActive = false;
+			for (StationDto dto : dtos) {
+				if (station.getStationcode().equals(dto.getId())) {
+					isActive = true;
+					break;
 				}
 			}
-			em.getTransaction().commit();
+			if (station.getActive() == null || isActive != station.getActive()){
+				station.setActive(isActive);
+				em.merge(station);
+			}
 		}
+		em.getTransaction().commit();
 	}
 
-	private List<Station> findStationsByOrigin(EntityManager em, List<StationDto> dtos) {
-		List<Station> resultList = null;
-		if (dtos != null && !dtos.isEmpty()){
-			String origin = dtos.get(0).getOrigin();
-			if (origin != null){
-				TypedQuery<Station> query = em.createQuery("select station from Station station where station.origin = :origin", Station.class);
-				query.setParameter("origin", origin);
-				resultList = query.getResultList();
-			}
+	private static List<Station> findStationsByOrigin(EntityManager em, List<StationDto> dtos) {
+		if (dtos == null || dtos.isEmpty()) {
+			return null;
 		}
-		return resultList;
+		String origin = dtos.get(0).getOrigin();
+		if (origin == null) {
+			return null;
+		}
+		return em.createQuery("select station from Station station where station.origin = :origin", Station.class)
+				 .setParameter("origin", origin)
+				 .getResultList();
 	}
 
 	public List<StationDto> findChildren(EntityManager em, String stationId) {
@@ -423,9 +425,7 @@ public class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id) {
-		TypedQuery<Station> stationquery = em.createQuery(
-				"select s from Station s where s.stationcode=:stationcode",
-				Station.class);
+		TypedQuery<Station> stationquery = em.createQuery("select s from Station s where s.stationcode=:stationcode", Station.class);
 		stationquery.setParameter("stationcode", id);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
