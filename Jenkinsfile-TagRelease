@@ -4,20 +4,17 @@ pipeline {
     stages {
         stage('Deploy dto') {
             steps {
-		sh 'cd dto/'
-		sh 'mvn clean install deploy'
+		sh 'cd dto/ && mvn clean install deploy'
             }
         }
         stage('Deploy dc-interface') {
             steps {
-		sh 'cd dc-interface/'
-		sh 'mvn clean install deploy'
+		sh 'cd dc-interface/ && mvn clean install deploy'
             }
         }
         stage('Deploy ws-interface') {
             steps {
-		sh 'cd ws-interface/'
-		sh 'mvn clean install deploy'
+		sh 'cd ws-interface/ && mvn clean install deploy'
             }
         }
     }
