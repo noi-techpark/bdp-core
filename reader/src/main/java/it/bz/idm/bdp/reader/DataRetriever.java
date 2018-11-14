@@ -69,21 +69,21 @@ public class DataRetriever {
 
 	//APIv1
 
-	public List<? extends StationDto> getStationDetails(String type, String id) {
+	public List<? extends StationDto> getStationDetails(String stationType, String stationID) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			Station station = (Station) JPAUtil.getInstanceByType(em, type);
 			Station stationById = null;
-			if (id != null && !id.isEmpty()) {
-				stationById = station.findStation(em,id);
+			if (stationID != null && !stationID.isEmpty()) {
+				stationById = Station.findStation(em,stationID);
 			}
-			if ((stationById == null && (id == null || id.isEmpty())) || (stationById != null && station.getClass().equals(stationById.getClass())))
-				stations = station.findStationsDetails(em,stationById);
+			if ((stationById == null && (stationID == null || stationID.isEmpty())) || (stationById != null && stationType.equals(stationById.getStationtype())))
+				stations = Station.findStationsDetails(em, stationType, stationById);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}finally{
-			em.close();
+			if (em.isOpen())
+				em.close();
 		}
 		return stations;
 	}

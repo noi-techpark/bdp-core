@@ -109,7 +109,7 @@ public class DataManager {
 		try {
 			List<Station> stations = Station.findStations(em,stationType,origin);
 			if (!stations.isEmpty())
-				stationsDtos = stations.get(0).convertToDtos(em, stations);
+				stationsDtos = Station.convertToDto(stations);
 			return stationsDtos;
 		} finally {
 			if (em.isOpen())

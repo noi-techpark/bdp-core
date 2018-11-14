@@ -106,18 +106,18 @@ public class Station {
 		this.active = true;
 	}
 
-	public List<StationDto> findStationsDetails(EntityManager em, Station station){
+	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
 		List<StationDto> dtos = null;
 		List<Station> resultList = new ArrayList<Station>();
 		if (station == null)
-			resultList = findStations(em);
+			resultList = Station.findStations(em, stationType);
 		else
 			resultList.add(station);
-		dtos = this.convertToDtos(em,resultList);
+		dtos = convertToDto(resultList);
 		return dtos;
 	}
 
-	public List<StationDto> convertToDtos(EntityManager em, List<Station> resultList) {
+	public static List<StationDto> convertToDto(List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
 		for (Station s : resultList) {
 			StationDto dto = convertToDto(s);
@@ -126,7 +126,7 @@ public class Station {
 		return stationList;
 	}
 
-	public StationDto convertToDto(Station s) {
+	public static StationDto convertToDto(Station s) {
 		Double x = null,y = null;
 		if (s.getPointprojection() != null){
 			y = s.getPointprojection().getY();
@@ -225,8 +225,8 @@ public class Station {
 		return metaDataHistory;
 	}
 
-	public List<Station> findStations(EntityManager em){
-		TypedQuery<Station> query = em.createQuery("select station from "+this.getClass().getSimpleName()+" station where station.active=:active",Station.class);
+	public static List<Station> findStations(EntityManager em, String stationType){
+		TypedQuery<Station> query = em.createQuery("select station from " + stationType + " station where station.active=:active", Station.class);
 		query.setParameter("active",true);
 		List<Station> resultList = query.getResultList();
 		return resultList;
@@ -292,6 +292,9 @@ public class Station {
 		em.getTransaction().begin();
 		for (StationDto dto : data){
 			try {
+				if (dto.getStationType() == null) {
+					dto.setStationType(this.getStationtype());
+				}
 				sync(em, dto);
 			} catch (Exception e) {
 				/* continue */
@@ -309,7 +312,7 @@ public class Station {
 	private void sync(EntityManager em, StationDto dto) {
 		Station existingStation = Station.findStation(em, dto.getId());
 		if (existingStation == null) {
-			existingStation = new Station();		
+			existingStation = new Station();
 			existingStation.setStationcode(dto.getId());
 			existingStation.setStationtype(dto.getStationType());
 			em.persist(existingStation);
@@ -326,6 +329,7 @@ public class Station {
 					Geometry geometry = JTS.transform(point, CRS.findMathTransform(thirdPartyCRS, crs));
 					point = geometry.getCentroid();
 				} catch (FactoryException | MismatchedDimensionException | TransformException e) {
+					e.printStackTrace();
 					throw new JPAException("Unable to create a valid coordinate reference system for station " + existingStation.getName(), e);
 					// XXX PEMOSER Continue here: Should an invalid CRS terminate any insertion or continue without?
 					// Should we return an message that some station had problems with their CRS, but were nevertheless inserted
@@ -410,8 +414,7 @@ public class Station {
 	public List<StationDto> findChildren(EntityManager em, String stationId) {
 		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.parent.stationcode = :parentId",Station.class);
 		stationquery.setParameter("parentId", stationId);
-		List<StationDto> dtos = convertToDtos(em, stationquery.getResultList());
-		return dtos;
+		return convertToDto(stationquery.getResultList());
 	}
 
 	public static void patch(EntityManager em, StationDto dto) {

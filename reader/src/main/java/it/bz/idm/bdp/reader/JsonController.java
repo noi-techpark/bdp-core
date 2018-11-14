@@ -46,13 +46,13 @@ import it.bz.idm.bdp.reader.security.JwtUtil;
 
 @Controller
 public class JsonController extends DataRetriever{
-	
+
 	@Autowired
 	public AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private JwtUtil util;
-	
+
 
 	@RequestMapping(value = "refreshToken", method = RequestMethod.GET)
 	public @ResponseBody JwtTokenDto getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
@@ -107,7 +107,8 @@ public class JsonController extends DataRetriever{
 	}
 	@RequestMapping(value = "/station-details", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody  List<? extends StationDto> getStationDetails(@RequestParam String stationType,@RequestParam(required=false) String stationId) {
+	public @ResponseBody  List<? extends StationDto> getStationDetails(@RequestParam String stationType,
+																	   @RequestParam(required=false) String stationId) {
 		List<? extends StationDto> stationDetails = super.getStationDetails(stationType, stationId);
 		return stationDetails;
 	}
