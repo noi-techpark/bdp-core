@@ -39,9 +39,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 
 @Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
-public class Measurement extends M{
-
-	private static final String MEASUREMENT = "Measurement";
+public class Measurement extends M {
 
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
@@ -86,7 +84,7 @@ public class Measurement extends M{
 			Number numberValue =(Number)value;
 			this.setValue(numberValue.doubleValue());
 		}
-		
+
 	}
 	@Override
 	public M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {

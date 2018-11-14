@@ -430,20 +430,20 @@ public class Station {
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
-	public static List<Station> findStations(EntityManager em, String type, String origin) {
+	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
 		String baseQuery = "Select station from Station station where station.active = :active and station.stationtype = :type";
 		if (origin != null)
 			baseQuery += " and origin = :origin";
 		try {
 			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class);
 			query.setParameter("active", true);
-			query.setParameter("type", type);
+			query.setParameter("type", stationType);
 			if (origin != null)
 				query.setParameter("origin", origin);
 			return query.getResultList();
 		} catch (Exception e) {
 			List<String> types = JPAUtil.getInstanceTypes(em);
-			throw new JPAException("Unable to create query for station type '" + type + "'",
+			throw new JPAException("Unable to create query for station type '" + stationType + "'",
 								   "Possible types are " + types.toString(), e);
 		}
 	}

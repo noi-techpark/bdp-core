@@ -21,8 +21,6 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -37,20 +35,17 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.DataMapDto;
-import it.bz.idm.bdp.dto.RecordDtoImpl;
-import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
-public class MeasurementStringHistory extends MHistory{
-	
+public class MeasurementStringHistory extends MHistory {
+
     @Id
 	@GeneratedValue(generator = "measurementstringhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
 	private Long id;
-    
+
 	private String value;
 
 	public MeasurementStringHistory() {
@@ -59,7 +54,7 @@ public class MeasurementStringHistory extends MHistory{
 			String value, Date timestamp, Integer period) {
 		this.setStation(station);
 		this.setType(type);
-		
+
 		this.setTimestamp(timestamp);
 		this.setCreated_on(new Date());
 		this.setPeriod(period);
