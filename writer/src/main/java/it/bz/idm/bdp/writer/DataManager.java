@@ -21,12 +21,13 @@
 package it.bz.idm.bdp.writer;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -45,46 +46,63 @@ import it.bz.idm.bdp.dto.StationDto;
 @Component
 public class DataManager {
 
-	public Object pushRecords(String stationType, Object... data){
+	public static Object pushRecords(String stationType, Object... data){
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			return new MeasurementHistory().pushRecords(em, data);
+			return new MeasurementHistory().pushRecords(em, stationType, data);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
 	}
 
-	public void syncStations(String stationType, List<StationDto> dtos) {
+	public static ResponseEntity<?> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Station.syncStations(em, stationType, dtos);
+			return ResponseEntity.created(responseLocation).build();
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
 	}
 
-	public Object syncDataTypes(List<DataTypeDto> dtos) {
+	public static ResponseEntity<?> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			return DataType.sync(em,dtos);
+			DataType.sync(em,dtos);
+			return ResponseEntity.created(responseLocation).build();
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
 	}
 
-	public Object getDateOfLastRecord(String stationtype,String stationcode,String type,Integer period){
-		EntityManager em = JPAUtil.createEntityManager();
+	public static Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
+		if (stationType == null || stationType.isEmpty()
+				|| stationCode == null || stationCode.isEmpty()
+				|| dataTypeName == null || dataTypeName.isEmpty()) {
+			JPAException ex = new JPAException("Wrong parameter value");
+			ex.getDto().setStatus(HttpStatus.BAD_REQUEST.value());
+			throw ex;
+		}
 		Date date = new Date(-1);
+		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			Station station = Station.findStation(em,stationcode);
-			if (station != null) {
-				DataType dataType = DataType.findByCname(em,type);
-				BDPRole role = BDPRole.fetchAdminRole(em);
-				date = M.getDateOfLastRecord(em, station, dataType, period, role);
+			Station station = Station.findStation(em, stationType, stationCode);
+			if (station == null) {
+				JPAException ex = new JPAException("Station '" + stationCode + "' not found.");
+				ex.getDto().setStatus(HttpStatus.NOT_FOUND.value());
+				throw ex;
 			}
+			DataType dataType = DataType.findByCname(em,dataTypeName);
+			if (dataType == null) {
+				JPAException ex = new JPAException("Data type '" + dataTypeName + "' not found.");
+				ex.getDto().setStatus(HttpStatus.NOT_FOUND.value());
+				throw ex;
+			}
+			BDPRole role = BDPRole.fetchAdminRole(em);
+			date = M.getDateOfLastRecord(em, station, dataType, period, role);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -102,21 +120,17 @@ public class DataManager {
 		}
 	}
 
-	public List<StationDto> getStations(String stationType, String origin) throws JPAException {
+	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
-		List<StationDto> stationsDtos = new ArrayList<StationDto>();
 		try {
-			List<Station> stations = Station.findStations(em,stationType,origin);
-			if (!stations.isEmpty())
-				stationsDtos = Station.convertToDto(stations);
-			return stationsDtos;
+			return Station.convertToDto(Station.findStations(em, stationType, origin));
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
 	}
 
-	public List<String> getStationTypes() {
+	public static List<String> getStationTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			return Station.findStationTypes(em);

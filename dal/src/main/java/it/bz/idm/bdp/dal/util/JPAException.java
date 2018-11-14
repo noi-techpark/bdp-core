@@ -20,62 +20,29 @@
  */
 package it.bz.idm.bdp.dal.util;
 
+import it.bz.idm.bdp.dto.ExceptionDto;
+
 public class JPAException extends RuntimeException {
 
 	private static final long serialVersionUID = -8271639898842999188L;
 
-	private String error;
-	private String hint;
-
-	public JPAException(String error, String hint, Throwable cause) {
-		super(error, cause);
-		this.setError(error);
-		this.setHint(hint);
-	}
-
-	public JPAException(String error, String hint) {
-		super(error);
-		this.setError(error);
-		this.setHint(hint);
-	}
+	private ExceptionDto dto = new ExceptionDto();
 
 	public JPAException(String error, Throwable cause) {
 		super(error, cause);
-		this.setError(error);
-		this.setHint(null);
+		dto.setDescription(error);
 	}
 
 	public JPAException(String error) {
 		super(error);
-		this.setError(error);
-		this.setHint(null);
+		dto.setDescription(error);
 	}
 
-	public JPAException(Throwable cause) {
-		super("UNKNOWN", cause);
-		this.setError(null);
-		this.setHint(null);
+	public ExceptionDto getDto() {
+		return dto;
 	}
 
-	public JPAException() {
-		super("UNKNOWN");
-		this.setError(null);
-		this.setHint(null);
-	}
-
-	public String getError() {
-		return error;
-	}
-
-	public void setError(String error) {
-		this.error = error == null ? "UNKNOWN" : error;
-	}
-
-	public String getHint() {
-		return hint;
-	}
-
-	public void setHint(String hint) {
-		this.hint = hint == null ? "" : hint;
+	public void setDto(ExceptionDto dto) {
+		this.dto = dto;
 	}
 }

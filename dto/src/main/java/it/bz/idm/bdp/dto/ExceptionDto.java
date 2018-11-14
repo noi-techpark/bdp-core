@@ -27,8 +27,6 @@ public class ExceptionDto implements Serializable {
 	private Integer status;
 	private String name;
 	private String description;
-	private String error;
-	private String hint;
 
 	public String getName() {
 		return name;
@@ -47,17 +45,5 @@ public class ExceptionDto implements Serializable {
 	}
 	public void setDescription(String description) {
 		this.description = description;
-	}
-	public String getError() {
-		return error;
-	}
-	public void setError(String error) {
-		this.error = error;
-	}
-	public String getHint() {
-		return hint;
-	}
-	public void setHint(String hint) {
-		this.hint = hint;
 	}
 }

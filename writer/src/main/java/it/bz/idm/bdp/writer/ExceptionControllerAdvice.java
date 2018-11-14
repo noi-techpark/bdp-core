@@ -118,17 +118,23 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 		return buildResponse(status,ex);
 	}
 	private ResponseEntity<Object> buildResponse(HttpStatus httpStatus, Exception ex) {
-		ExceptionDto dto = new ExceptionDto();
-		dto.setStatus(httpStatus.value());
-		dto.setName(httpStatus.getReasonPhrase());
+		ExceptionDto dto;
 		if (ex instanceof JPAException) {
-			JPAException e = (JPAException) ex;
-			dto.setError(e.getError());
-			dto.setDescription(e.getCause().getMessage());
-			dto.setHint(e.getHint());
+			dto = ((JPAException) ex).getDto();
+			if (ex.getCause() != null) {
+				dto.setDescription(ex.getCause().getMessage());
+			}
 		} else {
-			dto.setDescription(ex.getMessage());
+			dto = new ExceptionDto();
 		}
-		return new ResponseEntity<Object>(dto, httpStatus);
+		if (dto.getDescription() == null)
+			dto.setDescription(ex.getMessage());
+		if (dto.getStatus() == null) {
+			dto.setStatus(httpStatus.value());
+			dto.setName(httpStatus.getReasonPhrase());
+		} else if (dto.getName() == null) {
+			dto.setName(HttpStatus.valueOf(dto.getStatus()).getReasonPhrase());
+		}
+		return ResponseEntity.status(httpStatus).body(dto);
 	}
 }

@@ -180,7 +180,7 @@ public class MeasurementHistory extends MHistory {
 		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
 	}
 	@Override
-	public Object pushRecords(EntityManager em, Object... objects) {
+	public Object pushRecords(EntityManager em, String stationType, Object... objects) {
 		Object object = objects[0];
 		BDPRole adminRole = BDPRole.fetchAdminRole(em);
 		if (object instanceof DataMapDto) {
@@ -188,7 +188,7 @@ public class MeasurementHistory extends MHistory {
 			DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
 			try{
 				for (Map.Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
-					Station station = Station.findStation(em, entry.getKey());
+					Station station = Station.findStation(em, stationType, entry.getKey());
 					for(Map.Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()){
 						try{
 							em.getTransaction().begin();
@@ -252,7 +252,7 @@ public class MeasurementHistory extends MHistory {
 					FullRecordDto full = (FullRecordDto)dto;
 					if (full.validate()){
 						if (!full.getStation().equals(tempSS)){
-							station = Station.findStation(em, full.getStation());
+							station = Station.findStation(em, stationType, full.getStation());
 							if (station == null)
 								continue;
 							tempSS = station.getStationcode();

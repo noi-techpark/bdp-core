@@ -165,7 +165,7 @@ public class DataType {
 			types.add(entry.getValue());
 		return types;
 	}
-	
+
 	public static List<String[]> findDataTypes(EntityManager em,String stationType, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId != null && !stationId.isEmpty()){
@@ -185,7 +185,7 @@ public class DataType {
 		List<Object[]> resultList = query.getResultList();
 		return getDataTypesFromQuery(resultList);
 	}
-	
+
 	private static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
 		List<String[]> stringlist = new ArrayList<String[]>();
 		for(Object[] objects : resultList){
@@ -198,8 +198,8 @@ public class DataType {
 		}
 		return stringlist;
 	}
-	
-	public static Object sync(EntityManager em, List<DataTypeDto> data) {
+
+	public static void sync(EntityManager em, List<DataTypeDto> data) {
 		em.getTransaction().begin();
 		for (DataTypeDto dto : data) {
 			DataType type = DataType.findByCname(em,dto.getName());
@@ -218,7 +218,5 @@ public class DataType {
 			}
 		}
 		em.getTransaction().commit();
-		return null;
-
 	}
 }

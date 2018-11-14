@@ -125,8 +125,9 @@ public class MeasurementStringHistory extends MHistory {
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
+
 	@Override
-	public Object pushRecords(EntityManager em, Object... objects) {
+	public Object pushRecords(EntityManager em, String stationType, Object... objects) {
 		// TODO Auto-generated method stub
 		return null;
 	}

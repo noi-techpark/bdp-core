@@ -74,6 +74,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		role2.setParent(role);
 		station = new Station();
 		station.setName("BLuesky");
+		station.setStationtype("Environment");
 		type = new DataType("NO2","mg","Fake type","Instants");
 		rule = new BDPRules();
 		rule.setPeriod(500);
@@ -136,7 +137,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		BDPRole r2 = BDPRole.fetchAdminRole(em);
 		assertNotNull(r);
 		assertNotNull(r2);
-		Station station = Station.findStation(em, this.station.getName());
+		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getName());
 		assertNotNull(station);
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		assertNotNull(type);
@@ -149,19 +150,17 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 	@Test
 	public void testSyncStations() {
 		StationDto s = new StationDto("!TEST-WRITER", null, null, null);
-		DataManager m = new DataManager();
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		m.syncStations("EnvironmentStation", dtos);
+		DataManager.syncStations("EnvironmentStation", dtos, null); // TODO Update response location
 	}
 
 	@Test
 	public void testSyncDataTypes() {
 		DataTypeDto t = new DataTypeDto("!TEST-WRITER", null, null, null);
-		DataManager m = new DataManager();
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
-		m.syncDataTypes(dtos);
+		DataManager.syncDataTypes(dtos, null);
 	}
 
 	@After

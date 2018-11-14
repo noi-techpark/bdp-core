@@ -88,5 +88,5 @@ public abstract class MHistory {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	public abstract Object pushRecords(EntityManager em, Object... objects); 
+	public abstract Object pushRecords(EntityManager em, String stationType, Object... objects);
 }

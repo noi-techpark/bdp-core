@@ -20,7 +20,6 @@
  */
 package it.bz.idm.bdp.writer;
 
-import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -41,22 +40,23 @@ import it.bz.idm.bdp.dto.StationDto;
 @RequestMapping("/json")
 @Controller
 public class JsonController extends DataManager {
-	@Override
+
 	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
-	public @ResponseBody Date getDateOfLastRecord(@PathVariable("integreenTypology") String stationType,@RequestParam("stationId") String stationId,
-			@RequestParam(value="typeId") String typeId, @RequestParam(value="period",required=false) Integer period) {
-		return (Date) super.getDateOfLastRecord(stationType, stationId, typeId, period);
+	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,
+																  @RequestParam("stationId") String stationId,
+																  @RequestParam(value="typeId") String typeId,
+																  @RequestParam(value="period", required=false) Integer period) {
+		return ResponseEntity.ok(DataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
-	@Override
 	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
-	public @ResponseBody List<StationDto> getStations(@PathVariable("integreenTypology") String stationType, @RequestParam(value="origin",required=false) String origin) {
-		return super.getStations(stationType,origin);
+	public @ResponseBody List<StationDto> stationsGetList(@PathVariable("integreenTypology") String stationType,
+													  	  @RequestParam(value="origin", required=false) String origin) {
+		return DataManager.getStations(stationType, origin);
 	}
 
-	@Override
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
-	public @ResponseBody List<String> getStationTypes() {
+	public @ResponseBody List<String> stationsGetTypes() {
 		return super.getStationTypes();
 	}
 
@@ -73,16 +73,13 @@ public class JsonController extends DataManager {
 	}
 
 	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> syncStations(@RequestBody(required = true) List<StationDto> stationDtos,
-														@PathVariable String stationType) {
-		super.syncStations(stationType, stationDtos);
-		URI location = getURIMapping("/stations/{stationType}", stationType);
-		return ResponseEntity.created(location).build();
+	public @ResponseBody ResponseEntity<?> syncStations(@PathVariable String stationType,
+														@RequestBody(required = true) List<StationDto> stationDtos) {
+		return DataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
 	}
 
-	@Override
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public @ResponseBody Object syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
-		return super.syncDataTypes(data);
+	public @ResponseBody ResponseEntity<?> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
+		return DataManager.syncDataTypes(data, null);
 	}
 }

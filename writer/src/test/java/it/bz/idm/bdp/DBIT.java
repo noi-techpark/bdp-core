@@ -44,28 +44,28 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 public class DBIT extends AbstractJUnit4SpringContextTests{
 
 	EntityManager em = JPAUtil.createEntityManager();
-	
-	
+
+
 	@Test
 	public void testStationFetch() {
-		Station station = Station.findStation(em, "hey");
+		Station station = Station.findStation(em, "stationtype", "hey");
 		assertNull(station);
 	}
-	
+
 	@Test
 	public void testAdminRole() {
 		BDPRole role = BDPRole.fetchAdminRole(em);
 		assertNotNull(role);
 		assertFalse(role.getUsers()==null || role.getUsers().isEmpty());
 	}
-	
-	
+
+
 	@Test
 	public void testFindLatestEntry() {
 		BDPRole role = BDPRole.fetchAdminRole(em);
 		Integer period = 600;
 		DataType type = DataType.findByCname(em, "air-humidity");
-		Station station = Station.findStation(em, "00390SF");
+		Station station = Station.findStation(em, "EnvironmentStation", "00390SF");
 		M latestEntry = new Measurement().findLatestEntry(em, station, type, period, role);
 		assertNotNull(latestEntry);
 	};

@@ -107,14 +107,12 @@ public class Station {
 	}
 
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
-		List<StationDto> dtos = null;
 		List<Station> resultList = new ArrayList<Station>();
 		if (station == null)
-			resultList = Station.findStations(em, stationType);
+			resultList = Station.findStations(em, stationType, true);
 		else
 			resultList.add(station);
-		dtos = convertToDto(resultList);
-		return dtos;
+		return convertToDto(resultList);
 	}
 
 	public static List<StationDto> convertToDto(List<Station> resultList) {
@@ -225,19 +223,22 @@ public class Station {
 		return metaDataHistory;
 	}
 
-	public static List<Station> findStations(EntityManager em, String stationType){
-		return em.createQuery("select station from " + stationType + " station where station.active=:active", Station.class)
-				 .setParameter("active", true)
-				 .getResultList();
-	}
-	public static List<Station> findAllStations(EntityManager em, String stationType){
-		return em.createQuery("select station from " + stationType + " station", Station.class)
+	public static List<String> findStationCodes(EntityManager em, String stationType, boolean isActive) {
+		return em.createQuery("select station.stationcode from Station station where station.active = :active and station.stationtype = :stationtype", String.class)
+				 .setParameter("active", isActive)
+				 .setParameter("stationtype", stationType)
 				 .getResultList();
 	}
 
-	public static List<String> findActiveStations(EntityManager em, String stationType) {
-		return em.createQuery("Select station.stationcode from " + stationType + " station where station.active = :active", String.class)
-				 .setParameter("active", true)
+
+	public static List<Station> findStations(EntityManager em, String stationType, boolean isActive) {
+		return em.createQuery("select station from Station station where station.active = :active and station.stationtype = :stationtype", Station.class)
+				 .setParameter("active", isActive)
+				 .setParameter("stationtype", stationType)
+				 .getResultList();
+	}
+	public static List<Station> findStations(EntityManager em){
+		return em.createQuery("select station from Station station", Station.class)
 				 .getResultList();
 	}
 
@@ -246,22 +247,23 @@ public class Station {
 				 .getResultList();
 	}
 
-	private static Station findStation(EntityManager em, Object stationCode) {
-		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode", Station.class)
-											 .setParameter("stationcode", stationCode);
+	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
+		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode and station.stationtype = :stationtype", Station.class)
+											 .setParameter("stationcode", stationCode)
+											 .setParameter("stationtype", stationType);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
-	public static Station findStation(EntityManager em, Integer stationCode) {
+	public static Station findStation(EntityManager em, String stationType, Integer stationCode) {
 		if(stationCode == null)
 			return null;
-		return findStation(em, (Object) stationCode);
+		return findStation(em, stationType, (Object) stationCode);
 	}
 
-	public static Station findStation(EntityManager em, String stationCode) {
+	public static Station findStation(EntityManager em, String stationType, String stationCode) {
 		if(stationCode == null || stationCode.isEmpty())
 			return null;
-		return findStation(em, (Object) stationCode);
+		return findStation(em, stationType, (Object) stationCode);
 	}
 
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
@@ -312,7 +314,7 @@ public class Station {
 	 * @throws JPAException
 	 */
 	private static void sync(EntityManager em, StationDto dto) {
-		Station existingStation = Station.findStation(em, dto.getId());
+		Station existingStation = Station.findStation(em, dto.getStationType(), dto.getId());
 		if (existingStation == null) {
 			existingStation = new Station();
 			existingStation.setStationcode(dto.getId());
@@ -379,7 +381,10 @@ public class Station {
 	}
 
 	public static void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
-		List<Station> stations = findStationsByOrigin(em, dtos);
+		if (dtos == null || dtos.isEmpty()) {
+			return;
+		}
+		List<Station> stations = findStationsByOrigin(em, dtos.get(0).getOrigin());
 		if (stations == null) {
 			return;
 		}
@@ -400,12 +405,8 @@ public class Station {
 		em.getTransaction().commit();
 	}
 
-	private static List<Station> findStationsByOrigin(EntityManager em, List<StationDto> dtos) {
-		if (dtos == null || dtos.isEmpty()) {
-			return null;
-		}
-		String origin = dtos.get(0).getOrigin();
-		if (origin == null) {
+	private static List<Station> findStationsByOrigin(EntityManager em, String origin) {
+		if (origin == null || origin.isEmpty()) {
 			return null;
 		}
 		return em.createQuery("select station from Station station where station.origin = :origin", Station.class)
@@ -442,9 +443,7 @@ public class Station {
 				query.setParameter("origin", origin);
 			return query.getResultList();
 		} catch (Exception e) {
-			List<String> types = JPAUtil.getInstanceTypes(em);
-			throw new JPAException("Unable to create query for station type '" + stationType + "'",
-								   "Possible types are " + types.toString(), e);
+			throw new JPAException("Unable to create query for station type '" + stationType + "'", e);
 		}
 	}
 
