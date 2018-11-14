@@ -36,7 +36,13 @@
         <spring.version>4.2.9.RELEASE</spring.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
-
+    <repositories>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <name>OpenDataHub</name>
+            <url>s3://it.bz.opendatahub/release</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
@@ -127,5 +133,22 @@
                 </executions>
             </plugin>
         </plugins>
+	<extensions>
+            <extension>
+                <groupId>org.springframework.build</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>5.0.0.RELEASE</version>
+            </extension>
+        </extensions>
     </build>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>s3://it.bz.opendatahub/snapshot</url>
+        </snapshotRepository>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>s3://it.bz.opendatahub/release</url>
+        </repository>
+    </distributionManagement>
 </project>
