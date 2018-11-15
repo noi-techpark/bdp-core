@@ -4,15 +4,18 @@ This folder contains sql scripts, which modify the database tables and content.
 That is, it does what ORM tools cannot accomplish automatically, or where ORM
 fails to perform well.
 
+Do not just commit database schema dumps, but rather treat SQL-DDL files as
+source code and cleanly distinguish the initial creation and later updates.
+(see https://opendatahub.readthedocs.io/en/latest/guidelines/database.html)
+
 ### FILES WITH PATTERN `schema-<version>-<type>.sql`
 
-... are meant to be used for new
-`bdp-core` installations (also the quickbuild.sh script uses them). If you want
-to install bdp-core with version `1.0.2` for instance, run first
-`schema-1.0.2-dump.sql` and then `schema-1.0.2-modifications.sql`. The former
-contains a `pg_dump` output after Hibernate created all artefacts inside
-PostgreSQL, the latter modifies that schema to hold also materialized views,
-some indexes and inserts initial data.
+... are meant to be used for new `bdp-core` installations (also the
+quickbuild.sh script uses them). If you want to install bdp-core with version
+`1.0.2` for instance, run first `schema-1.0.2-dump.sql` and then
+`schema-1.0.2-modifications.sql`. The former contains a `pg_dump` output after
+Hibernate created all artefacts inside PostgreSQL, the latter modifies that
+schema to hold also materialized views, some indexes and inserts initial data.
 
 ### `opendatarules.sql`
 
