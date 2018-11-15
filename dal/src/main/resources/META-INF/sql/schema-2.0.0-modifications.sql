@@ -1,9 +1,10 @@
-CREATE TABLE intime.schemaversion (
+CREATE TABLE IF NOT EXISTS intime.schemaversion (
     version character varying COLLATE pg_catalog."default" NOT NULL
 );
 COMMENT ON TABLE intime.schemaversion
     IS 'Version of the current schema (used for scripted updates)';
-insert into intime.schemaversion values ('2.0.0');
+DELETE FROM intime.schemaversion;
+INSERT INTO intime.schemaversion VALUES ('2.0.0');
 ALTER TABLE intime.schemaversion OWNER to bdp;
 
 ------------------------------------------------------------------------------------------------------------------------
