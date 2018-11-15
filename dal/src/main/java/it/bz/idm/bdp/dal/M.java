@@ -37,7 +37,7 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 @Entity
 @Inheritance (strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class M {
-	
+
 	@Id
 	private Long id;
 
@@ -50,11 +50,11 @@ public abstract class M {
 	private DataType type;
 
 	private Integer period;
-	
+
 	public M() {
 		this.created_on = new Date();
 	}
-	
+
 	public M(Station station, DataType type, Date timestamp, Integer period) {
 		this.station = station;
 		this.type = type;
@@ -99,9 +99,8 @@ public abstract class M {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
-	
-	public static Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period,
-			BDPRole role) {
+
+	public static Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		if (station == null)
 			return null;
 
@@ -129,7 +128,7 @@ public abstract class M {
 			query.setParameter("period", period);
 		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
 	}
-	
+
 	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role,T table) {
 		if (station == null)
 			return null;
@@ -167,5 +166,5 @@ public abstract class M {
 		return JPAUtil.getSingleResultOrNull(query);
 	}
 	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
-	public abstract void setValue(Object value); 
+	public abstract void setValue(Object value);
 }

@@ -66,12 +66,12 @@ public class JPAUtil {
 		return types;
 	}
 
-	public static String getEntityNameByObject(Object obj) throws Exception {
+	public static String getEntityNameByObject(Object obj) {
 		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
 			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))
 					return type.getName();
 		}
-		throw new Exception("ERROR: Cannot get any entity name for object "
+		throw new JPAException("ERROR: Cannot get any entity name for object "
 				+ obj.getClass().getTypeName() + ". Class not found.");
 	}
 

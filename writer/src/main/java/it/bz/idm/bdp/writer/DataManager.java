@@ -82,24 +82,18 @@ public class DataManager {
 		if (stationType == null || stationType.isEmpty()
 				|| stationCode == null || stationCode.isEmpty()
 				|| dataTypeName == null || dataTypeName.isEmpty()) {
-			JPAException ex = new JPAException("Wrong parameter value");
-			ex.getDto().setStatus(HttpStatus.BAD_REQUEST.value());
-			throw ex;
+			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
 		Date date = new Date(-1);
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Station station = Station.findStation(em, stationType, stationCode);
 			if (station == null) {
-				JPAException ex = new JPAException("Station '" + stationCode + "' not found.");
-				ex.getDto().setStatus(HttpStatus.NOT_FOUND.value());
-				throw ex;
+				throw new JPAException("Station '" + stationCode + "' not found.", HttpStatus.NOT_FOUND.value());
 			}
 			DataType dataType = DataType.findByCname(em,dataTypeName);
 			if (dataType == null) {
-				JPAException ex = new JPAException("Data type '" + dataTypeName + "' not found.");
-				ex.getDto().setStatus(HttpStatus.NOT_FOUND.value());
-				throw ex;
+				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
 			}
 			BDPRole role = BDPRole.fetchAdminRole(em);
 			date = M.getDateOfLastRecord(em, station, dataType, period, role);

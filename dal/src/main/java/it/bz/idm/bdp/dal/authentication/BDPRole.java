@@ -122,8 +122,8 @@ public class BDPRole {
 		this.parent = parent;
 	}
 
-	public static BDPRole findByName(EntityManager manager, String name) {
-		TypedQuery<BDPRole> query = manager.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
+	public static BDPRole findByName(EntityManager em, String name) {
+		TypedQuery<BDPRole> query = em.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
 		query.setParameter("name", name);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
