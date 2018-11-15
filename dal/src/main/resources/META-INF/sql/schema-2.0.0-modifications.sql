@@ -1,3 +1,9 @@
+------------------------------------------------------------------------------------------------------------------------
+-- Schema versioning
+--     We want to know which schema is currently installed
+--     Documentation: https://opendatahub.readthedocs.io/en/latest/guidelines/database.html
+------------------------------------------------------------------------------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS intime.schemaversion (
     version character varying COLLATE pg_catalog."default" NOT NULL
 );
