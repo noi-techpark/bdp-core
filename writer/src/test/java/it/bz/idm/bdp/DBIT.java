@@ -39,7 +39,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class DBIT extends TestSetup {
+public class DBIT extends WriterTestSetup {
 
 	@Test
 	public void testStationFetch() {

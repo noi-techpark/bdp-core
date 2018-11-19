@@ -47,7 +47,7 @@ import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class SecurityIT extends TestSetup {
+public class SecurityIT extends WriterTestSetup {
 
 	@Test
 	public void testInitialData() {

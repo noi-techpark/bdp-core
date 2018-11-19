@@ -33,7 +33,7 @@ import it.bz.idm.bdp.dal.Station;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class StationRetrievalIT extends TestSetup {
+public class StationRetrievalIT extends WriterTestSetup {
 
 	private String type = prefix + "TrafficSensor";
 	private String origin = prefix + "FAMAS-traffic";

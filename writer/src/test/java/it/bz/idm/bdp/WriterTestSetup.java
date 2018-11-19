@@ -15,7 +15,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-public class TestSetup extends AbstractJUnit4SpringContextTests {
+public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 
 	/**
 	 * This is the prefix for all things created inside a DB, which will
