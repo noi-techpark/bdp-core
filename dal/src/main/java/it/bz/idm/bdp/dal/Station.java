@@ -415,9 +415,10 @@ public class Station {
 	}
 
 	public List<StationDto> findChildren(EntityManager em, String stationId) {
-		TypedQuery<Station> stationquery = em.createQuery("select station from Station station where station.parent.stationcode = :parentId",Station.class);
-		stationquery.setParameter("parentId", stationId);
-		return convertToDto(stationquery.getResultList());
+		List<Station> stations = em.createQuery("select station from Station station where station.parent.stationcode = :parentId", Station.class)
+								   .setParameter("parentId", stationId)
+								   .getResultList();
+		return convertToDto(stations);
 	}
 
 	public static void patch(EntityManager em, StationDto dto) {
@@ -426,8 +427,8 @@ public class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id) {
-		TypedQuery<Station> stationquery = em.createQuery("select s from Station s where s.stationcode=:stationcode", Station.class);
-		stationquery.setParameter("stationcode", id);
+		TypedQuery<Station> stationquery = em.createQuery("select s from Station s where s.stationcode = :stationcode", Station.class)
+											 .setParameter("stationcode", id);
 		return JPAUtil.getSingleResultOrNull(stationquery);
 	}
 
@@ -436,9 +437,9 @@ public class Station {
 		if (origin != null)
 			baseQuery += " and origin = :origin";
 		try {
-			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class);
-			query.setParameter("active", true);
-			query.setParameter("type", stationType);
+			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class)
+										  .setParameter("active", true)
+										  .setParameter("type", stationType);
 			if (origin != null)
 				query.setParameter("origin", origin);
 			return query.getResultList();

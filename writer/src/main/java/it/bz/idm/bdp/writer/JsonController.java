@@ -43,15 +43,15 @@ public class JsonController extends DataManager {
 
 	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,
-																  @RequestParam("stationId") String stationId,
-																  @RequestParam(value="typeId") String typeId,
-																  @RequestParam(value="period", required=false) Integer period) {
+															   @RequestParam("stationId") String stationId,
+															   @RequestParam(value="typeId") String typeId,
+															   @RequestParam(value="period", required=false) Integer period) {
 		return ResponseEntity.ok(DataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
 	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody List<StationDto> stationsGetList(@PathVariable("integreenTypology") String stationType,
-													  	  @RequestParam(value="origin", required=false) String origin) {
+														  @RequestParam(value="origin", required=false) String origin) {
 		return DataManager.getStations(stationType, origin);
 	}
 

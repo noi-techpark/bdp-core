@@ -55,8 +55,7 @@ public class Measurement extends M {
 	public Measurement() {
 	}
 
-	public Measurement(Station station, DataType type,
-			Double value, Date timestamp, Integer period) {
+	public Measurement(Station station, DataType type, Double value, Date timestamp, Integer period) {
 		super(station,type,timestamp,period);
 		this.value = value;
 	}
