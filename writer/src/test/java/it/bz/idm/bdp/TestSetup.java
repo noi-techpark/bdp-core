@@ -58,6 +58,8 @@ public class TestSetup extends AbstractJUnit4SpringContextTests {
 		} catch (Exception e) {
 			e.printStackTrace();
 			em.getTransaction().rollback();
+			if (em.isOpen())
+				em.close();
 			throw e;
 		}
 	}
@@ -81,6 +83,8 @@ public class TestSetup extends AbstractJUnit4SpringContextTests {
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			e.printStackTrace();
+			em.getTransaction().rollback();
+			throw e;
 		} finally {
 			if (em.isOpen())
 				em.close();
