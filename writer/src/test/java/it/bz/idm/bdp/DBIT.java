@@ -20,16 +20,15 @@
  */
 package it.bz.idm.bdp;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
-import javax.persistence.EntityManager;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -37,18 +36,14 @@ import it.bz.idm.bdp.dal.M;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class DBIT extends AbstractJUnit4SpringContextTests{
-
-	EntityManager em = JPAUtil.createEntityManager();
-
+public class DBIT extends TestSetup {
 
 	@Test
 	public void testStationFetch() {
-		Station station = Station.findStation(em, "stationtype", "hey");
+		Station station = Station.findStation(em, prefix + "non-existent-stationtype", prefix + "hey");
 		assertNull(station);
 	}
 
@@ -59,14 +54,16 @@ public class DBIT extends AbstractJUnit4SpringContextTests{
 		assertFalse(role.getUsers()==null || role.getUsers().isEmpty());
 	}
 
-
 	@Test
 	public void testFindLatestEntry() {
 		BDPRole role = BDPRole.fetchAdminRole(em);
-		Integer period = 600;
-		DataType type = DataType.findByCname(em, "air-humidity");
-		Station station = Station.findStation(em, "EnvironmentStation", "00390SF");
+		Integer period = 500;
+		DataType type = DataType.findByCname(em, this.type.getCname());
+		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getStationcode());
 		M latestEntry = new Measurement().findLatestEntry(em, station, type, period, role);
 		assertNotNull(latestEntry);
-	};
+		assertEquals(period, latestEntry.getPeriod());
+		assertTrue(this.station.getActive());
+		assertTrue(this.station.getAvailable());
+	}
 }

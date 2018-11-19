@@ -106,6 +106,12 @@ public class Station {
 		this.active = true;
 	}
 
+	public Station(String stationType, String stationCode) {
+		this();
+		setStationtype(stationType);
+		setStationcode(stationCode);
+	}
+
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
 		List<Station> resultList = new ArrayList<Station>();
 		if (station == null)

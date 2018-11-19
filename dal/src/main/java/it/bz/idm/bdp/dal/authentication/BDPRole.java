@@ -67,21 +67,31 @@ public class BDPRole {
 	public BDPRole() {
 	}
 
+	public BDPRole(String name) {
+		setName(name);
+	}
+
+	public BDPRole(String name, BDPRole parent) {
+		this(name);
+		setParent(parent);
+	}
+
+	public BDPRole(String name, String description) {
+		setName(name);
+		setDescription(description);
+	}
+
+	public BDPRole(String name, String description, BDPRole parent) {
+		this(name, description);
+		setParent(parent);
+	}
+
 	public static BDPRole fetchGuestRole(EntityManager manager) {
 		return findByName(manager, ROLE_GUEST);
 	}
 
 	public static BDPRole fetchAdminRole(EntityManager manager) {
 		return findByName(manager, ROLE_ADMIN);
-	}
-
-	public BDPRole(String name, String description) {
-		this.setName(name);
-		this.setDescription(description);
-	}
-
-	public BDPRole(String name) {
-		this.setName(name);
 	}
 
 	public Long getId() {

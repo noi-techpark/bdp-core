@@ -25,18 +25,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -52,46 +47,7 @@ import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class SecurityIT extends AbstractJUnit4SpringContextTests{
-	private EntityManager em;
-	private BDPRole role,role2;
-	private Station station;
-	private DataType type;
-	private BDPRules rule;
-	private Measurement measurement;
-	private static boolean firstrun = true;
-
-	@Before
-	public void setup() {
-		em = JPAUtil.createEntityManager();
-		em.getTransaction().begin();
-		role = new BDPRole();
-		role.setName("Holla");
-		role.setDescription("The Parent Role");
-		role2 = new BDPRole();
-		role2.setName("Halla");
-		role2.setDescription("The Child Role");
-		role2.setParent(role);
-		station = new Station();
-		station.setName("BLuesky");
-		station.setStationtype("Environment");
-		type = new DataType("NO2","mg","Fake type","Instants");
-		rule = new BDPRules();
-		rule.setPeriod(500);
-		rule.setRole(role);
-		rule.setStation(station);
-		rule.setType(type);
-		measurement = new Measurement(station, type, 1.11, new Date(), 500);
-
-		if (firstrun) {
-			em.persist(role);
-			em.persist(role2);
-			em.persist(station);
-			em.persist(type);
-			em.persist(measurement);
-			firstrun = false;
-		}
-	}
+public class SecurityIT extends TestSetup {
 
 	@Test
 	public void testInitialData() {
@@ -102,8 +58,8 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 		assertTrue(BDPRole.ROLE_GUEST.equals(guest.getName()));
 
 		/* Admin roles must have a rule to see everything */
-		TypedQuery<BDPRules> query = em.createQuery("select r from BDPRules r where r.role = :role", BDPRules.class);
-		query.setParameter("role", admin);
+		TypedQuery<BDPRules> query = em.createQuery("select r from BDPRules r where r.role = :role", BDPRules.class)
+									   .setParameter("role", admin);
 		BDPRules rule = JPAUtil.getSingleResultOrNull(query);
 		assertNotNull(rule);
 		assertNull(rule.getPeriod());
@@ -118,7 +74,7 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 
 	@Test
 	public void testGetRulesForRole() {
-		BDPRole r = BDPRole.findByName(em, role.getName());
+		BDPRole r = BDPRole.findByName(em, roleParent.getName());
 		//JOIN between unrelated entities https://www.thoughts-on-java.org/how-to-join-unrelated-entities/
 		//had to upgrade hibernate to resolve this known issue https://hibernate.atlassian.net/browse/HHH-2772
 		TypedQuery<Measurement> query = em.createQuery(
@@ -133,39 +89,34 @@ public class SecurityIT extends AbstractJUnit4SpringContextTests{
 
 	@Test
 	public void testRulesForLastRecord() {
-		BDPRole r = BDPRole.findByName(em, role.getName());
-		BDPRole r2 = BDPRole.fetchAdminRole(em);
-		assertNotNull(r);
-		assertNotNull(r2);
-		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getName());
+		BDPRole role1 = BDPRole.findByName(em, roleParent.getName());
+		BDPRole role2 = BDPRole.fetchAdminRole(em);
+		assertNotNull(role1);
+		assertNotNull(role2);
+		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getStationcode());
 		assertNotNull(station);
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		assertNotNull(type);
-		M m = new Measurement().findLatestEntry(em, station, null, null, r2);
+		M m = new Measurement().findLatestEntry(em, station, null, null, role2);
 		assertNotNull(m);
-		M m2 =new Measurement().findLatestEntry(em, station, null, null, r);
+		M m2 = new Measurement().findLatestEntry(em, station, null, null, role1);
 		assertNull(m2);
 	}
 
 	@Test
 	public void testSyncStations() {
-		StationDto s = new StationDto("!TEST-WRITER", null, null, null);
+		StationDto s = new StationDto(prefix + "WRITER", null, null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		DataManager.syncStations("EnvironmentStation", dtos, null); // TODO Update response location
+		DataManager.syncStations(prefix + "EnvironmentStation", dtos, null); // TODO Update response location
 	}
 
 	@Test
 	public void testSyncDataTypes() {
-		DataTypeDto t = new DataTypeDto("!TEST-WRITER", null, null, null);
+		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
 		DataManager.syncDataTypes(dtos, null);
 	}
 
-	@After
-	public void cleanup() {
-		em.getTransaction().rollback();
-		em.close();
-	}
 }

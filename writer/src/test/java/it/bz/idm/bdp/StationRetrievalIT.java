@@ -24,24 +24,19 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
-public class StationRetrievalIT {
+public class StationRetrievalIT extends TestSetup {
 
-	private EntityManager em = JPAUtil.createEntityManager();
-
-	private String type = "TrafficSensor";
-	private String origin = "FAMAS-traffic";
+	private String type = prefix + "TrafficSensor";
+	private String origin = prefix + "FAMAS-traffic";
 
 	@Test
 	public void testStationsRetrieval() {
