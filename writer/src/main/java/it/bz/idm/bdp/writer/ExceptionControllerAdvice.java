@@ -135,6 +135,7 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 		} else if (dto.getName() == null) {
 			dto.setName(HttpStatus.valueOf(dto.getStatus()).getReasonPhrase());
 		}
+		httpStatus = HttpStatus.valueOf(dto.getStatus());
 		return ResponseEntity.status(httpStatus).body(dto);
 	}
 }

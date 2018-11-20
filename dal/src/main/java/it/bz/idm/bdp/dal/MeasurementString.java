@@ -38,14 +38,22 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @Table(name="measurementstring",schema="intime")
 @Entity
-public class MeasurementString extends M{
+public class MeasurementString extends M {
 
 	@Id
 	@GeneratedValue(generator = "measurementstring_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstring_gen", sequenceName = "measurementstring_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstring_seq')")
 	private Long id;
-	private String value;
+
+    /*
+     * Make sure all subclasses of M contain different value names. If these
+     * variable names would be called the same, but with different data types
+     * Hibernate would complain about not being able to create a SQL UNION.
+     * Ex. private String value; and private Double value; would not work
+     *     inside MeasurementString and Measurement respectively
+     */
+	private String stringValue;
 
 	public MeasurementString() {
 	}
@@ -56,7 +64,7 @@ public class MeasurementString extends M{
 		this.setTimestamp(timestamp);
 		this.setCreated_on(new Date());
 		this.setPeriod(period);
-		this.value = value;		
+		this.stringValue = value;
 	}
 
 	public Long getId() {
@@ -68,11 +76,11 @@ public class MeasurementString extends M{
 	}
 
 	public String getValue() {
-		return value;
+		return stringValue;
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		this.stringValue = value;
 	}
 
 	public static MeasurementString findLastMeasurementByStationAndType(
@@ -92,7 +100,7 @@ public class MeasurementString extends M{
 		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(q);
 	}
-	
+
 	@Override
 	public void setValue(Object value) {
 		if (value instanceof String)

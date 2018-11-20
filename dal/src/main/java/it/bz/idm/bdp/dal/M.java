@@ -119,9 +119,9 @@ public abstract class M {
 			queryString += " AND record.period=:period";
 		}
 		queryString += " ORDER BY record.timestamp DESC";
-		TypedQuery<Date> query = em.createQuery(queryString, Date.class);
-		query.setParameter("station", station);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
+		TypedQuery<Date> query = em.createQuery(queryString, Date.class)
+								   .setParameter("station", station)
+								   .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		if (type != null)
 			query.setParameter("type", type);
 		if (period != null)

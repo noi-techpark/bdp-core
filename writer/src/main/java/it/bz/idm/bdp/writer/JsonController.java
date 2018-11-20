@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
@@ -40,6 +41,11 @@ import it.bz.idm.bdp.dto.StationDto;
 @RequestMapping("/json")
 @Controller
 public class JsonController extends DataManager {
+
+	@RequestMapping(value = "/getDateOfLastRecord", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<Date> dateOfLastRecordMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../getDateOfLastRecord/MyStationType?stationId=X&typeId=Y");
+	}
 
 	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,

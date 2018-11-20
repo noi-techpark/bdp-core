@@ -97,6 +97,11 @@ public class DataManager {
 			}
 			BDPRole role = BDPRole.fetchAdminRole(em);
 			date = M.getDateOfLastRecord(em, station, dataType, period, role);
+		} catch (Exception e) {
+			if (!(e instanceof JPAException)) {
+				e.printStackTrace();
+			}
+			throw e;
 		} finally {
 			if (em.isOpen())
 				em.close();

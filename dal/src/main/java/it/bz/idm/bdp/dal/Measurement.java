@@ -50,14 +50,21 @@ public class Measurement extends M {
 	@ColumnDefault(value = "nextval('intime.measurement_seq')")
 	private Long id;
 
-	private Double value;
+    /*
+     * Make sure all subclasses of M contain different value names. If these
+     * variable names would be called the same, but with different data types
+     * Hibernate would complain about not being able to create a SQL UNION.
+     * Ex. private String value; and private Double value; would not work
+     *     inside MeasurementString and Measurement respectively
+     */
+	private Double doubleValue;
 
 	public Measurement() {
 	}
 
 	public Measurement(Station station, DataType type, Double value, Date timestamp, Integer period) {
 		super(station,type,timestamp,period);
-		this.value = value;
+		this.doubleValue = value;
 	}
 
 	public Long getId() {
@@ -69,13 +76,12 @@ public class Measurement extends M {
 	}
 
 	public Double getValue() {
-		return value;
+		return doubleValue;
 	}
 
 	public void setValue(Double value) {
-		this.value = value;
+		this.doubleValue = value;
 	}
-
 
 	@Override
 	public void setValue(Object value) {

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -54,7 +55,10 @@ public class DataType {
 	@SequenceGenerator(name = "type_gen", sequenceName = "type_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.type_seq')")
 	protected Long id;
+
+	@Column(nullable = false)
 	private String cname;
+
 	private Date created_on;
 	private String cunit;
 	private String description;
@@ -64,20 +68,19 @@ public class DataType {
 	private String rtype;
 
 	public DataType() {
-		this.created_on = new Date();
+		setCreated_on(new Date());
 	}
 
-	public DataType(String cname,  String cunit,
-			String description, String rtype) {
-		this();
-		this.cname = cname;
-		this.cunit = cunit;
-		this.description = description;
-		this.rtype = rtype;
+	public DataType(String cname,  String cunit, String description, String rtype) {
+		this(cname);
+		setCunit(cunit);
+		setDescription(description);
+		setRtype(rtype);
 	}
 
 	public DataType(String cname) {
-		this.cname = cname;
+		this();
+		setCname(cname);
 	}
 	public Long getId() {
 		return id;
