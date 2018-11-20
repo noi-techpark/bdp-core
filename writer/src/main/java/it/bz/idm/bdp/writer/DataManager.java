@@ -84,7 +84,6 @@ public class DataManager {
 				|| dataTypeName == null || dataTypeName.isEmpty()) {
 			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
-		Date date = new Date(-1);
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Station station = Station.findStation(em, stationType, stationCode);
@@ -96,7 +95,7 @@ public class DataManager {
 				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
 			}
 			BDPRole role = BDPRole.fetchAdminRole(em);
-			date = M.getDateOfLastRecord(em, station, dataType, period, role);
+			return M.getDateOfLastRecord(em, station, dataType, period, role);
 		} catch (Exception e) {
 			if (!(e instanceof JPAException)) {
 				e.printStackTrace();
@@ -106,7 +105,6 @@ public class DataManager {
 			if (em.isOpen())
 				em.close();
 		}
-		return date;
 	}
 
 	public Object getLatestMeasurementStringRecord(String stationtype, String id, BDPRole role) {

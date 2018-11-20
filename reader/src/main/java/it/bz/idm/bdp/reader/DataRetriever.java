@@ -122,17 +122,17 @@ public class DataRetriever {
 	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
-		Date dateOfLastRecord = null;
 		try{
 			Station station = Station.findStation(em, stationTypology, stationcode);
 			DataType type = DataType.findByCname(em,cname);
-			dateOfLastRecord = Measurement.getDateOfLastRecord(em, station, type, period, role);
-		}catch(Exception ex){
+			return Measurement.getDateOfLastRecord(em, station, type, period, role);
+		} catch(Exception ex) {
 			ex.printStackTrace();
-		}finally{
-			em.close();
+			throw ex;
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return dateOfLastRecord;
 	}
 
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {

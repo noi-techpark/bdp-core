@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dal;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -41,14 +42,19 @@ public abstract class M {
 	@Id
 	private Long id;
 
+	@Column(nullable = false)
 	private Date created_on;
+
+	@Column(nullable = false)
 	private Date timestamp;
+
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
 
 	@ManyToOne(cascade=CascadeType.PERSIST)
 	private DataType type;
 
+	@Column(nullable = false)
 	private Integer period;
 
 	public M() {
@@ -126,7 +132,7 @@ public abstract class M {
 			query.setParameter("type", type);
 		if (period != null)
 			query.setParameter("period", period);
-		return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
+		return JPAUtil.getSingleResultOrAlternative(query, new Date(-1));
 	}
 
 	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role,T table) {
