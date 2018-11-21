@@ -38,7 +38,12 @@
         <spring.version>5.0.10.RELEASE</spring.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
-
+    <repositories>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>log4j</groupId>
