@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        dockerfile {
+            filename 'docker/dockerfile-java'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+        }
+    }
 
     environment {
         BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
@@ -11,14 +16,12 @@ pipeline {
                sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
             }
         }
-        stage('Test - Install') {
+        stage('Install') {
             steps {
-               sh 'cd dto && mvn clean test install'
-               sh 'cd dal && mvn clean test install'
-               sh 'cd dc-interface && mvn clean test install'
-               sh 'cd ws-interface && mvn clean test install'
-               sh 'cd reader && mvn clean test'
-               sh 'cd writer && mvn clean test'
+               sh 'cd dto && mvn clean install'
+               sh 'cd dal && mvn clean install'
+               sh 'cd dc-interface && mvn clean install'
+               sh 'cd ws-interface && mvn clean install'
             }
         }
         stage('Build - Reader') {
@@ -33,10 +36,8 @@ pipeline {
         }
         stage('Archive') {
             steps {
-               sh 'mkdir -p /var/builds/prod-server-dc'
-               sh 'mkdir -p /var/builds/prod-server-ws'
-               sh 'cp -f reader/target/reader.war /var/builds/prod-server-ws/'
-               sh 'cp -f writer/target/writer.war /var/builds/prod-server-dc/'
+                archiveArtifacts artifacts: 'reader/target/reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'writer/target/writer.war', onlyIfSuccessful: true
             }
         }
     }
