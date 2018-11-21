@@ -84,7 +84,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-            <version>1.2.4</version>
+            <version>[1.2.4,2.0.0)</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
