@@ -57,13 +57,7 @@ public class SecurityIT {
 			e.printStackTrace();
 		}
 	}
-	public RestClient client = new RestClient() {
-		
-		@Override
-		public String initIntegreenTypology() {
-			return "Not important";
-		}
-	};
+	public RestClient client = new RestClient();
 	
 	@Test
 	public void testFetchRefreshTokenAuthentication(){

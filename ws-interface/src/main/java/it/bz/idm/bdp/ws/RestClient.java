@@ -29,6 +29,7 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import it.bz.idm.bdp.dto.ChildDto;
@@ -39,7 +40,8 @@ import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import reactor.core.publisher.Mono;
 
-public abstract class RestClient extends DataRetriever {
+@Component
+public class RestClient extends DataRetriever {
 
 	private static final String REQUEST_TIMEOUT_IN_SECONDS_KEY = "requestTimeoutInSeconds";
 	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10;

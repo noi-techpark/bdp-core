@@ -34,17 +34,11 @@ public class DataRetrieverTests {
 	private DataRetriever retriever;
 	@Before
 	public void doBefore(){
-		 retriever= new RestClient(){
-			@Override
-			public String initIntegreenTypology() {
-				return "TestStation";
-			}
-		};
+		 retriever= new RestClient();
 	}
 	
 	@Test
 	public void testInitDataRetriever(){
-		assertNotNull(retriever.integreenTypology);
 		assertNotNull(retriever.config);
 	}
 }
