@@ -13,6 +13,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 ----
 
 #### Table of Contents
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -42,7 +43,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 
 ## CORE
 
-The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the webservices which serve the data.
+The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the web services which serve the data.
 
 ### DAL
 
