@@ -13,6 +13,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 ----
 
 #### Table of Contents
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -43,11 +44,11 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 
 ## CORE
 
-The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the webservices which serve the data.
+The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the web services which serve the data.
 
 ### DAL
 
-Is the layer which communicates with the db underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometrys. The whole module got developed with postgresql as database and postgis as an extension, but should also work with other rdbms (nobody knows :)).
+Is the layer which communicates with the db underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometries. The whole module got developed with PostgreSQL as database and Postgis as an extension, but should also work with other RDBMS (nobody knows :)).
 
 Connection pooling is handled by [HikariCP](https://github.com/idm-suedtirol/bdp-core) for high speed connections to the db.
 
