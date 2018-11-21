@@ -16,7 +16,6 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see LICENSES/GPL-3.0.txt).
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [CORE](#core)
   - [DAL](#dal)
     - [Entity structure](#entity-structure)
@@ -93,7 +92,6 @@ The DAL is a big and shared part between writer and reader and saves and retriev
 The writer himself implements the methods to write data to the bdp and is therefore the endpoint for all datacollectors.
 It uses the persistence-unit of the DAL which has permissions to read all data and also to write everything.
 
-
 #### dc-interface
 The dc-interface contains the API through which components can comunicate with the bdp writer. Just include the dc-interface jar-file in your project and use the existing json client implementation(JSONPusher.java).
 The API is compact and easy to use:
@@ -142,7 +140,6 @@ More informations will be available soon.
   - create a database and add postgis extension
   - create a user with full permissions on the db
   - create a user with read only permissions on the db
-
 
 ```
   createdb bd
@@ -199,7 +196,6 @@ If you want to fill your db with data, you will either create your own module, w
 If you also need to expose this data you can either use the reader API or use the existing client interface ws-interface.
 
 For more informations read the modules manual.
-
 
 ## Licenses
 
