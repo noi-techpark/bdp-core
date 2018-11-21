@@ -20,6 +20,9 @@
  */
 package it.bz.idm.bdp.writer;
 
+import javax.persistence.PersistenceException;
+
+import org.hibernate.PropertyValueException;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -55,6 +58,14 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(JPAException.class)
 	public ResponseEntity<Object> handleJPA(JPAException ex) {
 		return buildResponse(HttpStatus.BAD_REQUEST, ex);
+	}
+	@ExceptionHandler(PersistenceException.class)
+	public ResponseEntity<Object> handlePropertyValueException(PersistenceException ex) {
+		if (ex.getCause() != null && ex.getCause() instanceof PropertyValueException) {
+			JPAException jpaex = new JPAException("Invalid JSON: " + ex.getCause().getMessage());
+			return buildResponse(HttpStatus.BAD_REQUEST, jpaex);
+		}
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {

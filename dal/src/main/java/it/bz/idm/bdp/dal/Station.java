@@ -307,8 +307,13 @@ public class Station {
 				}
 				sync(em, dto);
 			} catch (Exception e) {
-				/* continue */
-				e.printStackTrace();
+				/*
+				 * FIXME throw exception and give feedback as JSON list, which station
+				 * couldn't be imported correctly and why
+				 */
+				// if (!(e instanceof JPAException))
+					e.printStackTrace();
+				// throw e;
 			}
 		}
 		em.getTransaction().commit();
