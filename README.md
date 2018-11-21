@@ -46,7 +46,7 @@ The core of the platform contains all the business logic which handles connectio
 
 ### DAL
 
-Is the layer which communicates with the db underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometrys. The whole module got developed with postgresql as database and postgis as an extension, but should also work with other rdbms (nobody knows :)).
+Is the layer which communicates with the db underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometrys. The whole module got developed with a PostgresSQL database including postgis as an extension, but should also work with other rdbms (nobody knows :)).
 
 Connection pooling is handled by [HikariCP](https://github.com/idm-suedtirol/bdp-core) for high speed connections to the db.
 
