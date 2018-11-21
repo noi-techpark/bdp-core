@@ -79,6 +79,7 @@ public class Station {
 	@ManyToOne
 	protected Station parent;
 
+	@Column(nullable = false)
 	protected String name;
 
 	protected Point pointprojection;
@@ -305,15 +306,16 @@ public class Station {
 				if (dto.getStationType() == null) {
 					dto.setStationType(stationType);
 				}
+				if (! dto.isValid()) {
+					throw new JPAException("Invalid JSON for " + StationDto.class.getSimpleName(), StationDto.class);
+				}
 				sync(em, dto);
 			} catch (Exception e) {
-				/*
-				 * FIXME throw exception and give feedback as JSON list, which station
-				 * couldn't be imported correctly and why
-				 */
-				// if (!(e instanceof JPAException))
-					e.printStackTrace();
-				// throw e;
+				e.printStackTrace();
+				em.getTransaction().rollback();
+				if (e instanceof JPAException)
+					throw (JPAException) e;
+				throw new JPAException(e.getMessage(), e);
 			}
 		}
 		em.getTransaction().commit();
@@ -330,10 +332,9 @@ public class Station {
 			existingStation = new Station();
 			existingStation.setStationcode(dto.getId());
 			existingStation.setStationtype(dto.getStationType());
+			existingStation.setName(dto.getName());
 			em.persist(existingStation);
 		}
-		if (existingStation.getName() == null)
-			existingStation.setName(dto.getName());
 		if (dto.getLatitude() != null && dto.getLongitude() != null) {
 			Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(), dto.getLatitude()));
 			if (dto.getCoordinateReferenceSystem() != null && !GEOM_CRS.equals(dto.getCoordinateReferenceSystem())) {

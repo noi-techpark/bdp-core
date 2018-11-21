@@ -27,20 +27,38 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @JsonInclude(value=Include.NON_EMPTY)
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
+
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Unique station code (ex., bz:noi01)")
 	protected String id;
+
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Station type or category (ex., Environment)")
+	private String stationType;
+
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Natural station name (ex., Primary NOI Station)")
 	protected String name;
+
 	protected Double latitude;
 	protected Double longitude;
 	protected Double elevation;
 	protected String coordinateReferenceSystem;
+
+	@JsonPropertyDescription("Who provided this station?")
 	private String origin;
+
+	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
 	private String parentId;
-	private String stationType;
+
+	@JsonPropertyDescription("Meta data, that describes this station (ex., {\"municipality\":\"Bolzano\"})")
 	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {
@@ -119,9 +137,12 @@ public class StationDto implements Serializable {
 	}
 
 	@JsonIgnore
-	public boolean checkIfValid() {
-		return this.id != null && !this.id.isEmpty();
+	public boolean isValid() {
+		return id != null && !id.isEmpty()
+						  && stationType != null && !stationType.isEmpty()
+						  && name != null && !name.isEmpty();
 	}
+
 	@JsonIgnore
 	@Override
 	public boolean equals(Object obj) {
