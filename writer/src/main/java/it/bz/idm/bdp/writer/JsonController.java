@@ -66,16 +66,26 @@ public class JsonController extends DataManager {
 		return super.getStationTypes();
 	}
 
-	@RequestMapping(value = "/pushRecords/{integreenTypology}", method = RequestMethod.POST)
+	@RequestMapping(value = "/types", method = RequestMethod.GET)
+	public @ResponseBody List<String> dataTypes() {
+		return super.getDataTypes();
+	}
+
+	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
 	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
-			@PathVariable String integreenTypology) {
-		return super.pushRecords(integreenTypology, stationData);
+											@PathVariable String stationType) {
+		return super.pushRecords(stationType, stationData);
 	}
 
 	@Override
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
 		super.patchStations(stations);
+	}
+
+	@RequestMapping(value = "/syncStations", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> syncStationsMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../syncStations/MyStationType");
 	}
 
 	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
@@ -86,6 +96,6 @@ public class JsonController extends DataManager {
 
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<?> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
-		return DataManager.syncDataTypes(data, null);
+		return DataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 }

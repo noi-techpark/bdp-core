@@ -137,6 +137,16 @@ public class DataManager {
 		}
 	}
 
+	public static List<String> getDataTypes() {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			return DataType.findTypeNames(em);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {

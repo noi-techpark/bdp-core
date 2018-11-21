@@ -132,6 +132,11 @@ public class DataType {
 
 	}
 
+	public static List<String> findTypeNames(EntityManager em) {
+		return em.createQuery("SELECT t.cname FROM DataType t GROUP BY t.cname", String.class)
+				 .getResultList();
+	}
+
 	public static List<TypeDto> findTypes(EntityManager em, String stationType, String stationId) {
 		TypedQuery<Object[]> query;
 		if (stationId == null || stationId.isEmpty()) {
