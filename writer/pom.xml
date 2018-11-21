@@ -86,6 +86,12 @@
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
         </dependency>
+		<!-- To create JSON schema descriptions out of classes -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.module</groupId>
+		    <artifactId>jackson-module-jsonSchema</artifactId>
+		    <version>2.9.7</version>
+		</dependency>
     </dependencies>
 
     <build>

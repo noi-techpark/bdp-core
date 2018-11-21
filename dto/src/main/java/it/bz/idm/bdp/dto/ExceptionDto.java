@@ -21,12 +21,14 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class ExceptionDto implements Serializable {
 	private static final long serialVersionUID = -2644337056228195945L;
 	private Integer status;
 	private String name;
 	private String description;
+	private Map<String, Object> correctSchema;
 
 	public String getName() {
 		return name;
@@ -45,5 +47,11 @@ public class ExceptionDto implements Serializable {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public Map<String, Object> getJsonSchema() {
+		return correctSchema;
+	}
+	public void setJsonSchema(Map<String, Object> jsonSchema) {
+		this.correctSchema = jsonSchema;
 	}
 }

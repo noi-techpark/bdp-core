@@ -41,6 +41,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.TypeDto;
@@ -126,8 +127,8 @@ public class DataType {
 	}
 
 	public static DataType findByCname(EntityManager manager, String cname) {
-		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class);
-		query.setParameter("cname",cname);
+		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class)
+											.setParameter("cname",cname);
 		return JPAUtil.getSingleResultOrNull(query);
 
 	}
@@ -208,23 +209,35 @@ public class DataType {
 	}
 
 	public static void sync(EntityManager em, List<DataTypeDto> data) {
-		em.getTransaction().begin();
-		for (DataTypeDto dto : data) {
-			DataType type = DataType.findByCname(em,dto.getName());
-			if (type != null){
-				if (dto.getDescription() != null)
-					type.setDescription(dto.getDescription());
-				type.setRtype(dto.getRtype());
-				type.setCunit(dto.getUnit());
-				if (type.getI18n().get(Locale.ENGLISH.getLanguage()) == null && dto.getDescription() != null)
+		try {
+			em.getTransaction().begin();
+			for (DataTypeDto dto : data) {
+				if (! dto.isValid()) {
+					throw new JPAException("Invalid JSON for " + DataTypeDto.class.getSimpleName(), DataTypeDto.class);
+				}
+
+				DataType type = DataType.findByCname(em,dto.getName());
+				if (type != null){
+					if (dto.getDescription() != null)
+						type.setDescription(dto.getDescription());
+					type.setRtype(dto.getRtype());
+					type.setCunit(dto.getUnit());
+					if (type.getI18n().get(Locale.ENGLISH.getLanguage()) == null && dto.getDescription() != null)
+						type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
+					em.merge(type);
+				}else{
+					type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
 					type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
-				em.merge(type);
-			}else{
-				type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
-				type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
-				em.persist(type);
+					em.persist(type);
+				}
 			}
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			em.getTransaction().rollback();
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			throw new JPAException(e.getMessage(), e);
 		}
-		em.getTransaction().commit();
 	}
 }

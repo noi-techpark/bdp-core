@@ -26,35 +26,63 @@ public class JPAException extends RuntimeException {
 
 	private static final long serialVersionUID = -8271639898842999188L;
 
-	private ExceptionDto dto = new ExceptionDto();
+	private ExceptionDto exceptionDto = new ExceptionDto();
+
+	/*
+	 * Used to determine correct DTO schemas
+	 */
+	private Class<?> schemaDtoClass;
 
 	public JPAException(String error, int httpCode, Throwable cause) {
 		super(error, cause);
-		dto.setStatus(new Integer(httpCode));
-		dto.setDescription(error);
+		exceptionDto.setStatus(new Integer(httpCode));
+		exceptionDto.setDescription(error);
 	}
 
 	public JPAException(String error, Throwable cause) {
 		super(error, cause);
-		dto.setDescription(error);
+		exceptionDto.setDescription(error);
 	}
 
 	public JPAException(String error) {
 		super(error);
-		dto.setDescription(error);
+		exceptionDto.setDescription(error);
 	}
 
 	public JPAException(String error, int httpCode) {
 		super(error);
-		dto.setStatus(new Integer(httpCode));
-		dto.setDescription(error);
+		exceptionDto.setStatus(new Integer(httpCode));
+		exceptionDto.setDescription(error);
 	}
 
-	public ExceptionDto getDto() {
-		return dto;
+	public JPAException(String error, Class<?> schemaDtoClass) {
+		this(error);
+		this.schemaDtoClass = schemaDtoClass;
 	}
 
-	public void setDto(ExceptionDto dto) {
-		this.dto = dto;
+	public JPAException(String error, int httpCode, Class<?> schemaDtoClass) {
+		this(error, httpCode);
+		this.schemaDtoClass = schemaDtoClass;
+	}
+
+	public JPAException(String error, int httpCode, Throwable cause, Class<?> schemaDtoClass) {
+		this(error, httpCode, cause);
+		this.schemaDtoClass = schemaDtoClass;
+	}
+
+	public ExceptionDto getExceptionDto() {
+		return exceptionDto;
+	}
+
+	public void setExceptionDto(ExceptionDto dto) {
+		this.exceptionDto = dto;
+	}
+
+	public Class<?> getDtoClass() {
+		return schemaDtoClass;
+	}
+
+	public void setDtoClass(Class<?> dtoClass) {
+		this.schemaDtoClass = dtoClass;
 	}
 }

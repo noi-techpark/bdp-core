@@ -22,7 +22,11 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 
-public class DataTypeDto implements Serializable{
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
+public class DataTypeDto implements Serializable {
 
 	private static final long serialVersionUID = -2577340085858167829L;
 	public static final String NUMBER_AVAILABE = "number-available";
@@ -30,14 +34,29 @@ public class DataTypeDto implements Serializable{
 	public static final String FUTURE_AVAILABILITY = "future-availability";
 	public static final String PARKING_FORECAST = "parking-forecast";
 
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Unique name (ex., air-temperature)")
 	private String name;
+
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Unit of the data type (ex., °C)")
 	private String unit;
+
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Description of the data type (ex., Air temperature)")
 	private String description;
+
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Metric of the data type (ex., mean or instantaneous)")
 	private String rtype;
+
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Interval on how often a measurement with this data type gets collected (seconds)")
 	private Integer period;
 
 	public DataTypeDto() {
 	}
+
 	public DataTypeDto(String name, String unit, String description, String rtype) {
 		super();
 		this.name = name;
@@ -47,11 +66,7 @@ public class DataTypeDto implements Serializable{
 	}
 
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
-		super();
-		this.name = name;
-		this.unit = unit;
-		this.description = description;
-		this.rtype = rtype;
+		this(name, unit, description, rtype);
 		this.period = period;
 	}
 	public String getName() {
@@ -101,5 +116,10 @@ public class DataTypeDto implements Serializable{
 	@Override
 	public String toString() {
 		return "DataTypeDto [name=" + name + ", unit=" + unit + ", description=" + description + ", rtype=" + rtype + ", period=" + period + "]";
+	}
+
+	@JsonIgnore
+	public boolean isValid() {
+		return getName() != null && !getName().isEmpty();
 	}
 }

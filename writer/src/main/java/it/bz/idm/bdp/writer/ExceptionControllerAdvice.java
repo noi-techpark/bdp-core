@@ -20,6 +20,8 @@
  */
 package it.bz.idm.bdp.writer;
 
+import java.util.Map;
+
 import javax.persistence.PersistenceException;
 
 import org.hibernate.PropertyValueException;
@@ -44,6 +46,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.ExceptionDto;
@@ -129,24 +136,42 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 		return buildResponse(status,ex);
 	}
 	private ResponseEntity<Object> buildResponse(HttpStatus httpStatus, Exception ex) {
-		ExceptionDto dto;
+		ExceptionDto exceptionDto;
 		if (ex instanceof JPAException) {
-			dto = ((JPAException) ex).getDto();
-			if (ex.getCause() != null) {
-				dto.setDescription(ex.getCause().getMessage());
+			JPAException jpaex = (JPAException) ex;
+			exceptionDto = jpaex.getExceptionDto();
+			if (jpaex.getCause() != null) {
+				exceptionDto.setDescription(jpaex.getCause().getMessage());
+			}
+			if (jpaex.getDtoClass() != null) {
+				ObjectMapper mapper = new ObjectMapper();
+		        SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
+		        try {
+			        mapper.acceptJsonFormatVisitor(jpaex.getDtoClass(), visitor);
+			        JsonSchema schema = visitor.finalSchema();
+			        String s = mapper.writer().writeValueAsString(schema);
+			        JsonNode node = mapper.readTree(s).get("properties");
+
+			        @SuppressWarnings("unchecked")
+					Map<String, Object> map = mapper.convertValue(node, Map.class);
+			        exceptionDto.setJsonSchema(map);
+		        } catch (Exception e) {
+		        	e.printStackTrace();
+		        	exceptionDto.setDescription(exceptionDto.getDescription() + " --- We had an error during schema information creation: " + e.getMessage());
+		        }
 			}
 		} else {
-			dto = new ExceptionDto();
+			exceptionDto = new ExceptionDto();
 		}
-		if (dto.getDescription() == null)
-			dto.setDescription(ex.getMessage());
-		if (dto.getStatus() == null) {
-			dto.setStatus(httpStatus.value());
-			dto.setName(httpStatus.getReasonPhrase());
-		} else if (dto.getName() == null) {
-			dto.setName(HttpStatus.valueOf(dto.getStatus()).getReasonPhrase());
+		if (exceptionDto.getDescription() == null)
+			exceptionDto.setDescription(ex.getMessage());
+		if (exceptionDto.getStatus() == null) {
+			exceptionDto.setStatus(httpStatus.value());
+			exceptionDto.setName(httpStatus.getReasonPhrase());
+		} else if (exceptionDto.getName() == null) {
+			exceptionDto.setName(HttpStatus.valueOf(exceptionDto.getStatus()).getReasonPhrase());
 		}
-		httpStatus = HttpStatus.valueOf(dto.getStatus());
-		return ResponseEntity.status(httpStatus).body(dto);
+		httpStatus = HttpStatus.valueOf(exceptionDto.getStatus());
+		return ResponseEntity.status(httpStatus).body(exceptionDto);
 	}
 }
