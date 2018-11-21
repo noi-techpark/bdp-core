@@ -56,7 +56,7 @@ public class DataType {
 	@ColumnDefault(value = "nextval('intime.type_seq')")
 	protected Long id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String cname;
 
 	private Date created_on;
