@@ -34,7 +34,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.M;
-import it.bz.idm.bdp.dal.MeasurementHistory;
+import it.bz.idm.bdp.dal.MHistory;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -46,10 +46,14 @@ import it.bz.idm.bdp.dto.StationDto;
 @Component
 public class DataManager {
 
-	public static Object pushRecords(String stationType, Object... data){
+	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, Object... data){
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			return new MeasurementHistory().pushRecords(em, stationType, data);
+			MHistory.pushRecords(em, stationType, data);
+			return ResponseEntity.created(responseLocation).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -88,9 +92,9 @@ public class DataManager {
 		try {
 			Station station = Station.findStation(em, stationType, stationCode);
 			if (station == null) {
-				throw new JPAException("Station '" + stationCode + "' not found.", HttpStatus.NOT_FOUND.value());
+				throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
 			}
-			DataType dataType = DataType.findByCname(em,dataTypeName);
+			DataType dataType = DataType.findByCname(em, dataTypeName);
 			if (dataType == null) {
 				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
 			}

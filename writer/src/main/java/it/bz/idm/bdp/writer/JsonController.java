@@ -71,10 +71,15 @@ public class JsonController extends DataManager {
 		return super.getDataTypes();
 	}
 
+	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> pushRecordsMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../pushRecords/MyStationType");
+	}
+
 	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
 	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
 											@PathVariable String stationType) {
-		return super.pushRecords(stationType, stationData);
+		return super.pushRecords(stationType, null, stationData);
 	}
 
 	@Override
