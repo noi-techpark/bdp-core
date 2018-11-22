@@ -36,7 +36,7 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Table(name="measurementstring",schema="intime")
+@Table(name="measurementstring", schema="intime")
 @Entity
 public class MeasurementString extends M {
 
@@ -104,9 +104,9 @@ public class MeasurementString extends M {
 		if (value instanceof String)
 			this.setValue(value);
 	}
+
 	@Override
 	public M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		// TODO Auto-generated method stub
-		return null;
+		return M.findLatestEntryImpl(em, station, type, period, role, this);
 	}
 }

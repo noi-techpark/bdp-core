@@ -50,15 +50,13 @@ public class MeasurementStringHistory extends MHistory {
 
 	public MeasurementStringHistory() {
 	}
-	public MeasurementStringHistory(Station station, DataType type,
-			String value, Date timestamp, Integer period) {
-		this.setStation(station);
-		this.setType(type);
-
-		this.setTimestamp(timestamp);
-		this.setCreated_on(new Date());
-		this.setPeriod(period);
-		this.value = value;
+	public MeasurementStringHistory(Station station, DataType type, String value, Date timestamp, Integer period, Date created_on) {
+		setStation(station);
+		setType(type);
+		setTimestamp(timestamp);
+		setCreated_on(created_on);
+		setPeriod(period);
+		setValue(value);
 	}
 
 	public Long getId() {

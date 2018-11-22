@@ -20,7 +20,6 @@
  */
 package it.bz.idm.bdp.dal;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -30,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataMapDto;
@@ -37,11 +37,13 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
+@MappedSuperclass
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class MHistory {
 
 	private Date created_on;
 	private Date timestamp;
+
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Station station;
 
@@ -126,35 +128,74 @@ public abstract class MHistory {
 							}
 
 							em.getTransaction().begin();
-							M lastEntry = new Measurement().findLatestEntry(em, station, type, null, adminRole);
+
+							M latestNumberMeasurement = new Measurement().findLatestEntry(em, station, type, null, adminRole);
+							long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
+							M latestStringMeasurement = new MeasurementString().findLatestEntry(em, station, type, null, adminRole);
+							long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
+
 							Date created_on = new Date();
-							Collections.sort(dataRecords);
-							long lastEntryTime = (lastEntry != null)?lastEntry.getTimestamp().getTime():0;
-							for (RecordDto recordDto : dataRecords){
-								if (recordDto instanceof SimpleRecordDto){
-									SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
-									Long dateOfMeasurement = simpleRecordDto.getTimestamp();
-									Double value = (Double) simpleRecordDto.getValue();
-									if(lastEntryTime < dateOfMeasurement){
-										MeasurementHistory record = new MeasurementHistory(station,type,value,new Date(dateOfMeasurement),simpleRecordDto.getPeriod(),created_on);
+							SimpleRecordDto newestStringDto = null;
+							SimpleRecordDto newestNumberDto = null;
+							for (RecordDto recordDto : dataRecords) {
+
+								/*
+								 * XXX We support only SimpleRecordDtos at the moment. This should be removed,
+								 * when we see that we do not need anything else then SimpleRecords
+								 */
+								if (! (recordDto instanceof SimpleRecordDto))
+									continue;
+
+								SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
+								Long dateOfMeasurement = simpleRecordDto.getTimestamp();
+								Object valueObj = simpleRecordDto.getValue();
+								if (valueObj instanceof Number) {
+									if (latestNumberMeasurementTime < dateOfMeasurement) {
+										Double value = ((Number)valueObj).doubleValue();
+										MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod(), created_on);
 										em.persist(record);
+									}
+									if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
+										newestNumberDto = simpleRecordDto;
+									}
+								} else if (valueObj instanceof String) {
+									if (latestStringMeasurementTime < dateOfMeasurement) {
+										String value = (String) valueObj;
+										MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod(), created_on);
+										em.persist(record);
+									}
+									if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
+										newestStringDto = simpleRecordDto;
 									}
 								}
 							}
-							SimpleRecordDto newestDto = (SimpleRecordDto) dataRecords.get(dataRecords.size()-1);
-							if (lastEntry == null){
-								Double value = (Double) newestDto.getValue();
-								lastEntry = new Measurement(station, type, value, new Date(newestDto.getTimestamp()), newestDto.getPeriod());
-								em.persist(lastEntry);
+
+							if (newestNumberDto != null) {
+								Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
+								if (latestNumberMeasurement == null) {
+									latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
+									em.persist(latestNumberMeasurement);
+								} else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
+									latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
+									latestNumberMeasurement.setValue(valueNumber);
+									em.merge(latestNumberMeasurement);
+								}
 							}
-							else if (newestDto != null && newestDto.getTimestamp()>lastEntryTime){
-								Double value = (Double) newestDto.getValue();
-								lastEntry.setTimestamp(new Date(newestDto.getTimestamp()));
-								lastEntry.setValue(value);
-								em.merge(lastEntry);
+
+							if (newestStringDto != null) {
+								String valueString = (String) newestStringDto.getValue();
+								if (latestStringMeasurement == null) {
+									latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+									em.persist(latestStringMeasurement);
+								} else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
+									latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
+									latestStringMeasurement.setValue(valueString);
+									em.merge(latestStringMeasurement);
+								}
 							}
+
 							em.getTransaction().commit();
-						}catch(Exception ex){
+						} catch(Exception ex) {
 							ex.printStackTrace();
 							if (em.getTransaction().isActive())
 								em.getTransaction().rollback();
@@ -163,14 +204,15 @@ public abstract class MHistory {
 					}
 
 				}
-			}catch(Exception ex){
+			} catch(Exception ex) {
 				ex.printStackTrace();
 				if (em.getTransaction().isActive())
 					em.getTransaction().rollback();
 				throw ex;
-			}finally{
+			} finally {
 				em.clear();
-				em.close();
+				if (em.isOpen())
+					em.close();
 			}
 		}
 	}

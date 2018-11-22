@@ -59,10 +59,9 @@ public class MeasurementHistory extends MHistory {
 
 	public MeasurementHistory() {
 	}
-	public MeasurementHistory(Station station, DataType type,
-			Double value, Date timestamp, Integer period,Date created_on) {
+	public MeasurementHistory(Station station, DataType type, Double value, Date timestamp, Integer period, Date created_on) {
 		super(station,type,timestamp,period);
-		this.value = value;
+		setValue(value);
 	}
 
 	public Long getId() {

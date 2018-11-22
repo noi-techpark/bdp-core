@@ -24,23 +24,19 @@ import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Entity
+@MappedSuperclass
 @Inheritance (strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class M {
-
-	@Id
-	private Long id;
 
 	@Column(nullable = false)
 	private Date created_on;
@@ -135,7 +131,7 @@ public abstract class M {
 		return JPAUtil.getSingleResultOrAlternative(query, new Date(-1));
 	}
 
-	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role,T table) {
+	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
 			return null;
 		String baseQuery = "select record from " + table.getClass().getSimpleName() + " record, BDPPermissions p"
