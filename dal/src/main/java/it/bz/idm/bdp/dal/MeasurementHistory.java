@@ -22,7 +22,6 @@ package it.bz.idm.bdp.dal;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -44,7 +43,6 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
-import it.bz.idm.bdp.dto.FullRecordDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
@@ -179,6 +177,7 @@ public class MeasurementHistory extends MHistory {
 		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
 	}
+
 	@Override
 	public Object pushRecords(EntityManager em, String stationType, Object... objects) {
 		Object object = objects[0];
@@ -241,52 +240,7 @@ public class MeasurementHistory extends MHistory {
 				em.clear();
 				em.close();
 			}
-		}else if (object instanceof Object[]){
-			List<Object> dtos = Arrays.asList((Object[]) object);
-			try{
-				em.getTransaction().begin();
-				Station station = null;
-				DataType type = null;
-				String tempSS = null,tempTS = null;
-				for (Object dto : dtos){
-					FullRecordDto full = (FullRecordDto)dto;
-					if (full.validate()){
-						if (!full.getStation().equals(tempSS)){
-							station = Station.findStation(em, stationType, full.getStation());
-							if (station == null)
-								continue;
-							tempSS = station.getStationcode();
-						}
-						if (!full.getType().equals(tempTS)){
-							type = DataType.findByCname(em, full.getType());
-							if (type == null)
-								continue;
-							tempTS = full.getType();
-						}
-						M lastEntry = new Measurement().findLatestEntry(em, station, type, full.getPeriod(), adminRole);
-						Number value = (Number) full.getValue();
-						if (lastEntry == null){
-							lastEntry = new Measurement(station, type,value.doubleValue(), new Date(full.getTimestamp()), full.getPeriod());
-							em.persist(lastEntry);
-						}
-						else if (lastEntry.getTimestamp().getTime()<full.getTimestamp()){
-							lastEntry.setValue(value.doubleValue());
-							lastEntry.setTimestamp(new Date(full.getTimestamp()));
-							em.merge(lastEntry);
-						}
-						MeasurementHistory record = new MeasurementHistory(station,type,value.doubleValue(), new Date(full.getTimestamp()),full.getPeriod(),new Date());
-						em.persist(record);
-					}
-				}
-				em.getTransaction().commit();
-			}catch(Exception ex){
-				ex.printStackTrace();
-				if (em.getTransaction().isActive())
-					em.getTransaction().rollback();
-			}
 		}
 		return null;
 	}
-
-
 }

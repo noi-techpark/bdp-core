@@ -58,7 +58,7 @@ public class StationDto implements Serializable {
 	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
 	private String parentId;
 
-	@JsonPropertyDescription("Meta data, that describes this station (ex., {\"municipality\":\"Bolzano\"})")
+	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
 	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {

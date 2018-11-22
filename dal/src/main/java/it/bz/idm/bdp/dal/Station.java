@@ -311,10 +311,10 @@ public class Station {
 				}
 				sync(em, dto);
 			} catch (Exception e) {
-				e.printStackTrace();
 				em.getTransaction().rollback();
 				if (e instanceof JPAException)
 					throw (JPAException) e;
+				e.printStackTrace();
 				throw new JPAException(e.getMessage(), e);
 			}
 		}
