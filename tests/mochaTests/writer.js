@@ -90,5 +90,15 @@ describe("BDP WRITER v1", function() {
 				return chakram.wait();
 			});
 		});
+		method = "stations"
+		stationType = "ST"
+		url = webserviceHost + webservice + method;
+		it("No path variables: " + url, function () {
+			return chakram.get(url).then(function (response) {
+				checkBadRequest(response);
+				expect(response.body.description).to.contain("Missing station type");
+				return chakram.wait();
+			});
+		});
 	});
 });
