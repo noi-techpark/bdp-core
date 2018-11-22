@@ -57,8 +57,7 @@ public class MeasurementString extends M {
 
 	public MeasurementString() {
 	}
-	public MeasurementString(Station station, DataType type,
-			String value, Date timestamp, Integer period) {
+	public MeasurementString(Station station, DataType type, String value, Date timestamp, Integer period) {
 		this.setStation(station);
 		this.setType(type);
 		this.setTimestamp(timestamp);
@@ -83,8 +82,7 @@ public class MeasurementString extends M {
 		this.stringValue = value;
 	}
 
-	public static MeasurementString findLastMeasurementByStationAndType(
-			EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+	public static MeasurementString findLastMeasurementByStationAndType(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
 		TypedQuery<MeasurementString> q = em.createQuery("SELECT measurement "
 				+ "FROM MeasurementString measurement, BDPPermissions p "
 				+ "WHERE (measurement.station = p.station OR p.station = null) "
@@ -92,8 +90,8 @@ public class MeasurementString extends M {
 				+ "AND (measurement.period = p.period OR p.period = null) "
 				+ "AND p.role = :role "
 				+ "AND measurement.station = :station "
-				+ "AND measurement.type=:type "
-				+ "AND measurement.period=:period",MeasurementString.class);
+				+ "AND measurement.type = :type "
+				+ "AND measurement.period = :period", MeasurementString.class);
 		q.setParameter("station",station);
 		q.setParameter("type",type);
 		q.setParameter("period", period);
