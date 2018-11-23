@@ -55,7 +55,8 @@ public class JsonController extends DataRetriever{
 
 
 	@RequestMapping(value = "refreshToken", method = RequestMethod.GET)
-	public @ResponseBody JwtTokenDto getAccessToken(@RequestParam(value="user",required=true) String user,@RequestParam(value="password",required=true)String pw) {
+	public @ResponseBody JwtTokenDto getAccessToken(@RequestParam(value="user", required=true) String user,
+													@RequestParam(value="password", required=true) String pw) {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, pw));
 		UserDetails principal = (UserDetails) authentication.getPrincipal();
 		JwtTokenDto token = util.generateToken(principal);
@@ -75,7 +76,8 @@ public class JsonController extends DataRetriever{
 	}
 	@RequestMapping(value = "/data-types", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody List<String[]> getDataTypes(@RequestParam String stationType, @RequestParam(required=false) String stationId) {
+	public @ResponseBody List<String[]> getDataTypes(@RequestParam String stationType,
+													 @RequestParam(required=false) String stationId) {
 		return super.getDataTypes(stationType, stationId);
 	}
 	@RequestMapping(value = "/types", method = RequestMethod.GET)
@@ -85,25 +87,44 @@ public class JsonController extends DataRetriever{
 	}
 	@RequestMapping(value = "/date-of-last-record", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody Date getDateOfLastRecord(@RequestParam String stationType,@RequestParam String stationId, @RequestParam(required=false) String typeId, @RequestParam(required=false) Integer period,Principal principal) {
+	public @ResponseBody Date getDateOfLastRecord(@RequestParam String stationType,
+												  @RequestParam String stationId,
+												  @RequestParam(required=false) String typeId,
+												  @RequestParam(required=false) Integer period,
+												  Principal principal) {
 		return super.getDateOfLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/last-record", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody RecordDto getLastRecord(@RequestParam String stationType, @RequestParam String stationId, @RequestParam(required=false)String typeId, @RequestParam(required=false)Integer period,Principal principal) {
+	public @ResponseBody RecordDto getLastRecord(@RequestParam String stationType,
+												 @RequestParam String stationId,
+												 @RequestParam(required=false) String typeId,
+												 @RequestParam(required=false) Integer period,
+												 Principal principal) {
 		return super.getLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/newest-record", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody RecordDto getNewestRecord(@RequestParam String stationType,@RequestParam String stationId, @RequestParam(required=false) String typeId, @RequestParam(required=false) Integer period, Principal principal) {
-		RecordDto newestRecord = super.getNewestRecord(stationType, stationId, typeId, period, principal);
-		return newestRecord;
+	public @ResponseBody RecordDto getNewestRecord(@RequestParam String stationType,
+												   @RequestParam String stationId,
+												   @RequestParam(required=false) String typeId,
+												   @RequestParam(required=false) Integer period,
+												   Principal principal) {
+		return super.getNewestRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/records", method = RequestMethod.GET)
-	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,@RequestParam String stationId,@RequestParam(required=false) String typeId,@RequestParam(required=false) Long start,@RequestParam(required=false) Long end,
-			@RequestParam(required=false) Integer period, @RequestParam(required=false)Integer seconds, Principal p) {
-		return super.getRecords(stationType, stationId, typeId, start != null ? new Date(start) : null,
-				end != null ? new Date(end) : null, period, seconds, p);
+	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,
+													@RequestParam String stationId,
+													@RequestParam(required=false) String typeId,
+													@RequestParam(required=false) Long start,
+													@RequestParam(required=false) Long end,
+													@RequestParam(required=false) Integer period,
+													@RequestParam(required=false) Integer seconds,
+													Principal p) {
+		return super.getRecords(stationType, stationId, typeId,
+								start != null ? new Date(start) : null,
+								end != null ? new Date(end) : null,
+								period, seconds, p);
 	}
 	@RequestMapping(value = "/station-details", method = RequestMethod.GET)
 	@Override
