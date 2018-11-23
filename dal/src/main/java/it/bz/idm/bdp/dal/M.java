@@ -134,35 +134,36 @@ public abstract class M {
 	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
 			return null;
+
 		String baseQuery = "select record from " + table.getClass().getSimpleName() + " record, BDPPermissions p"
 						 + " where (record.station = p.station or p.station = null)"
 						 + " and (record.type = p.type or p.type = null)"
 						 + " and (record.period = p.period or p.period = null)"
 					 	 + " and p.role = :role "
 					 	 + "and record.station = :station";
+		String andPeriod = " AND record.period = :period";
+		String andType = " AND record.type = :type";
 		String order = " ORDER BY record.timestamp DESC";
 
 		TypedQuery<? extends M> query = null;
 		//set optional parameters
 		if (type == null){
-			if (period == null){
+			if (period == null) {
 				query = em.createQuery(baseQuery + order, M.class);
-			}else{
-				query = em.createQuery(baseQuery + " AND record.period=:period" + order, table.getClass());
-				query.setParameter("period", period);
+			} else {
+				query = em.createQuery(baseQuery + andPeriod + order, table.getClass())
+						  .setParameter("period", period);
 			}
-		}else if (period==null){
-			query = em.createQuery(baseQuery + " AND record.type=:type" + order, table.getClass());
-			query.setParameter("type", type);
-
-		}else{
-			query = em.createQuery(baseQuery + " AND record.type=:type AND record.period=:period" + order,
-					M.class);
-			query.setParameter("type", type);
-			query.setParameter("period", period);
+		} else if (period == null) {
+			query = em.createQuery(baseQuery + andType + order, table.getClass())
+					  .setParameter("type", type);
+		} else {
+			query = em.createQuery(baseQuery + andType + andPeriod + order, M.class)
+					  .setParameter("type", type)
+					  .setParameter("period", period);
 		}
 
-		//set required paramaters
+		//set required parameters
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(query);
