@@ -114,20 +114,20 @@ public abstract class MHistory {
 			for (Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
 				Station station = Station.findStation(em, stationType, entry.getKey());
 				if (station == null) {
-					System.out.println("pushRecords: Station '" + stationType + "/" + entry.getKey() + "' not found. Skipping...");
+					System.err.println("pushRecords: Station '" + stationType + "/" + entry.getKey() + "' not found. Skipping...");
 					continue;
 				}
 				for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()) {
 					try {
 						DataType type = DataType.findByCname(em, typeEntry.getKey());
 						if (type == null) {
-							System.out.println("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
+							System.err.println("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
 							continue;
 						}
 
 						List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 						if (dataRecords.isEmpty()) {
-							System.out.println("pushRecords: Empty data set. Skipping...");
+							System.err.println("pushRecords: Empty data set. Skipping...");
 							continue;
 						}
 
@@ -171,6 +171,11 @@ public abstract class MHistory {
 								if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
 									newestStringDto = simpleRecordDto;
 								}
+							} else {
+								System.err.println("pushRecords: Unsupported data format for "
+												   + stationType + "/" + entry.getKey() + "/" + typeEntry.getKey()
+												   + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
+												   + ". Skipping..."));
 							}
 						}
 
