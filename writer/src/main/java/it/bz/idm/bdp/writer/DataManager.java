@@ -40,20 +40,19 @@ import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
 @Component
 public class DataManager {
 
-	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, Object... data){
+	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			MHistory.pushRecords(em, stationType, data);
+			MHistory.pushRecords(em, stationType, dataMap);
 			return ResponseEntity.created(responseLocation).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
 		} finally {
 			if (em.isOpen())
 				em.close();

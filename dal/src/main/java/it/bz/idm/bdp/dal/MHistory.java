@@ -31,7 +31,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
@@ -101,41 +100,37 @@ public abstract class MHistory {
 		this.period = period;
 	}
 
-	public static void pushRecords(EntityManager em, String stationType, Object... objects) {
-		Object object = objects[0];
-		if (! (object instanceof DataMapDto)) {
-			throw new JPAException("Given data is not a DataMapDto");
-		}
-
-		BDPRole adminRole = BDPRole.fetchAdminRole(em);
-		@SuppressWarnings("unchecked")
-		DataMapDto<RecordDtoImpl> dto = (DataMapDto<RecordDtoImpl>) object;
-		try{
-			for (Entry<String, DataMapDto<RecordDtoImpl>> entry:dto.getBranch().entrySet()){
-				Station station = Station.findStation(em, stationType, entry.getKey());
+	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
+		boolean givenDataOK = false;
+		boolean stationFound = false;
+		boolean typeFound = false;
+		boolean jsonOK = false;
+		try {
+			for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
+				Station station = Station.findStation(em, stationType, stationEntry.getKey());
 				if (station == null) {
-					System.err.println("pushRecords: Station '" + stationType + "/" + entry.getKey() + "' not found. Skipping...");
+					System.err.println("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
 					continue;
 				}
-				for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : entry.getValue().getBranch().entrySet()) {
+				stationFound = true;
+				for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
 					try {
 						DataType type = DataType.findByCname(em, typeEntry.getKey());
 						if (type == null) {
 							System.err.println("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
 							continue;
 						}
-
+						typeFound = true;
 						List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
 						if (dataRecords.isEmpty()) {
 							System.err.println("pushRecords: Empty data set. Skipping...");
 							continue;
 						}
-
 						em.getTransaction().begin();
 
-						M latestNumberMeasurement = new Measurement().findLatestEntry(em, station, type, null, adminRole);
+						M latestNumberMeasurement = M.findLatestEntryImpl(em, station, type, Measurement.class);
 						long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
-						M latestStringMeasurement = new MeasurementString().findLatestEntry(em, station, type, null, adminRole);
+						M latestStringMeasurement = M.findLatestEntryImpl(em, station, type, MeasurementString.class);
 						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
 						Date created_on = new Date();
@@ -162,6 +157,7 @@ public abstract class MHistory {
 								if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
 									newestNumberDto = simpleRecordDto;
 								}
+								givenDataOK = true;
 							} else if (valueObj instanceof String) {
 								if (latestStringMeasurementTime < dateOfMeasurement) {
 									String value = (String) valueObj;
@@ -171,12 +167,14 @@ public abstract class MHistory {
 								if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
 									newestStringDto = simpleRecordDto;
 								}
+								givenDataOK = true;
 							} else {
 								System.err.println("pushRecords: Unsupported data format for "
-												   + stationType + "/" + entry.getKey() + "/" + typeEntry.getKey()
+												   + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
 												   + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
 												   + ". Skipping..."));
 							}
+							jsonOK = true;
 						}
 
 						if (newestNumberDto != null) {
@@ -211,10 +209,25 @@ public abstract class MHistory {
 						continue;
 					}
 				}
-
 			}
+
+			if (stationFound == false) {
+				throw new JPAException("No station found inside " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+			}
+			if (typeFound == false) {
+				throw new JPAException("No station/type found inside " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+			}
+			if (givenDataOK == false) {
+				throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
+			}
+			/* FALSE, if no valid data can be found, either because of missing station/type/data combinations, hence invalid JSON */
+			if (jsonOK == false) {
+				throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+			}
+
 		} catch(Exception ex) {
-			ex.printStackTrace();
+			if (! (ex instanceof JPAException))
+				ex.printStackTrace();
 			if (em.getTransaction().isActive())
 				em.getTransaction().rollback();
 			throw ex;

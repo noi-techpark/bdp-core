@@ -77,9 +77,9 @@ public class JsonController extends DataManager {
 	}
 
 	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
-	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
+	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
 											@PathVariable String stationType) {
-		return super.pushRecords(stationType, null, stationData);
+		return super.pushRecords(stationType, null, dataMap);
 	}
 
 	@Override

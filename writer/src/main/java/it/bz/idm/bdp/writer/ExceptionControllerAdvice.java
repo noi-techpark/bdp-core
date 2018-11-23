@@ -145,6 +145,8 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 			}
 			if (jpaex.getDtoClass() != null) {
 				ObjectMapper mapper = new ObjectMapper();
+
+				// TODO Generate visitor to filter out only properties in all sub-levels
 		        SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
 		        try {
 			        mapper.acceptJsonFormatVisitor(jpaex.getDtoClass(), visitor);

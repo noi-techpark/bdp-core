@@ -35,7 +35,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
 @MappedSuperclass
-@Inheritance (strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class M {
 
 	@Column(nullable = false)
@@ -131,7 +131,44 @@ public abstract class M {
 		return JPAUtil.getSingleResultOrAlternative(query, new Date(-1));
 	}
 
-	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
+	/**
+	 * This is the {@link findLatestEntryImpl} implementation without permission control.
+	 *
+	 * <p> THIS METHOD SEES ALL DATA, SO CAREFUL WHEN YOU USE IT </p>
+	 *
+	 * Use {@link M#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)}, if you need permission handling.
+	 *
+	 * @param em
+	 * @param station
+	 * @param type
+	 * @param period
+	 * @param table
+	 * @return
+	 */
+	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Class<T> subClass) {
+		if (station == null)
+			return null;
+
+		String baseQuery = "select record from " + subClass.getSimpleName() + " record"
+						 + " WHERE record.station = :station";
+		String andType = " AND record.type = :type";
+		String order = " ORDER BY record.timestamp DESC";
+
+		TypedQuery<? extends M> query = null;
+		//set optional parameters
+		if (type == null){
+			query = em.createQuery(baseQuery + order, M.class);
+		} else {
+			query = em.createQuery(baseQuery + andType + order, subClass)
+					  .setParameter("type", type);
+		}
+
+		//set required parameters
+		query.setParameter("station", station);
+		return JPAUtil.getSingleResultOrNull(query);
+	}
+
+	protected static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
 			return null;
 
