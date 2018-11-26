@@ -107,10 +107,11 @@ public class Station {
 		this.active = true;
 	}
 
-	public Station(String stationType, String stationCode) {
+	public Station(String stationType, String stationCode, String stationName) {
 		this();
 		setStationtype(stationType);
 		setStationcode(stationCode);
+		setName(stationName);
 	}
 
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){

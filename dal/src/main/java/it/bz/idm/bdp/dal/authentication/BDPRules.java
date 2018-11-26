@@ -53,6 +53,29 @@ public class BDPRules {
 
 	private Integer period;
 
+	public BDPRules() {
+	}
+
+	public BDPRules(BDPRole role, Station station, DataType type, Integer period) {
+		super();
+		setRole(role);
+		setStation(station);
+		setType(type);
+		setPeriod(period);
+	}
+
+	public BDPRules(BDPRole role, Station station, DataType type) {
+		this(role, station, type, null);
+	}
+
+	public BDPRules(BDPRole role, Station station) {
+		this(role, station, null);
+	}
+
+	public BDPRules(BDPRole role) {
+		this(role, null);
+	}
+
 	public Long getId() {
 		return id;
 	}

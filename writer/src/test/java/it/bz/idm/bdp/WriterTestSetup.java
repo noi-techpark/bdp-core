@@ -37,15 +37,11 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 
 		roleParent = new BDPRole(prefix + "parent", "The Parent Role");
 		roleChild = new BDPRole(prefix + "child", "The Child Role", roleParent);
-		station = new Station(prefix + "Environment", prefix + "Station01");
+		station = new Station(prefix + "Environment", prefix + "Station01", "Station One");
 		type = new DataType(prefix + "NO2", "mg", "Fake type", "Instants");
-		rule = new BDPRules();
-		rule.setPeriod(500);
-		rule.setRole(roleParent);
-		rule.setStation(station);
-		rule.setType(type);
+		rule = new BDPRules(roleParent, station, type, 500);
 		measurement = new Measurement(station, type, 1.11, new Date(), 500);
-		measurement.setId(100L); // FIXME Manually set ID: needed for inherited classes of "M"
+
 		try {
 			em.getTransaction().begin();
 			em.persist(roleParent);
@@ -58,8 +54,10 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 		} catch (Exception e) {
 			e.printStackTrace();
 			em.getTransaction().rollback();
-			if (em.isOpen())
+			if (em.isOpen()) {
+				em.clear();
 				em.close();
+			}
 			throw e;
 		}
 	}
@@ -86,8 +84,10 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 			em.getTransaction().rollback();
 			throw e;
 		} finally {
-			if (em.isOpen())
+			if (em.isOpen()) {
+				em.clear();
 				em.close();
+			}
 		}
 	}
 }

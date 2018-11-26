@@ -20,11 +20,11 @@
  */
 package it.bz.idm.bdp;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -41,9 +41,6 @@ import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
 import it.bz.idm.bdp.dal.util.JPAUtil;
-import it.bz.idm.bdp.dto.DataTypeDto;
-import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
@@ -104,19 +101,10 @@ public class SecurityIT extends WriterTestSetup {
 	}
 
 	@Test
-	public void testSyncStations() {
-		StationDto s = new StationDto(prefix + "WRITER", null, null, null);
-		List<StationDto> dtos = new ArrayList<StationDto>();
-		dtos.add(s);
-		DataManager.syncStations(prefix + "EnvironmentStation", dtos, null); // TODO Update response location
-	}
-
-	@Test
-	public void testSyncDataTypes() {
-		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
-		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
-		dtos.add(t);
-		DataManager.syncDataTypes(dtos, null);
+	public void testAdminRole() {
+		BDPRole role = BDPRole.fetchAdminRole(em);
+		assertNotNull(role);
+		assertFalse(role.getUsers()==null || role.getUsers().isEmpty());
 	}
 
 }
