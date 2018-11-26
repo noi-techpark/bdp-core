@@ -71,7 +71,9 @@ public class JsonController extends DataRetriever{
 	}
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody List<String> getStations(@RequestParam String stationType) {
+	public @ResponseBody List<String> getStations(@RequestParam(required = false) String stationType) {
+		if (stationType == null)
+			return super.getStationTypes();
 		return super.getStations(stationType);
 	}
 	@RequestMapping(value = "/data-types", method = RequestMethod.GET)
@@ -82,7 +84,8 @@ public class JsonController extends DataRetriever{
 	}
 	@RequestMapping(value = "/types", method = RequestMethod.GET)
 	@Override
-	public @ResponseBody List<TypeDto> getTypes(String stationType, String stationId) {
+	public @ResponseBody List<TypeDto> getTypes(@RequestParam String stationType,
+												@RequestParam(required=false) String stationId) {
 		return super.getTypes(stationType, stationId);
 	}
 	@RequestMapping(value = "/date-of-last-record", method = RequestMethod.GET)

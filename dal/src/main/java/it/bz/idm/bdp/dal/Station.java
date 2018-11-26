@@ -256,6 +256,8 @@ public class Station {
 	}
 
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
+		if(stationCode == null || stationType == null || stationType.isEmpty())
+			return null;
 		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode and station.stationtype = :stationtype", Station.class)
 											 .setParameter("stationcode", stationCode)
 											 .setParameter("stationtype", stationType);
@@ -263,13 +265,11 @@ public class Station {
 	}
 
 	public static Station findStation(EntityManager em, String stationType, Integer stationCode) {
-		if(stationCode == null)
-			return null;
 		return findStation(em, stationType, (Object) stationCode);
 	}
 
 	public static Station findStation(EntityManager em, String stationType, String stationCode) {
-		if(stationCode == null || stationCode.isEmpty())
+		if(stationCode.isEmpty())
 			return null;
 		return findStation(em, stationType, (Object) stationCode);
 	}

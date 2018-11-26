@@ -33,8 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.M;
 import it.bz.idm.bdp.dal.MHistory;
+import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -98,7 +99,11 @@ public class DataManager {
 				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
 			}
 			BDPRole role = BDPRole.fetchAdminRole(em);
-			return M.getDateOfLastRecord(em, station, dataType, period, role);
+
+			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
+			Date date1 = new Measurement().getDateOfLastRecord(em, station, dataType, period, role);
+			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role);
+			return date1.after(date2) ? date1 : date2;
 		} catch (Exception e) {
 			if (!(e instanceof JPAException)) {
 				e.printStackTrace();

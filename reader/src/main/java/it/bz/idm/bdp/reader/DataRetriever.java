@@ -31,9 +31,11 @@ import javax.persistence.EntityManager;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementHistory;
+import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPUser;
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
@@ -45,42 +47,38 @@ public class DataRetriever {
 	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given */
 	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
 
-	//Utility
-	private List<String> getStationTypes(EntityManager em){
-		List<String> result = null;
-		result = Station.findStationTypes(em);
-		return result;
-
-	}
-
 	//API additions for V2
 	public List<TypeDto> getTypes(String type, String stationId) {
-		List<TypeDto> dataTypes = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			dataTypes =	DataType.findTypes(em, type, stationId);
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
+			return DataType.findTypes(em, type, stationId);
+		}catch(Exception e){
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return dataTypes;
 	}
 
 	//APIv1
-
 	public List<? extends StationDto> getStationDetails(String stationType, String stationID) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
-		try{
+		try {
 			Station stationById = null;
 			if (stationID != null && !stationID.isEmpty()) {
 				stationById = Station.findStation(em, stationType, stationID);
 			}
 			if ((stationById == null && (stationID == null || stationID.isEmpty())) || (stationById != null && stationType.equals(stationById.getStationtype())))
 				stations = Station.findStationsDetails(em, stationType, stationById);
-		}catch(Exception ex){
-			ex.printStackTrace();
+		}catch(Exception e){
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
 		}finally{
 			if (em.isOpen())
 				em.close();
@@ -89,30 +87,48 @@ public class DataRetriever {
 	}
 
 	public List<String> getStations(String type){
-		List<String> stations = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			if (getStationTypes(em).contains(type))
-				stations = Station.findStationCodes(em, type, true);
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
+			return Station.findStationCodes(em, type, true);
+		} catch(Exception e) {
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return stations;
+	}
+
+	public List<String> getStationTypes(){
+		EntityManager em = JPAUtil.createEntityManager();
+		try{
+			return Station.findStationTypes(em);
+		} catch(Exception e) {
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 
 	public List<String[]> getDataTypes(String type, String stationId) {
-		List<String[]> dataTypes = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			dataTypes = DataType.findDataTypes(em, type, stationId);
-		}catch(Exception ex){
-			ex.printStackTrace();
+			return DataType.findDataTypes(em, type, stationId);
+		}catch(Exception e){
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
 		}finally{
-			em.close();
+			if (em.isOpen())
+				em.close();
 		}
-		return dataTypes;
 	}
 
 	public List<String[]> getDataTypes(String type){
@@ -122,13 +138,22 @@ public class DataRetriever {
 	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
-		try{
+		Date date = new Date(-1);
+		try {
 			Station station = Station.findStation(em, stationTypology, stationcode);
-			DataType type = DataType.findByCname(em,cname);
-			return Measurement.getDateOfLastRecord(em, station, type, period, role);
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			throw ex;
+			if (station == null)
+				return date;
+			DataType type = DataType.findByCname(em, cname);
+
+			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
+			Date date1 = new Measurement().getDateOfLastRecord(em, station, type, period, role);
+			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, type, period, role);
+			return date1.after(date2) ? date1 : date2;
+		} catch(Exception e) {
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -136,23 +161,44 @@ public class DataRetriever {
 	}
 
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
-		SimpleRecordDto dto = null;
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
-		try{
+		try {
 			Station station = Station.findStation(em, stationTypology, stationcode);
-			DataType type = DataType.findByCname(em,cname);
+			if (station == null)
+				return null;
+
+			DataType type = DataType.findByCname(em, cname);
+
 			Measurement latestEntry = (Measurement) new Measurement().findLatestEntry(em, station, type, period, role);
-			if (latestEntry != null){
-				dto = new SimpleRecordDto(latestEntry.getTimestamp().getTime(),latestEntry.getValue());
-				dto.setPeriod(latestEntry.getPeriod());
+			MeasurementString latestStringEntry = (MeasurementString) new MeasurementString().findLatestEntry(em, station, type, period, role);
+
+			if (latestEntry == null && latestStringEntry == null) {
+				return null;
 			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}finally{
-			em.close();
+
+			if (latestEntry == null && latestStringEntry != null) {
+				return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(), latestStringEntry.getValue(), latestStringEntry.getPeriod());
+			}
+
+			if (latestEntry != null && latestStringEntry == null) {
+				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(), latestEntry.getValue(), latestEntry.getPeriod());
+			}
+
+			if (latestEntry.getTimestamp().after(latestStringEntry.getTimestamp())) {
+				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(), latestEntry.getValue(), latestEntry.getPeriod());
+			}
+
+			return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(), latestStringEntry.getValue(), latestStringEntry.getPeriod());
+		} catch(Exception e) {
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return dto;
 	}
 	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
 		return getLastRecord(typology, stationId, typeId, period, principal);
@@ -177,17 +223,20 @@ public class DataRetriever {
 		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em);
 
 		List<RecordDto> records = new ArrayList<RecordDto>();
-		try{
+		try {
 			Station station = Station.findStation(em, stationtypology, identifier);
 			if (station != null) {
 				records.addAll(MeasurementHistory.findRecords(em, stationtypology, identifier, type, start, end, period, role));
 				return records;
 			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
-		finally{
-			em.close();
+		} catch(Exception e) {
+			if (e instanceof JPAException)
+				throw (JPAException) e;
+			e.printStackTrace();
+			throw new JPAException(e.getMessage(), e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
 		return records;
 	}

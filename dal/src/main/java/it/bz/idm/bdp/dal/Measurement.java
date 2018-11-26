@@ -97,6 +97,8 @@ public class Measurement extends M {
 		return M.findLatestEntryImpl(em, station, type, period, role, this);
 	}
 
-
-
+	@Override
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return M.getDateOfLastRecordImpl(em, station, type, period, role, this);
+	}
 }

@@ -53,6 +53,10 @@ public abstract class M {
 	@Column(nullable = false)
 	private Integer period;
 
+	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract void setValue(Object value);
+
 	public M() {
 		this.created_on = new Date();
 	}
@@ -102,12 +106,26 @@ public abstract class M {
 		this.period = period;
 	}
 
-	public static Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+	/**
+	 * Retrieve the date of the last inserted record of {@code table}.
+	 *
+	 * Hibernate does not support {@code UNION ALL} queries, hence we must retrieve all
+	 * last record entries of all subclasses and compare programmatically.
+	 *
+	 * @param em
+	 * @param station
+	 * @param type
+	 * @param period
+	 * @param role
+	 * @param table
+	 * @return
+	 */
+	public static <T> Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
 			return null;
 
 		String queryString = "select record.timestamp "
-				+ "from M record, BDPPermissions p "
+				+ "from " + table.getClass().getSimpleName() + " record, BDPPermissions p "
 				+ "WHERE (record.station = p.station OR p.station = null) "
 				+ "AND (record.type = p.type OR p.type = null) "
 				+ "AND (record.period = p.period OR p.period = null) "
@@ -205,6 +223,5 @@ public abstract class M {
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 		return JPAUtil.getSingleResultOrNull(query);
 	}
-	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
-	public abstract void setValue(Object value);
+
 }

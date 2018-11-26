@@ -40,7 +40,12 @@ public class SimpleRecordDto extends RecordDtoImpl {
 
 	public SimpleRecordDto() {
 	}
-	public SimpleRecordDto(Long timestamp,Double value) {
+	public SimpleRecordDto(Long timestamp, Double value) {
+		super();
+		this.timestamp = timestamp;
+		this.value = value;
+	}
+	public SimpleRecordDto(Long timestamp, Object value) {
 		super();
 		this.timestamp = timestamp;
 		this.value = value;

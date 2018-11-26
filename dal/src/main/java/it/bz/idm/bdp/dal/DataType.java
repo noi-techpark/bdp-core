@@ -143,7 +143,7 @@ public class DataType {
 		String queryString = "SELECT type, m.period FROM Measurement m INNER JOIN m.type type"
 						   + " WHERE m.station.stationtype = :stationType";
 		String queryGroupBy = " GROUP BY type, m.period";
-		String andStationCode = " AND record.station.stationcode = :station";
+		String andStationCode = " AND m.station.stationcode = :station";
 
 		List<Object[]> resultList = null;
 		if (stationId == null || stationId.isEmpty()) {
