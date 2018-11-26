@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.14
--- Dumped by pg_dump version 11.0 (Ubuntu 11.0-1.pgdg18.04+2)
+-- Dumped from database version 9.5.15
+-- Dumped by pg_dump version 11.1 (Ubuntu 11.1-1.pgdg18.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
---SET idle_in_transaction_session_timeout = 0;
+-- SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -16,73 +16,17 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: intime; Type: SCHEMA; Schema: -; Owner: bdp
+-- Name: intime; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
 CREATE SCHEMA intime;
 
 
-ALTER SCHEMA intime OWNER TO bdp;
-
---
--- Name: alarm_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.alarm_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.alarm_seq OWNER TO bdp;
+ALTER SCHEMA intime OWNER TO postgres;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
-
---
--- Name: alarm; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.alarm (
-    id bigint DEFAULT nextval('intime.alarm_seq'::regclass) NOT NULL,
-    createdate timestamp without time zone,
-    "timestamp" timestamp without time zone,
-    specification_id bigint,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.alarm OWNER TO bdp;
-
---
--- Name: alarmspecification_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.alarmspecification_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.alarmspecification_seq OWNER TO bdp;
-
---
--- Name: alarmspecification; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.alarmspecification (
-    id bigint DEFAULT nextval('intime.alarmspecification_seq'::regclass) NOT NULL,
-    description character varying(255),
-    name character varying(255)
-);
-
-
-ALTER TABLE intime.alarmspecification OWNER TO bdp;
 
 --
 -- Name: bdppermissions; Type: TABLE; Schema: intime; Owner: bdp
@@ -279,100 +223,6 @@ CREATE TABLE intime.datatype_i18n (
 ALTER TABLE intime.datatype_i18n OWNER TO bdp;
 
 --
--- Name: echargingplugoutlet_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.echargingplugoutlet_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.echargingplugoutlet_seq OWNER TO bdp;
-
---
--- Name: echargingplugoutlet; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.echargingplugoutlet (
-    id bigint DEFAULT nextval('intime.echargingplugoutlet_seq'::regclass) NOT NULL,
-    code character varying(255),
-    hasfixedcable boolean,
-    maxcurrent double precision,
-    maxpower double precision,
-    mincurrent double precision,
-    plugtype character varying(255),
-    plug_id bigint
-);
-
-
-ALTER TABLE intime.echargingplugoutlet OWNER TO bdp;
-
---
--- Name: elaboration_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.elaboration_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.elaboration_seq OWNER TO bdp;
-
---
--- Name: elaboration; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.elaboration (
-    id integer DEFAULT nextval('intime.elaboration_seq'::regclass) NOT NULL,
-    created_on timestamp without time zone,
-    period integer,
-    "timestamp" timestamp without time zone,
-    value double precision,
-    station_id bigint,
-    type_id bigint
-);
-
-
-ALTER TABLE intime.elaboration OWNER TO bdp;
-
---
--- Name: elaborationhistory_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.elaborationhistory_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.elaborationhistory_seq OWNER TO bdp;
-
---
--- Name: elaborationhistory; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.elaborationhistory (
-    id bigint DEFAULT nextval('intime.elaborationhistory_seq'::regclass) NOT NULL,
-    created_on timestamp without time zone,
-    period integer,
-    "timestamp" timestamp without time zone,
-    value double precision,
-    station_id bigint,
-    type_id bigint
-);
-
-
-ALTER TABLE intime.elaborationhistory OWNER TO bdp;
-
---
 -- Name: measurement_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -392,10 +242,10 @@ ALTER TABLE intime.measurement_seq OWNER TO bdp;
 
 CREATE TABLE intime.measurement (
     id bigint DEFAULT nextval('intime.measurement_seq'::regclass) NOT NULL,
-    created_on timestamp without time zone,
-    period integer,
-    "timestamp" timestamp without time zone,
-    value double precision,
+    created_on timestamp without time zone NOT NULL,
+    period integer NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL,
+    doublevalue double precision,
     station_id bigint,
     type_id bigint
 );
@@ -625,11 +475,11 @@ ALTER TABLE intime.measurementstring_seq OWNER TO bdp;
 --
 
 CREATE TABLE intime.measurementstring (
-    id integer DEFAULT nextval('intime.measurementstring_seq'::regclass) NOT NULL,
-    created_on timestamp without time zone,
-    period integer,
-    "timestamp" timestamp without time zone,
-    value character varying(255),
+    id bigint DEFAULT nextval('intime.measurementstring_seq'::regclass) NOT NULL,
+    created_on timestamp without time zone NOT NULL,
+    period integer NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL,
+    stringvalue character varying(255),
     station_id bigint,
     type_id bigint
 );
@@ -719,7 +569,7 @@ CREATE TABLE intime.station (
     id bigint DEFAULT nextval('intime.station_seq'::regclass) NOT NULL,
     active boolean,
     available boolean,
-    name character varying(255),
+    name character varying(255) NOT NULL,
     origin character varying(255),
     pointprojection public.geometry,
     stationcode character varying(255) NOT NULL,
@@ -780,7 +630,7 @@ ALTER TABLE intime.type_seq OWNER TO bdp;
 
 CREATE TABLE intime.type (
     id bigint DEFAULT nextval('intime.type_seq'::regclass) NOT NULL,
-    cname character varying(255),
+    cname character varying(255) NOT NULL,
     created_on timestamp without time zone,
     cunit character varying(255),
     description character varying(255),
@@ -789,22 +639,6 @@ CREATE TABLE intime.type (
 
 
 ALTER TABLE intime.type OWNER TO bdp;
-
---
--- Name: alarm alarm_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.alarm
-    ADD CONSTRAINT alarm_pkey PRIMARY KEY (id);
-
-
---
--- Name: alarmspecification alarmspecification_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.alarmspecification
-    ADD CONSTRAINT alarmspecification_pkey PRIMARY KEY (id);
-
 
 --
 -- Name: bdppermissions bdppermissions_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
@@ -860,30 +694,6 @@ ALTER TABLE ONLY intime.carparkingdynamichistory
 
 ALTER TABLE ONLY intime.datatype_i18n
     ADD CONSTRAINT datatype_i18n_pkey PRIMARY KEY (datatype_id, i18n_key);
-
-
---
--- Name: echargingplugoutlet echargingplugoutlet_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingplugoutlet
-    ADD CONSTRAINT echargingplugoutlet_pkey PRIMARY KEY (id);
-
-
---
--- Name: elaboration elaboration_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaboration
-    ADD CONSTRAINT elaboration_pkey PRIMARY KEY (id);
-
-
---
--- Name: elaborationhistory elaborationhistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaborationhistory
-    ADD CONSTRAINT elaborationhistory_pkey PRIMARY KEY (id);
 
 
 --
@@ -967,14 +777,6 @@ ALTER TABLE ONLY intime.type
 
 
 --
--- Name: measurementhistory uk46ymdfj63griskpxoou335uqn; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.measurementhistory
-    ADD CONSTRAINT uk46ymdfj63griskpxoou335uqn UNIQUE (station_id, type_id, "timestamp", period);
-
-
---
 -- Name: bdprole uk_47fpix67ktrhok7ee98qr4h9j; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -983,11 +785,11 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: measurement uk_6tvbxvtiou8witoj88k9jp48r; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: type uk_7jg7156wbi7gvwgs6s46yf43a; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
-ALTER TABLE ONLY intime.measurement
-    ADD CONSTRAINT uk_6tvbxvtiou8witoj88k9jp48r UNIQUE (period, station_id, type_id);
+ALTER TABLE ONLY intime.type
+    ADD CONSTRAINT uk_7jg7156wbi7gvwgs6s46yf43a UNIQUE (cname);
 
 
 --
@@ -1018,13 +820,6 @@ CREATE INDEX bdppermissions_stp_idx ON intime.bdppermissions USING btree (statio
 --
 
 CREATE INDEX measurement_tsdesc_idx ON intime.measurement USING btree ("timestamp" DESC);
-
-
---
--- Name: measurementhistory_tsdesc_idx; Type: INDEX; Schema: intime; Owner: bdp
---
-
-CREATE INDEX measurementhistory_tsdesc_idx ON intime.measurementhistory USING btree ("timestamp" DESC);
 
 
 --
@@ -1068,14 +863,6 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
--- Name: alarm fk67hmoh6okqgqcv0j0ia04jsks; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.alarm
-    ADD CONSTRAINT fk67hmoh6okqgqcv0j0ia04jsks FOREIGN KEY (specification_id) REFERENCES intime.alarmspecification(id);
-
-
---
 -- Name: measurementhistory fk6ft0if5pwoff43uyhh4g6mrv5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1108,14 +895,6 @@ ALTER TABLE ONLY intime.measurementstringhistory
 
 
 --
--- Name: alarm fk9w0ph05u8x3louer75d8d6g0t; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.alarm
-    ADD CONSTRAINT fk9w0ph05u8x3louer75d8d6g0t FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
 -- Name: bdprole fka9v6xc44bmdp6ngcev8w6qxr5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1124,27 +903,11 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: elaboration fkav5dnq85ljasqix0nnjhbcoy8; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaboration
-    ADD CONSTRAINT fkav5dnq85ljasqix0nnjhbcoy8 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
 -- Name: measurementmobilehistory fkdc8h2uo6mi73f6sho1cbc4qqt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.measurementmobilehistory
     ADD CONSTRAINT fkdc8h2uo6mi73f6sho1cbc4qqt FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: elaboration fkdi3xmx3ick2mh5tf5kga91evx; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaboration
-    ADD CONSTRAINT fkdi3xmx3ick2mh5tf5kga91evx FOREIGN KEY (type_id) REFERENCES intime.type(id);
 
 
 --
@@ -1161,22 +924,6 @@ ALTER TABLE ONLY intime.bdprules
 
 ALTER TABLE ONLY intime.measurementhistory
     ADD CONSTRAINT fkgn083v6hfhqnguemmu0tqm1wp FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: elaborationhistory fkh3qi0htd1jkshh1ep377fovo4; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaborationhistory
-    ADD CONSTRAINT fkh3qi0htd1jkshh1ep377fovo4 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: echargingplugoutlet fkhce8yoanxbbeurhseaf2pu80j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.echargingplugoutlet
-    ADD CONSTRAINT fkhce8yoanxbbeurhseaf2pu80j FOREIGN KEY (plug_id) REFERENCES intime.station(id);
 
 
 --
@@ -1252,14 +999,6 @@ ALTER TABLE ONLY intime.carparkingdynamic
 
 
 --
--- Name: elaborationhistory fkqkj3j3kx7yctkubhil9a9kkqs; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.elaborationhistory
-    ADD CONSTRAINT fkqkj3j3kx7yctkubhil9a9kkqs FOREIGN KEY (type_id) REFERENCES intime.type(id);
-
-
---
 -- Name: bdprules fkqno7vwsq5oovnaxfun2sjmcc3; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -1284,6 +1023,15 @@ ALTER TABLE ONLY intime.station
 
 
 --
--- PostgreSQL database dump complete
+-- Name: SCHEMA intime; Type: ACL; Schema: -; Owner: postgres
 --
 
+REVOKE ALL ON SCHEMA intime FROM PUBLIC;
+REVOKE ALL ON SCHEMA intime FROM postgres;
+GRANT ALL ON SCHEMA intime TO postgres;
+GRANT ALL ON SCHEMA intime TO bdp;
+
+
+--
+-- PostgreSQL database dump complete
+--
