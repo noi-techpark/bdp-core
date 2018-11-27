@@ -33,7 +33,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -133,9 +132,11 @@ public class BDPRole {
 	}
 
 	public static BDPRole findByName(EntityManager em, String name) {
-		TypedQuery<BDPRole> query = em.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
-		query.setParameter("name", name);
-		return QueryBuilder.getSingleResultOrNull(query);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT r FROM BDPRole r WHERE r.name = :name")
+				.setParameter("name", name)
+				.buildSingleResultOrNull(BDPRole.class);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {

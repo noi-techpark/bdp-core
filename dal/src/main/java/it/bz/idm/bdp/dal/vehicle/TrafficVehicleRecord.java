@@ -895,11 +895,11 @@ public class TrafficVehicleRecord {
 	public static Date findRecordTimestampByVehicle(String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			TypedQuery<Date> query = em.createQuery(
-					"select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
-					Date.class);
-			query.setParameter("station", stationId);
-			return QueryBuilder.getSingleResultOrNull(query);
+			return QueryBuilder
+					.init(em)
+					.addSql("SELECT record.ts_ms FROM TrafficVehicleRecord record WHERE record.station.stationcode = :station ORDER BY record.ts_ms DESC")
+					.setParameter("station", stationId)
+					.buildSingleResultOrNull(Date.class);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -907,9 +907,11 @@ public class TrafficVehicleRecord {
 	}
 
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Station trafficVehicle){
-		TypedQuery<TrafficVehicleRecord > query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station",TrafficVehicleRecord.class);
-		query.setParameter("station", trafficVehicle);
-		return QueryBuilder.getSingleResultOrNull(query);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM TrafficVehicleRecord record WHERE record.station = :station")
+				.setParameter("station", trafficVehicle)
+				.buildSingleResultOrNull(TrafficVehicleRecord.class);
 	}
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Station trafficVehicle, String cname, Integer period){
 		TrafficVehicleRecord vehicleRecord = null;
@@ -922,14 +924,13 @@ public class TrafficVehicleRecord {
 		return vehicleRecord;
 	}
 
-	private static TrafficVehicleRecord findRecordByVehicle(EntityManager em,
-			Station trafficVehicle, String type) {
-		TypedQuery<TrafficVehicleRecord> query = em.createQuery(
-				"select record from TrafficVehicleRecord record where record.station= :station and :type is not null",
-				TrafficVehicleRecord.class);
-		query.setParameter("station", trafficVehicle);
-		query.setParameter("type", type);
-		return QueryBuilder.getSingleResultOrNull(query);
+	private static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Station trafficVehicle, String type) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM TrafficVehicleRecord record WHERE record.station= :station AND :type IS NOT NULL")
+				.setParameter("station", trafficVehicle)
+				.setParameter("type", type)
+				.buildSingleResultOrNull(TrafficVehicleRecord.class);
 	}
 
 }

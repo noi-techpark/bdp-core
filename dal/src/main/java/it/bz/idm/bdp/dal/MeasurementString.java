@@ -29,7 +29,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -83,20 +82,21 @@ public class MeasurementString extends M {
 	}
 
 	public static MeasurementString findLastMeasurementByStationAndType(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		TypedQuery<MeasurementString> q = em.createQuery("SELECT measurement "
-				+ "FROM MeasurementString measurement, BDPPermissions p "
-				+ "WHERE (measurement.station = p.station OR p.station = null) "
-				+ "AND (measurement.type = p.type OR p.type = null) "
-				+ "AND (measurement.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND measurement.station = :station "
-				+ "AND measurement.type = :type "
-				+ "AND measurement.period = :period", MeasurementString.class);
-		q.setParameter("station",station);
-		q.setParameter("type",type);
-		q.setParameter("period", period);
-		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return QueryBuilder.getSingleResultOrNull(q);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT measurement FROM MeasurementString measurement, BDPPermissions p",
+						"WHERE (measurement.station = p.station OR p.station = null)",
+						"AND (measurement.type = p.type OR p.type = null)",
+						"AND (measurement.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND measurement.station = :station",
+						"AND measurement.type = :type",
+						"AND measurement.period = :period")
+				.setParameter("station", station)
+				.setParameter("type", type)
+				.setParameter("period", period)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.buildSingleResultOrNull(MeasurementString.class);
 	}
 
 	@Override

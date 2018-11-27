@@ -216,9 +216,11 @@ public class CarParkingDynamicHistory {
 		return dtos;
 	}
 	public static CarParkingDynamicHistory findRecord(EntityManager em, Station station, Long timestamp) {
-		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
-		query.setParameter("station", station);
-		query.setParameter("lastupdate", new Date(timestamp));
-		return QueryBuilder.getSingleResultOrNull(query);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM CarParkingDynamicHistory record WHERE record.station = :station AND record.lastupdate = :lastupdate")
+				.setParameter("station", station)
+				.setParameter("lastupdate", new Date(timestamp))
+				.buildSingleResultOrNull(CarParkingDynamicHistory.class);
 	}
 }

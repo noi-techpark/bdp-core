@@ -55,9 +55,11 @@ public class SecurityIT extends WriterTestSetup {
 		assertTrue(BDPRole.ROLE_GUEST.equals(guest.getName()));
 
 		/* Admin roles must have a rule to see everything */
-		TypedQuery<BDPRules> query = em.createQuery("select r from BDPRules r where r.role = :role", BDPRules.class)
-									   .setParameter("role", admin);
-		BDPRules rule = QueryBuilder.getSingleResultOrNull(query);
+		BDPRules rule = QueryBuilder
+				.init(em)
+				.addSql("SELECT r FROM BDPRules r WHERE r.role = :role")
+				.setParameter("role", admin)
+				.buildSingleResultOrNull(BDPRules.class);
 		assertNotNull(rule);
 		assertNull(rule.getPeriod());
 		assertNull(rule.getStation());

@@ -29,7 +29,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
@@ -124,29 +123,20 @@ public abstract class M {
 		if (station == null)
 			return null;
 
-		String queryString = "select record.timestamp "
-				+ "from " + table.getClass().getSimpleName() + " record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station=:station";
-
-		if (type != null) {
-			queryString += " AND record.type = :type";
-		}
-		if (period != null) {
-			queryString += " AND record.period=:period";
-		}
-		queryString += " ORDER BY record.timestamp DESC";
-		TypedQuery<Date> query = em.createQuery(queryString, Date.class)
-								   .setParameter("station", station)
-								   .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		if (type != null)
-			query.setParameter("type", type);
-		if (period != null)
-			query.setParameter("period", period);
-		return QueryBuilder.getSingleResultOrAlternative(query, new Date(-1));
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record.timestamp FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+						"WHERE (record.station = p.station OR p.station = null)",
+						"AND (record.type = p.type OR p.type = null)",
+						"AND (record.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND record.station = :station")
+				.setParameterIfNotNull("type", type, "AND record.type = :type")
+				.setParameterIfNotNull("period", period, "AND record.period=:period")
+				.setParameter("station", station)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.addSql("ORDER BY record.timestamp DESC")
+				.buildSingleResultOrAlternative(Date.class, new Date(-1));
 	}
 
 	/**
@@ -180,38 +170,20 @@ public abstract class M {
 		if (station == null)
 			return null;
 
-		String baseQuery = "select record from " + table.getClass().getSimpleName() + " record, BDPPermissions p"
-						 + " where (record.station = p.station or p.station = null)"
-						 + " and (record.type = p.type or p.type = null)"
-						 + " and (record.period = p.period or p.period = null)"
-					 	 + " and p.role = :role "
-					 	 + "and record.station = :station";
-		String andPeriod = " AND record.period = :period";
-		String andType = " AND record.type = :type";
-		String order = " ORDER BY record.timestamp DESC";
-
-		TypedQuery<? extends M> query = null;
-		//set optional parameters
-		if (type == null){
-			if (period == null) {
-				query = em.createQuery(baseQuery + order, M.class);
-			} else {
-				query = em.createQuery(baseQuery + andPeriod + order, table.getClass())
-						  .setParameter("period", period);
-			}
-		} else if (period == null) {
-			query = em.createQuery(baseQuery + andType + order, table.getClass())
-					  .setParameter("type", type);
-		} else {
-			query = em.createQuery(baseQuery + andType + andPeriod + order, M.class)
-					  .setParameter("type", type)
-					  .setParameter("period", period);
-		}
-
-		//set required parameters
-		query.setParameter("station", station);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return QueryBuilder.getSingleResultOrNull(query);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+						"WHERE (record.station = p.station OR p.station = null)",
+						"AND (record.type = p.type OR p.type = null)",
+						"AND (record.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND record.station = :station")
+				.setParameterIfNotNull("period", period, "AND record.period = :period")
+				.setParameterIfNotNull("type", type, "AND record.type = :type")
+				.setParameter("station", station)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.addSql("ORDER BY record.timestamp DESC")
+				.buildSingleResultOrNull(table.getClass());
 	}
 
 }

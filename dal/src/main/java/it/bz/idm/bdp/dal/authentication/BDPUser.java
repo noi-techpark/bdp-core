@@ -33,7 +33,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -136,10 +135,12 @@ public class BDPUser {
 		this.roles = roles;
 	}
 
-	public static BDPUser findByEmail(EntityManager manager, String email) {
-		TypedQuery<BDPUser> query = manager.createQuery("SELECT u FROM BDPUser u where email = :email", BDPUser.class);
-		query.setParameter("email", email);
-		return QueryBuilder.getSingleResultOrNull(query);
+	public static BDPUser findByEmail(EntityManager em, String email) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT u FROM BDPUser u WHERE email = :email")
+				.setParameter("email", email)
+				.buildSingleResultOrNull(BDPUser.class);
 	}
 
 	public static Object sync(EntityManager em, List<UserDto> data) {

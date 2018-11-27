@@ -906,11 +906,11 @@ public class TrafficVehicleRecordHistory {
 	public static Date findRecordTimestampByVehicle(String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			TypedQuery<Date> query = em.createQuery(
-					"select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
-					Date.class);
-			query.setParameter("station", stationId);
-			return QueryBuilder.getSingleResultOrAlternative(query, new Date(0));
+			return QueryBuilder
+					.init(em)
+					.addSql("SELECT record.ts_ms FROM TrafficVehicleRecordHistory record WHERE record.station.stationcode = :station ORDER BY record.ts_ms DESC")
+					.setParameter("station", stationId)
+					.buildSingleResultOrAlternative(Date.class, new Date(0));
 		} finally {
 			if (em.isOpen())
 				em.close();

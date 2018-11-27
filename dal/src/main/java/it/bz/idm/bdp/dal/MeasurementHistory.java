@@ -153,24 +153,24 @@ public class MeasurementHistory extends MHistory {
 		return castToDtos(query.getResultList());
 	}
 
-	public static boolean recordExists(EntityManager em, Station station, DataType type, Date date, Integer period,
-			BDPRole role) {
-		String baseQuery = "SELECT record FROM MeasurementHistory record, BDPPermissions p"
-						 + " WHERE (record.station = p.station OR p.station = null)"
-						 + " AND (record.type = p.type OR p.type = null)"
-						 + " AND (record.period = p.period OR p.period = null)"
-						 + " AND p.role = :role"
-						 + " AND record.station= :station"
-						 + " AND record.type=:type"
-						 + " AND record.timestamp =:timestamp"
-						 + " AND record.period=:period";
-		TypedQuery<MeasurementHistory> preparedQuery = em.createQuery(baseQuery, MeasurementHistory.class);
-		preparedQuery.setParameter("station",station);
-		preparedQuery.setParameter("type",type);
-		preparedQuery.setParameter("timestamp",date);
-		preparedQuery.setParameter("period",period);
-		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return QueryBuilder.getSingleResultOrNull(preparedQuery) != null;
+	public static boolean recordExists(EntityManager em, Station station, DataType type, Date date, Integer period, BDPRole role) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM MeasurementHistory record, BDPPermissions p",
+						" WHERE (record.station = p.station OR p.station = null)",
+						" AND (record.type = p.type OR p.type = null)",
+						" AND (record.period = p.period OR p.period = null)",
+						" AND p.role = :role",
+						" AND record.station = :station",
+						" AND record.type = :type",
+						" AND record.timestamp = :timestamp",
+						" AND record.period = :period")
+				.setParameter("station", station)
+				.setParameter("type", type)
+				.setParameter("timestamp", date)
+				.setParameter("period", period)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.buildSingleResultOrNull(MeasurementHistory.class) != null;
 	}
 
 }

@@ -105,29 +105,6 @@ public class QueryBuilder {
 	 */
 	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
 		TypedQuery<T> query = build(resultClass);
-		return getSingleResultOrAlternative(query, alternative);
-	}
-
-	/**
-	 * Emulates getSingleResult without not-found or non-unique-result exceptions. It
-	 * simply returns null on no-results. Leaves exceptions to proper errors.
-	 *
-	 * @param query
-	 * @return topmost result or null if not found
-	 */
-	public static <T> T getSingleResultOrNull(TypedQuery<T> query) {
-		return getSingleResultOrAlternative(query, null);
-	}
-
-	/**
-	 * Emulates getSingleResult without not-found or non-unique-result exceptions. It
-	 * simply returns 'alternative' on no-results. Leaves exceptions to proper errors.
-	 *
-	 * @param query
-	 * @param alternative
-	 * @return topmost result or 'alternative' if not found
-	 */
-	public static <T> T getSingleResultOrAlternative(TypedQuery<T> query, T alternative) {
 		query.setMaxResults(1);
 		List<T> list = query.getResultList();
 		if (list == null || list.isEmpty()) {
