@@ -38,7 +38,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 import javax.persistence.UniqueConstraint;
 
 import org.geotools.geometry.jts.JTS;
@@ -255,10 +254,12 @@ public class Station {
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
 		if(stationCode == null || stationType == null || stationType.isEmpty())
 			return null;
-		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode and station.stationtype = :stationtype", Station.class)
-											 .setParameter("stationcode", stationCode)
-											 .setParameter("stationtype", stationType);
-		return QueryBuilder.getSingleResultOrNull(stationquery);
+		QueryBuilder qb = new QueryBuilder(em);
+		return qb.addSql("SELECT station FROM Station station",
+						 "WHERE station.stationcode = :stationcode AND station.stationtype = :stationtype")
+				 .setParameter("stationcode", stationCode)
+				 .setParameter("stationtype", stationType)
+				 .buildSingleResultOrNull(Station.class);
 	}
 
 	public static Station findStation(EntityManager em, String stationType, Integer stationCode) {
@@ -437,9 +438,10 @@ public class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id) {
-		TypedQuery<Station> stationquery = em.createQuery("select s from Station s where s.stationcode = :stationcode", Station.class)
-											 .setParameter("stationcode", id);
-		return QueryBuilder.getSingleResultOrNull(stationquery);
+		QueryBuilder qb = new QueryBuilder(em);
+		return qb.addSql("SELECT s FROM Station s WHERE s.stationcode = :stationcode")
+				 .setParameter("stationcode", id)
+				 .buildSingleResultOrNull(Station.class);
 	}
 
 	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
