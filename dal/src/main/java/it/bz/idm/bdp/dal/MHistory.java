@@ -20,6 +20,8 @@
  */
 package it.bz.idm.bdp.dal;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -31,7 +33,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
+import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
@@ -51,6 +55,10 @@ public abstract class MHistory {
 	private DataType type;
 
 	private Integer period;
+
+	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role);
+	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
+	public abstract MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role);
 
 	public MHistory() {
 		this.created_on = new Date();
@@ -236,5 +244,91 @@ public abstract class MHistory {
 			if (em.isOpen())
 				em.close();
 		}
+	}
+
+	protected static List<RecordDto> castToDtos(List<Object[]> resultList) {
+		List<RecordDto> dtos = new ArrayList<RecordDto>();
+		for (Object[] row: resultList){
+			SimpleRecordDto dto = new SimpleRecordDto(((Date) row[0]).getTime(),
+					Double.parseDouble(String.valueOf(row[1])));
+			if (row.length>2)
+				dto.setPeriod(Integer.parseInt(row[2].toString()));
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+
+	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role, T table) {
+		List<Object[]> result = QueryBuilder
+				.init(em)
+				.addSql("SELECT record.timestamp, record.value")
+				.addSqlIf(", record.period", period == null)
+				.addSql("SELECT record.timestamp, record.value FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+						"WHERE (record.station = p.station OR p.station = null)",
+						"AND (record.type = p.type OR p.type = null)",
+						"AND (record.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND record.station.stationtype = :stationtype",
+						"AND record.station.stationcode = :stationcode",
+						"AND record.type.cname = :cname",
+						"AND record.timestamp > :date")
+				.setParameterIfNotNull("period", period, "AND record.period = :period")
+				.setParameter("stationtype", stationtype)
+				.setParameter("stationcode", identifier)
+				.setParameter("cname", cname)
+				.setParameter("date", new Date(Calendar.getInstance().getTimeInMillis() - 1000 * seconds))
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.addSql("ORDER BY record.timestamp")
+				.buildResultList(Object[].class);
+
+		return castToDtos(result);
+	}
+
+	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T table) {
+		List<Object[]> result = QueryBuilder
+				.init(em)
+				.addSql("SELECT record.timestamp, record.value")
+				.addSqlIf(", record.period", period == null)
+				.addSql("FROM  " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+						"WHERE (record.station = p.station OR p.station = null)",
+						"AND (record.type = p.type OR p.type = null)",
+						"AND (record.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND record.station.stationtype = :stationtype",
+						"AND record.station.stationcode = :stationcode",
+						"AND record.type.cname = :cname",
+						"AND record.timestamp between :start AND :end")
+				.setParameterIfNotNull("period", period, "AND record.period = :period")
+				.setParameter("stationtype", stationtype)
+				.setParameter("stationcode", identifier)
+				.setParameter("cname", cname)
+				.setParameter("start", start)
+				.setParameter("end", end)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.addSql("ORDER BY record.timestamp")
+				.buildResultList(Object[].class);
+		return MHistory.castToDtos(result);
+	}
+
+	protected static <T extends MHistory> MHistory findRecordImpl(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role, Class<T> table) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM " + table.getSimpleName() + " record, BDPPermissions p",
+						 "WHERE (record.station = p.station OR p.station = null)",
+						 "AND (record.type = p.type OR p.type = null)",
+						 "AND (record.period = p.period OR p.period = null)",
+						 "AND p.role = :role",
+						 "AND record.station = :station",
+						 "AND record.type = :type",
+						 "AND record.timestamp = :timestamp",
+						 "AND record.value = :value",
+						 "AND record.period = :period")
+				 .setParameter("station", station)
+				 .setParameter("type", type)
+				 .setParameter("value", value)
+				 .setParameter("timestamp", timestamp)
+				 .setParameter("period", period)
+				 .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				 .buildSingleResultOrNull(table);
 	}
 }

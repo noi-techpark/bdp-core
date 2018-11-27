@@ -21,6 +21,7 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -33,7 +34,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.QueryBuilder;
+import it.bz.idm.bdp.dto.RecordDto;
 
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
@@ -72,42 +73,18 @@ public class MeasurementStringHistory extends MHistory {
 		this.value = value;
 	}
 
-
-
-	public static MeasurementStringHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
-		return QueryBuilder
-				.init(em)
-				.addSql("SELECT record FROM MeasurementStringHistory record, BDPPermissions p",
-						 "WHERE (record.station = p.station OR p.station = null)",
-						 "AND (record.type = p.type OR p.type = null)",
-						 "AND (record.period = p.period OR p.period = null)",
-						 "AND p.role = :role",
-						 "AND record.station = :station",
-						 "AND record.type=:type",
-						 "AND record.timestamp=:timestamp",
-						 "AND record.value=:value",
-						 "AND record.period=:period")
-				 .setParameter("station", station)
-				 .setParameter("type", type)
-				 .setParameter("value", value)
-				 .setParameter("timestamp", timestamp)
-				 .setParameter("period", period)
-				 .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				 .buildSingleResultOrNull(MeasurementStringHistory.class);
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role) {
+		return findRecordsImpl(em, stationtype, identifier, cname, seconds, period, role, this);
 	}
 
-	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id, BDPRole role) {
-		return QueryBuilder
-				.init(em)
-				.addSql("SELECT record.timestamp FROM MeasurementString record, BDPPermissions p",
-						"WHERE (record.station = p.station OR p.station = null)",
-						"AND (record.type = p.type OR p.type = null)",
-						"AND (record.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND record.station.stationcode=:stationcode")
-				.setParameterIfNotNull("stationtype", stationtype, "AND record.station.stationtype = :stationtype")
-				.setParameter("stationcode", id)
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				.buildSingleResultOrNull(Date.class);
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
+		return findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
+	}
+
+	@Override
+	public MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
+		return findRecordImpl(em, station, type, value, timestamp, period, role, MeasurementStringHistory.class);
 	}
 }

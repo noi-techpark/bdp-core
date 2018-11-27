@@ -33,7 +33,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @Table(name="measurementstring", schema="intime")
 @Entity
@@ -79,24 +78,6 @@ public class MeasurementString extends M {
 
 	public void setValue(String value) {
 		this.stringValue = value;
-	}
-
-	public static MeasurementString findLastMeasurementByStationAndType(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return QueryBuilder
-				.init(em)
-				.addSql("SELECT measurement FROM MeasurementString measurement, BDPPermissions p",
-						"WHERE (measurement.station = p.station OR p.station = null)",
-						"AND (measurement.type = p.type OR p.type = null)",
-						"AND (measurement.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND measurement.station = :station",
-						"AND measurement.type = :type",
-						"AND measurement.period = :period")
-				.setParameter("station", station)
-				.setParameter("type", type)
-				.setParameter("period", period)
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				.buildSingleResultOrNull(MeasurementString.class);
 	}
 
 	@Override

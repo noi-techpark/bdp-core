@@ -236,7 +236,7 @@ public class DataRetriever {
 		try {
 			Station station = Station.findStation(em, stationtypology, identifier);
 			if (station != null) {
-				records.addAll(MeasurementHistory.findRecords(em, stationtypology, identifier, type, start, end, period, role));
+				records.addAll(new MeasurementHistory().findRecords(em, stationtypology, identifier, type, start, end, period, role));
 				return records;
 			}
 		} catch(Exception e) {

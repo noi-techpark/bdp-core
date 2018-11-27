@@ -132,7 +132,7 @@ public abstract class M {
 						"AND p.role = :role",
 						"AND record.station = :station")
 				.setParameterIfNotNull("type", type, "AND record.type = :type")
-				.setParameterIfNotNull("period", period, "AND record.period=:period")
+				.setParameterIfNotNull("period", period, "AND record.period = :period")
 				.setParameter("station", station)
 				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp DESC")
@@ -185,5 +185,4 @@ public abstract class M {
 				.addSql("ORDER BY record.timestamp DESC")
 				.buildSingleResultOrNull(table.getClass());
 	}
-
 }
