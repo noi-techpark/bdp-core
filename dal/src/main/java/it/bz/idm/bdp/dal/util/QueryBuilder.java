@@ -33,30 +33,57 @@ public class QueryBuilder {
 	private EntityManager em = null;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
+	/**
+	 * Create a new {@link QueryBuilder} instance
+	 *
+	 * @see QueryBuilder#QueryBuilder(EntityManager)
+	 *
+	 * @param em {@link EntityManager}
+	 * @return {@link QueryBuilder}
+	 */
 	public static QueryBuilder init(EntityManager em) {
 		return new QueryBuilder(em);
 	}
 
+	/**
+	 * Create a new {@link QueryBuilder} instance
+	 *
+	 * @see QueryBuilder#init
+	 *
+	 * @param em {@link EntityManager}
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder(EntityManager em) {
 		super();
 		this.em = em;
 	}
 
-	public QueryBuilder(EntityManager em, String sqlPart) {
-		this(em);
-		addSql(sqlPart);
-	}
-
-	public QueryBuilder(EntityManager em, String... sqlPart) {
-		this(em);
-		addSql(sqlPart);
-	}
-
-
+	/**
+	 * Set a parameter with <code>name</code> and <code>value</code> and add
+	 * <code>sqlPart</code> to the end of the SQL string, if the
+	 * <code>condition</code> holds.
+	 *
+	 * @param name of the parameter
+	 * @param value of the parameter
+	 * @param sqlPart SQL string
+	 * @param condition that must hold
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder setParameterIfNotNull(String name, Object value, String sqlPart) {
 		return setParameterIf(name, value, sqlPart, value != null);
 	}
 
+	/**
+	 * Set a parameter with <code>name</code> and <code>value</code> and add
+	 * <code>sqlPart</code> to the end of the SQL string, if the
+	 * <code>condition</code> holds.
+	 *
+	 * @param name of the parameter
+	 * @param value of the parameter
+	 * @param sqlPart SQL string
+	 * @param condition that must hold
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder setParameterIf(String name, Object value, String sqlPart, boolean condition) {
 		if (condition) {
 			addSql(sqlPart);
@@ -65,6 +92,14 @@ public class QueryBuilder {
 		return this;
 	}
 
+	/**
+	 * Set a parameter with <code>name</code> and <code>value</code>, if
+	 * it is not null or empty.
+	 *
+	 * @param name of the parameter
+	 * @param value of the parameter
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder setParameter(String name, Object value) {
 		if (name != null && !name.isEmpty()) {
 			parameters.put(name, value);
@@ -72,6 +107,13 @@ public class QueryBuilder {
 		return this;
 	}
 
+	/**
+	 * Create a {@link TypedQuery} with type <code>resultClass</code> and set
+	 * all collected parameters.
+	 *
+	 * @param resultClass Type of the query result
+	 * @return {@link TypedQuery} with type <code>resultClass</code>
+	 */
 	public <T> TypedQuery<T> build(Class<T> resultClass) {
 		TypedQuery<T> query = em.createQuery(sql.toString(), resultClass);
 		for (Entry<String, Object> entry : parameters.entrySet()) {
@@ -80,15 +122,22 @@ public class QueryBuilder {
 		return query;
 	}
 
+	/**
+	 * Build the current query and execute {@link javax.persistence.TypedQuery#getResultList}
+	 *
+	 * @param resultClass Type of the query result
+	 * @return List of <code>resultClass</code> objects
+	 */
 	public <T> List<T> buildResultList(Class<T> resultClass) {
 		return build(resultClass).getResultList();
 	}
 
 	/**
-	 * Emulates getSingleResult without not-found or non-unique-result exceptions. It
-	 * simply returns null on no-results. Leaves exceptions to proper errors.
+	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
+	 * return null, if {@link javax.persistence.TypedQuery#getResultList} has no results,
+	 * and leave exceptions to proper errors.
 	 *
-	 * @param query
+	 * @param resultClass Type of the query result
 	 * @return topmost result or null if not found
 	 */
 	public <T> T buildSingleResultOrNull(Class<T> resultClass) {
@@ -96,11 +145,12 @@ public class QueryBuilder {
 	}
 
 	/**
-	 * Emulates getSingleResult without not-found or non-unique-result exceptions. It
-	 * simply returns 'alternative' on no-results. Leaves exceptions to proper errors.
+	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
+	 * return <code>alternative</code>, if {@link javax.persistence.TypedQuery#getResultList}
+	 * has no results, and leave exceptions to proper errors.
 	 *
-	 * @param query
-	 * @param alternative
+	 * @param resultClass Type of the query result
+	 * @param alternative to be returned, if {@link javax.persistence.TypedQuery#getResultList} does not return results
 	 * @return topmost result or 'alternative' if not found
 	 */
 	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
@@ -113,6 +163,11 @@ public class QueryBuilder {
 		return list.get(0);
 	}
 
+	/**
+	 * Append <code>sqlPart</code> to the end of the SQL string.
+	 * @param sqlPart SQL string
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder addSql(String sqlPart) {
 		if (sqlPart != null && !sqlPart.isEmpty()) {
 			sql.append(" ");
@@ -121,6 +176,12 @@ public class QueryBuilder {
 		return this;
 	}
 
+	/**
+	 * Appends all <code>sqlPart</code> elements to the end of the SQL string.
+	 *
+	 * @param sqlPart SQL string array
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder addSql(String... sqlPart) {
 		for (int i = 0; i < sqlPart.length; i++) {
 			addSql(sqlPart[i]);
