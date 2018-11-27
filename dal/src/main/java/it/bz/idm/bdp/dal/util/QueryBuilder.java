@@ -177,6 +177,32 @@ public class QueryBuilder {
 	}
 
 	/**
+	 * Append <code>sqlPart</code> to the end of the SQL string, if
+	 * <code>condition</code> holds.
+	 *
+	 * @param sqlPart SQL string
+	 * @return {@link QueryBuilder}
+	 */
+	public QueryBuilder addSqlIf(String sqlPart, boolean condition) {
+		if (sqlPart != null && !sqlPart.isEmpty() && condition) {
+			sql.append(" ");
+			sql.append(sqlPart);
+		}
+		return this;
+	}
+
+	/**
+	 * Append <code>sqlPart</code> to the end of the SQL string, if
+	 * <code>object</code> is not null.
+	 *
+	 * @param sqlPart SQL string
+	 * @return {@link QueryBuilder}
+	 */
+	public QueryBuilder addSqlIfNotNull(String sqlPart, Object object) {
+		return addSqlIf(sqlPart, object != null);
+	}
+
+	/**
 	 * Appends all <code>sqlPart</code> elements to the end of the SQL string.
 	 *
 	 * @param sqlPart SQL string array

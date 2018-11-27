@@ -218,13 +218,17 @@ public class DataRetriever {
 		return getRecords(stationtypology, identifier, type, start, end, period,seconds, p);
 	}
 
-	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end,
-			Integer period, Integer seconds, Principal p) {
+	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end, Integer period, Integer seconds, Principal p) {
 		if (start == null && end == null) {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
 			start = new Date(end.getTime() - (seconds * 1000l));
 		}
+
+		if (start == null || end == null) {
+			throw new JPAException("Provided interval not valid: [" + start + ", " + end + "]. Set 'start' and 'end', or leave both null.");
+		}
+
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em);
 
