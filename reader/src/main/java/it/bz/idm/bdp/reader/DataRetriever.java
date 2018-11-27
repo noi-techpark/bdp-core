@@ -143,7 +143,13 @@ public class DataRetriever {
 			Station station = Station.findStation(em, stationTypology, stationcode);
 			if (station == null)
 				return date;
-			DataType type = DataType.findByCname(em, cname);
+
+			DataType type = null;
+			if (cname != null) {
+				type = DataType.findByCname(em, cname);
+				if (type == null)
+					return date;
+			}
 
 			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
 			Date date1 = new Measurement().getDateOfLastRecord(em, station, type, period, role);

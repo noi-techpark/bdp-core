@@ -26,23 +26,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TypeDto implements Serializable{
-	/**
-	 * 
-	 */
+public class TypeDto implements Serializable {
+
 	private static final long serialVersionUID = -1224947780318447560L;
+
 	private String id;
 	private String unit;
 	private Map<String,String> desc = new HashMap<String, String>();
 	private String typeOfMeasurement;
-	private Set<Integer> aquisitionIntervalls = new TreeSet<Integer>();
-	
+	private Set<Integer> acquisitionIntervals = new TreeSet<Integer>();
+
 	public TypeDto() {
 	}
 	public TypeDto(String id, Integer interval) {
 		this.id = id;
 		if (interval!= null)
-			this.aquisitionIntervalls.add(interval);
+			this.acquisitionIntervals.add(interval);
 	}
 	public String getId() {
 		return id;
@@ -68,11 +67,31 @@ public class TypeDto implements Serializable{
 	public void setTypeOfMeasurement(String typeOfMeasurement) {
 		this.typeOfMeasurement = typeOfMeasurement;
 	}
-	public Set<Integer> getAquisitionIntervalls() {
-		return aquisitionIntervalls;
+	public Set<Integer> getAcquisitionIntervals() {
+		return acquisitionIntervals;
 	}
-	public void setAquisitionIntervalls(Set<Integer> aquisitionIntervalls) {
-		this.aquisitionIntervalls = aquisitionIntervalls;
+	public void setAcquisitionIntervals(Set<Integer> acquisitionIntervals) {
+		this.acquisitionIntervals = acquisitionIntervals;
 	}
-	
+
+	private static boolean equal(Object a, Object b) {
+		if (a == null && b == null)
+			return true;
+		return (a != null && b != null && a.equals(b));
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof TypeDto) || obj == null) {
+			return false;
+		}
+		TypeDto dto = (TypeDto) obj;
+		return equal(id, dto.getId()) && equal(unit, dto.getUnit());
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
 }

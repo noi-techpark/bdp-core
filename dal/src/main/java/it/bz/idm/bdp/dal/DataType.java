@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -138,9 +139,8 @@ public class DataType {
 				 .getResultList();
 	}
 
-	public static List<TypeDto> findTypes(EntityManager em, String stationType, String stationId) {
-
-		String queryString = "SELECT type, m.period FROM Measurement m INNER JOIN m.type type"
+	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId, Class<T> subClass) {
+		String queryString = "SELECT type, m.period FROM " + subClass.getSimpleName() + " m INNER JOIN m.type type"
 						   + " WHERE m.station.stationtype = :stationType";
 		String queryGroupBy = " GROUP BY type, m.period";
 		String andStationCode = " AND m.station.stationcode = :station";
@@ -163,7 +163,7 @@ public class DataType {
 		for (Object obj : resultList){
 			Object[] results = (Object[]) obj;
 			DataType type = (DataType) results[0];
-			Integer acqIntervall = (Integer) results[1];
+			Integer acqInterval = (Integer) results[1];
 			String id = type.getCname();
 			TypeDto dto = dtos.get(id);
 			if (dto == null){
@@ -174,43 +174,51 @@ public class DataType {
 				dto.setTypeOfMeasurement(type.getRtype());
 				dtos.put(id, dto);
 			}
-			dto.getAquisitionIntervalls().add(acqIntervall);
+			dto.getAcquisitionIntervals().add(acqInterval);
 		}
 		for (Map.Entry<String, TypeDto> entry : dtos.entrySet())
 			types.add(entry.getValue());
 		return types;
 	}
 
-	public static List<String[]> findDataTypes(EntityManager em,String stationType, String stationId) {
-		String queryString = "SELECT m.type.cname, m.type.cunit, m.type.description, m.period FROM Measurement m"
-						   + " INNER JOIN m.type WHERE m.station.stationtype = :stationtype";
-		String andStationCode = " AND m.station.stationcode = :station";
-		String queryGroupBy = " GROUP BY m.type.cname, m.type.cunit, m.type.description, m.period";
-		List<Object[]> resultList = null;
-		if (stationId == null || stationId.isEmpty()) {
-			resultList = em.createQuery(queryString + queryGroupBy, Object[].class)
-						   .setParameter("stationtype", stationType)
-						   .getResultList();
-		} else {
-			resultList = em.createQuery(queryString + andStationCode + queryGroupBy, Object[].class)
-						   .setParameter("station", stationId)
-						   .setParameter("stationtype", stationType)
-						   .getResultList();
-		}
-		return getDataTypesFromQuery(resultList);
+	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId) {
+		List<TypeDto> resultDouble = findTypes(em, stationType, stationId, Measurement.class);
+		List<TypeDto> resultString = findTypes(em, stationType, stationId, MeasurementString.class);
+		resultDouble.addAll(resultString);
+		return new ArrayList<>(new HashSet<>(resultDouble));
 	}
 
-	private static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
-		List<String[]> stringlist = new ArrayList<String[]>();
-		for(Object[] objects : resultList){
-			String[] stringarray= new String[objects.length];
-			for (int i = 0; i< objects.length;i++){
-				String value = String.valueOf(objects[i]);
-				stringarray[i]= "null".equals(value) ? "" : value;
+	/**
+	 * Find data types and return them as a list of string arrays with 4 elements each: <br />
+	 * <code> {[ID, UNIT, DESCRIPTION, INTERVAL], ...} </code>
+	 * <p>
+	 * We use the new function {@link findTypes} internally, and convert the
+	 * {@link TypeDto} output into string arrays, because we do not want to duplicate
+	 * the finding-types query.
+	 * </p>
+	 *
+	 * @param em			The Entity Manager
+	 * @param stationType	Station type, i.e., {@code EnvironmentStation}
+	 * @param stationId		Station ID, i.e., {@code BZ:01}
+	 * @return				List of string arrays with 4 elements each, see above <br />
+	 * 						or an empty string array, if nothing can be found
+	 */
+	public static List<String[]> findDataTypes(EntityManager em, String stationType, String stationId) {
+		List<TypeDto> typeDtoList = findTypes(em, stationType, stationId);
+		List<String[]> result = new ArrayList<>();
+		for (TypeDto item : typeDtoList) {
+			String desc = "";
+			if (! item.getDesc().isEmpty()) {
+				desc = item.getDesc().entrySet().iterator().next().getValue();
 			}
-			stringlist.add(stringarray);
+			String interval = "";
+			if (! item.getAcquisitionIntervals().isEmpty()) {
+				interval = item.getAcquisitionIntervals().iterator().next().toString();
+			}
+			String[] arr = {item.getId(), item.getUnit(), desc, interval};
+			result.add(arr);
 		}
-		return stringlist;
+		return result;
 	}
 
 	public static void sync(EntityManager em, List<DataTypeDto> data) {
