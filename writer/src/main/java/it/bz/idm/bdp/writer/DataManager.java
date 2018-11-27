@@ -36,7 +36,6 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MHistory;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementString;
-import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
@@ -109,16 +108,6 @@ public class DataManager {
 				e.printStackTrace();
 			}
 			throw e;
-		} finally {
-			if (em.isOpen())
-				em.close();
-		}
-	}
-
-	public Object getLatestMeasurementStringRecord(String stationtype, String id, BDPRole role) {
-		EntityManager em = JPAUtil.createEntityManager();
-		try {
-			return MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em, stationtype, id, role);
 		} finally {
 			if (em.isOpen())
 				em.close();
