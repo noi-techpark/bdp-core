@@ -565,7 +565,6 @@ ALTER TABLE intime.station_seq OWNER TO bdp;
 --
 
 CREATE TABLE intime.station (
-    stationcategory character varying(31) NOT NULL,
     id bigint DEFAULT nextval('intime.station_seq'::regclass) NOT NULL,
     active boolean,
     available boolean,

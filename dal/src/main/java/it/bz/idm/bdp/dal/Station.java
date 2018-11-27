@@ -27,8 +27,6 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
@@ -64,7 +62,6 @@ import it.bz.idm.bdp.dto.StationDto;
 
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
-@DiscriminatorColumn(name = "stationcategory", discriminatorType = DiscriminatorType.STRING)
 public class Station {
 
 	public static final String GEOM_CRS = "EPSG:4326";
