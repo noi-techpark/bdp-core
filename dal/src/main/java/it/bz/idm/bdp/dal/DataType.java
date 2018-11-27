@@ -38,7 +38,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -127,10 +126,12 @@ public class DataType {
 		this.i18n = i18n;
 	}
 
-	public static DataType findByCname(EntityManager manager, String cname) {
-		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class)
-											.setParameter("cname",cname);
-		return QueryBuilder.getSingleResultOrNull(query);
+	public static DataType findByCname(EntityManager em, String cname) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT type FROM DataType type WHERE type.cname = :cname")
+				.setParameter("cname", cname)
+				.buildSingleResultOrNull(DataType.class);
 
 	}
 
@@ -140,22 +141,14 @@ public class DataType {
 	}
 
 	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId, Class<T> subClass) {
-		String queryString = "SELECT type, m.period FROM " + subClass.getSimpleName() + " m INNER JOIN m.type type"
-						   + " WHERE m.station.stationtype = :stationType";
-		String queryGroupBy = " GROUP BY type, m.period";
-		String andStationCode = " AND m.station.stationcode = :station";
-
-		List<Object[]> resultList = null;
-		if (stationId == null || stationId.isEmpty()) {
-			resultList = em.createQuery(queryString + queryGroupBy, Object[].class)
-						   .setParameter("stationType", stationType)
-						   .getResultList();
-		} else {
-			resultList = em.createQuery(queryString + andStationCode + queryGroupBy, Object[].class)
-						   .setParameter("stationType", stationType)
-						   .setParameter("station",stationId)
-						   .getResultList();
-		}
+		List<Object[]> resultList = QueryBuilder
+				.init(em)
+				.addSql("SELECT type, m.period FROM " + subClass.getSimpleName() + " m INNER JOIN m.type type",
+						"WHERE m.station.stationtype = :stationType")
+				.setParameter("stationType", stationType)
+				.setParameterIf("station", stationId, "AND m.station.stationcode = :station", stationId != null && !stationId.isEmpty())
+				.addSql("GROUP BY type, m.period")
+				.buildResultList(Object[].class);
 
 		List<TypeDto> types = new ArrayList<TypeDto>();
 		Map<String,TypeDto> dtos = new HashMap<String, TypeDto>();

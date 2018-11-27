@@ -29,7 +29,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -75,52 +74,40 @@ public class MeasurementStringHistory extends MHistory {
 
 
 
-	public static MeasurementStringHistory findRecord(EntityManager em, Station station, DataType type, String value,
-			Date timestamp, Integer period, BDPRole role) {
-
-		TypedQuery<MeasurementStringHistory> history = em.createQuery("SELECT record "
-				+ "FROM MeasurementStringHistory record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station = :station "
-				+ "AND record.type=:type "
-				+ "AND record.timestamp=:timestamp "
-				+ "AND record.value=:value "
-				+ "AND record.period=:period", MeasurementStringHistory.class);
-
-		history.setParameter("station", station);
-		history.setParameter("type", type);
-		history.setParameter("value", value);
-		history.setParameter("timestamp", timestamp);
-		history.setParameter("period", period);
-		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-
-		return QueryBuilder.getSingleResultOrNull(history);
+	public static MeasurementStringHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM MeasurementStringHistory record, BDPPermissions p",
+						 "WHERE (record.station = p.station OR p.station = null)",
+						 "AND (record.type = p.type OR p.type = null)",
+						 "AND (record.period = p.period OR p.period = null)",
+						 "AND p.role = :role",
+						 "AND record.station = :station",
+						 "AND record.type=:type",
+						 "AND record.timestamp=:timestamp",
+						 "AND record.value=:value",
+						 "AND record.period=:period")
+				 .setParameter("station", station)
+				 .setParameter("type", type)
+				 .setParameter("value", value)
+				 .setParameter("timestamp", timestamp)
+				 .setParameter("period", period)
+				 .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				 .buildSingleResultOrNull(MeasurementStringHistory.class);
 	}
 
-	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
-			BDPRole role) {
-
-		String sql1 = "SELECT record.timestamp "
-				+ "from MeasurementString record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station.stationcode=:stationcode ";
-		String sql2 = "record.station.stationtype=:stationtype";
-
-		TypedQuery<Date> query;
-		if (stationtype == null) {
-			query = em.createQuery(sql1, Date.class);
-		} else {
-			query = em.createQuery(sql1 + sql2, Date.class);
-			query.setParameter("stationtype",stationtype);
-		}
-		query.setParameter("stationcode", id);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return QueryBuilder.getSingleResultOrNull(query);
+	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id, BDPRole role) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record.timestamp FROM MeasurementString record, BDPPermissions p",
+						"WHERE (record.station = p.station OR p.station = null)",
+						"AND (record.type = p.type OR p.type = null)",
+						"AND (record.period = p.period OR p.period = null)",
+						"AND p.role = :role",
+						"AND record.station.stationcode=:stationcode")
+				.setParameterIfNotNull("stationtype", stationtype, "AND record.station.stationtype = :stationtype")
+				.setParameter("stationcode", id)
+				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+				.buildSingleResultOrNull(Date.class);
 	}
 }

@@ -167,23 +167,13 @@ public abstract class M {
 		if (station == null)
 			return null;
 
-		String baseQuery = "select record from " + subClass.getSimpleName() + " record"
-						 + " WHERE record.station = :station";
-		String andType = " AND record.type = :type";
-		String order = " ORDER BY record.timestamp DESC";
-
-		TypedQuery<? extends M> query = null;
-		//set optional parameters
-		if (type == null){
-			query = em.createQuery(baseQuery + order, M.class);
-		} else {
-			query = em.createQuery(baseQuery + andType + order, subClass)
-					  .setParameter("type", type);
-		}
-
-		//set required parameters
-		query.setParameter("station", station);
-		return QueryBuilder.getSingleResultOrNull(query);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT record FROM " + subClass.getSimpleName() + " record WHERE record.station = :station")
+				.setParameter("station", station)
+				.setParameterIfNotNull("type", type, "AND record.type = :type")
+				.addSql("ORDER BY record.timestamp DESC")
+				.buildSingleResultOrNull(subClass);
 	}
 
 	protected static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {

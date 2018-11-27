@@ -254,12 +254,13 @@ public class Station {
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
 		if(stationCode == null || stationType == null || stationType.isEmpty())
 			return null;
-		QueryBuilder qb = new QueryBuilder(em);
-		return qb.addSql("SELECT station FROM Station station",
-						 "WHERE station.stationcode = :stationcode AND station.stationtype = :stationtype")
-				 .setParameter("stationcode", stationCode)
-				 .setParameter("stationtype", stationType)
-				 .buildSingleResultOrNull(Station.class);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT station FROM Station station",
+						"WHERE station.stationcode = :stationcode AND station.stationtype = :stationtype")
+				.setParameter("stationcode", stationCode)
+				.setParameter("stationtype", stationType)
+				.buildSingleResultOrNull(Station.class);
 	}
 
 	public static Station findStation(EntityManager em, String stationType, Integer stationCode) {
@@ -438,21 +439,23 @@ public class Station {
 	}
 
 	private static Station findStationByIdentifier(EntityManager em, String id) {
-		QueryBuilder qb = new QueryBuilder(em);
-		return qb.addSql("SELECT s FROM Station s WHERE s.stationcode = :stationcode")
-				 .setParameter("stationcode", id)
-				 .buildSingleResultOrNull(Station.class);
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT s FROM Station s WHERE s.stationcode = :stationcode")
+				.setParameter("stationcode", id)
+				.buildSingleResultOrNull(Station.class);
 	}
 
 	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
 		try {
-			QueryBuilder qb = new QueryBuilder(em);
-			return qb.addSql("SELECT station FROM Station station",
-							 "WHERE station.active = :active AND station.stationtype = :type")
-					 .setParameterIfNotNull("origin", origin, "AND origin = :origin")
-					 .setParameter("active", true)
-					 .setParameter("type", stationType)
-					 .buildResultList(Station.class);
+			return QueryBuilder
+					.init(em)
+					.addSql("SELECT station FROM Station station",
+							"WHERE station.active = :active AND station.stationtype = :type")
+					.setParameterIfNotNull("origin", origin, "AND origin = :origin")
+					.setParameter("active", true)
+					.setParameter("type", stationType)
+					.buildResultList(Station.class);
 		} catch (Exception e) {
 			throw new JPAException("Unable to create query for station type '" + stationType + "'", e);
 		}

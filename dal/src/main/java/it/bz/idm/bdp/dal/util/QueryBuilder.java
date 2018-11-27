@@ -33,6 +33,10 @@ public class QueryBuilder {
 	private EntityManager em = null;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
+	public static QueryBuilder init(EntityManager em) {
+		return new QueryBuilder(em);
+	}
+
 	public QueryBuilder(EntityManager em) {
 		super();
 		this.em = em;
@@ -50,7 +54,11 @@ public class QueryBuilder {
 
 
 	public QueryBuilder setParameterIfNotNull(String name, Object value, String sqlPart) {
-		if (value != null) {
+		return setParameterIf(name, value, sqlPart, value != null);
+	}
+
+	public QueryBuilder setParameterIf(String name, Object value, String sqlPart, boolean condition) {
+		if (condition) {
 			addSql(sqlPart);
 			setParameter(name, value);
 		}
