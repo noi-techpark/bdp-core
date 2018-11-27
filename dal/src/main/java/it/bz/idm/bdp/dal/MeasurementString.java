@@ -29,6 +29,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -37,6 +38,9 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 @Table(name="measurementstring", schema="intime")
 @Entity
 public class MeasurementString extends M {
+
+	@Transient
+	private static final long serialVersionUID = -4378235887347510723L;
 
 	@Id
 	@GeneratedValue(generator = "measurementstring_gen", strategy = GenerationType.SEQUENCE)

@@ -20,6 +20,7 @@
  */
 package it.bz.idm.bdp.dal;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -35,7 +36,9 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @MappedSuperclass
 @Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class M {
+public abstract class M implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Column(nullable = false)
 	private Date created_on;

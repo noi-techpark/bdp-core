@@ -89,7 +89,6 @@ public class Measurement extends M {
 			Number numberValue =(Number)value;
 			this.setValue(numberValue.doubleValue());
 		}
-
 	}
 
 	@Override

@@ -20,6 +20,7 @@
  */
 package it.bz.idm.bdp.dal;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,7 +44,9 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 @MappedSuperclass
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public abstract class MHistory {
+public abstract class MHistory implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private Date created_on;
 	private Date timestamp;

@@ -30,6 +30,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -40,7 +41,10 @@ import it.bz.idm.bdp.dto.RecordDto;
 @Entity
 public class MeasurementStringHistory extends MHistory {
 
-    @Id
+	@Transient
+	private static final long serialVersionUID = 8968054299664379971L;
+
+	@Id
 	@GeneratedValue(generator = "measurementstringhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
