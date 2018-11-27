@@ -212,10 +212,10 @@ public abstract class MHistory {
 			}
 
 			if (stationFound == false) {
-				throw new JPAException("No station found inside " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+				throw new JPAException("No station found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
 			}
 			if (typeFound == false) {
-				throw new JPAException("No station/type found inside " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+				throw new JPAException("No station/type found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
 			}
 			if (givenDataOK == false) {
 				throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
