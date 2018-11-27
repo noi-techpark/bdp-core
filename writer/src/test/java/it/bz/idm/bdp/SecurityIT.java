@@ -40,7 +40,7 @@ import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPRules;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
@@ -57,7 +57,7 @@ public class SecurityIT extends WriterTestSetup {
 		/* Admin roles must have a rule to see everything */
 		TypedQuery<BDPRules> query = em.createQuery("select r from BDPRules r where r.role = :role", BDPRules.class)
 									   .setParameter("role", admin);
-		BDPRules rule = JPAUtil.getSingleResultOrNull(query);
+		BDPRules rule = QueryBuilder.getSingleResultOrNull(query);
 		assertNotNull(rule);
 		assertNull(rule.getPeriod());
 		assertNull(rule.getStation());
