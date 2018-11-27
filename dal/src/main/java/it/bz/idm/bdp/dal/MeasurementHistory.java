@@ -39,7 +39,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
@@ -170,7 +170,7 @@ public class MeasurementHistory extends MHistory {
 		preparedQuery.setParameter("timestamp",date);
 		preparedQuery.setParameter("period",period);
 		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
+		return QueryBuilder.getSingleResultOrNull(preparedQuery) != null;
 	}
 
 }

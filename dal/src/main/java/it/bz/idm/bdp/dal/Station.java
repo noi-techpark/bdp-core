@@ -56,7 +56,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.util.JPAException;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.StationDto;
 
@@ -258,7 +258,7 @@ public class Station {
 		TypedQuery<Station> stationquery = em.createQuery("SELECT station FROM Station station WHERE station.stationcode = :stationcode and station.stationtype = :stationtype", Station.class)
 											 .setParameter("stationcode", stationCode)
 											 .setParameter("stationtype", stationType);
-		return JPAUtil.getSingleResultOrNull(stationquery);
+		return QueryBuilder.getSingleResultOrNull(stationquery);
 	}
 
 	public static Station findStation(EntityManager em, String stationType, Integer stationCode) {
@@ -439,20 +439,18 @@ public class Station {
 	private static Station findStationByIdentifier(EntityManager em, String id) {
 		TypedQuery<Station> stationquery = em.createQuery("select s from Station s where s.stationcode = :stationcode", Station.class)
 											 .setParameter("stationcode", id);
-		return JPAUtil.getSingleResultOrNull(stationquery);
+		return QueryBuilder.getSingleResultOrNull(stationquery);
 	}
 
 	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
-		String baseQuery = "Select station from Station station where station.active = :active and station.stationtype = :type";
-		if (origin != null)
-			baseQuery += " and origin = :origin";
 		try {
-			TypedQuery<Station> query = em.createQuery(baseQuery, Station.class)
-										  .setParameter("active", true)
-										  .setParameter("type", stationType);
-			if (origin != null)
-				query.setParameter("origin", origin);
-			return query.getResultList();
+			QueryBuilder qb = new QueryBuilder(em);
+			return qb.addSql("SELECT station FROM Station station",
+							 "WHERE station.active = :active AND station.stationtype = :type")
+					 .setParameterIfNotNull("origin", origin, "AND origin = :origin")
+					 .setParameter("active", true)
+					 .setParameter("type", stationType)
+					 .buildResultList(Station.class);
 		} catch (Exception e) {
 			throw new JPAException("Unable to create query for station type '" + stationType + "'", e);
 		}

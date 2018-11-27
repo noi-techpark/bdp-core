@@ -39,7 +39,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 
@@ -219,6 +219,6 @@ public class CarParkingDynamicHistory {
 		TypedQuery<CarParkingDynamicHistory> query = em.createQuery("SELECT record FROM CarParkingDynamicHistory record WHERE record.station=:station AND record.lastupdate= :lastupdate ",CarParkingDynamicHistory.class);
 		query.setParameter("station", station);
 		query.setParameter("lastupdate", new Date(timestamp));
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 }

@@ -34,7 +34,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @Table(name="measurementstring", schema="intime")
 @Entity
@@ -96,7 +96,7 @@ public class MeasurementString extends M {
 		q.setParameter("type",type);
 		q.setParameter("period", period);
 		q.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(q);
+		return QueryBuilder.getSingleResultOrNull(q);
 	}
 
 	@Override

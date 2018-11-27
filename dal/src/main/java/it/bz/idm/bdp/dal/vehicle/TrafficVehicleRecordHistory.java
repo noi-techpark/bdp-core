@@ -48,6 +48,7 @@ import com.vividsolutions.jts.geom.Point;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.vehicles.CarValue;
 import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
@@ -909,7 +910,7 @@ public class TrafficVehicleRecordHistory {
 					"select record.ts_ms from TrafficVehicleRecordHistory record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
 					Date.class);
 			query.setParameter("station", stationId);
-			return JPAUtil.getSingleResultOrAlternative(query, new Date(0));
+			return QueryBuilder.getSingleResultOrAlternative(query, new Date(0));
 		} finally {
 			if (em.isOpen())
 				em.close();

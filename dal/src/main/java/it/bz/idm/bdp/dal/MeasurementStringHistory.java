@@ -34,7 +34,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
@@ -97,7 +97,7 @@ public class MeasurementStringHistory extends MHistory {
 		history.setParameter("period", period);
 		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
 
-		return JPAUtil.getSingleResultOrNull(history);
+		return QueryBuilder.getSingleResultOrNull(history);
 	}
 
 	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
@@ -121,6 +121,6 @@ public class MeasurementStringHistory extends MHistory {
 		}
 		query.setParameter("stationcode", id);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 }

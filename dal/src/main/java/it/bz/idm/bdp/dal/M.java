@@ -32,7 +32,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.TypedQuery;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @MappedSuperclass
 @Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
@@ -146,7 +146,7 @@ public abstract class M {
 			query.setParameter("type", type);
 		if (period != null)
 			query.setParameter("period", period);
-		return JPAUtil.getSingleResultOrAlternative(query, new Date(-1));
+		return QueryBuilder.getSingleResultOrAlternative(query, new Date(-1));
 	}
 
 	/**
@@ -183,7 +183,7 @@ public abstract class M {
 
 		//set required parameters
 		query.setParameter("station", station);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 
 	protected static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
@@ -221,7 +221,7 @@ public abstract class M {
 		//set required parameters
 		query.setParameter("station", station);
 		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 
 }

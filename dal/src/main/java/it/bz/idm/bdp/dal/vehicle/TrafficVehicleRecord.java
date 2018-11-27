@@ -45,6 +45,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.vehicles.CarValue;
 
 @Entity
@@ -898,7 +899,7 @@ public class TrafficVehicleRecord {
 					"select record.ts_ms from TrafficVehicleRecord record where record.station.stationcode= :station ORDER BY record.ts_ms desc",
 					Date.class);
 			query.setParameter("station", stationId);
-			return JPAUtil.getSingleResultOrNull(query);
+			return QueryBuilder.getSingleResultOrNull(query);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -908,7 +909,7 @@ public class TrafficVehicleRecord {
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Station trafficVehicle){
 		TypedQuery<TrafficVehicleRecord > query = em.createQuery("select record from TrafficVehicleRecord record where record.station= :station",TrafficVehicleRecord.class);
 		query.setParameter("station", trafficVehicle);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 	public static TrafficVehicleRecord findRecordByVehicle(EntityManager em, Station trafficVehicle, String cname, Integer period){
 		TrafficVehicleRecord vehicleRecord = null;
@@ -928,7 +929,7 @@ public class TrafficVehicleRecord {
 				TrafficVehicleRecord.class);
 		query.setParameter("station", trafficVehicle);
 		query.setParameter("type", type);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 
 }

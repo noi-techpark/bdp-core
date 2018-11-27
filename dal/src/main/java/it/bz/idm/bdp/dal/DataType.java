@@ -43,7 +43,7 @@ import javax.persistence.TypedQuery;
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.util.JPAException;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
@@ -130,7 +130,7 @@ public class DataType {
 	public static DataType findByCname(EntityManager manager, String cname) {
 		TypedQuery<DataType> query = manager.createQuery("SELECT type from DataType type where type.cname = :cname ", DataType.class)
 											.setParameter("cname",cname);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 
 	}
 
@@ -207,15 +207,12 @@ public class DataType {
 		List<TypeDto> typeDtoList = findTypes(em, stationType, stationId);
 		List<String[]> result = new ArrayList<>();
 		for (TypeDto item : typeDtoList) {
-			String desc = "";
-			if (! item.getDesc().isEmpty()) {
-				desc = item.getDesc().entrySet().iterator().next().getValue();
-			}
-			String interval = "";
-			if (! item.getAcquisitionIntervals().isEmpty()) {
-				interval = item.getAcquisitionIntervals().iterator().next().toString();
-			}
-			String[] arr = {item.getId(), item.getUnit(), desc, interval};
+			String[] arr = {
+					item.getId(),
+					item.getUnit() == null ? "" : item.getUnit(),
+					item.getDesc().isEmpty() ? "" : item.getDesc().entrySet().iterator().next().getValue(),
+					item.getAcquisitionIntervals().isEmpty() ? "" : item.getAcquisitionIntervals().iterator().next().toString()
+				};
 			result.add(arr);
 		}
 		return result;

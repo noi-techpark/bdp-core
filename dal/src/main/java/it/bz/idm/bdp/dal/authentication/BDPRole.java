@@ -37,7 +37,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
 @Table(name = "bdprole", schema = "intime")
@@ -135,7 +135,7 @@ public class BDPRole {
 	public static BDPRole findByName(EntityManager em, String name) {
 		TypedQuery<BDPRole> query = em.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
 		query.setParameter("name", name);
-		return JPAUtil.getSingleResultOrNull(query);
+		return QueryBuilder.getSingleResultOrNull(query);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {
