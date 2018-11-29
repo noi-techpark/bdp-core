@@ -7,7 +7,6 @@
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
--- SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -142,74 +141,6 @@ CREATE TABLE intime.bdpusers_bdproles (
 ALTER TABLE intime.bdpusers_bdproles OWNER TO bdp;
 
 --
--- Name: carparkingdynamic_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.carparkingdynamic_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.carparkingdynamic_seq OWNER TO bdp;
-
---
--- Name: carparkingdynamic; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carparkingdynamic (
-    id integer DEFAULT nextval('intime.carparkingdynamic_seq'::regclass) NOT NULL,
-    carparkstate character varying(255),
-    carparktrend character varying(255),
-    createdate timestamp without time zone,
-    exitrate double precision,
-    fillrate double precision,
-    lastupdate timestamp without time zone,
-    occupacy integer,
-    occupacypercentage integer,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.carparkingdynamic OWNER TO bdp;
-
---
--- Name: carparkingdynamichistory_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.carparkingdynamichistory_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.carparkingdynamichistory_seq OWNER TO bdp;
-
---
--- Name: carparkingdynamichistory; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.carparkingdynamichistory (
-    id integer DEFAULT nextval('intime.carparkingdynamichistory_seq'::regclass) NOT NULL,
-    carparkstate character varying(255),
-    carparktrend character varying(255),
-    createdate timestamp without time zone,
-    exitrate double precision,
-    fillrate double precision,
-    lastupdate timestamp without time zone,
-    occupacy integer,
-    occupacypercentage integer,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.carparkingdynamichistory OWNER TO bdp;
-
---
 -- Name: datatype_i18n; Type: TABLE; Schema: intime; Owner: bdp
 --
 
@@ -283,178 +214,6 @@ CREATE TABLE intime.measurementhistory (
 
 
 ALTER TABLE intime.measurementhistory OWNER TO bdp;
-
---
--- Name: trafficvehiclerecord_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.trafficvehiclerecord_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.trafficvehiclerecord_seq OWNER TO bdp;
-
---
--- Name: measurementmobile; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.measurementmobile (
-    id bigint DEFAULT nextval('intime.trafficvehiclerecord_seq'::regclass) NOT NULL,
-    af_1_sccm double precision,
-    af_1_valid_b boolean,
-    can_acc_lat_mean_mps2 double precision,
-    can_acc_lat_mps2 double precision,
-    can_acc_lat_var_m2ps4 double precision,
-    can_acc_long_mean_mps2 double precision,
-    can_acc_long_mps2 double precision,
-    can_acc_long_var_m2ps4 double precision,
-    can_speed_mps double precision,
-    can_valid_b boolean,
-    co_1_ppm double precision,
-    co_1_runtime_s integer,
-    co_1_valid_b boolean,
-    created_on timestamp without time zone,
-    gps_1_alt_m double precision,
-    gps_1_hdg_deg double precision,
-    gps_1_lat_deg double precision,
-    gps_1_long_deg double precision,
-    gps_1_pdop_nr double precision,
-    gps_1_sat_nr integer,
-    gps_1_speed_mps double precision,
-    gps_1_valid_b boolean,
-    id_driver_nr integer,
-    id_runtime_s integer,
-    id_status_char character varying(255),
-    id_system_nr integer,
-    id_vehicle_nr integer,
-    id_version_char character varying(255),
-    imu_acc_lat_mean_mps2 double precision,
-    imu_acc_lat_mps2 double precision,
-    imu_acc_lat_var_m2ps4 double precision,
-    imu_acc_long_mean_mps2 double precision,
-    imu_acc_long_mps2 double precision,
-    imu_acc_long_var_m2ps4 double precision,
-    imu_speed_mps double precision,
-    imu_valid_b boolean,
-    no2_1_microgm3_exp double precision,
-    no2_1_microgm3_ma double precision,
-    no2_1_ppb double precision,
-    no2_1_runtime_s integer,
-    no2_1_valid_b boolean,
-    no2_2_ppb double precision,
-    no2_2_runtime_s integer,
-    no2_2_valid_b boolean,
-    o3_1_ppb double precision,
-    o3_1_runtime_s integer,
-    o3_1_valid_b boolean,
-    "position" public.geometry,
-    realtime_delay bigint,
-    res_1_a double precision,
-    res_1_runtime_s integer,
-    res_1_valid_b boolean,
-    res_2_a double precision,
-    res_2_runtime_s integer,
-    res_2_valid_b boolean,
-    rh_1_pct double precision,
-    rh_1_valid_b boolean,
-    temp_1_c double precision,
-    temp_1_valid_b boolean,
-    ts_ms timestamp without time zone,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.measurementmobile OWNER TO bdp;
-
---
--- Name: trafficvehiclerecordhistory_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.trafficvehiclerecordhistory_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.trafficvehiclerecordhistory_seq OWNER TO bdp;
-
---
--- Name: measurementmobilehistory; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.measurementmobilehistory (
-    id bigint DEFAULT nextval('intime.trafficvehiclerecordhistory_seq'::regclass) NOT NULL,
-    af_1_sccm double precision,
-    af_1_valid_b boolean,
-    can_acc_lat_mean_mps2 double precision,
-    can_acc_lat_mps2 double precision,
-    can_acc_lat_var_m2ps4 double precision,
-    can_acc_long_mean_mps2 double precision,
-    can_acc_long_mps2 double precision,
-    can_acc_long_var_m2ps4 double precision,
-    can_speed_mps double precision,
-    can_valid_b boolean,
-    co_1_ppm double precision,
-    co_1_runtime_s integer,
-    co_1_valid_b boolean,
-    created_on timestamp without time zone,
-    gps_1_alt_m double precision,
-    gps_1_hdg_deg double precision,
-    gps_1_lat_deg double precision,
-    gps_1_long_deg double precision,
-    gps_1_pdop_nr double precision,
-    gps_1_sat_nr integer,
-    gps_1_speed_mps double precision,
-    gps_1_valid_b boolean,
-    id_driver_nr integer,
-    id_runtime_s integer,
-    id_status_char character varying(255),
-    id_system_nr integer,
-    id_vehicle_nr integer,
-    id_version_char character varying(255),
-    imu_acc_lat_mean_mps2 double precision,
-    imu_acc_lat_mps2 double precision,
-    imu_acc_lat_var_m2ps4 double precision,
-    imu_acc_long_mean_mps2 double precision,
-    imu_acc_long_mps2 double precision,
-    imu_acc_long_var_m2ps4 double precision,
-    imu_speed_mps double precision,
-    imu_valid_b boolean,
-    no2_1_microgm3_exp double precision,
-    no2_1_microgm3_ma double precision,
-    no2_1_ppb double precision,
-    no2_1_runtime_s integer,
-    no2_1_valid_b boolean,
-    no2_2_ppb double precision,
-    no2_2_runtime_s integer,
-    no2_2_valid_b boolean,
-    o3_1_ppb double precision,
-    o3_1_runtime_s integer,
-    o3_1_valid_b boolean,
-    "position" public.geometry,
-    realtime_delay bigint,
-    res_1_a double precision,
-    res_1_runtime_s integer,
-    res_1_valid_b boolean,
-    res_2_a double precision,
-    res_2_runtime_s integer,
-    res_2_valid_b boolean,
-    rh_1_pct double precision,
-    rh_1_valid_b boolean,
-    temp_1_c double precision,
-    temp_1_valid_b boolean,
-    ts_ms timestamp without time zone,
-    station_id bigint
-);
-
-
-ALTER TABLE intime.measurementmobilehistory OWNER TO bdp;
 
 --
 -- Name: measurementstring_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -581,35 +340,6 @@ CREATE TABLE intime.station (
 ALTER TABLE intime.station OWNER TO bdp;
 
 --
--- Name: translation_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
---
-
-CREATE SEQUENCE intime.translation_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE intime.translation_seq OWNER TO bdp;
-
---
--- Name: translation; Type: TABLE; Schema: intime; Owner: bdp
---
-
-CREATE TABLE intime.translation (
-    dtype character varying(31) NOT NULL,
-    id bigint DEFAULT nextval('intime.translation_seq'::regclass) NOT NULL,
-    address character varying(255),
-    city character varying(255),
-    name character varying(255)
-);
-
-
-ALTER TABLE intime.translation OWNER TO bdp;
-
---
 -- Name: type_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
@@ -672,22 +402,6 @@ ALTER TABLE ONLY intime.bdpuser
 
 
 --
--- Name: carparkingdynamic carparkingdynamic_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingdynamic
-    ADD CONSTRAINT carparkingdynamic_pkey PRIMARY KEY (id);
-
-
---
--- Name: carparkingdynamichistory carparkingdynamichistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingdynamichistory
-    ADD CONSTRAINT carparkingdynamichistory_pkey PRIMARY KEY (id);
-
-
---
 -- Name: datatype_i18n datatype_i18n_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -709,22 +423,6 @@ ALTER TABLE ONLY intime.measurement
 
 ALTER TABLE ONLY intime.measurementhistory
     ADD CONSTRAINT measurementhistory_pkey PRIMARY KEY (id);
-
-
---
--- Name: measurementmobile measurementmobile_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.measurementmobile
-    ADD CONSTRAINT measurementmobile_pkey PRIMARY KEY (id);
-
-
---
--- Name: measurementmobilehistory measurementmobilehistory_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.measurementmobilehistory
-    ADD CONSTRAINT measurementmobilehistory_pkey PRIMARY KEY (id);
 
 
 --
@@ -757,14 +455,6 @@ ALTER TABLE ONLY intime.metadata
 
 ALTER TABLE ONLY intime.station
     ADD CONSTRAINT station_pkey PRIMARY KEY (id);
-
-
---
--- Name: translation translation_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.translation
-    ADD CONSTRAINT translation_pkey PRIMARY KEY (id);
 
 
 --
@@ -819,14 +509,6 @@ CREATE INDEX bdppermissions_stp_idx ON intime.bdppermissions USING btree (statio
 --
 
 CREATE INDEX measurement_tsdesc_idx ON intime.measurement USING btree ("timestamp" DESC);
-
-
---
--- Name: measurementmobile fk1dnojfv99vxielbkj9vv3u9wa; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.measurementmobile
-    ADD CONSTRAINT fk1dnojfv99vxielbkj9vv3u9wa FOREIGN KEY (station_id) REFERENCES intime.station(id);
 
 
 --
@@ -902,14 +584,6 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
--- Name: measurementmobilehistory fkdc8h2uo6mi73f6sho1cbc4qqt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.measurementmobilehistory
-    ADD CONSTRAINT fkdc8h2uo6mi73f6sho1cbc4qqt FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
 -- Name: bdprules fkdten6vp3aa3r30ixmaxr0qcj1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -958,14 +632,6 @@ ALTER TABLE ONLY intime.measurementstring
 
 
 --
--- Name: carparkingdynamichistory fkkno932ygx9q10x5s4hdt43eu5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingdynamichistory
-    ADD CONSTRAINT fkkno932ygx9q10x5s4hdt43eu5 FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
 -- Name: datatype_i18n fkkuxk6ww2a8dxcub3iw9byny1k; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -987,14 +653,6 @@ ALTER TABLE ONLY intime.station
 
 ALTER TABLE ONLY intime.measurementstring
     ADD CONSTRAINT fkpi0ege52d6f86n8o6l6s75irm FOREIGN KEY (station_id) REFERENCES intime.station(id);
-
-
---
--- Name: carparkingdynamic fkq90lpabiye1scahh0pa6drni7; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.carparkingdynamic
-    ADD CONSTRAINT fkq90lpabiye1scahh0pa6drni7 FOREIGN KEY (station_id) REFERENCES intime.station(id);
 
 
 --
@@ -1029,8 +687,10 @@ REVOKE ALL ON SCHEMA intime FROM PUBLIC;
 REVOKE ALL ON SCHEMA intime FROM postgres;
 GRANT ALL ON SCHEMA intime TO postgres;
 GRANT ALL ON SCHEMA intime TO bdp;
+GRANT USAGE ON SCHEMA intime TO bdpreadonly;
 
 
 --
 -- PostgreSQL database dump complete
 --
+
