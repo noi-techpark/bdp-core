@@ -139,9 +139,9 @@ public abstract class MHistory implements Serializable {
 						}
 						em.getTransaction().begin();
 
-						M latestNumberMeasurement = M.findLatestEntryImpl(em, station, type, Measurement.class);
+						M latestNumberMeasurement = M.findLatestEntry(em, station, type, Measurement.class);
 						long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
-						M latestStringMeasurement = M.findLatestEntryImpl(em, station, type, MeasurementString.class);
+						M latestStringMeasurement = M.findLatestEntry(em, station, type, MeasurementString.class);
 						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
 						Date created_on = new Date();

@@ -147,7 +147,8 @@ public abstract class M implements Serializable {
 	 *
 	 * <p> THIS METHOD SEES ALL DATA, SO CAREFUL WHEN YOU USE IT </p>
 	 *
-	 * Use {@link M#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)}, if you need permission handling.
+	 * Use {@link M#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)},
+	 * if you need permission handling.
 	 *
 	 * @param em
 	 * @param station
@@ -156,7 +157,7 @@ public abstract class M implements Serializable {
 	 * @param table
 	 * @return
 	 */
-	public static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Class<T> subClass) {
+	public static <T extends M> M findLatestEntry(EntityManager em, Station station, DataType type, Class<T> subClass) {
 		if (station == null)
 			return null;
 
