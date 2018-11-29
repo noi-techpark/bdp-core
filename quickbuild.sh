@@ -24,9 +24,12 @@
 #
 # http://opendatahub.readthedocs.io/en/latest/howto/development.html
 #
+# If you run it with a DUMPFILE environment variable set, it creates a new
+# pg_dump out of a Hibernate create.
+#
 ###############################################################################
 
-set -euo pipefail
+set -xeuo pipefail
 
 ###############################################################################
 # CONFIGURATION
@@ -118,6 +121,10 @@ psql_createdb() {
         psql_call -d $PGDBDEFAULT -c "CREATE DATABASE $PGDBNAME"
 }
 
+psql_createschema() {
+    psql_call -d $PGDBNAME -c "CREATE SCHEMA $PGSCHEMA"
+}
+
 psql_dropdb() {
     psql_call -d $PGDBDEFAULT -c "DROP DATABASE IF EXISTS $PGDBNAME"
 }
@@ -160,7 +167,7 @@ db_setup_privileges() {
     echo_bold "Postgres: Grant privileges to USERS"
     echo
 
-	psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
     psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
     psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
     psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
@@ -225,11 +232,11 @@ update_persistence() {
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
 
     # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
-    if [[ ${DUMPING+x} ]]; then
-		xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "create" $PXMLFILE
-	else
-		xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
-	fi
+    if [[ ${DUMPFILE+x} ]]; then
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "create" $PXMLFILE
+	  else
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+	  fi
 
     echo_bold "...DONE."
 }
@@ -305,7 +312,7 @@ test_installation() {
     shift
     CMD="$@"
     echo -n "Check '$CMD'... "
-    $CMD && echo "--> OK" || echo "--> ERROR: $MSG_ERR"
+    $CMD && echo "--> OK" || { echo "--> ERROR: $MSG_ERR"; exit 1; }
 }
 
 test_first() {
@@ -338,16 +345,34 @@ test_first() {
     echo_bold "...DONE."
 }
 
-if [[ ${DUMPING+x} ]]; then
-	PGDBNAME=__justfordumps__
+if [[ ${DUMPFILE+x} ]]; then
+    echo_bold "Create new SQL DUMP from Hibernate output to file '$DUMPFILE'..."
+
+    if [ -f $DUMPFILE ]; then
+        echo "ERROR: File $DUMPFILE already exists... aborting"
+        exit 1
+    else
+        touch $DUMPFILE
+        if [ ! -w $DUMPFILE ]; then
+            echo "ERROR: File $DUMPFILE is not writeable... aborting"
+            exit 1
+        fi
+    fi
+
+    PGDBNAME=__justfordumps__
     test_first
-	psql_dropdb
+    psql_dropdb
     db_setup_db_and_users
+    psql_createschema
+    db_setup_privileges
     create_log_files
     update_persistence
     deploy_war_files
+    curl -iX GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
+    pg_dump -U $PGUSER -s -h localhost -p $PGPORT -n $PGSCHEMA -d $PGDBNAME > $DUMPFILE
 
-    curl -i -X GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
+    echo_bold "You can find your new dump inside $DUMPFILE"
+    echo_bold "...DONE."
 
     exit 0
 fi
