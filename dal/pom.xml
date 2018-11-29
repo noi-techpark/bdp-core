@@ -141,6 +141,31 @@
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.3.0</version>
         </dependency>
+
+		<!-- Solve issue with java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in Java 9
+		     See https://stackoverflow.com/a/43574427 for details
+		     -->
+        <dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2.11</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sun.xml.bind</groupId>
+		    <artifactId>jaxb-core</artifactId>
+		    <version>2.2.11</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sun.xml.bind</groupId>
+		    <artifactId>jaxb-impl</artifactId>
+		    <version>2.2.11</version>
+		</dependency>
+		<dependency>
+		    <groupId>javax.activation</groupId>
+		    <artifactId>activation</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+		<!-- END: Solve issue... -->
     </dependencies>
 
     <build>
