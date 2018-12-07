@@ -25,14 +25,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -64,8 +61,6 @@ public class DataType {
 	private String cunit;
 	private String description;
 
-	@ElementCollection(fetch=FetchType.EAGER)
-	private Map<String, String> i18n = new HashMap<String, String>();
 	private String rtype;
 
 	public DataType() {
@@ -119,12 +114,6 @@ public class DataType {
 	public void setRtype(String rtype) {
 		this.rtype = rtype;
 	}
-	public Map<String, String> getI18n() {
-		return i18n;
-	}
-	public void setI18n(Map<String, String> i18n) {
-		this.i18n = i18n;
-	}
 
 	public static DataType findByCname(EntityManager em, String cname) {
 		return QueryBuilder
@@ -161,7 +150,6 @@ public class DataType {
 			TypeDto dto = dtos.get(id);
 			if (dto == null){
 				dto = new TypeDto();
-				dto.getDesc().putAll(type.getI18n());
 				dto.setId(id);
 				dto.setUnit(type.getCunit());
 				dto.setTypeOfMeasurement(type.getRtype());
@@ -225,12 +213,9 @@ public class DataType {
 						type.setDescription(dto.getDescription());
 					type.setRtype(dto.getRtype());
 					type.setCunit(dto.getUnit());
-					if (type.getI18n().get(Locale.ENGLISH.getLanguage()) == null && dto.getDescription() != null)
-						type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
 					em.merge(type);
 				}else{
 					type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
-					type.getI18n().put(Locale.ENGLISH.getLanguage(), dto.getDescription());
 					em.persist(type);
 				}
 			}
