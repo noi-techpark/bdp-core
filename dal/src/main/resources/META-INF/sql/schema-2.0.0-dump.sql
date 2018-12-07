@@ -141,17 +141,34 @@ CREATE TABLE intime.bdpusers_bdproles (
 ALTER TABLE intime.bdpusers_bdproles OWNER TO bdp;
 
 --
--- Name: datatype_i18n; Type: TABLE; Schema: intime; Owner: bdp
+-- Name: edge_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
 --
 
-CREATE TABLE intime.datatype_i18n (
-    datatype_id bigint NOT NULL,
-    i18n character varying(255),
-    i18n_key character varying(255) NOT NULL
+CREATE SEQUENCE intime.edge_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.edge_seq OWNER TO bdp;
+
+--
+-- Name: edge; Type: TABLE; Schema: intime; Owner: bdp
+--
+
+CREATE TABLE intime.edge (
+    id bigint DEFAULT nextval('intime.edge_seq'::regclass) NOT NULL,
+    directed boolean DEFAULT true NOT NULL,
+    linegeometry public.geometry,
+    destination_id bigint NOT NULL,
+    edgedata_id bigint,
+    origin_id bigint NOT NULL
 );
 
 
-ALTER TABLE intime.datatype_i18n OWNER TO bdp;
+ALTER TABLE intime.edge OWNER TO bdp;
 
 --
 -- Name: measurement_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -402,11 +419,11 @@ ALTER TABLE ONLY intime.bdpuser
 
 
 --
--- Name: datatype_i18n datatype_i18n_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+-- Name: edge edge_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
-ALTER TABLE ONLY intime.datatype_i18n
-    ADD CONSTRAINT datatype_i18n_pkey PRIMARY KEY (datatype_id, i18n_key);
+ALTER TABLE ONLY intime.edge
+    ADD CONSTRAINT edge_pkey PRIMARY KEY (id);
 
 
 --
@@ -584,6 +601,14 @@ ALTER TABLE ONLY intime.bdprole
 
 
 --
+-- Name: edge fkbhk3m6i8hpuvw5f5wmob7lv0x; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.edge
+    ADD CONSTRAINT fkbhk3m6i8hpuvw5f5wmob7lv0x FOREIGN KEY (origin_id) REFERENCES intime.station(id);
+
+
+--
 -- Name: bdprules fkdten6vp3aa3r30ixmaxr0qcj1; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -632,19 +657,19 @@ ALTER TABLE ONLY intime.measurementstring
 
 
 --
--- Name: datatype_i18n fkkuxk6ww2a8dxcub3iw9byny1k; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.datatype_i18n
-    ADD CONSTRAINT fkkuxk6ww2a8dxcub3iw9byny1k FOREIGN KEY (datatype_id) REFERENCES intime.type(id);
-
-
---
 -- Name: station fkl75nk4972jo3defhqu6l23o9j; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
 ALTER TABLE ONLY intime.station
     ADD CONSTRAINT fkl75nk4972jo3defhqu6l23o9j FOREIGN KEY (metadata_id) REFERENCES intime.metadata(id);
+
+
+--
+-- Name: edge fklo9f6f70icnhbsy5fw5vm8q87; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.edge
+    ADD CONSTRAINT fklo9f6f70icnhbsy5fw5vm8q87 FOREIGN KEY (destination_id) REFERENCES intime.station(id);
 
 
 --
@@ -677,6 +702,14 @@ ALTER TABLE ONLY intime.bdppermissions
 
 ALTER TABLE ONLY intime.station
     ADD CONSTRAINT fkrwkpfeoxfhn1rks97k6wlanpk FOREIGN KEY (parent_id) REFERENCES intime.station(id);
+
+
+--
+-- Name: edge fks5ux522idfw9aredb1uwlq4tt; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.edge
+    ADD CONSTRAINT fks5ux522idfw9aredb1uwlq4tt FOREIGN KEY (edgedata_id) REFERENCES intime.station(id);
 
 
 --
