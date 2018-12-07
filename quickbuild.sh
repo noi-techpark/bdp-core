@@ -29,7 +29,7 @@
 #
 ###############################################################################
 
-set -xeuo pipefail
+set -euo pipefail
 
 ###############################################################################
 # CONFIGURATION
@@ -369,11 +369,12 @@ if [[ ${DUMPFILE+x} ]]; then
     update_persistence
     deploy_war_files
     curl -iX GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
+    echo
+
     pg_dump -U $PGUSER -s -h localhost -p $PGPORT -n $PGSCHEMA -d $PGDBNAME > $DUMPFILE
 
     # Remove settings, that are not compatible with v9.5
     sed -i '/SET idle_in_transaction_session_timeout*/d' $DUMPFILE
-
 
     echo_bold "You can find your new dump inside $DUMPFILE"
     echo_bold "...DONE."
