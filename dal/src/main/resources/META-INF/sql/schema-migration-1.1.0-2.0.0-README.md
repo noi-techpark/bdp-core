@@ -254,9 +254,9 @@ Example:
 - Removed
 
 > TODO: NEEDS DISCUSSION
-> 
+>
 > The idea above is not feasible, since we cannot change the origin of stations
-> to NOI, if they have already another oritin associated.
+> to NOI, if they have already another origin associated.
 
 ### linkbasicdata
 - Copy `id`, `station_id`, `origin_id`, `linegeometry` and `destination_id` to
@@ -285,10 +285,10 @@ Example:
 
 ### measurementmobile & measurementmobilehistory
 - We have around 7,000,000 records * 61 attributes, which would become 61 types
-  and 427,000,000 new records inside measurementhistory
+  and 427,000,000 new records inside measurementhistory.
   This could be a huge performance issue.
-
-> TODO: NEEDS DISCUSSION
+- We keep these tables without changes for now. They will be accessible solely
+  via PostgreSQL (ommitting Rest API connectivity)
 
 ### measurementstring
 - Rename column `value` to `stringvalue`
@@ -378,5 +378,3 @@ Example:
 
 ### type
 - Remove `timestamp` (was always null)
-
-----

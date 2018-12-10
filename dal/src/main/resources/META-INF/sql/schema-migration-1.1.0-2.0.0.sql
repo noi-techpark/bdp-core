@@ -430,7 +430,7 @@ where subs.station_id = intime.metadata.station_id;
 
 
 --------------------------------------------------------------------------------------------------------
--- measurement, measurementhistory, elaboration & elaborationhistory
+-- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
 --------------------------------------------------------------------------------------------------------
 insert into intime.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, id) 
 select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurement;
@@ -443,6 +443,10 @@ select created_on, timestamp, value, station_id, type_id, period, id from intime
 
 insert into intime.measurementstringhistory (created_on, timestamp, value, station_id, type_id, period, id) 
 select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurementstringhistory;
+
+create table intime.measurementmobile as table intimev1.measurementmobile;
+
+create table intime.measurementmobilehistory as table intimev1.measurementmobilehistory;
 
 
 --------------------------------------------------------------------------------------------------------
