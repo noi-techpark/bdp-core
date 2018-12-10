@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
@@ -58,6 +59,9 @@ public abstract class MHistory implements Serializable {
 	private DataType type;
 
 	private Integer period;
+
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	private Provenance provenance;
 
 	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role);
 	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
@@ -104,11 +108,21 @@ public abstract class MHistory implements Serializable {
 	public void setType(DataType type) {
 		this.type = type;
 	}
+
 	public Integer getPeriod() {
 		return period;
 	}
+
 	public void setPeriod(Integer period) {
 		this.period = period;
+	}
+
+	public Provenance getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(Provenance provenance) {
+		this.provenance = provenance;
 	}
 
 	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {

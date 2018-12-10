@@ -26,6 +26,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
@@ -54,6 +55,9 @@ public abstract class M implements Serializable {
 
 	@Column(nullable = false)
 	private Integer period;
+
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	private Provenance provenance;
 
 	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
 	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
@@ -106,6 +110,14 @@ public abstract class M implements Serializable {
 	}
 	public void setPeriod(Integer period) {
 		this.period = period;
+	}
+
+	public Provenance getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(Provenance provenance) {
+		this.provenance = provenance;
 	}
 
 	/**

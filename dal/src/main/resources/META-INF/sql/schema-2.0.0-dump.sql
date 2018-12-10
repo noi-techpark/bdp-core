@@ -194,6 +194,7 @@ CREATE TABLE intime.measurement (
     period integer NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
     doublevalue double precision,
+    provenance_id bigint,
     station_id bigint,
     type_id bigint
 );
@@ -225,6 +226,7 @@ CREATE TABLE intime.measurementhistory (
     period integer,
     "timestamp" timestamp without time zone,
     value double precision,
+    provenance_id bigint,
     station_id bigint,
     type_id bigint
 );
@@ -256,6 +258,7 @@ CREATE TABLE intime.measurementstring (
     period integer NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
     stringvalue character varying(255),
+    provenance_id bigint,
     station_id bigint,
     type_id bigint
 );
@@ -287,6 +290,7 @@ CREATE TABLE intime.measurementstringhistory (
     period integer,
     "timestamp" timestamp without time zone,
     value character varying(255),
+    provenance_id bigint,
     station_id bigint,
     type_id bigint
 );
@@ -321,6 +325,34 @@ CREATE TABLE intime.metadata (
 
 
 ALTER TABLE intime.metadata OWNER TO bdp;
+
+--
+-- Name: provenance_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
+--
+
+CREATE SEQUENCE intime.provenance_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE intime.provenance_seq OWNER TO bdp;
+
+--
+-- Name: provenance; Type: TABLE; Schema: intime; Owner: bdp
+--
+
+CREATE TABLE intime.provenance (
+    id bigint DEFAULT nextval('intime.provenance_seq'::regclass) NOT NULL,
+    datacollector character varying(255),
+    datacollectorversion character varying(255),
+    lineage character varying(255) NOT NULL
+);
+
+
+ALTER TABLE intime.provenance OWNER TO bdp;
 
 --
 -- Name: station_seq; Type: SEQUENCE; Schema: intime; Owner: bdp
@@ -467,6 +499,14 @@ ALTER TABLE ONLY intime.metadata
 
 
 --
+-- Name: provenance provenance_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.provenance
+    ADD CONSTRAINT provenance_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: station station_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -480,6 +520,14 @@ ALTER TABLE ONLY intime.station
 
 ALTER TABLE ONLY intime.type
     ADD CONSTRAINT type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: provenance uk92f8j5b9p35h30b9wus4blces; Type: CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.provenance
+    ADD CONSTRAINT uk92f8j5b9p35h30b9wus4blces UNIQUE (lineage, datacollector, datacollectorversion);
 
 
 --
@@ -537,6 +585,14 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
+-- Name: measurement fk2l14xdjteupo8d5nie9x7c86k; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.measurement
+    ADD CONSTRAINT fk2l14xdjteupo8d5nie9x7c86k FOREIGN KEY (provenance_id) REFERENCES intime.provenance(id);
+
+
+--
 -- Name: bdppermissions fk4ne8r7ss0r4eufg7qx3bdcybi; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -561,6 +617,14 @@ ALTER TABLE ONLY intime.bdpusers_bdproles
 
 
 --
+-- Name: measurementstring fk66wukreiy92ullugp5b5pooay; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.measurementstring
+    ADD CONSTRAINT fk66wukreiy92ullugp5b5pooay FOREIGN KEY (provenance_id) REFERENCES intime.provenance(id);
+
+
+--
 -- Name: measurementhistory fk6ft0if5pwoff43uyhh4g6mrv5; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -582,6 +646,14 @@ ALTER TABLE ONLY intime.metadata
 
 ALTER TABLE ONLY intime.bdprules
     ADD CONSTRAINT fk7ptqedikeqqbqmqlpspy0fny1 FOREIGN KEY (station_id) REFERENCES intime.station(id);
+
+
+--
+-- Name: measurementhistory fk8a185rsn3lwvbbk6ylbiovjty; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.measurementhistory
+    ADD CONSTRAINT fk8a185rsn3lwvbbk6ylbiovjty FOREIGN KEY (provenance_id) REFERENCES intime.provenance(id);
 
 
 --
@@ -670,6 +742,14 @@ ALTER TABLE ONLY intime.station
 
 ALTER TABLE ONLY intime.edge
     ADD CONSTRAINT fklo9f6f70icnhbsy5fw5vm8q87 FOREIGN KEY (destination_id) REFERENCES intime.station(id);
+
+
+--
+-- Name: measurementstringhistory fkn9wb0w7f39jr7sp9bq7gh34of; Type: FK CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.measurementstringhistory
+    ADD CONSTRAINT fkn9wb0w7f39jr7sp9bq7gh34of FOREIGN KEY (provenance_id) REFERENCES intime.provenance(id);
 
 
 --
