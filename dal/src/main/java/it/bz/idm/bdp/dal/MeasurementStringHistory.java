@@ -50,7 +50,14 @@ public class MeasurementStringHistory extends MHistory {
 	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
 	private Long id;
 
-	private String value;
+    /*
+     * Make sure all subclasses of MHistory contain different value names. If these
+     * variable names would be called the same, but with different data types
+     * Hibernate would complain about not being able to create a SQL UNION.
+     * Ex. private String value; and private Double value; would not work
+     *     inside MeasurementStringHistory and MeasurementHistory respectively
+     */
+	private String stringValue;
 
 	public MeasurementStringHistory() {
 	}
@@ -70,11 +77,11 @@ public class MeasurementStringHistory extends MHistory {
 		this.id = id;
 	}
 	public String getValue() {
-		return value;
+		return stringValue;
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		this.stringValue = value;
 	}
 
 	@Override
