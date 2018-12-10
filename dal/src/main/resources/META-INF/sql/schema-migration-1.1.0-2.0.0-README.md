@@ -249,14 +249,24 @@ Example:
 ```
 
 ### elaboration & elaborationhistory
-- Move into `measurement` with `origin = NOI`
-- Move into `measurmenthistory` with `origin = NOI`
-- Removed
 
-> TODO: NEEDS DISCUSSION
+> Our first idea was the following:
+> - Move into `measurement` with `origin = NOI`
+> - Move into `measurmenthistory` with `origin = NOI`
+> - Removed
 >
-> The idea above is not feasible, since we cannot change the origin of stations
+> However, it is not feasible, since we cannot change the origin of stations
 > to NOI, if they have already another origin associated.
+
+Final solution:
+- Create a new entity, called `provenance` with columns = `(lineage, dataCollector, dataCollectorVersion)`
+- Insert into `provenance`: `('NOI', 'Migration from V1', null)`
+- Add a foreign key from any `measurment...` table to `provenance`
+- Move `elaboration` into `measurement` with `provenance = (NOI, Migration from V1)`
+- Move `elaborationhistory` into `measurementhistory` with `provenance = (NOI, Migration from V1)`
+- Do not move data, that has `created_on` or `value` null
+- Remove `elaboration` and `elaborationhistory`
+
 
 ### linkbasicdata
 - Copy `id`, `station_id`, `origin_id`, `linegeometry` and `destination_id` to

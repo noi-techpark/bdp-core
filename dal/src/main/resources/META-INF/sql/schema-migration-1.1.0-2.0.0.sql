@@ -8,17 +8,6 @@
 --
 -------------------------------------------------------------------------------------------------------------
 
-truncate intime.type cascade;
-truncate intime.station cascade;
-truncate intime.metadata cascade;
-truncate intime.bdpuser cascade;
-truncate intime.bdprules cascade;
-truncate intime.bdprole cascade;
-truncate intime.bdpusers_bdproles cascade;
-truncate intime.datatype_i18n cascade;
-truncate intime.edge cascade;
-
-
 -- Make sure this script does not touch schemas other than v1.1.0
 -- select * from intime.schemaversion;
 -- delete from intime.schemaversion; insert into intime.schemaversion values('1.1.0');
@@ -35,6 +24,28 @@ $$;
 
 
 BEGIN;
+
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+-- !!!!! BEWARE: DATA LOSS!!!!!
+--
+-- THESE LINES ARE JUST FOR TESTING -- REMOVE BEFORE GOING INTO PRODUCTION!!!
+-------------------------------------------------------------------------------------------------------------
+truncate intime.type cascade;
+truncate intime.station cascade;
+truncate intime.metadata cascade;
+truncate intime.bdpuser cascade;
+truncate intime.bdprules cascade;
+truncate intime.bdprole cascade;
+truncate intime.bdpusers_bdproles cascade;
+truncate intime.datatype_i18n cascade;
+truncate intime.edge cascade;
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+
 
 
 -- alter schema intime rename to intimev1;
@@ -447,6 +458,18 @@ select created_on, timestamp, value, station_id, type_id, period, id from intime
 create table intime.measurementmobile as table intimev1.measurementmobile;
 
 create table intime.measurementmobilehistory as table intimev1.measurementmobilehistory;
+
+insert into intime.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1');
+
+insert into intime.measurementhistory (created_on, timestamp, value, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id
+		, (select id from intime.provenance where lineage = 'NOI' and datacollector = 'Migration from V1') as provenance_id
+from intimev1.elaborationhistory where created_on is not null and value is not null;
+
+insert into intime.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id
+		, (select id from intime.provenance where lineage = 'NOI' and datacollector = 'Migration from V1') as provenance_id
+from intimev1.elaboration where created_on is not null and value is not null;
 
 
 --------------------------------------------------------------------------------------------------------

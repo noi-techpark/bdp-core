@@ -15,13 +15,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: intime; Type: SCHEMA; Schema: -; Owner: postgres
+-- Name: intime; Type: SCHEMA; Schema: -; Owner: bdp
 --
 
 CREATE SCHEMA intime;
 
 
-ALTER SCHEMA intime OWNER TO postgres;
+ALTER SCHEMA intime OWNER TO bdp;
 
 SET default_tablespace = '';
 
@@ -346,7 +346,7 @@ ALTER TABLE intime.provenance_seq OWNER TO bdp;
 
 CREATE TABLE intime.provenance (
     id bigint DEFAULT nextval('intime.provenance_seq'::regclass) NOT NULL,
-    datacollector character varying(255),
+    datacollector character varying(255) NOT NULL,
     datacollectorversion character varying(255),
     lineage character varying(255) NOT NULL
 );
@@ -459,6 +459,14 @@ ALTER TABLE ONLY intime.edge
 
 
 --
+-- Name: provenance idx_provenance_l_dc_dcv; Type: CONSTRAINT; Schema: intime; Owner: bdp
+--
+
+ALTER TABLE ONLY intime.provenance
+    ADD CONSTRAINT idx_provenance_l_dc_dcv UNIQUE (lineage, datacollector, datacollectorversion);
+
+
+--
 -- Name: measurement measurement_pkey; Type: CONSTRAINT; Schema: intime; Owner: bdp
 --
 
@@ -520,14 +528,6 @@ ALTER TABLE ONLY intime.station
 
 ALTER TABLE ONLY intime.type
     ADD CONSTRAINT type_pkey PRIMARY KEY (id);
-
-
---
--- Name: provenance uk92f8j5b9p35h30b9wus4blces; Type: CONSTRAINT; Schema: intime; Owner: bdp
---
-
-ALTER TABLE ONLY intime.provenance
-    ADD CONSTRAINT uk92f8j5b9p35h30b9wus4blces UNIQUE (lineage, datacollector, datacollectorversion);
 
 
 --
@@ -793,12 +793,12 @@ ALTER TABLE ONLY intime.edge
 
 
 --
--- Name: SCHEMA intime; Type: ACL; Schema: -; Owner: postgres
+-- Name: SCHEMA intime; Type: ACL; Schema: -; Owner: bdp
 --
 
 REVOKE ALL ON SCHEMA intime FROM PUBLIC;
-REVOKE ALL ON SCHEMA intime FROM postgres;
-GRANT ALL ON SCHEMA intime TO postgres;
+REVOKE ALL ON SCHEMA intime FROM bdp;
+GRANT ALL ON SCHEMA intime TO bdp;
 GRANT ALL ON SCHEMA intime TO bdp;
 GRANT USAGE ON SCHEMA intime TO bdpreadonly;
 
