@@ -33,6 +33,7 @@ BEGIN;
 --
 -- THESE LINES ARE JUST FOR TESTING -- REMOVE BEFORE GOING INTO PRODUCTION!!!
 -------------------------------------------------------------------------------------------------------------
+/*
 truncate intime.type cascade;
 truncate intime.station cascade;
 truncate intime.metadata cascade;
@@ -42,11 +43,10 @@ truncate intime.bdprole cascade;
 truncate intime.bdpusers_bdproles cascade;
 truncate intime.datatype_i18n cascade;
 truncate intime.edge cascade;
+*/
 -------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------
-
-
 
 -- alter schema intime rename to intimev1;
 
@@ -93,16 +93,17 @@ where id = subj.sid;
 -------------------------------------------------------------------------------------------------------------
 -- bdpuser, bdprole, bdpusers_bdproles, bdprules
 -------------------------------------------------------------------------------------------------------------
+-- We need to delete default values first, since they are already present inside the old database, but maybe
+-- with a different primary key.
+delete from intime.bdpusers_bdproles;
+delete from intime.bdpuser;
+delete from intime.bdprules;
+delete from intime.bdprole;
+
 insert into intime.bdpuser table intimev1.bdpuser;
 insert into intime.bdprole table intimev1.bdprole;
 insert into intime.bdpusers_bdproles table intimev1.bdpusers_bdproles;
 insert into intime.bdprules table intimev1.bdprules;
-
-
--------------------------------------------------------------------------------------------------------------
--- datatype_i18n
--------------------------------------------------------------------------------------------------------------
-insert into intime.datatype_i18n table intimev1.datatype_i18n;
 
 
 -------------------------------------------------------------------------------------------------------------
@@ -128,12 +129,6 @@ from (
 	group by sid
 ) subs
 where station_id = subs.sid;
-
-
--------------------------------------------------------------------------------------------------------------
--- bluetoothbasicdata (no data, nothing to do)
--------------------------------------------------------------------------------------------------------------
--- select * from intimev1.bluetoothbasicdata;
 
 
 -------------------------------------------------------------------------------------------------------------
