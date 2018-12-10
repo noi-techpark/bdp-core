@@ -291,7 +291,7 @@ Example:
 - Rename column `value` to `doublevalue`
 
 ### measurmenthistory
-- No changes
+- Rename column `value` to `doublevalue`
 
 ### measurementmobile & measurementmobilehistory
 - We have around 7,000,000 records * 61 attributes, which would become 61 types
@@ -304,7 +304,7 @@ Example:
 - Rename column `value` to `stringvalue`
 
 ### measurementstringhistory
-- No changes
+- Rename column `value` to `stringvalue`
 
 ### meteostationbasicdata
 - Copy all fields into json metadata of stations with ID `station_id`
