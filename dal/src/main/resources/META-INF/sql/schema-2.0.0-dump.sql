@@ -225,7 +225,7 @@ CREATE TABLE intime.measurementhistory (
     created_on timestamp without time zone,
     period integer,
     "timestamp" timestamp without time zone,
-    value double precision,
+    doublevalue double precision,
     provenance_id bigint,
     station_id bigint,
     type_id bigint
@@ -289,7 +289,7 @@ CREATE TABLE intime.measurementstringhistory (
     created_on timestamp without time zone,
     period integer,
     "timestamp" timestamp without time zone,
-    value character varying(255),
+    stringvalue character varying(255),
     provenance_id bigint,
     station_id bigint,
     type_id bigint
@@ -799,8 +799,8 @@ ALTER TABLE ONLY intime.edge
 REVOKE ALL ON SCHEMA intime FROM PUBLIC;
 REVOKE ALL ON SCHEMA intime FROM bdp;
 GRANT ALL ON SCHEMA intime TO bdp;
-GRANT ALL ON SCHEMA intime TO bdp;
-GRANT USAGE ON SCHEMA intime TO bdpreadonly;
+
+GRANT USAGE ON SCHEMA intime TO bdp_readonly;
 
 
 --
