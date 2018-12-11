@@ -47,10 +47,10 @@ public abstract class M implements Serializable {
 	@Column(nullable = false)
 	private Date timestamp;
 
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL, optional = false)
 	private Station station;
 
-	@ManyToOne(cascade=CascadeType.PERSIST)
+	@ManyToOne(cascade=CascadeType.PERSIST, optional = false)
 	private DataType type;
 
 	@Column(nullable = false)

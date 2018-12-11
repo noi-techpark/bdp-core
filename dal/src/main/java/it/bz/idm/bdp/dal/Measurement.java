@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dal;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
@@ -57,6 +58,7 @@ public class Measurement extends M {
      * Ex. private String value; and private Double value; would not work
      *     inside MeasurementString and Measurement respectively
      */
+    @Column(nullable = false)
 	private Double doubleValue;
 
 	public Measurement() {

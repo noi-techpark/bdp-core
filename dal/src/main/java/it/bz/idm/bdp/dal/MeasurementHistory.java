@@ -24,6 +24,7 @@ package it.bz.idm.bdp.dal;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
@@ -57,6 +58,7 @@ public class MeasurementHistory extends MHistory {
      * Ex. private String value; and private Double value; would not work
      *     inside MeasurementStringHistory and MeasurementHistory respectively
      */
+    @Column(nullable = false)
 	private Double doubleValue;
 
 	public MeasurementHistory() {

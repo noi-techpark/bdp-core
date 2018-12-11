@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
@@ -49,15 +50,19 @@ public abstract class MHistory implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Column(nullable = false)
 	private Date created_on;
+
+	@Column(nullable = false)
 	private Date timestamp;
 
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(optional = false, cascade = CascadeType.ALL)
 	private Station station;
 
-	@ManyToOne(cascade=CascadeType.PERSIST)
+	@ManyToOne(optional = false, cascade = CascadeType.PERSIST)
 	private DataType type;
 
+	@Column(nullable = false)
 	private Integer period;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)

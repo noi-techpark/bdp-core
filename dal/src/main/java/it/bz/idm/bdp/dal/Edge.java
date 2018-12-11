@@ -49,6 +49,7 @@ public class Edge {
 	@ColumnDefault(value = "nextval('intime.edge_seq')")
 	protected Long id;
 
+	@Column(nullable = true)
 	protected LineString linegeometry;
 
 	@Column(nullable = false)

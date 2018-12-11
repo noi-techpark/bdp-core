@@ -72,12 +72,13 @@ public class Station {
 	@ColumnDefault(value = "nextval('intime.station_seq')")
 	protected Long id;
 
-	@ManyToOne
+	@ManyToOne(optional = false)
 	protected Station parent;
 
 	@Column(nullable = false)
 	protected String name;
 
+	@Column(nullable = true)
 	protected Point pointprojection;
 
 	@Column(nullable = false)

@@ -60,7 +60,6 @@ public class DataType {
 	private Date created_on;
 	private String cunit;
 	private String description;
-
 	private String rtype;
 
 	public DataType() {
