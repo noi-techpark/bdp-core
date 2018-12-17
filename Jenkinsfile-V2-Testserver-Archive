@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    environment {
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
+        BDP_READER_CONFIG = credentials('bdp-core-v2-test-reader-application.properties')
+        TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
+    }
+
+    stages {
+        stage('Configure') {
+            steps {
+                sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
+                sh 'xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" dal/src/main/resources/META-INF/persistence.xml'
+                sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
+            }
+        }
+        stage('Test & Build') {
+            steps {
+                sh 'cd dto && mvn clean test install'
+                sh 'cd dal && mvn clean test install'
+                sh 'cd dc-interface && mvn clean test install'
+                sh 'cd ws-interface && mvn clean test install'
+                sh 'cd reader && mvn clean package'
+                sh 'cd writer && mvn clean package'
+            }
+        }
+        stage('Deploy') {
+            steps{
+                sh 'cd writer && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+            }
+        }
+    }
+}
