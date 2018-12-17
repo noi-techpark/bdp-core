@@ -11,7 +11,9 @@ pipeline {
         stage('Configure') {
             steps {
                 sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
-                sh 'xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" dal/src/main/resources/META-INF/persistence.xml'
+                sh '''
+                    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" dal/src/main/resources/META-INF/persistence.xml
+                '''
                 sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
             }
         }
