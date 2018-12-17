@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-v2-test-persistence')
         BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
         TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
     }
@@ -11,9 +11,6 @@ pipeline {
         stage('Configure') {
             steps {
                 sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
-                sh '''
-                    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" dal/src/main/resources/META-INF/persistence.xml
-                '''
                 sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
             }
         }
