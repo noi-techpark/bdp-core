@@ -90,7 +90,7 @@ public class MeasurementHistory extends MHistory {
 
 	@Override
 	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
-		return MHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
+		return MHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, "doubleValue", this);
 	}
 
 	@Override

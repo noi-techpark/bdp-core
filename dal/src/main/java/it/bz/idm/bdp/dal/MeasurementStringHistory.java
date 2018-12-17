@@ -93,7 +93,7 @@ public class MeasurementStringHistory extends MHistory {
 
 	@Override
 	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
-		return findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
+		return findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, "stringValue", this);
 	}
 
 	@Override

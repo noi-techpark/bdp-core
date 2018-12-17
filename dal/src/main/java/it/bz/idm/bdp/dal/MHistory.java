@@ -283,9 +283,9 @@ public abstract class MHistory implements Serializable {
 	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role, T table) {
 		List<Object[]> result = QueryBuilder
 				.init(em)
-				.addSql("SELECT record.timestamp, record.value")
+				.addSql("SELECT record.timestamp, record.doubleValue")
 				.addSqlIf(", record.period", period == null)
-				.addSql("SELECT record.timestamp, record.value FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+				.addSql("FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
 						"WHERE (record.station = p.station OR p.station = null)",
 						"AND (record.type = p.type OR p.type = null)",
 						"AND (record.period = p.period OR p.period = null)",
@@ -306,10 +306,10 @@ public abstract class MHistory implements Serializable {
 		return castToDtos(result);
 	}
 
-	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T table) {
+	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, String valueName, T table) {
 		List<Object[]> result = QueryBuilder
 				.init(em)
-				.addSql("SELECT record.timestamp, record.value")
+				.addSql("SELECT record.timestamp, record." + valueName)
 				.addSqlIf(", record.period", period == null)
 				.addSql("FROM  " + table.getClass().getSimpleName() + " record, BDPPermissions p",
 						"WHERE (record.station = p.station OR p.station = null)",
