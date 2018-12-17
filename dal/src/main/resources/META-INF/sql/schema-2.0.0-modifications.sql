@@ -104,3 +104,14 @@ insert into intime.bdpusers_bdproles(user_id,role_id)
     where u.email = 'admin' and r.name ='ADMIN';
 
 REFRESH MATERIALIZED VIEW intime.bdppermissions;
+
+------------------------------------------------------------------------------------------------------------------------
+-- Privileges
+------------------------------------------------------------------------------------------------------------------------
+GRANT ALL ON SCHEMA intime TO bdp;
+GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdp;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA intime TO bdp;
+
+GRANT USAGE ON SCHEMA intime TO bdp_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdp_readonly;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA intime TO bdp_readonly;

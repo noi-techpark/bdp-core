@@ -387,7 +387,6 @@ if [ "$answer" == "yes" ]; then
     test_first
     db_setup_db_and_users
     db_setup_import_sqlfiles
-    db_setup_privileges
     create_log_files
     update_persistence
     deploy_war_files
@@ -401,20 +400,3 @@ fi
 
 tput sgr0
 exit 0
-
-##changelog
-
-# v.0.1
-## 22 Jun 2018 - initial version by Peter
-#
-# v 0.2 25
-## Jun 2018 - by stefanodavid
-## grouped commands in functions
-## added git commands
-## added warning before running the commands
-## added a note for a command to run after stopping tomcat.
-## added changelog
-## added BDPROOT variable
-#
-# v 0.9
-## Sep 2018 - Peter
