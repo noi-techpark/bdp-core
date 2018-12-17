@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
-        BDP_READER_CONFIG = credentials('bdp-core-v2-test-reader-application.properties')
+        BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
         TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
     }
 
