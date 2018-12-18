@@ -80,6 +80,12 @@
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
         </dependency>
+        <dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>javax.servlet-api</artifactId>
+		    <version>3.1.0</version>
+		    <scope>provided</scope>
+		</dependency>
 		<!-- To create JSON schema descriptions out of classes -->
 		<dependency>
 		    <groupId>com.fasterxml.jackson.module</groupId>

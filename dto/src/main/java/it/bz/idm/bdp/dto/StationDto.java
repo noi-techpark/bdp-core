@@ -27,27 +27,27 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import io.swagger.annotations.ApiModelProperty;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonInclude(value=Include.NON_EMPTY)
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
-	
+
 	@ApiModelProperty (notes = "The unique ID associated to the station.")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Unique station code (ex., bz:noi01)")
 	protected String id;
 
-	@ApiModelProperty (notes = "The name of the station")
+	@ApiModelProperty (notes = "The type of station")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Station type or category (ex., Environment)")
 	private String stationType;
 
+	@ApiModelProperty (notes = "The name of the station")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Natural station name (ex., Primary NOI Station)")
 	protected String name;
@@ -66,9 +66,6 @@ public class StationDto implements Serializable {
 
 	@ApiModelProperty (notes = "The town or city wehre the station is located.")
 	private String municipality;
-
-	@ApiModelProperty (notes = "The type of station")
-	private String stationType;
 
 	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
 	private String parentId;
