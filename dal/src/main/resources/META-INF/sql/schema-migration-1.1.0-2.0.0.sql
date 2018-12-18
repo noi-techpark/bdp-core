@@ -41,7 +41,6 @@ truncate intime.bdpuser cascade;
 truncate intime.bdprules cascade;
 truncate intime.bdprole cascade;
 truncate intime.bdpusers_bdproles cascade;
-truncate intime.datatype_i18n cascade;
 truncate intime.edge cascade;
 */
 -------------------------------------------------------------------------------------------------------------
