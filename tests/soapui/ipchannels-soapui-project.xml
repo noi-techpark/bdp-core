@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="5ef33392-479a-4610-a360-d090d7adec8d" activeEnvironment="Default" name="Project 1" resourceRoot="" soapui-version="5.4.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config">
+	<con:settings>
+		<con:setting id="com.eviware.soapui.impl.wsdl.actions.iface.tools.soapui.TestRunnerAction@values-local"><![CDATA[<xml-fragment xmlns:con="http://eviware.com/soapui/config">
+  <con:entry key="Report Format(s)" value=""/>
+  <con:entry key="Host:Port" value=""/>
+  <con:entry key="Export JUnit Results" value="false"/>
+  <con:entry key="Export All" value="false"/>
+  <con:entry key="Save After" value="false"/>
+  <con:entry key="Add Settings" value="false"/>
+  <con:entry key="WSS Password Type" value=""/>
+  <con:entry key="TestSuite" value="TestSuite 1"/>
+  <con:entry key="Endpoint" value=""/>
+  <con:entry key="Select Report Type" value=""/>
+  <con:entry key="System Properties" value=""/>
+  <con:entry key="Password" value=""/>
+  <con:entry key="Print Report" value="false"/>
+  <con:entry key="Open Report" value="false"/>
+  <con:entry key="Export JUnit Results with test properties" value="false"/>
+  <con:entry key="Global Properties" value=""/>
+  <con:entry key="Project Properties" value=""/>
+  <con:entry key="Project Password" value=""/>
+  <con:entry key="TestCase" value="TestCase 1"/>
+  <con:entry key="Username" value=""/>
+  <con:entry key="user-settings.xml Password" value=""/>
+  <con:entry key="TestRunner Path" value=""/>
+  <con:entry key="Environment" value="Default"/>
+  <con:entry key="Coverage Report" value="false"/>
+  <con:entry key="Enable UI" value="false"/>
+  <con:entry key="Root Folder" value=""/>
+  <con:entry key="Ignore Errors" value="false"/>
+  <con:entry key="Domain" value=""/>
+  <con:entry key="Tool Args" value=""/>
+  <con:entry key="Save Project" value="false"/>
+</xml-fragment>]]></con:setting>
+	</con:settings>
+	<con:interface xsi:type="con:RestService" id="7e69b7a0-4dd4-414a-a1d5-f35666af3f03" wadlVersion="http://wadl.dev.java.net/2009/02" name="Big data platform REST API" type="rest" basePath="/bluetooth" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<con:description>This API contains all documentation about the big
+			data platform </con:description>
+		<con:settings/>
+		
+		<con:definitionCache type="TEXT" rootPart=""/><con:endpoints>
+			<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+		</con:endpoints>
+		<con:resource name="/rest/access-token" path="/rest/access-token" id="0e409a31-d944-42e2-9936-fde8ec6b88cd">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getAccessTokenUsingGET" id="859457a4-7a37-406b-b0db-5f02458ec4ad" method="GET">
+				<con:description>
+					getAccessToken
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>Authorization</con:name>
+						<con:style>HEADER</con:style>
+						<con:description>All access token need to start with prefix
+							'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)
+						</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="FAULT">
+					<con:mediaType>application/json;charset=UTF-8</con:mediaType>
+					<con:status>400</con:status>
+					<con:params/>
+					<con:element xmlns:acc="http://ipchannels.integreen-life.bz.it/bluetooth/rest/access-token">acc:Fault</con:element>
+				</con:representation>
+				<con:request name="Request 1" id="55161891-cb56-4bde-9671-5aad3ed8249a" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-data-types" path="/rest/get-data-types" id="bddb92dc-940e-404f-aab6-0efd84916b30">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getDataTypesUsingGET" id="8f7cdf06-56e6-4de0-bf5f-86a863f02309" method="GET">
+				<con:description>
+					getDataTypes
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>station</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>station</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE"><con:mediaType>application/json;charset=UTF-8</con:mediaType><con:status>200</con:status><con:params/><con:element>Response</con:element></con:representation><con:request name="Request 1" id="aa953f5f-e7fd-410d-8c37-c407f2b161c8" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-date-of-last-record" path="/rest/get-date-of-last-record" id="bb02d40d-1d99-43d9-a5a6-10edea1ce37d">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getDateOfLastRecordUsingGET" id="8bc27bfe-e6fc-4440-8c91-ded25b63c41c" method="GET">
+				<con:description>
+					getDateOfLastRecord
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>Authorization</con:name>
+						<con:style>HEADER</con:style>
+						<con:description>All access token need to start with prefix
+							'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)
+						</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>station</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>station</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>type</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>type</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>period</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>period</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="7cba4228-fa2a-4b09-bf18-dac7878a8c38" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-newest-record" path="/rest/get-newest-record" id="44a50fd5-eb0d-4353-920a-def8ef660210">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getNewestRecordUsingGET" id="a6b2052c-7020-4d20-9bff-09c00c4862e9" method="GET">
+				<con:description>
+					getNewestRecord
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>Authorization</con:name>
+						<con:style>HEADER</con:style>
+						<con:description>All access token need to start with prefix
+							'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)
+						</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>station</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>station</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>type</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>type</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>period</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>period</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="889acb77-81d7-470f-a4ac-afe97bdcdfe2" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-records" path="/rest/get-records" id="50c555fe-c273-460b-ba43-e242fe465367">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getRecordsUsingGET" id="ed7128ca-3969-4703-b4b5-a44b9568e300" method="GET">
+				<con:description>
+					getRecords
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>Authorization</con:name>
+						<con:style>HEADER</con:style>
+						<con:description>All access token need to start with prefix
+							'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)
+						</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>station</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>station</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>name</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>name</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>seconds</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>seconds</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>period</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>period</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="0d40e14a-aeed-45c8-8c56-efc2a834d37b" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-records-in-timeframe" path="/rest/get-records-in-timeframe" id="017b7392-3250-49a5-9f67-93bddd23bb6d">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getRecordsInTimeFrameUsingGET" id="30e01620-7309-4a77-9c8b-eb0224aca534" method="GET">
+				<con:description>
+					getRecordsInTimeFrame
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter>
+						<con:name>Authorization</con:name>
+						<con:style>HEADER</con:style>
+						<con:description>All access token need to start with prefix
+							'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1)
+						</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>station</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>station</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>name</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>name</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>from</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>from</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>to</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>to</con:description>
+					</con:parameter>
+					<con:parameter>
+						<con:name>period</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>period</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="af4d5f64-20b1-4d1e-8c2d-ec79ccec2cd1" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-station-details" path="/rest/get-station-details" id="7ffa35c1-d999-4bd0-94e2-56360b31c0bd">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getStationDetailsUsingGET" id="9eb72a31-b9cd-499b-8374-1de58c26001c" method="GET">
+				<con:description>
+					getStationDetails
+				</con:description>
+				<con:settings/>
+				<con:parameters/>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="84e01f09-5df1-4fba-a326-20e305e0de5e" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/get-stations" path="/rest/get-stations" id="6c8dda5a-41cb-4db8-8680-5bb1ec3b038e">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getStationIdsUsingGET" id="41fd4df8-0b25-4d48-b826-bd55bf2dce6b" method="GET">
+				<con:description>
+					getStationIds
+				</con:description>
+				<con:settings/>
+				<con:parameters/>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="ffa5929f-47b9-4a81-9dcf-5bf024a8b3d2" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+		<con:resource name="/rest/refresh-token" path="/rest/refresh-token" id="706c6684-600f-4949-83e4-0d0229512964">
+			<con:settings/>
+			<con:parameters/>
+			<con:method name="getTokenUsingGET" id="ba95a8f7-d9dc-4212-ae82-3e77c21469c9" method="GET">
+				<con:description>
+					getToken
+				</con:description>
+				<con:settings/>
+				<con:parameters>
+					<con:parameter required="true">
+						<con:name>user</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>user</con:description>
+					</con:parameter>
+					<con:parameter required="true">
+						<con:name>pw</con:name>
+						<con:style>QUERY</con:style>
+						<con:description>pw</con:description>
+					</con:parameter>
+				</con:parameters>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>200</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>401</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>403</con:status>
+					<con:params/>
+				</con:representation>
+				<con:representation type="RESPONSE">
+					<con:mediaType>*/*</con:mediaType>
+					<con:status>404</con:status>
+					<con:params/>
+				</con:representation>
+				<con:request name="Request 1" id="1fe40200-4dd4-4ca8-b4de-403b3a6718f4" mediaType="application/json">
+					<con:settings/>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:parameters/>
+				</con:request>
+			</con:method>
+		</con:resource>
+	</con:interface>
+	<con:testSuite id="713800db-b40d-4d36-8eb0-587b8314a73e" name="TestSuite 1">
+		<con:settings/>
+		<con:runType>SEQUENTIAL</con:runType>
+		<con:testCase id="4e83a651-df47-4798-8048-8e863167745b" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase 1" searchProperties="true">
+			<con:settings/>
+			<con:testStep type="restrequest" name="getAccessTokenUsingGET - Request 1" id="b8a5af6f-9c02-47ca-a1f7-d7ddb5c71152">
+				<con:settings/>
+				<con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/access-token" methodName="getAccessTokenUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+					<con:restRequest name="getAccessTokenUsingGET - Request 1" id="55161891-cb56-4bde-9671-5aad3ed8249a" mediaType="application/json">
+						<con:settings>
+							<con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+						</con:settings>
+						<con:endpoint>http://ipchannels.integreen-life.bz.it 						</con:endpoint>
+						<con:request/>
+						<con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/access-token
+						</con:originalUri>
+						<con:credentials>
+							<con:authType>No Authorization</con:authType>
+						</con:credentials>
+						<con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+						<con:jmsPropertyConfig/>
+						<con:parameters/>
+					</con:restRequest>
+				</con:config>
+			</con:testStep>
+			<con:properties/>
+		</con:testCase>
+		<con:properties/>
+	</con:testSuite>
+	<con:testSuite id="e6f10dc0-e826-469a-bf32-32d19a851f8a" name="Big data platform REST API TestSuite"><con:description>TestSuite generated for REST Service [Big data platform REST API]</con:description><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="1c76792e-fd01-432a-b5bd-8f6e8a11a5b2" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Big data platform REST API TestSuite" searchProperties="true"><con:settings/><con:testStep type="restrequest" name="/rest/access-token" id="2b3558dd-2a54-40b0-ab4b-930f99cd587d"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/access-token" methodName="getAccessTokenUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/access-token" id="55161891-cb56-4bde-9671-5aad3ed8249a" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:assertion type="Valid HTTP Status Codes" id="24ed78d7-a6f8-4780-9f7c-05adc0f0d35f" name="Valid HTTP Status Codes"><con:configuration><codes>400</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-data-types" id="52c4bea7-655a-40bc-a6f0-b218844425f3"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-data-types" methodName="getDataTypesUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-data-types" id="aa953f5f-e7fd-410d-8c37-c407f2b161c8" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-data-types</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="e6b430da-ffb5-4d7c-b02c-b309a3ec8b00" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-date-of-last-record" id="5a4281b7-e536-4576-81cc-f992291833c1"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-date-of-last-record" methodName="getDateOfLastRecordUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-date-of-last-record" id="7cba4228-fa2a-4b09-bf18-dac7878a8c38" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-date-of-last-record</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="eba96bce-8c93-469a-977c-e916027c58e6" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-newest-record" id="7e426e4b-f0b3-4000-b33b-6a713a1ac4ae"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-newest-record" methodName="getNewestRecordUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-newest-record" id="889acb77-81d7-470f-a4ac-afe97bdcdfe2" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-newest-record</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="6a445793-db33-4b71-afc5-49e12d1f565e" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-records" id="f2012085-3a6d-4469-b5ef-36e4641e83a0"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-records" methodName="getRecordsUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-records" id="0d40e14a-aeed-45c8-8c56-efc2a834d37b" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-records</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="b8c6978d-9e9f-49e8-b738-8e8acb01eee0" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-records-in-timeframe" id="c814b46c-5829-48a1-9f8d-0903d43de2ae"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-records-in-timeframe" methodName="getRecordsInTimeFrameUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-records-in-timeframe" id="af4d5f64-20b1-4d1e-8c2d-ec79ccec2cd1" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-records-in-timeframe</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="68256d43-512a-45ac-a68b-83eebe7718eb" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-station-details" id="967a9f78-ca01-4976-a718-8e24fec1cbef"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-station-details" methodName="getStationDetailsUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-station-details" id="84e01f09-5df1-4fba-a326-20e305e0de5e" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-station-details</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="58a96414-5f83-432a-86a1-7d5cbefe3be6" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:assertion type="Response SLA Assertion" id="f76f6664-5f85-4434-9d3f-74e3c4ef5ecf" name="Response SLA"><con:configuration><SLA>200</SLA></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/get-stations" id="a0c8249e-a428-4c4a-a81c-e0075c9078b9"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/get-stations" methodName="getStationIdsUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/get-stations" id="ffa5929f-47b9-4a81-9dcf-5bf024a8b3d2" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/get-stations</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="2e1b490a-9b09-4b13-881e-2c90670a099e" name="Valid HTTP Status Codes"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="/rest/refresh-token" id="f4345f4c-265f-42d4-8dc4-197e671ca546"><con:settings/><con:config service="Big data platform REST API" resourcePath="/bluetooth/rest/refresh-token" methodName="getTokenUsingGET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="/rest/refresh-token" id="1fe40200-4dd4-4ca8-b4de-403b3a6718f4" mediaType="application/json">
+					<con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings>
+					<con:endpoint>http://ipchannels.integreen-life.bz.it</con:endpoint>
+					<con:request/><con:originalUri>http://ipchannels.integreen-life.bz.it/bluetooth/rest/refresh-token</con:originalUri><con:assertion type="Valid HTTP Status Codes" id="812632dc-83f5-425c-bdef-6b488ccf1206" name="Valid HTTP Status Codes"><con:configuration><codes>401</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/>
+				</con:restRequest></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/>
+	<con:wssContainer/>
+	<con:oAuth2ProfileContainer/>
+	<con:oAuth1ProfileContainer/>
+	<con:sensitiveInformation/>
+</con:soapui-project>

@@ -27,6 +27,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
@@ -34,11 +37,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
-
+	
+	@ApiModelProperty (notes = "The unique ID associated to the station.")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Unique station code (ex., bz:noi01)")
 	protected String id;
 
+	@ApiModelProperty (notes = "The name of the station")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("Station type or category (ex., Environment)")
 	private String stationType;
@@ -47,13 +52,23 @@ public class StationDto implements Serializable {
 	@JsonPropertyDescription("Natural station name (ex., Primary NOI Station)")
 	protected String name;
 
+	@ApiModelProperty (notes = "The latitude where this station is located.")
 	protected Double latitude;
+
+	@ApiModelProperty (notes = "The longitude where this station is located.")
 	protected Double longitude;
+	protected String crs;
 	protected Double elevation;
 	protected String coordinateReferenceSystem;
 
 	@JsonPropertyDescription("Who provided this station?")
 	private String origin;
+
+	@ApiModelProperty (notes = "The town or city wehre the station is located.")
+	private String municipality;
+
+	@ApiModelProperty (notes = "The type of station")
+	private String stationType;
 
 	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
 	private String parentId;

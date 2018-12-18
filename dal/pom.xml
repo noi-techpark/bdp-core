@@ -69,6 +69,10 @@
             <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -135,7 +139,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
-		</dependency>
+        </dependency>
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
@@ -193,8 +197,8 @@
                <version>2.22.1</version>
                <configuration>
                        <useSystemClassLoader>false</useSystemClassLoader>
-               </configuration>
-           </plugin>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -222,5 +226,22 @@
                 </executions>
             </plugin>
         </plugins>
+	<extensions>
+            <extension>
+                <groupId>org.springframework.build</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>5.0.0.RELEASE</version>
+            </extension>
+         </extensions>
     </build>
+    <distributionManagement>
+        <snapshotRepository>
+           <id>maven-repo.opendatahub.bz.it</id>
+           <url>s3://it.bz.opendatahub/snapshot</url>
+        </snapshotRepository>
+        <repository>
+           <id>maven-repo.opendatahub.bz.it</id>
+           <url>s3://it.bz.opendatahub/release</url>
+        </repository>
+     </distributionManagement>
 </project>

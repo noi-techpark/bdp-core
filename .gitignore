@@ -1,8 +1,6 @@
 *.class
 *.orig
 
-/tmp
-
 # Taken from https://github.com/spring-projects/spring-boot/blob/master/.gitignore
 *#
 *.iml

@@ -23,6 +23,7 @@ package it.bz.idm.bdp.ws;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 
 
 public abstract class DataRetriever implements IntegreenRunnable{
@@ -40,16 +41,25 @@ public abstract class DataRetriever implements IntegreenRunnable{
 
 	
 	protected Configuration config;
+
+	@Value("${bdp.stationtype}")
 	protected String integreenTypology;
 	protected String accessToken;
 
+
+	public String getIntegreenTypology() {
+		return integreenTypology;
+	}
+
+	public void setIntegreenTypology(String integreenTypology) {
+		this.integreenTypology = integreenTypology;
+	}
+
 	public abstract void connect();
-	public abstract String initIntegreenTypology();
 	
 	public DataRetriever() {
 		initConfig();
 		connect();
-		this.integreenTypology = initIntegreenTypology();
 	}
 	private void initConfig() {
 		if (config == null)

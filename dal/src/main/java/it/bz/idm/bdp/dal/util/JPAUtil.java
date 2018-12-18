@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 
@@ -82,8 +83,9 @@ public class JPAUtil {
 	 *
 	 * @param query
 	 *            The query input stream
+	 * @throws Exception 
 	 */
-	public static void executeNativeQueries(final InputStream query) {
+	public static void executeNativeQueries(final InputStream query) throws Exception {
 		List<String> commands = new ArrayList<String>();
 		String finalSQL = "";
 
@@ -116,6 +118,7 @@ public class JPAUtil {
 
 		// Execute all remaining commands
 		EntityManager em = JPAUtil.createEntityManager();
+		try {
 		em.getTransaction().begin();
 		for (String cmd : commands) {
 			if (cmd.toLowerCase().startsWith("select")) {
@@ -126,5 +129,11 @@ public class JPAUtil {
 			System.err.println("Execution from input stream successful: " + cmd);
 		}
 		em.getTransaction().commit();
+		}catch(Exception e) {
+			e.printStackTrace();
+			throw new PersistenceException("ERROR: Native querry failed: " + e.getMessage(),e);
+		}finally {
+			em.close();
+		}
 	}
 }

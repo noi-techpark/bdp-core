@@ -25,12 +25,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import io.swagger.annotations.ApiModelProperty;
 
 public class TypeDto implements Serializable {
 
 	private static final long serialVersionUID = -1224947780318447560L;
-
+	@ApiModelProperty (notes = "The unique ID of the type.")
 	private String id;
+	@ApiModelProperty (notes = "The unit of measurement of the type.")
 	private String unit;
 	private Map<String,String> desc = new HashMap<String, String>();
 	private String typeOfMeasurement;
