@@ -23,8 +23,6 @@ END
 $$;
 
 
-BEGIN;
-
 
 -------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------
@@ -120,9 +118,9 @@ where id = subs.bike;
 -- Insert max availability of each type as json metadata object with keys from cnames
 -- and values from max_available fields
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
-	select station_id sid, jsonb_object_agg(cname, max_available::text) j
+	select station_id sid, jsonb_object_agg(cname, max_available::int) j
 	from intimev1.bikesharingstationbasicdata b
 	join type t on b.type_id = t.id
 	group by sid
@@ -134,7 +132,7 @@ where station_id = subs.sid;
 -- carpooling*basicdata & translations
 -------------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select s.id station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -167,7 +165,7 @@ where id = subs.usr;
 -- carpoolinguserbasicdata & translations
 -------------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select s.id station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -198,7 +196,7 @@ where subs.station_id = intime.metadata.station_id;
 -- carsharingcarstationbasicdata
 -------------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -223,7 +221,7 @@ where id = subs.car;
 -- carsharingstationbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -241,7 +239,7 @@ where subs.station_id = intime.metadata.station_id;
 -- carsharingstationbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -301,7 +299,7 @@ insert into intime.copert_emisfact table intimev1.copert_emisfact;
 -- echargingplugbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(
@@ -330,11 +328,11 @@ where id = subs.plug;
 -- echargingplugoutlet
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select s.id station_id
-			, jsonb_strip_nulls(json || jsonb_build_object(
-				'outlets', json->'outlets' || jsonb_build_array(
+			, jsonb_strip_nulls(jsonb_build_object(
+				'outlets', array_agg(
 					jsonb_build_object(
 						'maxcurrent', maxcurrent,
 						'maxpower', maxpower,
@@ -348,6 +346,7 @@ from (
 	from intime.station s
 	join intimev1.echargingplugoutlet o on o.plug_id = s.id
 	join intime.metadata m on m.station_id = s.id
+	group by s.id
 ) subs
 where subs.station_id = intime.metadata.station_id;
 
@@ -356,7 +355,7 @@ where subs.station_id = intime.metadata.station_id;
 -- echargingstationbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -381,36 +380,51 @@ where subs.station_id = intime.metadata.station_id;
 --------------------------------------------------------------------------------------------------------
 -- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
 --------------------------------------------------------------------------------------------------------
-insert into intime.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, id)
-select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurement;
+insert into intime.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
+insert into intime.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
+
+insert into intime.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurement;
 select setval('intime.measurement_seq', (select max(id) from intime.measurement));
 
-insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id)
-select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurementhistory;
+insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id >= 0 and id < 100000000;
+insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 100000000 and id < 200000000;
+insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 200000000 and id < 300000000;
+insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 300000000 and id < 400000000;
+insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 400000000 and id < 500000000;
 select setval('intime.measurementhistory_seq', (select max(id) from intime.measurementhistory));
 
-insert into intime.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, id)
-select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurementstring;
+insert into intime.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementstring;
 select setval('intime.measurementstring_seq', (select max(id) from intime.measurementstring));
 
-insert into intime.measurementstringhistory (created_on, timestamp, stringvalue, station_id, type_id, period, id)
-select created_on, timestamp, value, station_id, type_id, period, id from intimev1.measurementstringhistory;
+insert into intime.measurementstringhistory (created_on, timestamp, stringvalue, station_id, type_id, period, id, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
+from intimev1.measurementstringhistory;
 select setval('intime.measurementstringhistory_seq', (select max(id) from intime.measurementstringhistory));
 
 create table intime.measurementmobile as select * from intimev1.measurementmobile;
 
 create table intime.measurementmobilehistory as select * from intimev1.measurementmobilehistory;
 
-insert into intime.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1');
-
 insert into intime.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period
-		, (select id from intime.provenance where lineage = 'NOI' and datacollector = 'Migration from V1') as provenance_id
+select created_on, timestamp, value, station_id, type_id, period, 1 /* provenance ID, see above */
 from intimev1.elaborationhistory where created_on is not null and value is not null;
 
 insert into intime.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period
-		, (select id from intime.provenance where lineage = 'NOI' and datacollector = 'Migration from V1') as provenance_id
+select created_on, timestamp, value, station_id, type_id, period, 1 /* provenance ID, see above */
 from intimev1.elaboration where created_on is not null and value is not null;
 
 
@@ -420,7 +434,7 @@ from intimev1.elaboration where created_on is not null and value is not null;
 -- It is important to handle dynamic tables after any regular measurement/-history inserts
 
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	with jsonobj as (
 		select station_id
@@ -476,7 +490,7 @@ where occupacy >= 0;
 -- meteostationbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -495,7 +509,7 @@ select id, station_id, origin_id, destination_id, linegeometry, true from intime
 select setval('intime.edge_seq', (select max(id) from intime.edge));
 
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -512,7 +526,7 @@ where subs.station_id = intime.metadata.station_id;
 -- streetbasicdata
 --------------------------------------------------------------------------------------------------------
 update intime.metadata
-set json = json || subs.j
+set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
@@ -575,7 +589,6 @@ from intimev1.trafficstreetfactor t
 join edge e on e.origin_id = t.id_arco and e.destination_id = t.id_spira;
 
 
-
 --------------------------------------------------------------------------------------------------------
 -- Final cleansing
 --------------------------------------------------------------------------------------------------------
@@ -596,4 +609,3 @@ update intime.metadata
 set json = null
 where json = '{}'::jsonb;
 
-COMMIT;
