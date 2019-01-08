@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -44,17 +43,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class RestClient extends DataRetriever {
 
-	@Value("${requestTimeoutInSeconds}")
-	private static Integer requestTimeoutInSeconds;
-
-	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10;
 	protected WebClient webClient;
-	private String url;
 
 	@Override
 	public void connect() {
-		url = (hasSSL ? "https" : "http") + "://" + host + ":" + port + endpoint;
-		webClient = WebClient.create(url);
+		webClient = WebClient.create(endpoint);
 	}
 
 	@Override
@@ -185,12 +178,13 @@ public class RestClient extends DataRetriever {
 
 	@Override
 	public AccessTokenDto fetchAccessToken(String refreshToken) {
-		Mono<AccessTokenDto> mono = webClient.get().uri("/accessToken").header(HttpHeaders.AUTHORIZATION, refreshToken)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<AccessTokenDto>() {
-				});
-		return mono.block(
-				Duration.ofSeconds(requestTimeoutInSeconds == null ? DEFAULT_HTTP_REQUEST_TIMEOUT : requestTimeoutInSeconds));
+		return webClient
+				.get()
+				.uri("/accessToken").header(HttpHeaders.AUTHORIZATION, refreshToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<AccessTokenDto>(){})
+				.block(Duration.ofSeconds(requestTimeoutInSeconds));
 	}
 
 	@Override
@@ -198,12 +192,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> map = new HashMap<>();
 		map.put("username", username);
 		map.put("password", password);
-		Mono<JwtTokenDto> mono = webClient.get().uri("/refreshToken?user={username}&password={password}", map)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<JwtTokenDto>() {
-				});
-		return mono.block(
-				Duration.ofSeconds(requestTimeoutInSeconds == null ? DEFAULT_HTTP_REQUEST_TIMEOUT : requestTimeoutInSeconds));
+		return webClient
+				.get()
+				.uri("/refreshToken?user={username}&password={password}", map)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<JwtTokenDto>(){})
+				.block(Duration.ofSeconds(requestTimeoutInSeconds));
 	}
 
 }

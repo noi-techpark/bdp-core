@@ -24,24 +24,25 @@ import org.springframework.beans.factory.annotation.Value;
 
 public abstract class DataRetriever implements IntegreenRunnable {
 
-	@Value("${host}")
-	protected String host;
+	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10; /* in seconds */
 
-	@Value("${port}")
-	protected Integer port;
-
-	@Value("${endpoint}")
+	@Value("${bdp.endpoint}")
 	protected String endpoint;
-
-	@Value("${ssl}")
-	protected Boolean hasSSL;
 
 	@Value("${bdp.stationtype}")
 	protected String stationType;
 
+	@Value("${bdp.requestTimeoutInSeconds}")
+	protected Integer requestTimeoutInSeconds;
+
 	protected String accessToken;
 
 	public abstract void connect();
+
+	public DataRetriever() {
+		if (requestTimeoutInSeconds == null)
+			requestTimeoutInSeconds = DEFAULT_HTTP_REQUEST_TIMEOUT;
+	}
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
