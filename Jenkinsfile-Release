@@ -28,9 +28,11 @@ pipeline {
         //     }
         // }
         stage('Tag') {
-            sshagent (credentials: ['jenkins_github_ssh_key']) {
-                sh 'git tag ${params.tag}'
-                sh 'git push --tags'
+            steps {
+                sshagent (credentials: ['jenkins_github_ssh_key']) {
+                    sh 'git tag ${params.tag}'
+                    sh 'git push --tags'
+                }
             }
         }
 
