@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,22 +44,23 @@ import reactor.core.publisher.Mono;
 @Component
 public class RestClient extends DataRetriever {
 
-	private static final String REQUEST_TIMEOUT_IN_SECONDS_KEY = "requestTimeoutInSeconds";
+	@Value("${requestTimeoutInSeconds}")
+	private static Integer requestTimeoutInSeconds;
+
 	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10;
 	protected WebClient webClient;
 	private String url;
 
 	@Override
 	public void connect() {
-		String sslString = DEFAULT_SSL ? "https" : "http";
-		this.url = sslString + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + DEFAULT_ENDPOINT;
+		url = (hasSSL ? "https" : "http") + "://" + host + ":" + port + endpoint;
 		webClient = WebClient.create(url);
 	}
 
 	@Override
 	public String[] fetchStations() {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.stationType);
 		Mono<String[]> body = webClient.get().uri("/stations?stationType={stationType}", params)
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String[].class);
 		return body.block();
@@ -67,7 +69,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<StationDto> fetchStationDetails(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.stationType);
 		params.put("stationId", stationId);
 		Mono<List<StationDto>> mono = webClient.get()
 				.uri("/station-details/?stationType={stationType}&stationId={stationId}", params)
@@ -80,7 +82,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<List<String>> fetchDataTypes(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.stationType);
 		params.put("stationId", stationId);
 		Mono<List<List<String>>> mono = webClient.get()
 				.uri("/data-types/?stationType={stationType}&stationId={stationId}", params)
@@ -94,7 +96,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<TypeDto> fetchTypes(String station) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.stationType);
 		params.put("stationId", station);
 		Mono<List<TypeDto>> response = webClient.get()
 				.uri("/types/?stationType={stationType}&stationId={stationId}", params)
@@ -107,7 +109,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.stationType);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("seconds", seconds);
@@ -123,7 +125,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.stationType);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("start", start);
@@ -140,7 +142,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public RecordDto fetchNewestRecord(String stationId, String typeId, Integer period) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.stationType);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period != null ? String.valueOf(period) : null);
@@ -156,7 +158,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.stationType);
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period);
@@ -171,7 +173,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.stationType);
 		map.put("parent", id);
 		Mono<List<ChildDto>> mono = webClient.get()
 				.uri("/child-stations?stationType={stationType}&parent={parent}", map)
@@ -188,7 +190,7 @@ public class RestClient extends DataRetriever {
 				.bodyToMono(new ParameterizedTypeReference<AccessTokenDto>() {
 				});
 		return mono.block(
-				Duration.ofSeconds(config.getLong(REQUEST_TIMEOUT_IN_SECONDS_KEY, DEFAULT_HTTP_REQUEST_TIMEOUT)));
+				Duration.ofSeconds(requestTimeoutInSeconds == null ? DEFAULT_HTTP_REQUEST_TIMEOUT : requestTimeoutInSeconds));
 	}
 
 	@Override
@@ -201,7 +203,7 @@ public class RestClient extends DataRetriever {
 				.bodyToMono(new ParameterizedTypeReference<JwtTokenDto>() {
 				});
 		return mono.block(
-				Duration.ofSeconds(config.getLong(REQUEST_TIMEOUT_IN_SECONDS_KEY, DEFAULT_HTTP_REQUEST_TIMEOUT)));
+				Duration.ofSeconds(requestTimeoutInSeconds == null ? DEFAULT_HTTP_REQUEST_TIMEOUT : requestTimeoutInSeconds));
 	}
 
 }
