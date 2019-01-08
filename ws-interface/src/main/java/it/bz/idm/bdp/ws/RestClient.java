@@ -38,7 +38,6 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
-import reactor.core.publisher.Mono;
 
 @Component
 public class RestClient extends DataRetriever {
@@ -54,9 +53,13 @@ public class RestClient extends DataRetriever {
 	public String[] fetchStations() {
 		Map<String, String> params = new HashMap<>();
 		params.put("stationType", this.stationType);
-		Mono<String[]> body = webClient.get().uri("/stations?stationType={stationType}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String[].class);
-		return body.block();
+		return webClient
+				.get()
+				.uri("/stations?stationType={stationType}", params)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String[].class)
+				.block();
 	}
 
 	@Override
@@ -64,12 +67,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> params = new HashMap<>();
 		params.put("stationType", this.stationType);
 		params.put("stationId", stationId);
-		Mono<List<StationDto>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/station-details/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<StationDto>>() {
-				});
-		return mono.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<StationDto>>(){})
+				.block();
 	}
 
 	@Override
@@ -77,13 +81,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> params = new HashMap<>();
 		params.put("stationType", this.stationType);
 		params.put("stationId", stationId);
-		Mono<List<List<String>>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/data-types/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<List<String>>>() {
-				});
-		return mono.block();
-
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<List<String>>>(){})
+				.block();
 	}
 
 	@Override
@@ -91,12 +95,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> params = new HashMap<>();
 		params.put("stationType", this.stationType);
 		params.put("stationId", station);
-		Mono<List<TypeDto>> response = webClient.get()
+		return webClient
+				.get()
 				.uri("/types/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<TypeDto>>() {
-				});
-		return response.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<TypeDto>>(){})
+				.block();
 	}
 
 	@Override
@@ -107,12 +112,14 @@ public class RestClient extends DataRetriever {
 		map.put("typeId", typeId);
 		map.put("seconds", seconds);
 		map.put("period", period);
-		Mono<List<RecordDto>> mono = webClient.get().uri(
-				"/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&seconds={seconds}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {
-				});
-		return mono.block();
+		return webClient
+				.get()
+				.uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&seconds={seconds}",	map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>(){})
+				.block();
 	}
 
 	@Override
@@ -124,12 +131,13 @@ public class RestClient extends DataRetriever {
 		map.put("start", start);
 		map.put("end", end);
 		map.put("period", period);
-		Mono<List<RecordDto>> mono = webClient.get().uri(
-				"/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&start={start}&end={end}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {
-				});
-		return mono.block();
+		return webClient.get()
+				.uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&start={start}&end={end}", map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>(){})
+				.block();
 	}
 
 	@Override
@@ -139,13 +147,14 @@ public class RestClient extends DataRetriever {
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period != null ? String.valueOf(period) : null);
-		Mono<RecordDto> mono = webClient.get()
-				.uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",
-						map)
-				.header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<RecordDto>() {
-				});
-		return mono.block();
+		return webClient
+				.get()
+				.uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",	map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<RecordDto>(){})
+				.block();
 	}
 
 	@Override
@@ -155,12 +164,13 @@ public class RestClient extends DataRetriever {
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period);
-		Mono<Date> mono = webClient.get().uri(
-				"/date-of-last-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<Date>() {
-				});
-		return mono.block();
+		return webClient.get()
+				.uri("/date-of-last-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}", map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<Date>(){})
+				.block();
 	}
 
 	@Override
@@ -168,12 +178,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> map = new HashMap<>();
 		map.put("stationType", this.stationType);
 		map.put("parent", id);
-		Mono<List<ChildDto>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/child-stations?stationType={stationType}&parent={parent}", map)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<ChildDto>>() {
-				});
-		return mono.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<ChildDto>>(){})
+				.block();
 	}
 
 	@Override
