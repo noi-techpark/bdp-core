@@ -23,12 +23,12 @@ pipeline {
         }
         stage('Build - Reader') {
             steps {
-               sh 'cd reader && mvn package'
+               sh 'cd reader && mvn package -DfinalName=reader'
             }
         }
         stage('Build - Writer') {
             steps {
-               sh 'cd writer && mvn package'
+               sh 'cd writer && mvn package -DfinalName=writer'
             }
         }
         stage('Archive') {

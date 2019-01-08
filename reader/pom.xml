@@ -121,7 +121,7 @@
     </dependencies>
 
     <build>
-        <finalName>reader</finalName>
+        <finalName>${finalName}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
