@@ -115,3 +115,9 @@ GRANT SELECT ON ALL SEQUENCES IN SCHEMA intime TO bdp;
 GRANT USAGE ON SCHEMA intime TO bdp_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA intime TO bdp_readonly;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA intime TO bdp_readonly;
+
+------------------------------------------------------------------------------------------------------------------------
+-- Additional indexes
+------------------------------------------------------------------------------------------------------------------------
+CREATE INDEX measurementhistory_tsdesc_idx ON measurementhistory USING btree ("timestamp" DESC);
+CREATE INDEX measurementstringhistory_tsdesc_idx ON measurementstringhistory USING btree ("timestamp" DESC);
