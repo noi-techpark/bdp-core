@@ -36,6 +36,6 @@ public class DataRetrieverTests {
 
 	@Test
 	public void testInitDataRetriever(){
-		assertNotNull(retriever.stationType);
+		assertNotNull(retriever.requestTimeoutInSeconds);
 	}
 }
