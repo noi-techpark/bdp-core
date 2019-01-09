@@ -7,31 +7,31 @@ pipeline {
     }
 
     parameters {
-        string(name: 'tag', defaultValue: '1.0.0', description: 'Tag')
-        gitParameter name: 'branch', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH'
+        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag')
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH'
     }
 
     stages {
-        // stage('Deploy dto') {
-        //     steps {
-		//         sh 'cd dto/ && mvn clean install deploy'
-        //     }
-        // }
-        // stage('Deploy dc-interface') {
-        //     steps {
-		//         sh 'cd dc-interface/ && mvn clean install deploy'
-        //     }
-        // }
-        // stage('Deploy ws-interface') {
-        //     steps {
-		//         sh 'cd ws-interface/ && mvn clean install deploy'
-        //     }
-        // }
+        stage('Deploy dto') {
+            steps {
+		        sh 'cd dto/ && mvn clean install deploy'
+            }
+        }
+        stage('Deploy dc-interface') {
+            steps {
+		        sh 'cd dc-interface/ && mvn clean install deploy'
+            }
+        }
+        stage('Deploy ws-interface') {
+            steps {
+		        sh 'cd ws-interface/ && mvn clean install deploy'
+            }
+        }
         stage('Tag') {
             steps {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
-                    sh 'git tag ${params.tag}'
-                    sh 'git push --tags'
+                    sh "git tag ${params.TAG}"
+                    sh "git push --tags"
                 }
             }
         }
