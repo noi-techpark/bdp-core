@@ -6,15 +6,15 @@ pipeline {
         }
     }
 
-    parameters {
-        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag')
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH'
-    }
-
     environment {
         S3_REPO_ID='maven-repo.opendatahub.bz.it'
         S3_REPO_USERNAME=credentials('s3_repo_username')
         S3_REPO_PASSWORD=credentials('s3_repo_password')
+    }
+
+    parameters {
+        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag')
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH'
     }
 
     stages {
