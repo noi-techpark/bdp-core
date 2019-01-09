@@ -26,8 +26,8 @@ pipeline {
         }
         stage('Deploy') {
             steps{
-                sh 'cd writer && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=writer2'
-                sh 'cd reader && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=reader2'
+                sh 'cd writer && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.path=writer2 -Dmaven.tomcat.server=testServer -DfinalName=writer2'
+                sh 'cd reader && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.path=reader2 -Dmaven.tomcat.server=testServer -DfinalName=reader2'
             }
         }
     }
