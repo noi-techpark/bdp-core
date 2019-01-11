@@ -29,11 +29,10 @@ public abstract class DataRetriever implements IntegreenRunnable {
 	@Value("${bdp.endpoint}")
 	protected String endpoint;
 
-	@Value("${bdp.stationtype}")
-	protected String stationType;
-
 	@Value("${bdp.requestTimeoutInSeconds}")
 	protected Integer requestTimeoutInSeconds;
+
+	private String stationType;
 
 	protected String accessToken;
 
@@ -46,5 +45,13 @@ public abstract class DataRetriever implements IntegreenRunnable {
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+
+	public String getStationType() {
+		return stationType;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
 	}
 }

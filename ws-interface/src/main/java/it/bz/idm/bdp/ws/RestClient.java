@@ -52,7 +52,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public String[] fetchStations() {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.stationType);
+		params.put("stationType", this.getStationType());
 		return webClient
 				.get()
 				.uri("/stations?stationType={stationType}", params)
@@ -65,7 +65,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<StationDto> fetchStationDetails(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.stationType);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", stationId);
 		return webClient
 				.get()
@@ -79,7 +79,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<List<String>> fetchDataTypes(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.stationType);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", stationId);
 		return webClient
 				.get()
@@ -93,7 +93,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<TypeDto> fetchTypes(String station) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.stationType);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", station);
 		return webClient
 				.get()
@@ -107,7 +107,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.stationType);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("seconds", seconds);
@@ -125,7 +125,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.stationType);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("start", start);
@@ -143,7 +143,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public RecordDto fetchNewestRecord(String stationId, String typeId, Integer period) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.stationType);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period != null ? String.valueOf(period) : null);
@@ -160,7 +160,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.stationType);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period);
@@ -176,7 +176,7 @@ public class RestClient extends DataRetriever {
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.stationType);
+		map.put("stationType", this.getStationType());
 		map.put("parent", id);
 		return webClient
 				.get()
