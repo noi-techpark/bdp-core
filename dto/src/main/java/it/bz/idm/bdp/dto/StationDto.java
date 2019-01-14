@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -140,6 +141,8 @@ public class StationDto implements Serializable {
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
+
+	@JsonAnyGetter
 	public Map<String, Object> getMetaData() {
 		return metaData;
 	}
