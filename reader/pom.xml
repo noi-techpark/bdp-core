@@ -38,6 +38,7 @@
         <spring.version>5.0.10.RELEASE</spring.version>
         <springsecurity.version>5.0.9.RELEASE</springsecurity.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
+        <finalName>reader</finalName>
     </properties>
     <repositories>
         <repository>
