@@ -23,21 +23,29 @@ package it.bz.idm.bdp.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @JsonInclude(value=Include.NON_EMPTY)
 public class SimpleRecordDto extends RecordDtoImpl {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 5703758724961079739L;
-	private Object value;
-	private Integer period;
 
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("The measurement value, either string or number")
+	private Object value;
+
+	@JsonPropertyDescription("Interval between one measurement and the consecutive one (seconds)")
+	private Integer period;
 
 	public SimpleRecordDto() {
 	}
-	public SimpleRecordDto(Long timestamp,Double value) {
+	public SimpleRecordDto(Long timestamp, Double value) {
+		super();
+		this.timestamp = timestamp;
+		this.value = value;
+	}
+	public SimpleRecordDto(Long timestamp, Object value) {
 		super();
 		this.timestamp = timestamp;
 		this.value = value;

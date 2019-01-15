@@ -38,157 +38,164 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
-import reactor.core.publisher.Mono;
 
 @Component
 public class RestClient extends DataRetriever {
 
-	private static final String REQUEST_TIMEOUT_IN_SECONDS_KEY = "requestTimeoutInSeconds";
-	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10;
 	protected WebClient webClient;
-	private String url;
 
 	@Override
 	public void connect() {
-		String sslString = DEFAULT_SSL ? "https" : "http";
-		this.url = sslString + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + DEFAULT_ENDPOINT;
-		webClient = WebClient.create(url);
+		webClient = WebClient.create(endpoint);
 	}
 
 	@Override
 	public String[] fetchStations() {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
-		Mono<String[]> body = webClient.get().uri("/stations?stationType={stationType}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String[].class);
-		return body.block();
+		params.put("stationType", this.getStationType());
+		return webClient
+				.get()
+				.uri("/stations?stationType={stationType}", params)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String[].class)
+				.block();
 	}
 
 	@Override
 	public List<StationDto> fetchStationDetails(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", stationId);
-		Mono<List<StationDto>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/station-details/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<StationDto>>() {
-				});
-		return mono.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<StationDto>>(){})
+				.block();
 	}
 
 	@Override
 	public List<List<String>> fetchDataTypes(String stationId) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", stationId);
-		Mono<List<List<String>>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/data-types/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<List<String>>>() {
-				});
-		return mono.block();
-
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<List<String>>>(){})
+				.block();
 	}
 
 	@Override
 	public List<TypeDto> fetchTypes(String station) {
 		Map<String, String> params = new HashMap<>();
-		params.put("stationType", this.integreenTypology);
+		params.put("stationType", this.getStationType());
 		params.put("stationId", station);
-		Mono<List<TypeDto>> response = webClient.get()
+		return webClient
+				.get()
 				.uri("/types/?stationType={stationType}&stationId={stationId}", params)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<TypeDto>>() {
-				});
-		return response.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<TypeDto>>(){})
+				.block();
 	}
 
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("seconds", seconds);
 		map.put("period", period);
-		Mono<List<RecordDto>> mono = webClient.get().uri(
-				"/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&seconds={seconds}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {
-				});
-		return mono.block();
+		return webClient
+				.get()
+				.uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&seconds={seconds}",	map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>(){})
+				.block();
 	}
 
 	@Override
 	public List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("start", start);
 		map.put("end", end);
 		map.put("period", period);
-		Mono<List<RecordDto>> mono = webClient.get().uri(
-				"/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&start={start}&end={end}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>() {
-				});
-		return mono.block();
+		return webClient.get()
+				.uri("/records/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}&start={start}&end={end}", map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<RecordDto>>(){})
+				.block();
 	}
 
 	@Override
 	public RecordDto fetchNewestRecord(String stationId, String typeId, Integer period) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period != null ? String.valueOf(period) : null);
-		Mono<RecordDto> mono = webClient.get()
-				.uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",
-						map)
-				.header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<RecordDto>() {
-				});
-		return mono.block();
+		return webClient
+				.get()
+				.uri("/newest-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",	map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<RecordDto>(){})
+				.block();
 	}
 
 	@Override
 	public Date fetchDateOfLastRecord(String stationId, String typeId, Integer period) {
 		Map<String, Object> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.getStationType());
 		map.put("stationId", stationId);
 		map.put("typeId", typeId);
 		map.put("period", period);
-		Mono<Date> mono = webClient.get().uri(
-				"/date-of-last-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}",
-				map).header(HttpHeaders.AUTHORIZATION, accessToken).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<Date>() {
-				});
-		return mono.block();
+		return webClient.get()
+				.uri("/date-of-last-record/?stationType={stationType}&stationId={stationId}&typeId={typeId}&period={period}", map)
+				.header(HttpHeaders.AUTHORIZATION, accessToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<Date>(){})
+				.block();
 	}
 
 	@Override
 	public List<? extends ChildDto> fetchChildStations(String id) {
 		Map<String, String> map = new HashMap<>();
-		map.put("stationType", this.integreenTypology);
+		map.put("stationType", this.getStationType());
 		map.put("parent", id);
-		Mono<List<ChildDto>> mono = webClient.get()
+		return webClient
+				.get()
 				.uri("/child-stations?stationType={stationType}&parent={parent}", map)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<List<ChildDto>>() {
-				});
-		return mono.block();
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<ChildDto>>(){})
+				.block();
 	}
 
 	@Override
 	public AccessTokenDto fetchAccessToken(String refreshToken) {
-		Mono<AccessTokenDto> mono = webClient.get().uri("/accessToken").header(HttpHeaders.AUTHORIZATION, refreshToken)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<AccessTokenDto>() {
-				});
-		return mono.block(
-				Duration.ofSeconds(config.getLong(REQUEST_TIMEOUT_IN_SECONDS_KEY, DEFAULT_HTTP_REQUEST_TIMEOUT)));
+		return webClient
+				.get()
+				.uri("/accessToken").header(HttpHeaders.AUTHORIZATION, refreshToken)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<AccessTokenDto>(){})
+				.block(Duration.ofSeconds(requestTimeoutInSeconds));
 	}
 
 	@Override
@@ -196,12 +203,13 @@ public class RestClient extends DataRetriever {
 		Map<String, String> map = new HashMap<>();
 		map.put("username", username);
 		map.put("password", password);
-		Mono<JwtTokenDto> mono = webClient.get().uri("/refreshToken?user={username}&password={password}", map)
-				.accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(new ParameterizedTypeReference<JwtTokenDto>() {
-				});
-		return mono.block(
-				Duration.ofSeconds(config.getLong(REQUEST_TIMEOUT_IN_SECONDS_KEY, DEFAULT_HTTP_REQUEST_TIMEOUT)));
+		return webClient
+				.get()
+				.uri("/refreshToken?user={username}&password={password}", map)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<JwtTokenDto>(){})
+				.block(Duration.ofSeconds(requestTimeoutInSeconds));
 	}
 
 }

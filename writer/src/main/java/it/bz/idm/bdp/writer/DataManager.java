@@ -1,5 +1,5 @@
 /**
- * Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+ * writer - Data Writer for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,151 +20,153 @@
  */
 package it.bz.idm.bdp.writer;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.MeasurementStringHistory;
+import it.bz.idm.bdp.dal.MHistory;
+import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
 @Component
 public class DataManager {
 
-	@Value("classpath:META-INF/sql/init.sql")
-	private Resource sql;
-
-	public Object pushRecords(String stationType, Object... data){
+	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
-		Station station;
 		try {
-			station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			return station.pushRecords(em, data);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
+			MHistory.pushRecords(em, stationType, dataMap);
+			return ResponseEntity.created(responseLocation).build();
+		} finally {
 			if (em.isOpen())
 				em.close();
 		}
-		return null;
 	}
 
-	public Object syncStations(String stationType, List<StationDto> dtos) {
+	public static ResponseEntity<?> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
-		try{
-			Station station = (Station) JPAUtil.getInstanceByType(em,stationType);
-			return station.syncStations(em, dtos);
-		} catch (Exception e) {
-			// FIXME Add error handling to report back to the writer method caller
-			e.printStackTrace();
+		try {
+			Station.syncStations(em, stationType, dtos);
+			return ResponseEntity.created(responseLocation).build();
 		} finally {
-			em.close();
+			if (em.isOpen())
+				em.close();
 		}
-		return null;
 	}
 
-	public Object syncDataTypes(List<DataTypeDto> dtos) {
-		Object object = null;
+	public static ResponseEntity<?> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
-		try{
-			object = DataType.sync(em,dtos);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			em.close();
+		try {
+			DataType.sync(em,dtos);
+			return ResponseEntity.created(responseLocation).build();
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return object;
 	}
 
-	public Object getDateOfLastRecord(String stationtype,String stationcode,String type,Integer period){
+	public static Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
+		if (stationType == null || stationType.isEmpty()
+				|| stationCode == null || stationCode.isEmpty()
+				|| dataTypeName == null || dataTypeName.isEmpty()) {
+			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
+		}
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = BDPRole.fetchAdminRole(em);
-		Date date = new Date(-1);
-		try{
-			Station s = (Station) JPAUtil.getInstanceByType(em, stationtype);
-			Station station = s.findStation(em,stationcode);
-			DataType dataType = DataType.findByCname(em,type);
-			if (station != null) {
-				date = station.getDateOfLastRecord(em, station, dataType, period, role);
+		try {
+			Station station = Station.findStation(em, stationType, stationCode);
+			if (station == null) {
+				throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
 			}
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
-		finally{
-			em.close();
-		}
-		return date;
-	}
+			DataType dataType = DataType.findByCname(em, dataTypeName);
+			if (dataType == null) {
+				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
+			}
+			BDPRole role = BDPRole.fetchAdminRole(em);
 
-	public Object getLatestMeasurementStringRecord(String stationtype, String id, BDPRole role) {
-		Date date = null;
-		EntityManager em = JPAUtil.createEntityManager();
-		date = MeasurementStringHistory.findTimestampOfNewestRecordByStationId(em, stationtype, id, role);
-		em.close();
-		return date;
-	}
-	public List<StationDto> getStationsWithoutMunicipality(){
-		List<StationDto> stationsDtos = new ArrayList<StationDto>();
-		EntityManager em = JPAUtil.createEntityManager();
-		List<Station> stations = Station.findStationsWithoutMunicipality(em);
-		for (Station station : stations) {
-			try {
-				StationDto dto = station.convertToDto(station);
-				String name = JPAUtil.getEntityNameByObject(station);
-				dto.setStationType(name);
-				stationsDtos.add(dto);
-			} catch (Exception e) {
-				// FIXME Give the error back to be handled in writer...
+			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
+			Date date1 = new Measurement().getDateOfLastRecord(em, station, dataType, period, role);
+			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role);
+			return date1.after(date2) ? date1 : date2;
+		} catch (Exception e) {
+			if (!(e instanceof JPAException)) {
 				e.printStackTrace();
 			}
+			throw e;
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		em.close();
-		return stationsDtos;
 	}
-	public List<StationDto> getStations(String stationType, String origin) {
-		List<StationDto> stationsDtos = new ArrayList<StationDto>();
+
+	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
-		List<Station> stations = Station.findStations(em,stationType,origin);
-		if (!stations.isEmpty())
-			stationsDtos = stations.get(0).convertToDtos(em, stations);
-		return stationsDtos;
+		try {
+			return Station.convertToDto(Station.findStations(em, stationType, origin));
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
+
+	public static List<String> getStationTypes() {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			return Station.findStationTypes(em);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
+	public static List<String> getDataTypes() {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			return DataType.findTypeNames(em);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
-		em.getTransaction().begin();
-		for (StationDto dto:stations) {
-			Station.patch(em,dto);
+		try {
+			em.getTransaction().begin();
+			for (StationDto dto:stations) {
+				Station.patch(em, dto);
+			}
+			em.getTransaction().commit();
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		em.getTransaction().commit();
 	}
 
-	/*
-	 * Permission handling, initial inserts and some native database fixes
-	 * must be executed at each startup of the big data platform.
-	 */
-	@EventListener(ContextRefreshedEvent.class)
-	public void afterStartup() throws IOException {
-		/*
-		 * XXX It is not safe to run this query on every startup, we must fix an
-		 * issue where Postgres fails because a table should be dropped that is
-		 * a view instead or vice-versa. Until this is fixed, we must run the
-		 * init.sql script manually choosing between "DROP TABLE" or "DROP VIEW"
-		 * based on the actual database content.
-		 */
-		// JPAUtil.executeNativeQueries(sql.getInputStream());
+	protected URI getURIMapping(String mapping, Object... uriVariableValues) {
+		if (mapping == null)
+			mapping = "";
+		else if (mapping.length() > 0)
+			mapping = "/" + mapping;
+		String mappingController = this.getClass().getAnnotation(RequestMapping.class).value()[0];
+		return ServletUriComponentsBuilder.fromCurrentContextPath()
+										  .path(mappingController + mapping)
+										  .buildAndExpand(uriVariableValues)
+										  .toUri();
 	}
-
 }

@@ -33,11 +33,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
 @Table(name = "bdprole", schema = "intime")
@@ -67,21 +66,31 @@ public class BDPRole {
 	public BDPRole() {
 	}
 
+	public BDPRole(String name) {
+		setName(name);
+	}
+
+	public BDPRole(String name, BDPRole parent) {
+		this(name);
+		setParent(parent);
+	}
+
+	public BDPRole(String name, String description) {
+		setName(name);
+		setDescription(description);
+	}
+
+	public BDPRole(String name, String description, BDPRole parent) {
+		this(name, description);
+		setParent(parent);
+	}
+
 	public static BDPRole fetchGuestRole(EntityManager manager) {
 		return findByName(manager, ROLE_GUEST);
 	}
 
 	public static BDPRole fetchAdminRole(EntityManager manager) {
 		return findByName(manager, ROLE_ADMIN);
-	}
-
-	public BDPRole(String name, String description) {
-		this.setName(name);
-		this.setDescription(description);
-	}
-
-	public BDPRole(String name) {
-		this.setName(name);
 	}
 
 	public Long getId() {
@@ -122,10 +131,12 @@ public class BDPRole {
 		this.parent = parent;
 	}
 
-	public static BDPRole findByName(EntityManager manager, String name) {
-		TypedQuery<BDPRole> query = manager.createQuery("SELECT r FROM BDPRole r where r.name = :name", BDPRole.class);
-		query.setParameter("name", name);
-		return JPAUtil.getSingleResultOrNull(query);
+	public static BDPRole findByName(EntityManager em, String name) {
+		return QueryBuilder
+				.init(em)
+				.addSql("SELECT r FROM BDPRole r WHERE r.name = :name")
+				.setParameter("name", name)
+				.buildSingleResultOrNull(BDPRole.class);
 	}
 
 	public static Object sync(EntityManager em, List<RoleDto> data) {

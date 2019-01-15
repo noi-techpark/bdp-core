@@ -1,5 +1,5 @@
 /**
- * ws-interface - Web Service Interface for the Big Data Platform
+ * BDP data - Data Access Layer for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,24 +18,8 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.ws;
+package it.bz.idm.bdp.dal;
 
-import static org.junit.Assert.assertNotNull;
+public class PeristenceTests {
 
-import org.junit.Before;
-import org.junit.Test;
-
-
-public class DataRetrieverTests {
-
-	private DataRetriever retriever;
-	@Before
-	public void doBefore(){
-		 retriever = new RestClient();
-	}
-
-	@Test
-	public void testInitDataRetriever(){
-		assertNotNull(retriever.requestTimeoutInSeconds);
-	}
 }

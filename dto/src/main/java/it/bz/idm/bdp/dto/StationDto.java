@@ -21,34 +21,58 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 @JsonInclude(value=Include.NON_EMPTY)
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="_t",visible=true)
 public class StationDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
+
 	@ApiModelProperty (notes = "The unique ID associated to the station.")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Unique station code (ex., bz:noi01)")
 	protected String id;
+
+	@ApiModelProperty (notes = "The type of station")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Station type or category (ex., Environment)")
+	private String stationType;
+
 	@ApiModelProperty (notes = "The name of the station")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Natural station name (ex., Primary NOI Station)")
 	protected String name;
+
 	@ApiModelProperty (notes = "The latitude where this station is located.")
 	protected Double latitude;
+
 	@ApiModelProperty (notes = "The longitude where this station is located.")
 	protected Double longitude;
-	protected String crs;
+
+	protected Double elevation;
+	protected String coordinateReferenceSystem;
+
+	@JsonPropertyDescription("Who provided this station?")
 	private String origin;
+
 	@ApiModelProperty (notes = "The town or city wehre the station is located.")
 	private String municipality;
-	@ApiModelProperty (notes = "The type of station")
-	private String stationType;
+
+	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
+	private String parentStation;
+
+	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
+	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {
 	}
@@ -59,13 +83,6 @@ public class StationDto implements Serializable {
 		this.longitude = longitude ;
 		this.latitude = latitude;
 	}
-	public StationDto(String id, String name, Double latitude, Double longitude, String municipality ) {
-		this.id = id;
-		this.name = name;
-		this.longitude = longitude ;
-		this.latitude = latitude;
-		this.municipality = municipality;
-	}
 
 
 	public String getId() {
@@ -74,6 +91,15 @@ public class StationDto implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+	public String getParentStation() {
+		return parentStation;
+	}
+
+	public void setParentStation(String parentId) {
+		this.parentStation = parentId;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -92,36 +118,46 @@ public class StationDto implements Serializable {
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public String getCrs() {
-		return crs;
+
+	public Double getElevation() {
+		return elevation;
 	}
-	public void setCrs(String crs) {
-		this.crs = crs;
+
+	public void setElevation(Double elevation) {
+		this.elevation = elevation;
 	}
+
+	public String getCoordinateReferenceSystem() {
+		return coordinateReferenceSystem;
+	}
+
+	public void setCoordinateReferenceSystem(String coordinateReferenceSystem) {
+		this.coordinateReferenceSystem = coordinateReferenceSystem;
+	}
+
 	public String getOrigin() {
 		return origin;
 	}
 	public void setOrigin(String origin) {
 		this.origin = origin;
 	}
-	public String getMunicipality() {
-		return municipality;
-	}
-	public void setMunicipality(String municipality) {
-		this.municipality = municipality;
-	}
-	public String getStationType() {
-		return stationType;
+
+	@JsonAnyGetter
+	public Map<String, Object> getMetaData() {
+		return metaData;
 	}
 
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
+	public void setMetaData(Map<String, Object> metaData) {
+		this.metaData = metaData;
 	}
 
 	@JsonIgnore
-	public boolean checkIfValid() {
-		return this.id != null && !this.id.isEmpty();
+	public boolean isValid() {
+		return id != null && !id.isEmpty()
+						  && stationType != null && !stationType.isEmpty()
+						  && name != null && !name.isEmpty();
 	}
+
 	@JsonIgnore
 	@Override
 	public boolean equals(Object obj) {
@@ -141,8 +177,15 @@ public class StationDto implements Serializable {
 	@Override
 	public String toString() {
 		return "StationDto [id=" + id + ", name=" + name + ", latitude=" + latitude + ", longitude=" + longitude
-				+ ", crs=" + crs + ", origin=" + origin + ", municipality=" + municipality + ", stationType="
-				+ stationType + "]";
+				+ ", crs=" + coordinateReferenceSystem + ", origin=" + origin + "]";
+	}
+
+	public String getStationType() {
+		return stationType;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
 	}
 
 }

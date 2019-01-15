@@ -24,6 +24,9 @@
 #
 # http://opendatahub.readthedocs.io/en/latest/howto/development.html
 #
+# If you run it with a DUMPFILE environment variable set, it creates a new
+# pg_dump out of a Hibernate create.
+#
 ###############################################################################
 
 set -euo pipefail
@@ -80,11 +83,11 @@ PGDBDEFAULT=postgres
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
 
 # DUMPSQL is what we've got from pg_dump after a Hibernate create execution
-DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-dump.sql
+DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-dump.sql
 
 # MODSSQL is what we need to modify manually, to have a complete usable schema
 # for bdp-core to run correctly.
-MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-modifications.sql
+MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-modifications.sql
 
 
 ###############################################################################
@@ -118,6 +121,14 @@ psql_createdb() {
         psql_call -d $PGDBDEFAULT -c "CREATE DATABASE $PGDBNAME"
 }
 
+psql_createschema() {
+    psql_call -d $PGDBNAME -c "CREATE SCHEMA $PGSCHEMA"
+}
+
+psql_dropdb() {
+    psql_call -d $PGDBDEFAULT -c "DROP DATABASE IF EXISTS $PGDBNAME"
+}
+
 give_consent() {
     # make sure user knows limits of the script
     echo
@@ -140,21 +151,21 @@ give_consent() {
     tput sgr0
 }
 
-db_setup() {
+db_setup_import_sqlfiles() {
     echo
-    echo_bold "Postgres setup"
+    echo_bold "Postgres: Import dumped SQL files"
     echo
 
-    # Look at https://wiki.postgresql.org/wiki/First_steps
-    psql_createdb
-    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+	psql_call -d $PGDBNAME -1 < $DUMPSQL
+	psql_call -d $PGDBNAME -1 < $MODSSQL
 
-    psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
-    psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
+	echo_bold "...DONE."
+}
 
-    psql_call -d $PGDBNAME -1 < $DUMPSQL
-    psql_call -d $PGDBNAME -1 < $MODSSQL
+db_setup_privileges() {
+    echo
+    echo_bold "Postgres: Grant privileges to USERS"
+    echo
 
     psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
     psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
@@ -165,6 +176,23 @@ db_setup() {
 
     echo_bold "...DONE."
 }
+
+db_setup_db_and_users() {
+    echo
+    echo_bold "Postgres: Create DB and USERS"
+    echo
+
+    # Look at https://wiki.postgresql.org/wiki/First_steps
+    psql_createdb
+
+    psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
+    psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
+
+    echo_bold "...DONE."
+}
+
+
+
 
 create_log_files() {
     echo
@@ -202,7 +230,11 @@ update_persistence() {
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
 
     # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
-    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+    if [[ ${DUMPFILE+x} ]]; then
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "create" $PXMLFILE
+	  else
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+	  fi
 
     echo_bold "...DONE."
 }
@@ -278,7 +310,7 @@ test_installation() {
     shift
     CMD="$@"
     echo -n "Check '$CMD'... "
-    $CMD && echo "--> OK" || echo "--> ERROR: $MSG_ERR"
+    $CMD && echo "--> OK" || { echo "--> ERROR: $MSG_ERR"; exit 1; }
 }
 
 test_first() {
@@ -311,13 +343,50 @@ test_first() {
     echo_bold "...DONE."
 }
 
+if [[ ${DUMPFILE+x} ]]; then
+    echo_bold "Create new SQL DUMP from Hibernate output to file '$DUMPFILE'..."
+
+    if [ -f $DUMPFILE ]; then
+        echo "ERROR: File $DUMPFILE already exists... aborting"
+        exit 1
+    else
+        touch $DUMPFILE
+        if [ ! -w $DUMPFILE ]; then
+            echo "ERROR: File $DUMPFILE is not writeable... aborting"
+            exit 1
+        fi
+    fi
+
+    PGDBNAME=__justfordumps__
+    test_first
+    psql_dropdb
+    db_setup_db_and_users
+    psql_createschema
+    db_setup_privileges
+    create_log_files
+    update_persistence
+    deploy_war_files
+    curl -iX GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
+    echo
+
+    pg_dump -U $PGUSER -s -h localhost -p $PGPORT -n $PGSCHEMA -d $PGDBNAME > $DUMPFILE
+
+    # Remove settings, that are not compatible with v9.5
+    sed -i '/SET idle_in_transaction_session_timeout*/d' $DUMPFILE
+
+    echo_bold "You can find your new dump inside $DUMPFILE"
+    echo_bold "...DONE."
+
+    exit 0
+fi
 
 # execute script
 give_consent
 
 if [ "$answer" == "yes" ]; then
     test_first
-    db_setup
+    db_setup_db_and_users
+    db_setup_import_sqlfiles
     create_log_files
     update_persistence
     deploy_war_files
@@ -331,20 +400,3 @@ fi
 
 tput sgr0
 exit 0
-
-##changelog
-
-# v.0.1
-## 22 Jun 2018 - initial version by Peter
-#
-# v 0.2 25
-## Jun 2018 - by stefanodavid
-## grouped commands in functions
-## added git commands
-## added warning before running the commands
-## added a note for a command to run after stopping tomcat.
-## added changelog
-## added BDPROOT variable
-#
-# v 0.9
-## Sep 2018 - Peter

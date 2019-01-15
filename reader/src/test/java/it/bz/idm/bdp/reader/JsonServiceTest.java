@@ -35,7 +35,6 @@ import org.mockito.internal.stubbing.answers.Returns;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.dto.meteo.MeteoStationDto;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JsonServiceTest {
@@ -64,9 +63,9 @@ public class JsonServiceTest {
 	}
 	@Test
 	public void testStationsDetailsFetch() {
-		MeteoStationDto dto = new MeteoStationDto("234r4", "My invention dto",15858.12 , 0);
-		dto.setArea("An area");
-		MeteoStationDto anotherDto = new MeteoStationDto("234r1", null,15858.12 , 12);
+		StationDto dto = new StationDto("234r4", "My invention dto",15858.12 , 0.);
+		dto.getMetaData().put("area","An area");
+		StationDto anotherDto = new StationDto("234r1", null,15858.12 , 12.);
 
 		List<StationDto> list = new ArrayList<StationDto>() {
 			private static final long serialVersionUID = 2145736428612955944L;

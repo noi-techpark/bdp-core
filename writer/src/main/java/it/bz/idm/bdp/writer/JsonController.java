@@ -1,5 +1,5 @@
 /**
- * Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+ * writer - Data Writer for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ package it.bz.idm.bdp.writer;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
@@ -38,45 +40,67 @@ import it.bz.idm.bdp.dto.StationDto;
 
 @RequestMapping("/json")
 @Controller
-public class JsonController extends DataManager{
-	@Override
-	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}/", method = RequestMethod.GET)
-	public @ResponseBody Date getDateOfLastRecord(@PathVariable("integreenTypology") String stationType,@RequestParam("stationId") String stationId,
-			@RequestParam(value="typeId") String typeId, @RequestParam(value="period",required=false) Integer period) {
-		return (Date) super.getDateOfLastRecord(stationType, stationId, typeId, period);
-	}
-	
-	@Override
-	@RequestMapping(value = "/stations/{integreenTypology}/", method = RequestMethod.GET)
-	public @ResponseBody List<StationDto> getStations(@PathVariable("integreenTypology") String stationType, @RequestParam(value="origin",required=false) String origin) {
-		return super.getStations(stationType,origin);
+public class JsonController extends DataManager {
+
+	@RequestMapping(value = "/getDateOfLastRecord", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<Date> dateOfLastRecordMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../getDateOfLastRecord/MyStationType?stationId=X&typeId=Y");
 	}
 
-	@Override
-	@RequestMapping(value = "/stationsWithoutMunicipality", method = RequestMethod.GET)
-	public @ResponseBody List<StationDto> getStationsWithoutMunicipality() {
-		return super.getStationsWithoutMunicipality();
+	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,
+															   @RequestParam("stationId") String stationId,
+															   @RequestParam(value="typeId") String typeId,
+															   @RequestParam(value="period", required=false) Integer period) {
+		return ResponseEntity.ok(DataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
-	@RequestMapping(value = "/pushRecords/{integreenTypology}", method = RequestMethod.POST)
-	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> stationData,
-			@PathVariable String integreenTypology) {
-		return super.pushRecords(integreenTypology, stationData);
+	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
+	public @ResponseBody List<StationDto> stationsGetList(@PathVariable("integreenTypology") String stationType,
+														  @RequestParam(value="origin", required=false) String origin) {
+		return DataManager.getStations(stationType, origin);
 	}
+
+	@RequestMapping(value = "/stations", method = RequestMethod.GET)
+	public @ResponseBody List<String> stationsGetTypes() {
+		return super.getStationTypes();
+	}
+
+	@RequestMapping(value = "/types", method = RequestMethod.GET)
+	public @ResponseBody List<String> dataTypes() {
+		return super.getDataTypes();
+	}
+
+	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> pushRecordsMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../pushRecords/MyStationType");
+	}
+
+	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
+	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
+											@PathVariable String stationType) {
+		return super.pushRecords(stationType, null, dataMap);
+	}
+
 	@Override
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
 		super.patchStations(stations);
 	}
-	@RequestMapping(value = "/syncStations/{integreenTypology}", method = RequestMethod.POST)
-	public @ResponseBody Object syncStations(@RequestBody(required = true) List<StationDto> data,
-			@PathVariable String integreenTypology) {
-		return super.syncStations(integreenTypology, data);
+
+	@RequestMapping(value = "/syncStations", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> syncStationsMissingTopology() {
+		throw new JPAException("Missing station type. For example set MyStationType: .../syncStations/MyStationType");
 	}
 
-	@Override
+	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> syncStations(@PathVariable String stationType,
+														@RequestBody(required = true) List<StationDto> stationDtos) {
+		return DataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
+	}
+
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public @ResponseBody Object syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
-		return super.syncDataTypes(data);
+	public @ResponseBody ResponseEntity<?> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
+		return DataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 }

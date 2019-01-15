@@ -21,35 +21,27 @@
 package it.bz.idm.bdp.dal;
 
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.TypedQuery;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.RecordDto;
-import it.bz.idm.bdp.dto.SimpleRecordDto;
 
-@Table(name = "measurementhistory", indexes = { @Index(columnList = "station_id,type_id,timestamp,period", unique = true), @Index(columnList = "timestamp desc", name = "measurementhistory_tsdesc_idx") })
+@Table(name = "measurementhistory")
 @Entity
-
-public class MeasurementHistory {
+public class MeasurementHistory extends MHistory {
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
 
@@ -59,28 +51,21 @@ public class MeasurementHistory {
 	@ColumnDefault(value = "nextval('intime.measurementhistory_seq')")
 	private Long id;
 
-	private Date timestamp;
-	private Double value;
-	private Date created_on;
-
-	@ManyToOne(cascade=CascadeType.ALL)
-	private Station station;
-
-	@ManyToOne(cascade = CascadeType.PERSIST)
-	private DataType type;
-
-	private Integer period;
+    /*
+     * Make sure all subclasses of MHistory contain different value names. If these
+     * variable names would be called the same, but with different data types
+     * Hibernate would complain about not being able to create a SQL UNION.
+     * Ex. private String value; and private Double value; would not work
+     *     inside MeasurementStringHistory and MeasurementHistory respectively
+     */
+    @Column(nullable = false)
+	private Double doubleValue;
 
 	public MeasurementHistory() {
 	}
-	public MeasurementHistory(Station station, DataType type,
-			Double value, Date timestamp, Integer period,Date created_on) {
-		this.station = station;
-		this.type = type;
-		this.value = value;
-		this.timestamp = timestamp;
-		this.period = period;
-		this.created_on = created_on;
+	public MeasurementHistory(Station station, DataType type, Double value, Date timestamp, Integer period, Date created_on) {
+		super(station,type,timestamp,period);
+		setValue(value);
 	}
 
 	public Long getId() {
@@ -89,149 +74,28 @@ public class MeasurementHistory {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Date getDate() {
-		return timestamp;
-	}
-
-	public void setDate(Date date) {
-		this.timestamp = date;
-	}
 
 	public Double getValue() {
-		return value;
+		return doubleValue;
 	}
 
 	public void setValue(Double value) {
-		this.value = value;
+		this.doubleValue = value;
 	}
 
-	public Station getStation() {
-		return station;
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role) {
+		return MHistory.findRecordsImpl(em, stationtype, identifier, cname, seconds, period, role, this);
 	}
 
-	public void setStation(Station station) {
-		this.station = station;
-	}
-	public Date getCreated_on() {
-		return created_on;
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
+		return MHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, "doubleValue", this);
 	}
 
-	public void setCreated_on(Date created_on) {
-		this.created_on = created_on;
+	@Override
+	public MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
+		return MHistory.findRecordImpl(em, station, type, value, timestamp, period, role, MeasurementHistory.class);
 	}
 
-	public DataType getType() {
-		return type;
-	}
-
-	public void setType(DataType type) {
-		this.type = type;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-	public Integer getPeriod() {
-		return period;
-	}
-	public void setPeriod(Integer period) {
-		this.period = period;
-	}
-
-	public static List<RecordDto> findRecords(EntityManager em, String stationtype,
-			String identifier, String cname, Long seconds, Integer period, BDPRole role) {
-
-		Date past = new Date(Calendar.getInstance().getTimeInMillis() - 1000 * seconds);
-
-		String querySQL = "SELECT record.timestamp, record.value FROM MeasurementHistory record, BDPPermissions p"
-						+ " WHERE (record.station = p.station OR p.station = null)"
-						+ " AND (record.type = p.type OR p.type = null)"
-						+ " AND (record.period = p.period OR p.period = null)"
-						+ " AND p.role = :role"
-						+ " AND record.station.class=:stationtype"
-						+ " AND record.station.stationcode= :stationcode"
-						+ " AND record.type.cname = :cname"
-						+ " AND record.timestamp > :date";
-		String orderSQL = " ORDER BY record.timestamp";
-
-		TypedQuery<Object[]> query;
-		if (period == null) {
-			query = em.createQuery(querySQL + orderSQL, Object[].class);
-		} else {
-			query = em.createQuery(querySQL + " AND record.period=:period" + orderSQL, Object[].class);
-			query.setParameter("period", period);
-		}
-		query.setParameter("stationtype", stationtype);
-		query.setParameter("stationcode", identifier);
-		query.setParameter("cname", cname);
-		query.setParameter("date", past);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return castToDtos(query.getResultList());
-	}
-
-	private static List<RecordDto> castToDtos(List<Object[]> resultList) {
-		List<RecordDto> dtos = new ArrayList<RecordDto>();
-		for (Object[] row: resultList){
-			SimpleRecordDto dto = new SimpleRecordDto(((Date) row[0]).getTime(),
-					Double.parseDouble(String.valueOf(row[1])));
-			if (row.length>2)
-				dto.setPeriod(Integer.parseInt(row[2].toString()));
-			dtos.add(dto);
-		}
-		return dtos;
-	}
-	public static List<RecordDto> findRecords(EntityManager em, String stationtype,
-			String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
-
-		String querySQL1 = "SELECT record.timestamp, record.value ";
-		String querySQL2 = " FROM MeasurementHistory record, BDPPermissions p"
-						 + " WHERE (record.station = p.station OR p.station = null)"
-						 + " AND (record.type = p.type OR p.type = null)"
-						 + " AND (record.period = p.period OR p.period = null)"
-						 + " AND p.role = :role"
-						 + " AND record.station.class=:stationtype"
-						 + " AND record.station.stationcode= :stationcode"
-						 + " AND record.type.cname = :cname"
-						 + " AND record.timestamp between :start AND :end ";
-		String orderSQL = " ORDER BY record.timestamp";
-
-		TypedQuery<Object[]> query;
-		if (period == null) {
-			query = em.createQuery(querySQL1 + ", record.period" + querySQL2 + orderSQL, Object[].class);
-		} else {
-			query = em.createQuery(querySQL1 + querySQL2 + " AND record.period=:period" + orderSQL, Object[].class);
-			query.setParameter("period", period);
-		}
-
-		query.setParameter("stationtype", stationtype);
-		query.setParameter("stationcode", identifier);
-		query.setParameter("cname", cname);
-		query.setParameter("start", start);
-		query.setParameter("end", end);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return castToDtos(query.getResultList());
-	}
-
-	public static boolean recordExists(EntityManager em, Station station, DataType type, Date date, Integer period,
-			BDPRole role) {
-		String baseQuery = "SELECT record FROM MeasurementHistory record, BDPPermissions p"
-						 + " WHERE (record.station = p.station OR p.station = null)"
-						 + " AND (record.type = p.type OR p.type = null)"
-						 + " AND (record.period = p.period OR p.period = null)"
-						 + " AND p.role = :role"
-						 + " AND record.station= :station"
-						 + " AND record.type=:type"
-						 + " AND record.timestamp =:timestamp"
-						 + " AND record.period=:period";
-		TypedQuery<MeasurementHistory> preparedQuery = em.createQuery(baseQuery, MeasurementHistory.class);
-		preparedQuery.setParameter("station",station);
-		preparedQuery.setParameter("type",type);
-		preparedQuery.setParameter("timestamp",date);
-		preparedQuery.setParameter("period",period);
-		preparedQuery.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(preparedQuery) != null;
-	}
 }

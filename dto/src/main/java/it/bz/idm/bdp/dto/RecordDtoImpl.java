@@ -20,12 +20,15 @@
  */
 package it.bz.idm.bdp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImpl>{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1124149647267291299L;
+
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Time stamp in milliseconds")
 	protected Long timestamp;
 
 	public Long getTimestamp() {
@@ -37,15 +40,16 @@ public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImp
 
 	public abstract Object getValue();
 
+	@Override
 	public boolean validate() {
 		return this.timestamp != null && this.getValue() != null;
 	}
-	
+
 	@Override
 	public int compareTo(RecordDtoImpl o) {
 		return this.timestamp != null && o.timestamp != null
 			? this.timestamp.compareTo(o.timestamp) : -1;
 	}
 
-	
+
 }

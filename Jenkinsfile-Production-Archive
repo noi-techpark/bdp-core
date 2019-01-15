@@ -13,22 +13,22 @@ pipeline {
         }
         stage('Test - Install') {
             steps {
-               sh 'cd dto && mvn clean test install'
-               sh 'cd dal && mvn clean test install'
-               sh 'cd dc-interface && mvn clean test install'
-               sh 'cd ws-interface && mvn clean test install'
-               sh 'cd reader && mvn clean test'
-               sh 'cd writer && mvn clean test'
+               sh 'cd dto && mvn -B clean test install'
+               sh 'cd dal && mvn -B clean test install'
+               sh 'cd dc-interface && mvn -B clean test install'
+               sh 'cd ws-interface && mvn -B clean test install'
+               sh 'cd reader && mvn -B clean test'
+               sh 'cd writer && mvn -B clean test'
             }
         }
         stage('Build - Reader') {
             steps {
-               sh 'cd reader && mvn package'
+               sh 'cd reader && mvn -B package -DfinalName=reader'
             }
         }
         stage('Build - Writer') {
             steps {
-               sh 'cd writer && mvn package'
+               sh 'cd writer && mvn -B package -DfinalName=writer'
             }
         }
         stage('Archive') {

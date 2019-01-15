@@ -21,55 +21,55 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.Date;
+import java.util.List;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TypedQuery;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dto.RecordDto;
 
 @Table(name="measurementstringhistory",schema="intime")
 @Entity
-public class MeasurementStringHistory {
+public class MeasurementStringHistory extends MHistory {
 
-    @Id
+	@Transient
+	private static final long serialVersionUID = 8968054299664379971L;
+
+	@Id
 	@GeneratedValue(generator = "measurementstringhistory_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", schema = "intime", allocationSize = 1)
 	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
 	private Long id;
 
-	private Date created_on;
-	private Date timestamp;
-	private String value;
-
-	@ManyToOne(cascade=CascadeType.ALL)
-	private Station station;
-
-	@ManyToOne(cascade=CascadeType.PERSIST)
-	private DataType type;
-
-	private Integer period;
+    /*
+     * Make sure all subclasses of MHistory contain different value names. If these
+     * variable names would be called the same, but with different data types
+     * Hibernate would complain about not being able to create a SQL UNION.
+     * Ex. private String value; and private Double value; would not work
+     *     inside MeasurementStringHistory and MeasurementHistory respectively
+     */
+	@Column(nullable = false)
+	private String stringValue;
 
 	public MeasurementStringHistory() {
 	}
-	public MeasurementStringHistory(Station station, DataType type,
-			String value, Date timestamp, Integer period) {
-		this.station = station;
-		this.type = type;
-		this.value = value;
-		this.timestamp = timestamp;
-		this.created_on = new Date();
-		this.period = period;
+	public MeasurementStringHistory(Station station, DataType type, String value, Date timestamp, Integer period, Date created_on) {
+		setStation(station);
+		setType(type);
+		setTimestamp(timestamp);
+		setCreated_on(created_on);
+		setPeriod(period);
+		setValue(value);
 	}
 
 	public Long getId() {
@@ -78,100 +78,26 @@ public class MeasurementStringHistory {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Date getCreated_on() {
-		return created_on;
-	}
-
-	public void setCreated_on(Date created_on) {
-		this.created_on = created_on;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
 	public String getValue() {
-		return value;
+		return stringValue;
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		this.stringValue = value;
 	}
 
-	public Station getStation() {
-		return station;
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role) {
+		return findRecordsImpl(em, stationtype, identifier, cname, seconds, period, role, this);
 	}
 
-	public void setStation(Station station) {
-		this.station = station;
+	@Override
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
+		return findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, "stringValue", this);
 	}
 
-	public DataType getType() {
-		return type;
+	@Override
+	public MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
+		return findRecordImpl(em, station, type, value, timestamp, period, role, MeasurementStringHistory.class);
 	}
-
-	public void setType(DataType type) {
-		this.type = type;
-	}
-	public Integer getPeriod() {
-		return period;
-	}
-	public void setPeriod(Integer period) {
-		this.period = period;
-	}
-
-	public static MeasurementStringHistory findRecord(EntityManager em, Station station, DataType type, String value,
-			Date timestamp, Integer period, BDPRole role) {
-
-		TypedQuery<MeasurementStringHistory> history = em.createQuery("SELECT record "
-				+ "FROM MeasurementStringHistory record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station = :station "
-				+ "AND record.type=:type "
-				+ "AND record.timestamp=:timestamp "
-				+ "AND record.value=:value "
-				+ "AND record.period=:period", MeasurementStringHistory.class);
-
-		history.setParameter("station", station);
-		history.setParameter("type", type);
-		history.setParameter("value", value);
-		history.setParameter("timestamp", timestamp);
-		history.setParameter("period", period);
-		history.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-
-		return JPAUtil.getSingleResultOrNull(history);
-	}
-
-	public static Date findTimestampOfNewestRecordByStationId(EntityManager em, String stationtype, String id,
-			BDPRole role) {
-
-		String sql1 = "SELECT record.timestamp "
-				+ "from MeasurementString record, BDPPermissions p "
-				+ "WHERE (record.station = p.station OR p.station = null) "
-				+ "AND (record.type = p.type OR p.type = null) "
-				+ "AND (record.period = p.period OR p.period = null) "
-				+ "AND p.role = :role "
-				+ "AND record.station.stationcode=:stationcode ";
-		String sql2 = "record.class=:stationtype";
-
-		TypedQuery<Date> query;
-		if (stationtype == null) {
-			query = em.createQuery(sql1, Date.class);
-		} else {
-			query = em.createQuery(sql1 + sql2, Date.class);
-			query.setParameter("stationtype",stationtype);
-		}
-		query.setParameter("stationcode", id);
-		query.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role);
-		return JPAUtil.getSingleResultOrNull(query);
-	}
-
-
 }
