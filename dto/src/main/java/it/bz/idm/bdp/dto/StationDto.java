@@ -58,7 +58,7 @@ public class StationDto implements Serializable {
 
 	@ApiModelProperty (notes = "The longitude where this station is located.")
 	protected Double longitude;
-	protected String crs;
+
 	protected Double elevation;
 	protected String coordinateReferenceSystem;
 
@@ -69,7 +69,7 @@ public class StationDto implements Serializable {
 	private String municipality;
 
 	@JsonPropertyDescription("Station code to which this station belongs (ex., bz:noi)")
-	private String parentId;
+	private String parentStation;
 
 	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
 	private Map<String, Object> metaData = new HashMap<>();
@@ -92,12 +92,12 @@ public class StationDto implements Serializable {
 		this.id = id;
 	}
 
-	public String getParentId() {
-		return parentId;
+	public String getParentStation() {
+		return parentStation;
 	}
 
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
+	public void setParentStation(String parentId) {
+		this.parentStation = parentId;
 	}
 
 	public String getName() {

@@ -137,7 +137,7 @@ public class Station {
 		}
 		StationDto dto = new StationDto(s.getStationcode(),s.getName(),y,x);
 		dto.setCoordinateReferenceSystem(GEOM_CRS);
-		dto.setParentId(s.getParent() == null ? null : s.getParent().getStationcode());
+		dto.setParentStation(s.getParent() == null ? null : s.getParent().getStationcode());
 		dto.setOrigin(s.getOrigin());
 		if (s.getMetaData() != null)
 			dto.setMetaData(s.getMetaData().getJson());
@@ -356,8 +356,8 @@ public class Station {
 			existingStation.setPointprojection(point);
 		}
 		existingStation.setOrigin(dto.getOrigin());
-		if (dto.getParentId() != null) {
-			Station parent = Station.findStationByIdentifier(em, dto.getParentId());
+		if (dto.getParentStation() != null) {
+			Station parent = Station.findStationByIdentifier(em, dto.getParentStation());
 			if (parent != null)
 				existingStation.setParent(parent);
 		}
