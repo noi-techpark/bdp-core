@@ -57,7 +57,7 @@ pipeline {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
                     sh "git commit -m 'Version ${params.TAG}' --allow-empty"
-                    sh "git tag -d ${params.TAG} || git tag ${params.TAG}"
+                    sh "git tag -d ${params.TAG}; git tag -a ${params.TAG} -m ${params.TAG}"
                     sh "mkdir -p ~/.ssh"
                     sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
                     sh "git push origin HEAD:${params.BRANCH} --follow-tags"
