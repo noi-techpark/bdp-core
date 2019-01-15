@@ -38,17 +38,17 @@ pipeline {
         }
         stage('Deploy dto') {
             steps {
-		        sh 'cd dto/ && mvn clean install deploy'
+		        sh 'cd dto/ && mvn -B clean install deploy'
             }
         }
         stage('Deploy dc-interface') {
             steps {
-		        sh 'cd dc-interface/ && mvn clean install deploy'
+		        sh 'cd dc-interface/ && mvn -B clean install deploy'
             }
         }
         stage('Deploy ws-interface') {
             steps {
-		        sh 'cd ws-interface/ && mvn clean install deploy'
+		        sh 'cd ws-interface/ && mvn -B clean install deploy'
             }
         }
         stage('Tag') {
@@ -58,7 +58,7 @@ pipeline {
                     sh "git config --global user.name 'Jenkins'"
                     sh "git commit -m 'Version ${params.TAG}' --allow-empty"
                     sh "git tag ${params.TAG}"
-                    sh "git push origin ${params.BRANCH} --follow-tags"
+                    sh "git push origin HEAD:${params.BRANCH} --follow-tags"
                 }
             }
         }
