@@ -340,17 +340,17 @@ set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
-				'assetprovider', assetprovider,
-				'chargingpointscount', chargingpointscount,
+				'provider', assetprovider,
+				'capacity', chargingpointscount,
 				'city', city,
 				'state', state,
 				'accessinfo', accessinfo,
 				'address', address,
 				'flashinfo', flashinfo,
 				'locationserviceinfo', locationserviceinfo,
-				'paymentinfo', paymentinfo,
+				'paymentInfo', paymentinfo,
 				'reservable', reservable,
-				'accesstype', accesstype,
+				'accessType', accesstype,
 				'categories', categories
 			)) j
 	from intime.echargingstationbasicdata
@@ -589,4 +589,3 @@ where id = subj.sid and metadata_id is null;
 update intimev2.metadata
 set json = null
 where json = '{}'::jsonb;
-
