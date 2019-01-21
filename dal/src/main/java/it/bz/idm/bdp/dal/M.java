@@ -169,7 +169,7 @@ public abstract class M implements Serializable {
 	 * @param table
 	 * @return
 	 */
-	public static <T extends M> M findLatestEntry(EntityManager em, Station station, DataType type, Class<T> subClass) {
+	public static <T extends M> M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, Class<T> subClass) {
 		if (station == null)
 			return null;
 

@@ -157,10 +157,16 @@ public abstract class MHistory implements Serializable {
 							continue;
 						}
 						em.getTransaction().begin();
-
-						M latestNumberMeasurement = M.findLatestEntry(em, station, type, Measurement.class);
+						
+						//TODO: remove period check once it gets removed from database
+						Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
+						if (period == null){
+							System.err.println("pushRecords: No period specified. Skipping...");
+							continue;
+						}
+						M latestNumberMeasurement = M.findLatestEntry(em, station, type, period, Measurement.class);
 						long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
-						M latestStringMeasurement = M.findLatestEntry(em, station, type, MeasurementString.class);
+						M latestStringMeasurement = M.findLatestEntry(em, station, type, period, MeasurementString.class);
 						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
 						Date created_on = new Date();
