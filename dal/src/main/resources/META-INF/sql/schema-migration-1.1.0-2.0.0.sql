@@ -101,7 +101,7 @@ where id = subs.bike;
 update intimev2.metadata
 set json = coalesce(json || subs.j, subs.j)
 from (
-	select station_id sid, jsonb_object_agg(cname, max_available::int) j
+	select station_id sid, jsonb_build_object('bikes', jsonb_object_agg(cname, max_available::int) j
 	from intime.bikesharingstationbasicdata b
 	join type t on b.type_id = t.id
 	group by sid
