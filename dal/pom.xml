@@ -26,7 +26,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dal</artifactId>
-	<version>2.0.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     <name>BDP data</name>
     <url>http://maven.apache.org</url>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-			<version>2.0.0</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
@@ -111,13 +111,12 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
-	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
-	<dependency>
-	    <groupId>org.apache.commons</groupId>
-	    <artifactId>commons-collections4</artifactId>
-	    <version>4.1</version>
-	</dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.1</version>
+        </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
@@ -140,36 +139,36 @@
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
         </dependency>
-		<dependency>
-			<groupId>com.vladmihalcea</groupId>
-			<artifactId>hibernate-types-52</artifactId>
-			<version>2.3.0</version>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-52</artifactId>
+            <version>2.3.0</version>
         </dependency>
 
-		<!-- Solve issue with java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in Java 9
-		     See https://stackoverflow.com/a/43574427 for details
-		     -->
+        <!-- Solve issue with java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException in Java 9
+             See https://stackoverflow.com/a/43574427 for details
+             -->
         <dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.2.11</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.sun.xml.bind</groupId>
-		    <artifactId>jaxb-core</artifactId>
-		    <version>2.2.11</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.sun.xml.bind</groupId>
-		    <artifactId>jaxb-impl</artifactId>
-		    <version>2.2.11</version>
-		</dependency>
-		<dependency>
-		    <groupId>javax.activation</groupId>
-		    <artifactId>activation</artifactId>
-		    <version>1.1.1</version>
-		</dependency>
-		<!-- END: Solve issue... -->
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <!-- END: Solve issue... -->
     </dependencies>
 
     <build>
@@ -217,31 +216,31 @@
                     </execution>
                 </executions>
             </plugin>
-	    <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-surefire-plugin</artifactId>
-               <version>2.22.1</version>
-               <configuration>
-                       <useSystemClassLoader>false</useSystemClassLoader>
-               </configuration>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                </configuration>
             </plugin>
         </plugins>
-	<extensions>
+        <extensions>
             <extension>
                 <groupId>org.springframework.build</groupId>
                 <artifactId>aws-maven</artifactId>
                 <version>5.0.0.RELEASE</version>
             </extension>
-         </extensions>
+        </extensions>
     </build>
     <distributionManagement>
         <snapshotRepository>
-           <id>maven-repo.opendatahub.bz.it</id>
-           <url>s3://it.bz.opendatahub/snapshot</url>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>s3://it.bz.opendatahub/snapshot</url>
         </snapshotRepository>
         <repository>
-           <id>maven-repo.opendatahub.bz.it</id>
-           <url>s3://it.bz.opendatahub/release</url>
+            <id>maven-repo.opendatahub.bz.it</id>
+            <url>s3://it.bz.opendatahub/release</url>
         </repository>
      </distributionManagement>
 </project>
