@@ -72,7 +72,7 @@ public class Station {
 	@ColumnDefault(value = "nextval('intime.station_seq')")
 	protected Long id;
 
-	@ManyToOne(optional = false)
+	@ManyToOne
 	protected Station parent;
 
 	@Column(nullable = false)
