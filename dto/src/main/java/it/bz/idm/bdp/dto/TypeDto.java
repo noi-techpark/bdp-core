@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class TypeDto implements Serializable {
@@ -55,7 +56,7 @@ public class TypeDto implements Serializable {
 		return unit;
 	}
 	public void setUnit(String unit) {
-		this.unit = unit;
+		this.unit = (unit == null || unit.isEmpty()) ? null : unit;
 	}
 	public Map<String, String> getDesc() {
 		return desc;
@@ -67,7 +68,7 @@ public class TypeDto implements Serializable {
 		return typeOfMeasurement;
 	}
 	public void setTypeOfMeasurement(String typeOfMeasurement) {
-		this.typeOfMeasurement = typeOfMeasurement;
+		this.typeOfMeasurement = (typeOfMeasurement == null || typeOfMeasurement.isEmpty()) ? null : typeOfMeasurement;
 	}
 	public Set<Integer> getAcquisitionIntervals() {
 		return acquisitionIntervals;

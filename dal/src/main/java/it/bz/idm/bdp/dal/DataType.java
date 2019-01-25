@@ -170,7 +170,7 @@ public class DataType {
 
 	/**
 	 * Find data types and return them as a list of string arrays with 4 elements each: <br />
-	 * <code> {[ID, UNIT, DESCRIPTION, INTERVAL], ...} </code>
+	 * <code> [[ID, UNIT, DESCRIPTION, INTERVAL], ...] </code>
 	 * <p>
 	 * We use the new function {@link findTypes} internally, and convert the
 	 * {@link TypeDto} output into string arrays, because we do not want to duplicate
@@ -189,9 +189,9 @@ public class DataType {
 		for (TypeDto item : typeDtoList) {
 			String[] arr = {
 					item.getId(),
-					item.getUnit() == null ? "" : item.getUnit(),
-					item.getDesc().isEmpty() ? "" : item.getDesc().entrySet().iterator().next().getValue(),
-					item.getAcquisitionIntervals().isEmpty() ? "" : item.getAcquisitionIntervals().iterator().next().toString()
+					item.getUnit() == null ? null : item.getUnit(),
+					item.getDesc().isEmpty() ? null : item.getDesc().entrySet().iterator().next().getValue(),
+					item.getAcquisitionIntervals().isEmpty() ? null : item.getAcquisitionIntervals().iterator().next().toString()
 				};
 			result.add(arr);
 		}
