@@ -47,8 +47,8 @@ public class MeasurementHistory extends MHistory {
 
     @Id
 	@GeneratedValue(generator = "measurementhistory_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "measurementhistory_gen", sequenceName = "measurementhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.measurementhistory_seq')")
+	@SequenceGenerator(name = "measurementhistory_gen", sequenceName = "measurementhistory_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurementhistory_seq')")
 	private Long id;
 
     /*

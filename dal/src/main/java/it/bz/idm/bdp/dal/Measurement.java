@@ -38,7 +38,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 
-@Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
+@Table(name = "measurement", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
 public class Measurement extends M {
 
@@ -47,8 +47,8 @@ public class Measurement extends M {
 
     @Id
 	@GeneratedValue(generator = "measurement_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.measurement_seq')")
+	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurement_seq')")
 	private Long id;
 
     /*

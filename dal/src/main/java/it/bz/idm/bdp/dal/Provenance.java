@@ -38,8 +38,8 @@ public class Provenance {
 
 	@Id
 	@GeneratedValue(generator = "provenance_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "provenance_gen", sequenceName = "provenance_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.provenance_seq')")
+	@SequenceGenerator(name = "provenance_gen", sequenceName = "provenance_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('provenance_seq')")
 	protected Long id;
 
 	@Column(nullable = false)

@@ -45,8 +45,8 @@ public class Edge {
 
 	@Id
 	@GeneratedValue(generator = "edge_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "edge_gen", sequenceName = "edge_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.edge_seq')")
+	@SequenceGenerator(name = "edge_gen", sequenceName = "edge_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('edge_seq')")
 	protected Long id;
 
 	@Column(nullable = true)

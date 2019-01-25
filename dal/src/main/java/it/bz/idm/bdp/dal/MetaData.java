@@ -46,8 +46,8 @@ public class MetaData {
 
 	@Id
 	@GeneratedValue(generator = "metadata_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "metadata_gen", sequenceName = "metadata_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.metadata_seq')")
+	@SequenceGenerator(name = "metadata_gen", sequenceName = "metadata_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('metadata_seq')")
 	protected Long id;
 
 	@Type(type = "jsonb")

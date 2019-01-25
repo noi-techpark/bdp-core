@@ -68,8 +68,8 @@ public class Station {
 
 	@Id
 	@GeneratedValue(generator = "station_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.station_seq')")
+	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('station_seq')")
 	protected Long id;
 
 	@ManyToOne

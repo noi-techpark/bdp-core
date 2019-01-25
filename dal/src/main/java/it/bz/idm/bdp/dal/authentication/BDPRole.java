@@ -39,7 +39,7 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
-@Table(name = "bdprole", schema = "intime")
+@Table(name = "bdprole")
 @Entity
 public class BDPRole {
 
@@ -48,8 +48,8 @@ public class BDPRole {
 
 	@Id
 	@GeneratedValue(generator = "bdprole_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "bdprole_gen", sequenceName = "bdprole_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.bdprole_seq')")
+	@SequenceGenerator(name = "bdprole_gen", sequenceName = "bdprole_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('bdprole_seq')")
 	private Long id;
 
 	@Column(unique = true, nullable = false)
