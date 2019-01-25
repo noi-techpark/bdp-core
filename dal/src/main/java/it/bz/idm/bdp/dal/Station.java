@@ -339,7 +339,7 @@ public abstract class Station {
 				em.persist(existingStation);
 			}
 			this.sync(em,existingStation,dto);									//sync instance specific metadata
-			if (existingStation.getName() == null)
+			if (dto.getName() != null)
 				existingStation.setName(dto.getName());
 			if (dto.getLatitude() != null && dto.getLongitude() != null){
 				Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));
