@@ -362,6 +362,9 @@ public class Station {
 				existingStation.setParent(parent);
 		}
 		syncMetaData(em, dto.getMetaData(), existingStation);
+
+		/* We do not need to check for NULL, nor empty strings, because the writer will take care of that */
+		existingStation.setName(dto.getName());
 		em.merge(existingStation);
 	}
 
