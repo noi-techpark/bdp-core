@@ -283,7 +283,7 @@ public abstract class MHistory implements Serializable {
 		return dtos;
 	}
 	
-	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, String valueName, T tableObject) {
+	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
 		List<MHistory> result = QueryBuilder
 				.init(em)
 				.addSql("SELECT record")
