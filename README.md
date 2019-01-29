@@ -172,12 +172,14 @@ More informations will be available soon.
   git clone https://github.com/idm-suedtirol/bdp-core.git
   cd bdp-core/dto
   mvn install
-  cd ../dal
-  vim src/main/resources/META-INF/persistence.xml
+  cd ../dal/src/main/resources/META-INF/persistence.xml
+  cp persistence.xml.dist persistence.xml
+  vim persistence.xml
 	> <property name="hibernate.hbm2ddl.auto" value="create"/>
 	> <property name="hibernate.hikari.dataSource.databaseName" value="bd"/>
 	> <property name="hibernate.hikari.dataSource.user" value="bd"/>
 	> <property name="hibernate.hikari.dataSource.password" value=""/>
+  cd ../../../..
   mvn clean install
   cd ../writer
   mvn clean package
