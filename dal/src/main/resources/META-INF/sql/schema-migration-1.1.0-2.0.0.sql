@@ -91,8 +91,8 @@ insert into intimev2.bdprules table intime.bdprules;
 update intimev2.station
 set parent_id = subs.station
 from (
-	  select station_id bike, bikesharingstation_id station
-		from intime.bicyclebasicdata
+	select station_id bike, bikesharingstation_id station
+	from intime.bicyclebasicdata
 ) subs
 where id = subs.bike;
 
@@ -108,6 +108,18 @@ from (
 ) subs
 where station_id = subs.sid;
 
+update intimev2.metadata
+set json = coalesce(json || subs.j, subs.j)
+from (
+	select id
+			, jsonb_strip_nulls(jsonb_build_object(
+				'type', regexp_replace(name, '\([0-9]*\)', '')
+			)) j
+	from intimev2.station
+	where stationtype = 'Bicycle'
+) subs
+where subs.id = intimev2.metadata.station_id;
+
 
 -------------------------------------------------------------------------------------------------------------
 -- carpooling*basicdata & translations
@@ -117,7 +129,7 @@ set json = coalesce(json || subs.j, subs.j)
 from (
 	select s.id station_id
 			, jsonb_strip_nulls(jsonb_build_object(
-				'location', jsonb_build_object(
+				'i18n', jsonb_build_object(
 					'it', jsonb_build_object(
 						'city', city,
 						'address', address,
@@ -150,28 +162,39 @@ set json = coalesce(json || subs.j, subs.j)
 from (
 	select s.id station_id
 			, jsonb_strip_nulls(jsonb_build_object(
-				'cartype', cartype,
-				'gender', gender,
+				'cartype', c.cartype,
+				'gender', c.gender,
 				'name', c.name,
-				'pendular', pendular,
+				'pendular', c.pendular,
 				'type', c.type,
-				'arrival', arrival,
-				'departure', departure,
+				'hub', par.stationcode,
+				'arrival', c.arrival,
+				'departure', c.departure,
+				'hubI18n', jsonb_build_object(
+					'it', jsonb_build_object(
+						'address', part.address,
+						'city', part.city,
+						'name', part.name
+					)
+				),
 				'location', jsonb_build_object(
 					'it', jsonb_build_object(
-						'city', city,
-						'address', address,
+						'city', t.city,
+						'address', t.address,
 						'name', t.name
 					)
 				)
 			)) j
 	from intimev2.station s
+	join intimev2.station par on s.parent_id = par.id
 	join intime.carpoolinguserbasicdata c on s.id = c.station_id
 	join intime.carpoolinguserbasicdata_translation ct on ct.carpoolinguserbasicdata_id = c.id
 	join intime.translation t on ct.location_id = t.id
+	join intime.carpoolinghubbasicdata parc on par.id = parc.station_id
+	join intime.carpoolinghubbasicdata_translation parct on parct.carpoolinghubbasicdata_id = parc.id
+	join intime.translation part on parct.i18n_id = part.id
 ) subs
-where subs.station_id = intimev2.metadata.station_id;
-
+where subs.station_id = intime.metadata.station_id;
 
 -------------------------------------------------------------------------------------------------------------
 -- carsharingcarstationbasicdata
@@ -206,10 +229,10 @@ set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
-				'canbookahead', canbookahead,
-				'companyshortname', companyshortname,
-				'hasfixedpaing', hasfixedparking,
-				'parking', parking,
+				'bookahead', canbookahead,
+				'company', companyshortname,
+				'fixedParking', hasfixedparking,
+				'availableVehicles', parking,
 				'spontaneously', spontaneously
 			)) j
 	from intime.carsharingstationbasicdata
@@ -285,10 +308,10 @@ from (
 	select station_id
 			, jsonb_strip_nulls(
 				jsonb_build_object(
-					'maxcurrent', maxcurrent,
-					'maxpower', maxpower,
-					'mincurrent', mincurrent,
-					'plugtype', plugtype
+					'maxCurrent', maxcurrent::numeric,
+					'maxPower', maxpower::numeric,
+					'minCurrent', mincurrent::numeric,
+					'outletTypeCode', plugtype
 				)
 			) j
 	from intime.echargingplugbasicdata
@@ -315,12 +338,12 @@ from (
 			, jsonb_strip_nulls(jsonb_build_object(
 				'outlets', array_agg(
 					jsonb_build_object(
-						'maxcurrent', maxcurrent,
-						'maxpower', maxpower,
-						'mincurrent', mincurrent,
-						'plugtype', plugtype,
-						'hasfixedcable', hasfixedcable,
-						'code', code
+						'maxCurrent', maxcurrent::numeric,
+						'maxPower', maxpower::numeric,
+						'minCurrent', mincurrent::numeric,
+						'outletTypeCode', plugtype,
+						'hasFixedCable', hasfixedcable,
+						'id', code
 					)
 				)
 			)) j
@@ -357,6 +380,32 @@ from (
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
+
+update intimev2.metadata
+set json = coalesce(json || subs.j, subs.j)
+from (
+	select station_id
+			, jsonb_strip_nulls(jsonb_build_object(
+				'provider', assetprovider,
+				'capacity', chargingpointscount,
+				'city', city,
+				'state', state,
+				'accessInfo', accessinfo,
+				'address', address,
+				'flashinfo', flashinfo,
+				'locationserviceinfo', locationserviceinfo,
+				'paymentInfo', paymentinfo,
+				'reservable', reservable,
+				'accessType', accesstype,
+				'categories', case
+					when categories is null or categories = ''
+						then null
+						else string_to_array(categories, ',')
+					end
+			)) j
+	from intime.echargingstationbasicdata
+) subs
+where subs.station_id = intimev2.metadata.station_id;
 
 --------------------------------------------------------------------------------------------------------
 -- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
@@ -475,8 +524,7 @@ set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
-				'area', area,
-				'zeus', zeus
+				'area', area
 			)) j
 	from intime.meteostationbasicdata
 ) subs
@@ -492,16 +540,28 @@ select setval('intimev2.edge_seq', (select max(id) from intimev2.edge));
 update intimev2.metadata
 set json = coalesce(json || subs.j, subs.j)
 from (
+	with lbd as (
+		select l.station_id id
+			, jsonb_agg(jsonb_build_object(
+				'lat', ST_X(ST_Transform(points.geom, 4326)),
+				'lon', ST_Y(ST_Transform(points.geom, 4326))
+			)) coords
+		from intime.linkbasicdata l, st_dumppoints(l.linegeometry) as points(path, geom)
+		group by 1
+	)
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
 				'length', length,
 				'street_ids_ref', street_ids_ref,
-				'elapsed_time_default', elapsed_time_default
+				'elapsed_time_default', elapsed_time_default,
+				'destination', dest.stationcode,
+				'coordinates', coords
 			)) j
-	from intime.linkbasicdata
+	from intime.linkbasicdata l
+	join intimev2.station dest on l.destination_id = dest.id
+	join lbd on lbd.id = l.station_id
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
-
 
 --------------------------------------------------------------------------------------------------------
 -- streetbasicdata
