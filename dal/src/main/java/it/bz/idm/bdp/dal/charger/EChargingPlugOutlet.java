@@ -40,8 +40,8 @@ public class EChargingPlugOutlet {
 
 	@Id
 	@GeneratedValue(generator = "echargingplugoutlet_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "echargingplugoutlet_gen", sequenceName = "echargingplugoutlet_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.echargingplugoutlet_seq')")
+	@SequenceGenerator(name = "echargingplugoutlet_gen", sequenceName = "echargingplugoutlet_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('echargingplugoutlet_seq')")
 	private Long id;
 
 	private String code;

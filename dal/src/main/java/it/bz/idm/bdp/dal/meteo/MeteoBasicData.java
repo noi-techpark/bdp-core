@@ -30,7 +30,7 @@ import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Table(name="meteostationbasicdata",schema="intime")
+@Table(name="meteostationbasicdata")
 @Entity
 public class MeteoBasicData extends BasicData{
 

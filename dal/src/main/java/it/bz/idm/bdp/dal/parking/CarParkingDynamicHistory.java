@@ -43,14 +43,14 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.parking.ParkingRecordExtendedDto;
 
 
-@Table(name="carparkingdynamichistory",schema="intime")
+@Table(name="carparkingdynamichistory")
 @Entity
 public class CarParkingDynamicHistory {
 
 	@Id
 	@GeneratedValue(generator = "carparkingdynamichistory_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "carparkingdynamichistory_gen", sequenceName = "carparkingdynamichistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.carparkingdynamichistory_seq')")
+	@SequenceGenerator(name = "carparkingdynamichistory_gen", sequenceName = "carparkingdynamichistory_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('carparkingdynamichistory_seq')")
 	private Integer id;
 
 	@ManyToOne

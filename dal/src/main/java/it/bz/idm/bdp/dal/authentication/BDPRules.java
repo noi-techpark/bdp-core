@@ -33,13 +33,13 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
-@Table(name = "bdprules", schema = "intime")
+@Table(name = "bdprules")
 @Entity
 public class BDPRules {
     @Id
 	@GeneratedValue(generator = "bdprules_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "bdprules_gen", sequenceName = "bdprules_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.bdprules_seq')")
+	@SequenceGenerator(name = "bdprules_gen", sequenceName = "bdprules_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('bdprules_seq')")
     private Long id;
 
     @ManyToOne
