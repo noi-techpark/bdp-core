@@ -38,6 +38,8 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	@JsonPropertyDescription("Interval between one measurement and the consecutive one (seconds)")
 	private Integer period;
 
+	private Long created_on;
+
 	public SimpleRecordDto() {
 	}
 	public SimpleRecordDto(Long timestamp, Double value) {
@@ -55,6 +57,12 @@ public class SimpleRecordDto extends RecordDtoImpl {
 		this.timestamp = timestamp;
 		this.value = value;
 		this.period = period;
+	}
+	public Long getCreated_on() {
+		return created_on;
+	}
+	public void setCreated_on(Long created_on) {
+		this.created_on = created_on;
 	}
 	@Override
 	public Object getValue() {
