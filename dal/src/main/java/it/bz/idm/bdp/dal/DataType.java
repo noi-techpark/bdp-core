@@ -189,9 +189,9 @@ public class DataType {
 		for (TypeDto item : typeDtoList) {
 			String[] arr = {
 					item.getId(),
-					item.getUnit() == null ? null : item.getUnit(),
-					item.getDesc().isEmpty() ? null : item.getDesc().entrySet().iterator().next().getValue(),
-					item.getAcquisitionIntervals().isEmpty() ? null : item.getAcquisitionIntervals().iterator().next().toString()
+					item.getUnit() == null ? "" : item.getUnit(),
+					item.getDesc().isEmpty() ? "" : item.getDesc().entrySet().iterator().next().getValue(),
+					item.getAcquisitionIntervals().isEmpty() ? "" : item.getAcquisitionIntervals().iterator().next().toString()
 				};
 			result.add(arr);
 		}

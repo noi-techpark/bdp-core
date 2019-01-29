@@ -83,7 +83,7 @@ public class JPAUtil {
 	 *
 	 * @param query
 	 *            The query input stream
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static void executeNativeQueries(final InputStream query) throws Exception {
 		List<String> commands = new ArrayList<String>();

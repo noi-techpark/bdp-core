@@ -97,4 +97,8 @@ public class TypeDto implements Serializable {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		return "TypeDto [id=" + id + ", unit=" + unit + ", desc=" + desc + ", typeOfMeasurement=" + typeOfMeasurement + ", acquisitionIntervals=" + acquisitionIntervals + "]";
+	}
 }
