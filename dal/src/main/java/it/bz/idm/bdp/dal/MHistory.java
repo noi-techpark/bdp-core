@@ -22,7 +22,6 @@ package it.bz.idm.bdp.dal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -68,9 +67,7 @@ public abstract class MHistory implements Serializable {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	private Provenance provenance;
 
-	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role);
 	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
-	public abstract MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role);
 
 	public MHistory() {
 		this.created_on = new Date();
@@ -336,27 +333,5 @@ public abstract class MHistory implements Serializable {
 				.addSql("ORDER BY record.timestamp")
 				.buildResultList(Object[].class);
 		return MHistory.castToDtos(result);
-	}
-
-	protected static <T extends MHistory> MHistory findRecordImpl(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role, Class<T> table) {
-		return QueryBuilder
-				.init(em)
-				.addSql("SELECT record FROM " + table.getSimpleName() + " record, BDPPermissions p",
-						 "WHERE (record.station = p.station OR p.station = null)",
-						 "AND (record.type = p.type OR p.type = null)",
-						 "AND (record.period = p.period OR p.period = null)",
-						 "AND p.role = :role",
-						 "AND record.station = :station",
-						 "AND record.type = :type",
-						 "AND record.timestamp = :timestamp",
-						 "AND record.value = :value",
-						 "AND record.period = :period")
-				 .setParameter("station", station)
-				 .setParameter("type", type)
-				 .setParameter("value", value)
-				 .setParameter("timestamp", timestamp)
-				 .setParameter("period", period)
-				 .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				 .buildSingleResultOrNull(table);
 	}
 }
