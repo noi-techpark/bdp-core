@@ -126,6 +126,8 @@ public abstract class MHistory implements Serializable {
 	public void setProvenance(Provenance provenance) {
 		this.provenance = provenance;
 	}
+	public abstract void setValue(Object value);
+	public abstract Object getValue();
 
 	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
 		boolean givenDataOK = false;
@@ -271,50 +273,21 @@ public abstract class MHistory implements Serializable {
 		}
 	}
 
-	protected static List<RecordDto> castToDtos(List<Object[]> resultList) {
-		List<RecordDto> dtos = new ArrayList<RecordDto>();
-		for (Object[] row: resultList){
-			SimpleRecordDto dto = new SimpleRecordDto(((Date) row[0]).getTime(),
-					Double.parseDouble(String.valueOf(row[1])));
-			if (row.length>2)
-				dto.setPeriod(Integer.parseInt(row[2].toString()));
+	private static List<RecordDto> castToDtos(List<MHistory> result) {
+		List<RecordDto> dtos = new ArrayList<>();
+		for (MHistory m : result) {
+			SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), m.getPeriod());
+			dto.setCreated_on(m.getCreated_on().getTime());
 			dtos.add(dto);
 		}
 		return dtos;
 	}
-
-	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role, T table) {
-		List<Object[]> result = QueryBuilder
+	
+	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, String valueName, T tableObject) {
+		List<MHistory> result = QueryBuilder
 				.init(em)
-				.addSql("SELECT record.timestamp, record.doubleValue")
-				.addSqlIf(", record.period", period == null)
-				.addSql("FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
-						"WHERE (record.station = p.station OR p.station = null)",
-						"AND (record.type = p.type OR p.type = null)",
-						"AND (record.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND record.station.stationtype = :stationtype",
-						"AND record.station.stationcode = :stationcode",
-						"AND record.type.cname = :cname",
-						"AND record.timestamp > :date")
-				.setParameterIfNotNull("period", period, "AND record.period = :period")
-				.setParameter("stationtype", stationtype)
-				.setParameter("stationcode", identifier)
-				.setParameter("cname", cname)
-				.setParameter("date", new Date(Calendar.getInstance().getTimeInMillis() - 1000 * seconds))
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				.addSql("ORDER BY record.timestamp")
-				.buildResultList(Object[].class);
-
-		return castToDtos(result);
-	}
-
-	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, String valueName, T table) {
-		List<Object[]> result = QueryBuilder
-				.init(em)
-				.addSql("SELECT record.timestamp, record." + valueName)
-				.addSqlIf(", record.period", period == null)
-				.addSql("FROM  " + table.getClass().getSimpleName() + " record, BDPPermissions p",
+				.addSql("SELECT record")
+				.addSql("FROM  " + tableObject.getClass().getSimpleName() + " record, BDPPermissions p",
 						"WHERE (record.station = p.station OR p.station = null)",
 						"AND (record.type = p.type OR p.type = null)",
 						"AND (record.period = p.period OR p.period = null)",
@@ -331,7 +304,7 @@ public abstract class MHistory implements Serializable {
 				.setParameter("end", end)
 				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp")
-				.buildResultList(Object[].class);
+				.buildResultList(MHistory.class);
 		return MHistory.castToDtos(result);
 	}
 }
