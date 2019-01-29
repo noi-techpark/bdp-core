@@ -62,6 +62,7 @@ public class MeasurementStringHistory extends MHistory {
 	private String stringValue;
 
 	public MeasurementStringHistory() {
+		super();
 	}
 	public MeasurementStringHistory(Station station, DataType type, String value, Date timestamp, Integer period, Date created_on) {
 		setStation(station);
@@ -87,17 +88,12 @@ public class MeasurementStringHistory extends MHistory {
 	}
 
 	@Override
-	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Long seconds, Integer period, BDPRole role) {
-		return findRecordsImpl(em, stationtype, identifier, cname, seconds, period, role, this);
-	}
-
-	@Override
 	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
 		return findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, "stringValue", this);
 	}
-
 	@Override
-	public MHistory findRecord(EntityManager em, Station station, DataType type, String value, Date timestamp, Integer period, BDPRole role) {
-		return findRecordImpl(em, station, type, value, timestamp, period, role, MeasurementStringHistory.class);
+	public void setValue(Object value) {
+		setValue(value.toString());
 	}
+
 }
