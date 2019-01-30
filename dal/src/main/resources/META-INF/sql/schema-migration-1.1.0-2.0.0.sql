@@ -615,16 +615,16 @@ select created_on, timestamp, value, station_id, type_id, period, 2 /* provenanc
 from intimev1.measurementhistory where id >= 0 and id < 100000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id => 100000000 and id < 200000000 and value is not null;
+from intimev1.measurementhistory where id >= 100000000 and id < 200000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id => 200000000 and id < 300000000 and value is not null;
+from intimev1.measurementhistory where id >= 200000000 and id < 300000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id => 300000000 and id < 400000000 and value is not null;
+from intimev1.measurementhistory where id >= 300000000 and id < 400000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id => 400000000 and id < 500000000 and value is not null;
+from intimev1.measurementhistory where id >= 400000000 and id < 500000000 and value is not null;
 
 insert into intimev2.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, 1 /* instant, will be removed in the near future */, 2 /* provenance ID, see above */
