@@ -1,0 +1,41 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename 'docker/dockerfile-java'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+        }
+    }
+
+    environment {
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
+    }
+
+    stages {
+        stage('Configure') {
+            steps {
+               sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
+            }
+        }
+        stage('Install') {
+            steps {
+               sh 'cd dal && mvn -B -U clean test install'
+            }
+        }
+        stage('Build - Reader') {
+            steps {
+               sh 'cd reader && mvn -B -U clean test package'
+            }
+        }
+        stage('Build - Writer') {
+            steps {
+               sh 'cd writer && mvn -B -U clean test package'
+            }
+        }
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'reader/target/reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'writer/target/writer.war', onlyIfSuccessful: true
+            }
+        }
+    }
+}
