@@ -23,7 +23,7 @@ DO language plpgsql $$
 DECLARE
 	count INT;
 BEGIN
-	SELECT COUNT(*) INTO count FROM intimev2.schemaversion WHERE version = '1.1.0';
+	SELECT COUNT(*) INTO count FROM intimev2.schemaversion WHERE version = '2.0.0';
 	IF count <> 1 THEN
 		RAISE EXCEPTION 'Wrong schema version... terminating script';
 	END IF;
@@ -34,19 +34,19 @@ $$;
 -------------------------------------------------------------------------------------------------------------
 -- type
 -------------------------------------------------------------------------------------------------------------
--- select * from intime.type where timestamp is not null
+-- select * from intimev1.type where timestamp is not null
 -- table intimev2.type;
 insert into intimev2.type
-select id, cname, created_on, cunit, description, rtype from intime.type;
+select id, cname, created_on, cunit, description, rtype from intimev1.type;
 select setval('intimev2.type_seq', (select max(id) from intimev2.type));
 
 -------------------------------------------------------------------------------------------------------------
 -- station
 -------------------------------------------------------------------------------------------------------------
 --table intimev2.station;
---select * from intime.station limit 10;
+--select * from intimev1.station limit 10;
 insert into intimev2.station
-select id, active, available, name, origin, pointprojection, stationcode, stationtype, null, parent_id from intime.station;
+select id, active, available, name, origin, pointprojection, stationcode, stationtype, null, parent_id from intimev1.station;
 select setval('intimev2.station_seq', (select max(id) from intimev2.station));
 
 insert into intimev2.metadata (station_id, created_on, json)
@@ -56,7 +56,7 @@ select id
 		 'municipality', case when char_length(municipality) > 0 then municipality else null end,
 		 'description', case when char_length(description) > 0 then description else null end)
 	   ) as j
-from intime.station;
+from intimev1.station;
 select setval('intimev2.metadata_seq', (select max(id) from intimev2.metadata));
 
 update intimev2.station
@@ -78,10 +78,10 @@ delete from intimev2.bdpuser;
 delete from intimev2.bdprules;
 delete from intimev2.bdprole;
 
-insert into intimev2.bdpuser table intime.bdpuser;
-insert into intimev2.bdprole table intime.bdprole;
-insert into intimev2.bdpusers_bdproles table intime.bdpusers_bdproles;
-insert into intimev2.bdprules table intime.bdprules;
+insert into intimev2.bdpuser table intimev1.bdpuser;
+insert into intimev2.bdprole table intimev1.bdprole;
+insert into intimev2.bdpusers_bdproles table intimev1.bdpusers_bdproles;
+insert into intimev2.bdprules table intimev1.bdprules;
 
 
 -------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select station_id bike, bikesharingstation_id station
-	from intime.bicyclebasicdata
+	from intimev1.bicyclebasicdata
 ) subs
 where id = subs.bike;
 
@@ -101,8 +101,8 @@ where id = subs.bike;
 update intimev2.metadata
 set json = coalesce(json || subs.j, subs.j)
 from (
-	select station_id sid, jsonb_build_object('bikes', jsonb_object_agg(cname, max_available::int) j
-	from intime.bikesharingstationbasicdata b
+	select station_id sid, jsonb_build_object('bikes', jsonb_object_agg(cname, max_available::int)) j
+	from intimev1.bikesharingstationbasicdata b
 	join type t on b.type_id = t.id
 	group by sid
 ) subs
@@ -138,9 +138,9 @@ from (
 				)
 			)) j
 	from intimev2.station s
-	join intime.carpoolinghubbasicdata c on s.id = c.station_id
-	join intime.carpoolinghubbasicdata_translation ct on ct.carpoolinghubbasicdata_id = c.id
-	join intime.translation t on ct.i18n_id = t.id
+	join intimev1.carpoolinghubbasicdata c on s.id = c.station_id
+	join intimev1.carpoolinghubbasicdata_translation ct on ct.carpoolinghubbasicdata_id = c.id
+	join intimev1.translation t on ct.i18n_id = t.id
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -149,7 +149,7 @@ update intimev2.station
 set parent_id = subs.hub
 from (
 	select station_id usr, hub_id hub
-	from intime.carpoolinguserbasicdata
+	from intimev1.carpoolinguserbasicdata
 ) subs
 where id = subs.usr;
 
@@ -187,14 +187,14 @@ from (
 			)) j
 	from intimev2.station s
 	join intimev2.station par on s.parent_id = par.id
-	join intime.carpoolinguserbasicdata c on s.id = c.station_id
-	join intime.carpoolinguserbasicdata_translation ct on ct.carpoolinguserbasicdata_id = c.id
-	join intime.translation t on ct.location_id = t.id
-	join intime.carpoolinghubbasicdata parc on par.id = parc.station_id
-	join intime.carpoolinghubbasicdata_translation parct on parct.carpoolinghubbasicdata_id = parc.id
-	join intime.translation part on parct.i18n_id = part.id
+	join intimev1.carpoolinguserbasicdata c on s.id = c.station_id
+	join intimev1.carpoolinguserbasicdata_translation ct on ct.carpoolinguserbasicdata_id = c.id
+	join intimev1.translation t on ct.location_id = t.id
+	join intimev1.carpoolinghubbasicdata parc on par.id = parc.station_id
+	join intimev1.carpoolinghubbasicdata_translation parct on parct.carpoolinghubbasicdata_id = parc.id
+	join intimev1.translation part on parct.i18n_id = part.id
 ) subs
-where subs.station_id = intime.metadata.station_id;
+where subs.station_id = intimev2.metadata.station_id;
 
 -------------------------------------------------------------------------------------------------------------
 -- carsharingcarstationbasicdata
@@ -207,7 +207,7 @@ from (
 				'brand', brand,
 				'licenseplate', licenseplate
 			)) j
-	from intime.carsharingcarstationbasicdata
+	from intimev1.carsharingcarstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -216,7 +216,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select station_id car, carsharingstation_id station
-	from intime.carsharingcarstationbasicdata
+	from intimev1.carsharingcarstationbasicdata
 ) subs
 where id = subs.car;
 
@@ -235,7 +235,7 @@ from (
 				'availableVehicles', parking,
 				'spontaneously', spontaneously
 			)) j
-	from intime.carsharingstationbasicdata
+	from intimev1.carsharingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -250,7 +250,7 @@ from (
 				'brand', brand,
 				'licenseplate', licenseplate
 			)) j
-	from intime.carsharingcarstationbasicdata
+	from intimev1.carsharingcarstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -294,9 +294,9 @@ CREATE TABLE intimev2.copert_emisfact (
 	CONSTRAINT copert_emisfact_id FOREIGN KEY (copert_parcom_id) REFERENCES intimev2.copert_parcom(id)
 );
 
-insert into intimev2.classification table intime.classification;
-insert into intimev2.copert_parcom table intime.copert_parcom;
-insert into intimev2.copert_emisfact table intime.copert_emisfact;
+insert into intimev2.classification table intimev1.classification;
+insert into intimev2.copert_parcom table intimev1.copert_parcom;
+insert into intimev2.copert_emisfact table intimev1.copert_emisfact;
 
 
 --------------------------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ from (
 					'outletTypeCode', plugtype
 				)
 			) j
-	from intime.echargingplugbasicdata
+	from intimev1.echargingplugbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -323,7 +323,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select estation_id station, station_id plug
-	from intime.echargingplugbasicdata
+	from intimev1.echargingplugbasicdata
 ) subs
 where id = subs.plug;
 
@@ -348,7 +348,7 @@ from (
 				)
 			)) j
 	from intimev2.station s
-	join intime.echargingplugoutlet o on o.plug_id = s.id
+	join intimev1.echargingplugoutlet o on o.plug_id = s.id
 	join intimev2.metadata m on m.station_id = s.id
 	group by s.id
 ) subs
@@ -376,7 +376,7 @@ from (
 				'accessType', accesstype,
 				'categories', categories
 			)) j
-	from intime.echargingstationbasicdata
+	from intimev1.echargingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -403,59 +403,9 @@ from (
 						else string_to_array(categories, ',')
 					end
 			)) j
-	from intime.echargingstationbasicdata
+	from intimev1.echargingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
-
---------------------------------------------------------------------------------------------------------
--- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
---------------------------------------------------------------------------------------------------------
-insert into intimev2.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
-insert into intimev2.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
-
-insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurement;
-select setval('intimev2.measurement_seq', (select max(id) from intimev2.measurement));
-
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementhistory where id >= 0 and id < 100000000;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementhistory where id => 100000000 and id < 200000000;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementhistory where id => 200000000 and id < 300000000;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementhistory where id => 300000000 and id < 400000000;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementhistory where id => 400000000 and id < 500000000;
-select setval('intimev2.measurementhistory_seq', (select max(id) from intimev2.measurementhistory));
-
-insert into intimev2.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementstring;
-select setval('intimev2.measurementstring_seq', (select max(id) from intimev2.measurementstring));
-
-insert into intimev2.measurementstringhistory (created_on, timestamp, stringvalue, station_id, type_id, period, id, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, id, 2 /* provenance ID, see above */
-from intime.measurementstringhistory;
-select setval('intimev2.measurementstringhistory_seq', (select max(id) from intimev2.measurementstringhistory));
-
-create table intimev2.measurementmobile as select * from intime.measurementmobile;
-
-create table intimev2.measurementmobilehistory as select * from intime.measurementmobilehistory;
-
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, 1 /* provenance ID, see above */
-from intime.elaborationhistory where created_on is not null and value is not null;
-
-insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, 1 /* provenance ID, see above */
-from intime.elaboration where created_on is not null and value is not null;
 
 
 -------------------------------------------------------------------------------------------------------------
@@ -485,7 +435,7 @@ from (
 				 'state', state,
 				 'womancapacity', womencapacity
 				)) j
-		from intime.carparkingbasicdata
+		from intimev1.carparkingbasicdata
 	)
 	select station_id, case when j::text = '{}'::text then null else j end
 	from jsonobj
@@ -498,21 +448,21 @@ values ('occupacy', null, 'Occupacy of a parking area', 'Count', now());
 insert into intimev2.measurement (station_id, type_id, created_on, timestamp, doublevalue, period)
 select station_id
 		, (select id from intimev2.type where cname = 'occupacy')
-		, createdate
+		, case when createdate is null then lastupdate else createdate end
 		, lastupdate
 		, occupacy
 		, 300  			-- set 5 minutes = 300 seconds, since the lastupdate column shows more-or-less those differences
-from intime.carparkingdynamic
+from intimev1.carparkingdynamic
 where occupacy >= 0;
 
 insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, doublevalue, period)
 select station_id
 		, (select id from intimev2.type where cname = 'occupacy')
-		, createdate
+		, case when createdate is null then lastupdate else createdate end
 		, lastupdate
 		, occupacy
 		, 300  			-- set 5 minutes = 300 seconds, since the lastupdate column shows more-or-less those differences
-from intime.carparkingdynamichistory
+from intimev1.carparkingdynamichistory
 where occupacy >= 0;
 
 
@@ -526,7 +476,7 @@ from (
 			, jsonb_strip_nulls(jsonb_build_object(
 				'area', area
 			)) j
-	from intime.meteostationbasicdata
+	from intimev1.meteostationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -534,7 +484,7 @@ where subs.station_id = intimev2.metadata.station_id;
 -- linkbasicdata
 --------------------------------------------------------------------------------------------------------
 insert into intimev2.edge (id, edgedata_id, origin_id, destination_id, linegeometry, directed)
-select id, station_id, origin_id, destination_id, linegeometry, true from intime.linkbasicdata;
+select id, station_id, origin_id, destination_id, linegeometry, true from intimev1.linkbasicdata;
 select setval('intimev2.edge_seq', (select max(id) from intimev2.edge));
 
 update intimev2.metadata
@@ -546,7 +496,7 @@ from (
 				'lat', ST_X(ST_Transform(points.geom, 4326)),
 				'lon', ST_Y(ST_Transform(points.geom, 4326))
 			)) coords
-		from intime.linkbasicdata l, st_dumppoints(l.linegeometry) as points(path, geom)
+		from intimev1.linkbasicdata l, st_dumppoints(l.linegeometry) as points(path, geom)
 		group by 1
 	)
 	select station_id
@@ -557,7 +507,7 @@ from (
 				'destination', dest.stationcode,
 				'coordinates', coords
 			)) j
-	from intime.linkbasicdata l
+	from intimev1.linkbasicdata l
 	join intimev2.station dest on l.destination_id = dest.id
 	join lbd on lbd.id = l.station_id
 ) subs
@@ -577,7 +527,7 @@ from (
 				'speed_default', speed_default,
 				'linegeometry', linegeometry
 			)) j
-	from intime.streetbasicdata
+	from intimev1.streetbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -598,7 +548,7 @@ sel as (
 			, 'TrafficStreetFactor' as stationtype
 			, id_arco
 			, id_spira
-	from intime.trafficstreetfactor
+	from intimev1.trafficstreetfactor
 	join station s on id_arco = s.id
 	join station s2 on id_spira = s2.id
 	order by rn
@@ -626,12 +576,12 @@ select now()
 			'length', length,
 			'hv_perc', hv_perc
 		)
-from intime.trafficstreetfactor t
+from intimev1.trafficstreetfactor t
 join edge e on e.origin_id = t.id_arco and e.destination_id = t.id_spira;
 
 
 --------------------------------------------------------------------------------------------------------
--- Final cleansing
+-- Final cleansing of station and metadata
 --------------------------------------------------------------------------------------------------------
 
 -- Update station-to-metadata foreign keys
@@ -649,3 +599,63 @@ where id = subj.sid and metadata_id is null;
 update intimev2.metadata
 set json = null
 where json = '{}'::jsonb;
+
+--------------------------------------------------------------------------------------------------------
+-- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
+--------------------------------------------------------------------------------------------------------
+insert into intimev2.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
+insert into intimev2.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
+
+insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurement where value is not null;
+
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id >= 0 and id < 100000000 and value is not null;
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 100000000 and id < 200000000 and value is not null;
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 200000000 and id < 300000000 and value is not null;
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 300000000 and id < 400000000 and value is not null;
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
+from intimev1.measurementhistory where id => 400000000 and id < 500000000 and value is not null;
+
+insert into intimev2.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, 1 /* instant, will be removed in the near future */, 2 /* provenance ID, see above */
+from intimev1.measurementstring where value is not null;
+
+insert into intimev2.measurementstringhistory (created_on, timestamp, stringvalue, station_id, type_id, period, provenance_id)
+select created_on, timestamp, value, station_id, type_id, 1 /* instant, will be removed in the near future */, 2 /* provenance ID, see above */
+from intimev1.measurementstringhistory where value is not null;
+
+create table intimev2.measurementmobile as select * from intimev1.measurementmobile;
+
+create table intimev2.measurementmobilehistory as select * from intimev1.measurementmobilehistory;
+
+insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select
+	case when created_on is null then timestamp else created_on end
+	, timestamp
+	, value
+	, station_id
+	, type_id
+	, period
+	, 1 /* provenance ID, see above */
+from intimev1.elaborationhistory where value is not null;
+
+insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+select
+	case when created_on is null then timestamp else created_on end
+	, timestamp
+	, value
+	, station_id
+	, type_id
+	, period
+	, 1 /* provenance ID, see above */
+from intimev1.elaboration where value is not null;
