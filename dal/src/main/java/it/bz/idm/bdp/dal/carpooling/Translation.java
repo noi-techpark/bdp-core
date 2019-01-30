@@ -33,8 +33,8 @@ public abstract class Translation {
 
 	@Id
 	@GeneratedValue(generator = "translation_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "translation_gen", sequenceName = "translation_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.translation_seq')")
+	@SequenceGenerator(name = "translation_gen", sequenceName = "translation_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('translation_seq')")
 	private Long id;
 
 	public Translation() {

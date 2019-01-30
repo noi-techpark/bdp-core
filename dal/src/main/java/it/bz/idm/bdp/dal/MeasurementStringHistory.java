@@ -38,14 +38,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Table(name="measurementstringhistory",schema="intime")
+@Table(name="measurementstringhistory")
 @Entity
 public class MeasurementStringHistory {
 
     @Id
 	@GeneratedValue(generator = "measurementstringhistory_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.measurementstringhistory_seq')")
+	@SequenceGenerator(name = "measurementstringhistory_gen", sequenceName = "measurementstringhistory_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurementstringhistory_seq')")
 	private Long id;
 
 	private Date created_on;

@@ -53,7 +53,7 @@ import it.bz.idm.bdp.dto.vehicles.CarValue;
 import it.bz.idm.bdp.dto.vehicles.TrafficVehicleRecordDto;
 
 @Entity
-@Table(name="measurementmobilehistory",schema="intime")
+@Table(name="measurementmobilehistory")
 public class TrafficVehicleRecordHistory {
 
 	//private static final Integer MAX_FRACTION_DIGITS = 3;
@@ -185,8 +185,8 @@ public class TrafficVehicleRecordHistory {
 
 	@Id
 	@GeneratedValue(generator = "trafficvehiclerecordhistory_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "trafficvehiclerecordhistory_gen", sequenceName = "trafficvehiclerecordhistory_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.trafficvehiclerecordhistory_seq')")
+	@SequenceGenerator(name = "trafficvehiclerecordhistory_gen", sequenceName = "trafficvehiclerecordhistory_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('trafficvehiclerecordhistory_seq')")
 	private Long id;
 
 	//@Type(type="org.hibernate.spatial.JTSGeometryType")
@@ -915,8 +915,8 @@ public class TrafficVehicleRecordHistory {
 		List<RecordDto> dtos = new ArrayList<RecordDto>();
 		if (dataTypeExists(type)){
 			Query query = em.createNativeQuery("select record.ts_ms, record."+type+" "
-					+ "FROM intime.station station, BDPPermissions p "
-					+ "join intime.measurementmobilehistory record on station.id=record.station_id "
+					+ "FROM station station, BDPPermissions p "
+					+ "join measurementmobilehistory record on station.id=record.station_id "
 					+ "WHERE (record.station = p.station OR p.station = null) "
 					+ "AND (record.type = p.type OR p.type = null) "
 					+ "AND (record.period = p.period OR p.period = null) "

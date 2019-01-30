@@ -34,7 +34,7 @@ import com.vividsolutions.jts.geom.LineString;
 import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 
-@Table(name="linkbasicdata",schema="intime")
+@Table(name="linkbasicdata")
 @Entity
 public class LinkBasicData extends BasicData{
 
@@ -43,18 +43,18 @@ public class LinkBasicData extends BasicData{
 
 	@ManyToOne(cascade=CascadeType.ALL)
 	private Bluetoothstation destination;
-	
+
 	private Double length;
-	
+
 	@Type(type="org.hibernate.type.StringType")
 	private String street_ids_ref;
-	
+
 	//@Type(type= "org.hibernate.spatial.JTSGeometryType")
 	private LineString linegeometry;
-	
+
 	private Integer elapsed_time_default;
 
-	
+
 	public Integer getElapsed_time_default() {
 		return elapsed_time_default;
 	}

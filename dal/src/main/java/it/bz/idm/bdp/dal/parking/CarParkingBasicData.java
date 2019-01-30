@@ -31,7 +31,7 @@ import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Table(name="carparkingbasicdata",schema="intime")
+@Table(name="carparkingbasicdata")
 @Entity
 public class CarParkingBasicData extends BasicData{
 

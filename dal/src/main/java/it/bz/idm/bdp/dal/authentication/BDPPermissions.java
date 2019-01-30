@@ -33,7 +33,7 @@ import it.bz.idm.bdp.dal.Station;
 
 @Immutable
 @Entity
-@Table(name = "bdppermissions", schema = "intime", indexes = { @Index(columnList = "station_id, type_id, period", name = "bdppermissions_stp_idx") })
+@Table(name = "bdppermissions", indexes = { @Index(columnList = "station_id, type_id, period", name = "bdppermissions_stp_idx") })
 public class BDPPermissions {
 
 	@Id
