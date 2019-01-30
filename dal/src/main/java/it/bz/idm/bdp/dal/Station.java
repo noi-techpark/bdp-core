@@ -70,8 +70,8 @@ public abstract class Station {
 
 	@Id
 	@GeneratedValue(generator = "station_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.station_seq')")
+	@SequenceGenerator(name = "station_gen", sequenceName = "station_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('station_seq')")
 	protected Long id;
 
 	protected String name;
@@ -339,7 +339,7 @@ public abstract class Station {
 				em.persist(existingStation);
 			}
 			this.sync(em,existingStation,dto);									//sync instance specific metadata
-			if (existingStation.getName() == null)
+			if (dto.getName() != null)
 				existingStation.setName(dto.getName());
 			if (dto.getLatitude() != null && dto.getLongitude() != null){
 				Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitude(),dto.getLatitude()));

@@ -1,5 +1,5 @@
 /**
- * BDP data - Data Access Layer for the Big Data Platform
+ * writer - Data Writer for the Big Data Platform
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,26 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.dal.carpooling;
+package it.bz.idm.bdp.writer;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
-import org.hibernate.annotations.ColumnDefault;
+import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Entity
-public abstract class Translation {
-
-	@Id
-	@GeneratedValue(generator = "translation_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "translation_gen", sequenceName = "translation_seq", allocationSize = 1)
-	@ColumnDefault(value = "nextval('translation_seq')")
-	private Long id;
-
-	public Translation() {
+@Configuration
+@EnableScheduling
+public class JobScheduler {
+	
+	@Value("classpath:META-INF/sql/opendatarules.sql")
+	private Resource sql;
+	
+	@Scheduled(cron="0 0 * * * *")
+	public void updateOpenData() throws Exception {
+		JPAUtil.executeNativeQueries(sql.getInputStream());
 	}
 
 }

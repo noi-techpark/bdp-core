@@ -28,12 +28,12 @@ import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 
 @Entity
-@Table(name="bluetoothbasicdata",schema="intime")
+@Table(name="bluetoothbasicdata")
 public class BluetoothBasicData extends BasicData {
-	
+
 	private String sim_number;
 	private String sim_serial;
-	
+
 	public String getSim_number() {
 		return sim_number;
 	}

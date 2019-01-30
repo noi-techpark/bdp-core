@@ -41,9 +41,9 @@ import org.hibernate.annotations.ColumnDefault;
 public class Alarm {
 
 	@Id
-	@SequenceGenerator(name = "alarm_gen", sequenceName = "alarm_seq", schema = "intime", allocationSize = 1)
+	@SequenceGenerator(name = "alarm_gen", sequenceName = "alarm_seq", allocationSize = 1)
 	@GeneratedValue(generator = "alarm_gen", strategy = GenerationType.SEQUENCE)
-	@ColumnDefault(value = "nextval('intime.alarm_seq')")
+	@ColumnDefault(value = "nextval('alarm_seq')")
 	private Long id;
 
 	@ManyToOne(cascade=CascadeType.ALL)

@@ -39,8 +39,8 @@ public class AlarmSpecification {
 
 	@Id
 	@GeneratedValue(generator = "alarmspecification_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "alarmspecification_gen", sequenceName = "alarmspecification_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.alarmspecification_seq')")
+	@SequenceGenerator(name = "alarmspecification_gen", sequenceName = "alarmspecification_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('alarmspecification_seq')")
 	private Long id;
 
 	private String name;

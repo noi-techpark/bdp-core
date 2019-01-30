@@ -38,7 +38,7 @@ import it.bz.idm.bdp.dto.carsharing.CarsharingVehicleDto;
 public class Carsharingcar extends MeasurementStation {
 
 	private static Long getCarCount(EntityManager em, Carsharingstation station) {
-		TypedQuery<Long> query = em.createQuery("Select count(basicdata) from CarsharingCarStationBasicData basicdata where basicdata.carsharingStation = :carsharing", Long.class);
+		TypedQuery<Long> query = em.createQuery("Select count(basicdata) from CarsharingCarStationBasicData basicdata where basicdata.carsharingStation = :carsharing and basicdata.station.active=true", Long.class);
 		query.setParameter("carsharing", station);
 		return JPAUtil.getSingleResultOrNull(query);
 	}

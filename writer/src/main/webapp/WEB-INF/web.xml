@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Big data platform - Data Writer for the Big Data Platform, that writes changes to the database
+    writer - Data Writer for the Big Data Platform
     Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,14 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<display-name>writer</display-name>
+	<context-param>
+		<param-name>defaultHtmlEscape</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
+	</context-param>
 	<filter>
 		<filter-name>Remote Address Filter</filter-name>
 		<filter-class>org.apache.catalina.filters.RemoteAddrFilter</filter-class>
@@ -38,19 +46,9 @@
 		<filter-name>Remote Address Filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	<servlet>
-		<servlet-name>XmlRpcServlet</servlet-name>
-		<servlet-class>it.bz.idm.bdp.writer.MyXmlRpcServlet</servlet-class>
-		<init-param>
-			<param-name>enabledForExtensions</param-name>
-			<param-value>true</param-value>
-		</init-param>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>XmlRpcServlet</servlet-name>
-		<url-pattern>/xmlrpc</url-pattern>
-	</servlet-mapping>
-
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 	<!-- Spring JSON -->
 	<servlet>
 		<servlet-name>json</servlet-name>

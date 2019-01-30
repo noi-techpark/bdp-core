@@ -49,14 +49,14 @@ public abstract class MeasurementStation extends Station {
 			query = em
 					.createQuery(
 							"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type  "
-									+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
+									+ "where record.station.class=:stationtype AND record.station.stationcode=:station GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period",
 									Object[].class);
 			query.setParameter("station", stationId);
 		}else
 			query = em
 			.createQuery(
 					"SELECT record.type.cname,record.type.cunit,record.type.description,record.period FROM Measurement record INNER JOIN record.type "
-							+ " where record.station.class=:stationtype GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period)",
+							+ " where record.station.class=:stationtype GROUP BY record.type.cname,record.type.cunit,record.type.description,record.period",
 							Object[].class);
 		query.setParameter("stationtype", this.getClass().getSimpleName());
 		List<Object[]> resultList = query.getResultList();

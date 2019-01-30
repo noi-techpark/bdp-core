@@ -43,7 +43,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.meteo.SegmentDataPointDto;
 
-@Table(name = "measurement", schema = "intime", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
+@Table(name = "measurement", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
 public class Measurement {
 
@@ -52,8 +52,8 @@ public class Measurement {
 
     @Id
 	@GeneratedValue(generator = "measurement_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.measurement_seq')")
+	@SequenceGenerator(name = "measurement_gen", sequenceName = "measurement_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('measurement_seq')")
 	private Long id;
 
 	private Date timestamp;

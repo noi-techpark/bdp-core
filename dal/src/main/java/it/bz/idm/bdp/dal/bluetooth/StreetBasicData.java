@@ -32,7 +32,7 @@ import it.bz.idm.bdp.dal.BasicData;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
-@Table(name="streetbasicdata",schema="intime")
+@Table(name="streetbasicdata")
 @Entity
 public class StreetBasicData extends BasicData{
 

@@ -40,14 +40,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
-@Table(name = "bdpuser", schema = "intime")
+@Table(name = "bdpuser")
 @Entity
 public class BDPUser {
 
 	@Id
 	@GeneratedValue(generator = "bdpuser_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "bdpuser_gen", sequenceName = "bdpuser_seq", schema = "intime", allocationSize = 1)
-	@ColumnDefault(value = "nextval('intime.bdpuser_seq')")
+	@SequenceGenerator(name = "bdpuser_gen", sequenceName = "bdpuser_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('bdpuser_seq')")
 	private Long id;
 
 	@Column(unique = true, nullable = false)
