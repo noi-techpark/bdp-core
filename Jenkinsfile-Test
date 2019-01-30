@@ -1,0 +1,55 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename 'docker/dockerfile-java'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+        }
+    }
+
+    environment {
+        TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
+        TESTSERVER_TOMCAT_CREDENTIALS=credentials('testserver-tomcat8-credentials')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-test-persistence.xml')
+        BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
+    }
+
+    stages {
+        stage('Configure') {
+            steps {
+                sh 'sed -i -e "s/<\\/settings>$//g\" ~/.m2/settings.xml'
+                sh 'echo "    <servers>" >> ~/.m2/settings.xml'
+                sh 'echo "        ${TESTSERVER_TOMCAT_CREDENTIALS}" >> ~/.m2/settings.xml'
+                sh 'echo "    </servers>" >> ~/.m2/settings.xml'
+                sh 'echo "</settings>" >> ~/.m2/settings.xml'
+
+                sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
+                sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
+            }
+        }
+        stage('Install') {
+            steps {
+               sh 'cd dal && mvn -B -U clean test install'
+            }
+        }
+        stage('Build - Reader') {
+            steps {
+               sh 'cd reader && mvn -B -U clean test package'
+            }
+        }
+        stage('Build - Writer') {
+            steps {
+               sh 'cd writer && mvn -B -U clean test package'
+            }
+        }
+        stage('Deploy - Reader') {
+            steps {
+                sh 'cd reader && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+            }
+        }
+        stage('Deploy - Writer') {
+            steps {
+                sh 'cd writer && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+            }
+        }
+    }
+}
