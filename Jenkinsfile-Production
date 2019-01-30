@@ -13,22 +13,25 @@ pipeline {
     stages {
         stage('Configure') {
             steps {
-               sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
+                sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
+                
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" reader/src/main/resources/log4j.properties'
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" writer/src/main/resources/log4j.properties'
             }
         }
         stage('Install') {
             steps {
-               sh 'cd dal && mvn -B -U clean test install'
+                sh 'cd dal && mvn -B -U clean test install'
             }
         }
         stage('Build - Reader') {
             steps {
-               sh 'cd reader && mvn -B -U clean test package'
+                sh 'cd reader && mvn -B -U clean test package'
             }
         }
         stage('Build - Writer') {
             steps {
-               sh 'cd writer && mvn -B -U clean test package'
+                sh 'cd writer && mvn -B -U clean test package'
             }
         }
         stage('Archive') {
