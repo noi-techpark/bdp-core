@@ -288,17 +288,20 @@ public class ParkingStation extends Station{
 			CarParkingBasicData data =  new CarParkingBasicData().findByStation(em,this);
 			capacity = data.getCapacity();
 		}
-		ParkingRecordExtendedDto dto;
+
 		//TODO: change if condition, once free and occupied are in db "Parking forecast".equals(cname)
 		if (type != null) {
 			Elaboration elab = new Elaboration().findLastRecord(em, this, type, period, role);
-			dto = new ParkingRecordExtendedDto(elab.getTimestamp().getTime(), Math.abs(capacity-elab.getValue().intValue()),elab.getCreated_on().getTime());
-		}else{
-			CarParkingDynamic dynamic = CarParkingDynamic.findLastRecord(em,this,period);
-			Integer value = ("free".equals(cname)) ? capacity-dynamic.getOccupacy() : dynamic.getOccupacy();
-			dto = new ParkingRecordExtendedDto(dynamic.getLastupdate().getTime(),value,dynamic.getCreatedate().getTime());
+			return new ParkingRecordExtendedDto(elab.getTimestamp().getTime(), Math.abs(capacity-elab.getValue().intValue()),elab.getCreated_on().getTime());
 		}
-		return dto;
+
+		CarParkingDynamic dynamic = CarParkingDynamic.findLastRecord(em,this,period);
+		if (dynamic == null) {
+			return null;
+		}
+
+		Integer value = ("free".equals(cname)) ? capacity-dynamic.getOccupacy() : dynamic.getOccupacy();
+		return new ParkingRecordExtendedDto(dynamic.getLastupdate().getTime(),value,dynamic.getCreatedate().getTime());
 	}
 
 	@Override
