@@ -28,30 +28,27 @@ pipeline {
         }
         stage('Install') {
             steps {
-               sh 'cd dto && mvn clean install'
-               sh 'cd dal && mvn clean install'
-               sh 'cd dc-interface && mvn clean install'
-               sh 'cd ws-interface && mvn clean install'
+               sh 'cd dal && mvn -B -U clean test install'
             }
         }
         stage('Build - Reader') {
             steps {
-               sh 'cd reader && mvn package'
+               sh 'cd reader && mvn -B -U clean test package'
             }
         }
         stage('Build - Writer') {
             steps {
-               sh 'cd writer && mvn package'
+               sh 'cd writer && mvn -B -U clean test package'
             }
         }
         stage('Deploy - Reader') {
             steps {
-                sh 'cd reader && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
         stage('Deploy - Writer') {
             steps {
-                sh 'cd writer && mvn tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd writer && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }

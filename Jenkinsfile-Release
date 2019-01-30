@@ -38,17 +38,17 @@ pipeline {
         }
         stage('Deploy dto') {
             steps {
-		        sh 'cd dto/ && mvn -B clean install deploy'
+		        sh 'cd dto/ && mvn -B -U clean test deploy'
             }
         }
         stage('Deploy dc-interface') {
             steps {
-		        sh 'cd dc-interface/ && mvn -B clean install deploy'
+		        sh 'cd dc-interface/ && mvn -B -U clean test deploy'
             }
         }
         stage('Deploy ws-interface') {
             steps {
-		        sh 'cd ws-interface/ && mvn -B clean install deploy'
+		        sh 'cd ws-interface/ && mvn -B -U clean test deploy'
             }
         }
         stage('Tag') {
@@ -56,7 +56,7 @@ pipeline {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
-                    sh "git commit -m 'Version ${params.TAG}' --allow-empty"
+                    sh "git commit -a -m 'Version ${params.TAG}' --allow-empty"
                     sh "git tag -d ${params.TAG} || true"
                     sh "git tag -a ${params.TAG} -m ${params.TAG}"
                     sh "mkdir -p ~/.ssh"
