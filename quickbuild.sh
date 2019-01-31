@@ -185,6 +185,8 @@ update_persistence() {
     echo_bold "Update values in persistence.xml"
     echo
 
+    cp "$PXMLFILE.dist" $PXMLFILE
+
     # - values common for reader and writer
 
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v 'localhost' $PXMLFILE
