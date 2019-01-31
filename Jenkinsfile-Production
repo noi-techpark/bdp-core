@@ -14,9 +14,10 @@ pipeline {
         stage('Configure') {
             steps {
                 sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
-                
+
                 sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" writer/src/main/resources/log4j.properties'
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" dal/src/main/resources/log4j.properties'
             }
         }
         stage('Install') {
