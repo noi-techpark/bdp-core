@@ -33,13 +33,18 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
-@Table(name = "bdpuser")
+@Table(name = "bdpuser",
+uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"email"})
+		}
+)
 @Entity
 public class BDPUser {
 
@@ -49,7 +54,7 @@ public class BDPUser {
 	@ColumnDefault(value = "nextval('bdpuser_seq')")
 	private Long id;
 
-	@Column(unique = true, nullable = false)
+	@Column(nullable = false)
 	private String email;
 
 	@Column(nullable = false)

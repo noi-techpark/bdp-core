@@ -33,13 +33,18 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
-@Table(name = "bdprole")
+@Table(name = "bdprole",
+	uniqueConstraints = {
+			@UniqueConstraint(columnNames = {"name"})
+			}
+)
 @Entity
 public class BDPRole {
 
@@ -52,7 +57,7 @@ public class BDPRole {
 	@ColumnDefault(value = "nextval('bdprole_seq')")
 	private Long id;
 
-	@Column(unique = true, nullable = false)
+	@Column(nullable = false)
 	private String name;
 
 	private String description;

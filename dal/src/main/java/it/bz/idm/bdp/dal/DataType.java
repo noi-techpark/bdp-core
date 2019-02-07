@@ -35,6 +35,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -44,7 +45,11 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
 
-@Table(name="type")
+@Table(name="type",
+	uniqueConstraints = {
+			@UniqueConstraint(columnNames = {"cname"})
+			}
+)
 @Entity
 public class DataType {
 
@@ -54,7 +59,7 @@ public class DataType {
 	@ColumnDefault(value = "nextval('type_seq')")
 	protected Long id;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String cname;
 
 	private Date created_on;
