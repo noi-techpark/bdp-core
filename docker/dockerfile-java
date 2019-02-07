@@ -1,13 +1,10 @@
-FROM debian:9
+FROM maven:3-jdk-8-alpine
 
-ARG JENKINS_GROUP_ID=200
-ARG JENKINS_USER_ID=200
+ARG JENKINS_GROUP_ID=1000
+ARG JENKINS_USER_ID=1000
 
-RUN groupadd --gid $JENKINS_GROUP_ID jenkins && \
-    useradd --uid $JENKINS_USER_ID --gid $JENKINS_GROUP_ID --create-home jenkins
-
-RUN apt-get update && \
-    apt-get install -y git openjdk-8-jdk maven xmlstarlet
+RUN addgroup -g $JENKINS_GROUP_ID jenkins && \
+    adduser -D -u $JENKINS_USER_ID -G jenkins jenkins
 
 COPY docker/entrypoint-java.sh /entrypoint-java.sh
 
