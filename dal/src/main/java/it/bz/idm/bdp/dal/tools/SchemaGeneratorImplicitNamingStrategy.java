@@ -104,8 +104,7 @@ public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrateg
 			return name;
 
 		int h = (POSTGRES_NAMELEN - 2) / 2;
-		System.out.println(h);
-		return name.substring(0, 31) + "_" + name.substring(name.length() - 30) + "_";
+		return name.substring(0, h + 1) + "_" + name.substring(name.length() - h) + "_";
 	}
 }
 

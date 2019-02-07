@@ -31,8 +31,12 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
 
-@Table(name = "provenance",
-	   indexes = @Index(name = "idx_provenance_l_dc_dcv", unique = true, columnList = "lineage, data_collector, data_collector_version"))
+@Table(
+	name = "provenance",
+	indexes = {
+		@Index(name = "idx_provenance_l_dc_dcv", unique = true, columnList = "lineage, data_collector, data_collector_version")
+	}
+)
 @Entity
 public class Provenance {
 
