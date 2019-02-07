@@ -8,4 +8,6 @@ cat > ~/.m2/settings.xml << EOF
 </settings>
 EOF
 
-/bin/bash -c "$@"
+export MAVEN_CONFIG="$HOME"
+
+/bin/bash -c "/usr/local/bin/mvn-entrypoint.sh $@"
