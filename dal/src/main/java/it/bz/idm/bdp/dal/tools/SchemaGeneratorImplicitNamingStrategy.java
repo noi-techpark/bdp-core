@@ -29,27 +29,30 @@ import org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl;
 import org.hibernate.boot.model.naming.ImplicitUniqueKeyNameSource;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 
+/**
+ * Naming patterns to be applied while running the schema generator tool.  We generate all
+ * identifiers as snake case strings (lower case with underscores), and add prefixes to
+ * constraints, indexes and foreign keys.  Finally, we sanitize identifiers to not exceed
+ * Postgres' NAMELEN constraint.
+ *
+ * @author Peter Moser
+ */
 public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrategyComponentPathImpl {
 
-	private static final long serialVersionUID = -2837008678932539996L;
+	/* Postgres supports names with at most NAMELEN chars */
+	private static final int POSTGRES_NAMELEN = 63;
+	private static final long serialVersionUID = 1L;
 
 	@Override
-    protected Identifier toIdentifier(String stringForm, MetadataBuildingContext buildingContext) {
-		System.out.println("NAME=" + stringForm);
-        return super.toIdentifier(lowerSnakecase(stringForm), buildingContext);
-    }
+	protected Identifier toIdentifier(String stringForm, MetadataBuildingContext buildingContext) {
+		return super.toIdentifier(lowerSnakecase(stringForm), buildingContext);
+	}
 
 	@Override
 	public Identifier determineUniqueKeyName(ImplicitUniqueKeyNameSource source) {
 //		Identifier userProvidedIdentifier = source.getUserProvidedIdentifier();
 //		if (userProvidedIdentifier != null)
 //			return userProvidedIdentifier;
-
-		System.out.println("NAME_UC=" + source.getTableName());
-
-		if ("type".equalsIgnoreCase(source.getTableName().toString())) {
-			System.out.println("XXXXX");
-		}
 
 		String cols = identifiersToSnakeCase(source.getColumnNames());
 		String name = sanitizeName("uc_" + source.getTableName() + cols);
@@ -72,41 +75,43 @@ public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrateg
 
 	/**
 	 * Translate camel-case strings into lower-case strings with underscores.
-	 * @param name
+	 * @param text
 	 * @return
 	 */
-    private static String lowerSnakecase(String name) {
-        final StringBuilder buf = new StringBuilder(name.replace('.', '_'));
-        for (int i = 1; i < buf.length() - 1; i++) {
-            if (Character.isLowerCase(buf.charAt(i - 1))
-                    && Character.isUpperCase(buf.charAt(i))
-                    && Character.isLowerCase(buf.charAt(i + 1))) {
-                buf.insert(i++, '_');
-            }
-        }
-        return buf.toString().toLowerCase(Locale.ROOT);
-    }
+	private static String lowerSnakecase(String text) {
+		final StringBuilder buf = new StringBuilder(text.replace('.', '_'));
+		for (int i = 1; i < buf.length() - 1; i++) {
+			if (Character.isLowerCase(buf.charAt(i - 1))
+					&& Character.isUpperCase(buf.charAt(i))
+					&& Character.isLowerCase(buf.charAt(i + 1))) {
+				buf.insert(i++, '_');
+			}
+		}
+		return buf.toString().toLowerCase(Locale.ROOT);
+	}
 
-    private static String identifiersToSnakeCase(List<Identifier> identifiers) {
-    	String cols = "";
+	private static String identifiersToSnakeCase(List<Identifier> identifiers) {
+		String cols = "";
 		for (Identifier col : identifiers) {
 			cols += "_" + col;
 		}
 		return cols;
-    }
+	}
 
-    /**
-	 * PostgreSQL supports max. lengths of 63 characters. It would truncate
+	/**
+	 * PostgreSQL supports max. lengths of POSTGRES_NAMELEN characters. It would truncate
 	 * the end of the identifier name, but we do it better in the middle and add another
 	 * underscore at the end to signal that it is shortened.
-     * @param name
-     * @return
-     */
-    private static String sanitizeName(String name) {
-    	if (name.length() <= 63)
-    		return name;
+	 * @param name
+	 * @return
+	 */
+	private static String sanitizeName(String name) {
+		if (name.length() <= POSTGRES_NAMELEN)
+			return name;
 
-    	return name.substring(0, 31) + "_" + name.substring(name.length() - 30) + "_";
-    }
+		int h = (POSTGRES_NAMELEN - 2) / 2;
+		System.out.println(h);
+		return name.substring(0, 31) + "_" + name.substring(name.length() - 30) + "_";
+	}
 }
 
