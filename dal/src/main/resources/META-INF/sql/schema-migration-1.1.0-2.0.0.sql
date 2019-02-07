@@ -205,7 +205,7 @@ from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
 				'brand', brand,
-				'licenseplate', licenseplate
+				'licensePlate', licenseplate
 			)) j
 	from intimev1.carsharingcarstationbasicdata
 ) subs
@@ -248,7 +248,7 @@ from (
 	select station_id
 			, jsonb_strip_nulls(jsonb_build_object(
 				'brand', brand,
-				'licenseplate', licenseplate
+				'licensePlate', licenseplate
 			)) j
 	from intimev1.carsharingcarstationbasicdata
 ) subs
