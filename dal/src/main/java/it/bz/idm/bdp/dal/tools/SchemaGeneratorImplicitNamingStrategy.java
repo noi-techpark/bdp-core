@@ -50,10 +50,6 @@ public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrateg
 
 	@Override
 	public Identifier determineUniqueKeyName(ImplicitUniqueKeyNameSource source) {
-//		Identifier userProvidedIdentifier = source.getUserProvidedIdentifier();
-//		if (userProvidedIdentifier != null)
-//			return userProvidedIdentifier;
-
 		String cols = identifiersToSnakeCase(source.getColumnNames());
 		String name = sanitizeName("uc_" + source.getTableName() + cols);
 		return toIdentifier(name, source.getBuildingContext());
@@ -61,14 +57,12 @@ public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrateg
 
 	@Override
 	public Identifier determineForeignKeyName(ImplicitForeignKeyNameSource source) {
-//		Identifier userProvidedIdentifier = source.getUserProvidedIdentifier();
-//		if (userProvidedIdentifier != null) {
-//			System.out.println("NAMEXXX=" + userProvidedIdentifier.getText());
-//			return userProvidedIdentifier;
-//		}
-
 		String cols = identifiersToSnakeCase(source.getColumnNames());
 		String colsRef = identifiersToSnakeCase(source.getReferencedColumnNames());
+		if (colsRef.length() == 0) {
+			/* It references the primary key */
+			colsRef = "_pk";
+		}
 		String name = sanitizeName("fk_" + source.getTableName() + cols + "_" + source.getReferencedTableName() + colsRef);
 		return toIdentifier(name, source.getBuildingContext());
 	}
