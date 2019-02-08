@@ -83,6 +83,10 @@ The core strutcture of the bdp is quiet simple. There exists 3 entities on which
 
   *Example*: the value is `20.4` the timestamp is `Fri Dec 16 2016 10:47:33`, the type is the one we just created before and the same for station. The time frame of the survey could be 1 hour and therefore `3600`
 
+#### I want to generate a new schema dump out of Hibernate's Entity classes
+
+See [README.md](https://github.com/idm-suedtirol/bdp-core/blob/jsonmetadata/tools/README.md) inside `/tools`.
+
 #### More about entities to come ...
 
 ### DTO
