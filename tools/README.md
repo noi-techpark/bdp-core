@@ -1,14 +1,22 @@
 # BIG DATA PLATFORM - Schema Generator
 
-Generate a schema dump of all entities inside a given path and write it into a file and to stdout.
-The output patterns are defined inside the implicit naming strategy class.
+Generate a schema dump of all entities inside a given path and write it into a file.
 
-For details see code comments.
+## Short version
+To generate a new schema, execute the shell script `bdp-sqldump.sh`.
 
-## Compilation:
+## Detailed version
+
+This chapter is about the Java tool itself, the shell script above simplifies these steps.
+
+The output patterns, that define how identifiers are written, are defined inside the implicit naming strategy class.
+For example, any unique constraint starts with `uc_` and contains the current table and used columns, all lower case
+with underscores.  For more details see code comments.
+
+### Compilation:
   `mvn clean package`
 
-## Example execution:
+### Example execution:
 Dump BDP/dal entity classes:
 ```
     java -cp '../dto/target/dto-2.0.0.jar:../dal/target/dal-2.0.0.jar:target/schemagenerator-1.0.0.jar' \
@@ -25,7 +33,7 @@ to override log levels, which may be too verbose.  `it.bz.idm.bdp.tools.SchemaGe
 contains the main method to be executed.  The script scans `it.bz.idm.bdp.dal` for entity classes, and dumps the
 result into `/tmp/schema_dump1.sql`.
 
-## Known issues
+### Known issues
 You can provide PostgreSQL connection information. However, the script also works if they are wrong.  That is,
 because of how the registry builder works. The registry builder needs a data source, however, also if the
 connection fails it succeeds in building a DDL SQL script.  The drawback hereby is, that it generates a warning
