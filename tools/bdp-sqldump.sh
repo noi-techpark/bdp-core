@@ -44,7 +44,9 @@ test -f "$GENERATORJAR" || mvn clean package
 # We override log4j properties to minimize verbose outputs
 # A known issue throws always exceptions, therefore we pipe it to /dev/null
 java -cp "$CLASSPATH:$GENERATORJAR" -Dlog4j.configuration=src/main/resources/log4j.properties $GENERATORMAIN $CLASSPREFIX $OUTPUTFILE 2>/dev/null || {
-    echo "FAILED: An error occurred - Response code:" $?
+    RES=$?
+    echo "FAILED: An error occurred - Response code:" $RES
+    exit $RES
 }
 
 echo 
