@@ -11,7 +11,6 @@ COMMENT ON TABLE schemaversion
     IS 'Version of the current schema (used for scripted updates)';
 DELETE FROM schemaversion;
 INSERT INTO schemaversion VALUES ('2.0.0');
-ALTER TABLE schemaversion OWNER to bdp;
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Permission handling
@@ -84,7 +83,7 @@ INSERT INTO bdprules(role_id, station_id, type_id, period)
     VALUES ((SELECT id FROM bdprole WHERE name = 'ADMIN'), null, null, null);
 
 -- create default admin user and association to admin role
-insert into bdpuser(email, enabled, password, tokenexpired)
+insert into bdpuser(email, enabled, password, token_expired)
 	values('admin', true, crypt('123456789', gen_salt('bf')), false);
 insert into bdpusers_bdproles(user_id,role_id)
     select u.id, r.id from bdpuser u
@@ -98,34 +97,3 @@ REFRESH MATERIALIZED VIEW bdppermissions;
 ------------------------------------------------------------------------------------------------------------------------
 CREATE INDEX measurementhistory_tsdesc_idx ON measurementhistory USING btree ("timestamp" DESC);
 CREATE INDEX measurementstringhistory_tsdesc_idx ON measurementstringhistory USING btree ("timestamp" DESC);
-
-
-------------------------------------------------------------------------------------------------------------------------
--- Privileges
-------------------------------------------------------------------------------------------------------------------------
-ALTER TABLE bdppermissions OWNER TO bdp;
-ALTER TABLE bdpfilters_unrolled OWNER TO bdp;
-ALTER TABLE bdproles_unrolled OWNER TO bdp;
-ALTER TABLE type OWNER TO bdp;
-ALTER TABLE station OWNER TO bdp;
-ALTER TABLE provenance OWNER TO bdp;
-ALTER TABLE metadata OWNER TO bdp;
-ALTER TABLE measurement OWNER TO bdp;
-ALTER TABLE measurementhistory OWNER TO bdp;
-ALTER TABLE measurementstring OWNER TO bdp;
-ALTER TABLE measurementstringhistory OWNER TO bdp;
-ALTER TABLE edge OWNER TO bdp;
-ALTER TABLE bdpusers_bdproles OWNER TO bdp;
-ALTER TABLE bdpuser OWNER TO bdp;
-ALTER TABLE bdprole OWNER TO bdp;
-ALTER TABLE bdprules OWNER TO bdp;
-
-GRANT ALL ON SCHEMA intimev2 TO bdp;
-GRANT SELECT ON ALL TABLES IN SCHEMA intimev2 TO bdp;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA intimev2 TO bdp;
-
-GRANT USAGE ON SCHEMA intimev2 TO bdp_readonly;
-GRANT SELECT ON ALL TABLES IN SCHEMA intimev2 TO bdp_readonly;
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA intimev2 TO bdp_readonly;
-
-

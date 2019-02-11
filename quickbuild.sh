@@ -62,17 +62,17 @@ PGUSER=$PGUSER
 PGPASSWORD=$PGPASSWORD
 
 # PGUSER1 is a role in Postgres with write access
-PGUSER1=bdp            # DO NOT CHANGE
+PGUSER1=bdp_readwrite
 PGPASS1=bdp
 
 # PGUSER2 is a role in Postgres with read-only access
-PGUSER2=bdpreadonly    # DO NOT CHANGE
+PGUSER2=bdp_readonly
 PGPASS2=bdpreadonly
 
 # We will create a new database $PGDBNAME for you inside your Postgres instance
 PGDBNAME=bdptest
 PGPORT=5432
-PGSCHEMA=intime        # DO NOT CHANGE
+PGSCHEMA=intime333
 
 # Which database should be used for version tests and other read-only
 # operations, before installing the new database $PGDBNAME. Please not, your
@@ -106,13 +106,17 @@ psql_call() {
 }
 
 psql_createuser() {
-    psql_call -d $PGDBNAME -tc "SELECT 1 FROM pg_user WHERE usename = '$1'" | grep -q 1 || \
-        psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+    psql_call -d $PGDBNAME -tc "SELECT 1 FROM pg_roles WHERE rolname = '$1'" | grep -q 1 && {
+        echo "WARNING: Role $1 already exists, skipping..."
+        return
+    }
 
-    psql_call -d $PGDBNAME <<EOF
-ALTER ROLE $1 PASSWORD '$2';
-GRANT CONNECT ON DATABASE $PGDBNAME TO $1;
-COMMENT ON ROLE $1 IS '$3';
+    psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+
+    psql_call -d $PGDBNAME << EOF
+        ALTER ROLE $1 PASSWORD '$2';
+        GRANT CONNECT ON DATABASE $PGDBNAME TO $1;
+        COMMENT ON ROLE $1 IS '$3';
 EOF
 }
 
@@ -124,6 +128,11 @@ psql_createdb() {
 psql_createschema() {
     psql_call -d $PGDBNAME -c "CREATE SCHEMA $PGSCHEMA"
 }
+
+psql_createextension() {
+    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS $1"
+}
+
 
 psql_dropdb() {
     psql_call -d $PGDBDEFAULT -c "DROP DATABASE IF EXISTS $PGDBNAME"
@@ -156,8 +165,9 @@ db_setup_import_sqlfiles() {
     echo_bold "Postgres: Import dumped SQL files"
     echo
 
-	psql_call -d $PGDBNAME -1 < $DUMPSQL
-	psql_call -d $PGDBNAME -1 < $MODSSQL
+    # We need also "public" for previously installed PostGIS data types, i.e., geometry...
+	(echo "SET search_path TO $PGSCHEMA, public;"; cat $DUMPSQL) | psql_call -d $PGDBNAME -1 -f -
+	(echo "SET search_path TO $PGSCHEMA, public;"; cat $MODSSQL) | psql_call -d $PGDBNAME -1 -f -
 
 	echo_bold "...DONE."
 }
@@ -185,14 +195,16 @@ db_setup_db_and_users() {
     # Look at https://wiki.postgresql.org/wiki/First_steps
     psql_createdb
 
+    psql_createschema
+
+    psql_createextension "pgcrypto"
+    psql_createextension "postgis"
+
     psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
     psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
 
     echo_bold "...DONE."
 }
-
-
-
 
 create_log_files() {
     echo
@@ -215,19 +227,17 @@ update_persistence() {
 
     cp "$PXMLFILE.dist" $PXMLFILE
 
-    # - values common for reader and writer
-
+    # values common for reader and writer
+    xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${PGSCHEMA} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v 'localhost' $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.portNumber']/@value" -v ${PGPORT} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.databaseName']/@value" -v ${PGDBNAME} $PXMLFILE
 
     # update values for reader
-
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER2} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS2} $PXMLFILE
 
     # update values for writer
-
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER1} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
 
@@ -351,7 +361,14 @@ give_consent
 if [ "$answer" == "yes" ]; then
     test_first
     db_setup_db_and_users
+    db_setup_privileges
     db_setup_import_sqlfiles
+
+    # Change the owner of all tables inside $PGSCHEMA
+    for table in $(psql_call -d $PGDBNAME -tc "SELECT tablename FROM pg_tables WHERE schemaname = '${PGSCHEMA}'"); do
+        psql_call -d $PGDBNAME -c "ALTER TABLE ${PGSCHEMA}.${table} OWNER TO ${PGUSER1}"
+    done
+
     create_log_files
     update_persistence
     deploy_war_files
