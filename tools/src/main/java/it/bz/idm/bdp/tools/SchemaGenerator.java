@@ -39,7 +39,7 @@ import org.postgresql.ds.PGSimpleDataSource;
 import org.reflections.Reflections;
 
 /**
- * Generate a schema dump of all entities inside a given path and write it into a file and to stdout.
+ * Generate a schema dump of all entities inside a given path and write it into a file.
  * The output patterns are defined inside the implicit naming strategy class.
  *
  * Configure connections to PostgreSQL with environmental variables:
@@ -71,7 +71,7 @@ public class SchemaGenerator {
 			System.out.println(
 				"SCHEMA GENERATOR - Dump the Hibernate SQL DDL script into a file" +
 				"\n" +
-				"  Generate a schema dump of all entities inside a given path and write it into a file and to stdout.\n" +
+				"  Generate a schema dump of all entities inside a given path and write it into a file.\n" +
 				"  The output patterns are defined inside the implicit naming strategy class.\n" +
 				"\n" +
 				"  Configure connections to PostgreSQL with environmental variables:\n" +
@@ -115,7 +115,7 @@ public class SchemaGenerator {
 		 * fails it succeeds in building a DDL SQL script.  The drawback hereby is, that it generates
 		 * a warning on stderr, which cannot be avoided with a try-catch...
 		 */
-		PGSimpleDataSource ds = new PGSimpleDataSource() ;
+		PGSimpleDataSource ds = new PGSimpleDataSource();
 		ds.setServerName(env.getOrDefault("ODH_SG_SERVER", PGSERVER_DEFAULT));
 		ds.setDatabaseName(env.get("ODH_SG_DBNAME"));
 		ds.setUser(env.getOrDefault("ODH_SG_USER", PGUSER_DEFAULT));
@@ -139,19 +139,17 @@ public class SchemaGenerator {
 		Metadata metaData = metaDataSources.buildMetadata();
 
 		/*
-		 * Export the schema to "outputFile" and standard output.  We write only create statements, since
-		 * we must not cleanup any prior databases.  What we want is to have a script that can populate
+		 * Export the schema to "outputFile".  We write only create statements, since we must
+		 * not cleanup any prior databases.  What we want is to have a script that can populate
 		 * a new empty database.
 		 */
-		System.out.println("Dumping schema to stdout and '" + outputFile + "':");
-		System.out.println("----------------------------------------------------------------------------------------------------");
+		System.out.println("Dumping schema...");
 		SchemaExport export = new SchemaExport();
 		export
 			.setDelimiter(";")
 			.setOutputFile(outputFile)
 			.setFormat(false)
-			.execute(EnumSet.of(TargetType.STDOUT, TargetType.SCRIPT), Action.CREATE, metaData);
-		System.out.println("----------------------------------------------------------------------------------------------------\n");
-		System.out.println("\nREADY.\n\n");
+			.execute(EnumSet.of(TargetType.SCRIPT), Action.CREATE, metaData);
+		System.out.println("Done. Schema dumped to '" + outputFile + "':");
 	}
 }
