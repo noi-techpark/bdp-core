@@ -345,43 +345,6 @@ test_first() {
     echo_bold "...DONE."
 }
 
-if [[ ${DUMPFILE+x} ]]; then
-    echo_bold "Create new SQL DUMP from Hibernate output to file '$DUMPFILE'..."
-
-    if [ -f $DUMPFILE ]; then
-        echo "ERROR: File $DUMPFILE already exists... aborting"
-        exit 1
-    else
-        touch $DUMPFILE
-        if [ ! -w $DUMPFILE ]; then
-            echo "ERROR: File $DUMPFILE is not writeable... aborting"
-            exit 1
-        fi
-    fi
-
-    PGDBNAME=__justfordumps__
-    test_first
-    psql_dropdb
-    db_setup_db_and_users
-    psql_createschema
-    db_setup_privileges
-    create_log_files
-    update_persistence
-    deploy_war_files
-    curl -iX GET -H 'Content-Type:application/json' http://127.0.0.1:8080/writer/json/stations
-    echo
-
-    pg_dump -U $PGUSER -s -h localhost -p $PGPORT -n $PGSCHEMA -d $PGDBNAME > $DUMPFILE
-
-    # Remove settings, that are not compatible with v9.5
-    sed -i '/SET idle_in_transaction_session_timeout*/d' $DUMPFILE
-
-    echo_bold "You can find your new dump inside $DUMPFILE"
-    echo_bold "...DONE."
-
-    exit 0
-fi
-
 # execute script
 give_consent
 
