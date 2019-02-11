@@ -179,8 +179,8 @@ db_setup_privileges() {
 
     psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
     psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
     psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
     psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
 
@@ -361,13 +361,14 @@ give_consent
 if [ "$answer" == "yes" ]; then
     test_first
     db_setup_db_and_users
-    db_setup_privileges
     db_setup_import_sqlfiles
 
     # Change the owner of all tables inside $PGSCHEMA
     for table in $(psql_call -d $PGDBNAME -tc "SELECT tablename FROM pg_tables WHERE schemaname = '${PGSCHEMA}'"); do
         psql_call -d $PGDBNAME -c "ALTER TABLE ${PGSCHEMA}.${table} OWNER TO ${PGUSER1}"
     done
+
+    db_setup_privileges
 
     create_log_files
     update_persistence
