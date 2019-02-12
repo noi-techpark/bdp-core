@@ -83,11 +83,11 @@ PGDBDEFAULT=postgres
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
 
 # DUMPSQL is what we've got from pg_dump after a Hibernate create execution
-DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-dump.sql
+DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.3.6-dump.sql
 
 # MODSSQL is what we need to modify manually, to have a complete usable schema
 # for bdp-core to run correctly.
-MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-modifications.sql
+MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.3.6-modifications.sql
 
 
 ###############################################################################
