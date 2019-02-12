@@ -15,9 +15,9 @@ pipeline {
             steps {
                 sh 'cp "${BDP_DATABASE_CONFIG}" dal/src/main/resources/META-INF/persistence.xml'
 
-                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" reader/src/main/resources/log4j.properties'
-                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" writer/src/main/resources/log4j.properties'
-                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,stdout,R%" dal/src/main/resources/log4j.properties'
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,R%" reader/src/main/resources/log4j.properties'
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties'
+                sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,R%" dal/src/main/resources/log4j.properties'
             }
         }
         stage('Install') {
@@ -37,8 +37,10 @@ pipeline {
         }
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'reader/target/reader.war', onlyIfSuccessful: true
-                archiveArtifacts artifacts: 'writer/target/writer.war', onlyIfSuccessful: true
+                sh 'cp reader/target/reader.war reader.war'
+                sh 'cp writer/target/writer.war writer.war'
+                archiveArtifacts artifacts: 'reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'writer.war', onlyIfSuccessful: true
             }
         }
     }

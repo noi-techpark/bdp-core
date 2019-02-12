@@ -24,6 +24,9 @@
 #
 # http://opendatahub.readthedocs.io/en/latest/howto/development.html
 #
+# If you run it with a DUMPFILE environment variable set, it creates a new
+# pg_dump out of a Hibernate create.
+#
 ###############################################################################
 
 set -euo pipefail
@@ -59,17 +62,17 @@ PGUSER=$PGUSER
 PGPASSWORD=$PGPASSWORD
 
 # PGUSER1 is a role in Postgres with write access
-PGUSER1=bdp            # DO NOT CHANGE
+PGUSER1=bdp_readwrite
 PGPASS1=bdp
 
 # PGUSER2 is a role in Postgres with read-only access
-PGUSER2=bdpreadonly    # DO NOT CHANGE
+PGUSER2=bdp_readonly
 PGPASS2=bdpreadonly
 
 # We will create a new database $PGDBNAME for you inside your Postgres instance
 PGDBNAME=bdptest
 PGPORT=5432
-PGSCHEMA=intime        # DO NOT CHANGE
+PGSCHEMA=intime333
 
 # Which database should be used for version tests and other read-only
 # operations, before installing the new database $PGDBNAME. Please not, your
@@ -80,11 +83,11 @@ PGDBDEFAULT=postgres
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
 
 # DUMPSQL is what we've got from pg_dump after a Hibernate create execution
-DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-dump.sql
+DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.3.6-dump.sql
 
 # MODSSQL is what we need to modify manually, to have a complete usable schema
 # for bdp-core to run correctly.
-MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.0.2-modifications.sql
+MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-1.3.6-modifications.sql
 
 
 ###############################################################################
@@ -103,19 +106,36 @@ psql_call() {
 }
 
 psql_createuser() {
-    psql_call -d $PGDBNAME -tc "SELECT 1 FROM pg_user WHERE usename = '$1'" | grep -q 1 || \
-        psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+    psql_call -d $PGDBNAME -tc "SELECT 1 FROM pg_roles WHERE rolname = '$1'" | grep -q 1 && {
+        echo "WARNING: Role $1 already exists, skipping..."
+        return
+    }
 
-    psql_call -d $PGDBNAME <<EOF
-ALTER ROLE $1 PASSWORD '$2';
-GRANT CONNECT ON DATABASE $PGDBNAME TO $1;
-COMMENT ON ROLE $1 IS '$3';
+    psql_call -d $PGDBNAME -c "CREATE USER $1 WITH LOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+
+    psql_call -d $PGDBNAME << EOF
+        ALTER ROLE $1 PASSWORD '$2';
+        GRANT CONNECT ON DATABASE $PGDBNAME TO $1;
+        COMMENT ON ROLE $1 IS '$3';
 EOF
 }
 
 psql_createdb() {
     psql_call -d $PGDBDEFAULT -tc "SELECT 1 FROM pg_database WHERE datname = '$PGDBNAME'" | grep -q 1 || \
         psql_call -d $PGDBDEFAULT -c "CREATE DATABASE $PGDBNAME"
+}
+
+psql_createschema() {
+    psql_call -d $PGDBNAME -c "CREATE SCHEMA $PGSCHEMA"
+}
+
+psql_createextension() {
+    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS $1"
+}
+
+
+psql_dropdb() {
+    psql_call -d $PGDBDEFAULT -c "DROP DATABASE IF EXISTS $PGDBNAME"
 }
 
 give_consent() {
@@ -140,28 +160,48 @@ give_consent() {
     tput sgr0
 }
 
-db_setup() {
+db_setup_import_sqlfiles() {
     echo
-    echo_bold "Postgres setup"
+    echo_bold "Postgres: Import dumped SQL files"
+    echo
+
+    # We need also "public" for previously installed PostGIS data types, i.e., geometry...
+	(echo "SET search_path TO $PGSCHEMA, public;"; cat $DUMPSQL) | psql_call -d $PGDBNAME -1 -f -
+	(echo "SET search_path TO $PGSCHEMA, public;"; cat $MODSSQL) | psql_call -d $PGDBNAME -1 -f -
+
+	echo_bold "...DONE."
+}
+
+db_setup_privileges() {
+    echo
+    echo_bold "Postgres: Grant privileges to USERS"
+    echo
+
+    psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
+
+    echo_bold "...DONE."
+}
+
+db_setup_db_and_users() {
+    echo
+    echo_bold "Postgres: Create DB and USERS"
     echo
 
     # Look at https://wiki.postgresql.org/wiki/First_steps
     psql_createdb
-    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-    psql_call -d $PGDBNAME -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+    psql_createschema
+
+    psql_createextension "pgcrypto"
+    psql_createextension "postgis"
 
     psql_createuser $PGUSER1 $PGPASS1 'Big Data Platform user for write access'
     psql_createuser $PGUSER2 $PGPASS2 'Big Data Platform user for read-only access'
-
-    psql_call -d $PGDBNAME -1 < $DUMPSQL
-    psql_call -d $PGDBNAME -1 < $MODSSQL
-
-    psql_call -d $PGDBNAME -c "GRANT ALL ON SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT USAGE ON SCHEMA $PGSCHEMA TO $PGUSER2"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER1"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL TABLES IN SCHEMA $PGSCHEMA TO $PGUSER2"
-    psql_call -d $PGDBNAME -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA $PGSCHEMA TO $PGUSER2"
 
     echo_bold "...DONE."
 }
@@ -187,24 +227,26 @@ update_persistence() {
 
     cp "$PXMLFILE.dist" $PXMLFILE
 
-    # - values common for reader and writer
-
+    # values common for reader and writer
+    xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${PGSCHEMA} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v 'localhost' $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.portNumber']/@value" -v ${PGPORT} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.databaseName']/@value" -v ${PGDBNAME} $PXMLFILE
 
     # update values for reader
-
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER2} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS2} $PXMLFILE
 
     # update values for writer
-
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${PGUSER1} $PXMLFILE
     xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${PGPASS1} $PXMLFILE
 
     # update value of hibernate property ("validate" on production and "create", if you want to do a new schema dump)
-    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+    if [[ ${DUMPFILE+x} ]]; then
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "create" $PXMLFILE
+	  else
+		    xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hbm2ddl.auto']/@value" -v "validate" $PXMLFILE
+	  fi
 
     echo_bold "...DONE."
 }
@@ -280,7 +322,7 @@ test_installation() {
     shift
     CMD="$@"
     echo -n "Check '$CMD'... "
-    $CMD && echo "--> OK" || echo "--> ERROR: $MSG_ERR"
+    $CMD && echo "--> OK" || { echo "--> ERROR: $MSG_ERR"; exit 1; }
 }
 
 test_first() {
@@ -313,13 +355,21 @@ test_first() {
     echo_bold "...DONE."
 }
 
-
 # execute script
 give_consent
 
 if [ "$answer" == "yes" ]; then
     test_first
-    db_setup
+    db_setup_db_and_users
+    db_setup_import_sqlfiles
+
+    # Change the owner of all tables inside $PGSCHEMA
+    for table in $(psql_call -d $PGDBNAME -tc "SELECT tablename FROM pg_tables WHERE schemaname = '${PGSCHEMA}'"); do
+        psql_call -d $PGDBNAME -c "ALTER TABLE ${PGSCHEMA}.${table} OWNER TO ${PGUSER1}"
+    done
+
+    db_setup_privileges
+
     create_log_files
     update_persistence
     deploy_war_files
@@ -333,20 +383,3 @@ fi
 
 tput sgr0
 exit 0
-
-##changelog
-
-# v.0.1
-## 22 Jun 2018 - initial version by Peter
-#
-# v 0.2 25
-## Jun 2018 - by stefanodavid
-## grouped commands in functions
-## added git commands
-## added warning before running the commands
-## added a note for a command to run after stopping tomcat.
-## added changelog
-## added BDPROOT variable
-#
-# v 0.9
-## Sep 2018 - Peter
