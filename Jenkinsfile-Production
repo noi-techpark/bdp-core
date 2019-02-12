@@ -37,8 +37,10 @@ pipeline {
         }
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'reader/target/reader.war', onlyIfSuccessful: true
-                archiveArtifacts artifacts: 'writer/target/writer.war', onlyIfSuccessful: true
+                sh 'cp reader/target/reader.war reader.war'
+                sh 'cp writer/target/writer.war writer.war'
+                archiveArtifacts artifacts: 'reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'writer.war', onlyIfSuccessful: true
             }
         }
     }
