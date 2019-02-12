@@ -132,8 +132,12 @@ public class SchemaGenerator {
 		StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder()
 				.applySetting("hibernate.connection.datasource", ds)
 				.applySetting("hibernate.dialect", HIBERNATE_DIALECT)
-				.applySetting("hibernate.implicit_naming_strategy", namingStrategy)
 				;
+
+		/* The naming strategy is optional */
+		if (! "-".equals(namingStrategy)) {
+			registryBuilder.applySetting("hibernate.implicit_naming_strategy", namingStrategy);
+		}
 
 		MetadataSources metaDataSources = new MetadataSources(registryBuilder.build());
 
