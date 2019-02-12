@@ -18,6 +18,7 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
+        BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
     }
 
     stages {
@@ -39,7 +40,7 @@ pipeline {
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${BDP_DATABASE_WRITE_USER} dal/src/main/resources/META-INF/persistence.xml'''
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${BDP_DATABASE_WRITE_PASSWORD} dal/src/main/resources/META-INF/persistence.xml'''
 
-                sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
+                sh 'sed -i -e "s%\\(jwt.secret=\\).*\\$%\\1${BDP_READER_JWT_SECRET}%" reader/src/main/resources/META-INF/spring/application.properties'
 
                 sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties'
