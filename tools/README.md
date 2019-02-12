@@ -23,6 +23,7 @@ Dump BDP/dal entity classes:
          -Dlog4j.configuration=src/main/resources/log4j.properties \
          it.bz.idm.bdp.tools.SchemaGenerator \
          it.bz.idm.bdp.dal \
+         it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy \
          /tmp/schema_dump1.sql
 ```
 
@@ -31,7 +32,7 @@ the `@Entity` annotated classes, that should be dumped as SQL DDL commands.  `ta
 is the library that contains the `main` method.  `-Dlog4j.configuration=src/main/resources/log4j.properties` is
 to override log levels, which may be too verbose.  `it.bz.idm.bdp.tools.SchemaGenerator` is the class that
 contains the main method to be executed.  The script scans `it.bz.idm.bdp.dal` for entity classes, and dumps the
-result into `/tmp/schema_dump1.sql`.
+result configured by `it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy` into `/tmp/schema_dump1.sql`.
 
 ### Known issues
 You can provide PostgreSQL connection information. However, the script also works if they are wrong.  That is,
