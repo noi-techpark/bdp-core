@@ -17,7 +17,6 @@ pipeline {
         BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-test-database-read-password')
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
-        BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
     }
 
