@@ -49,10 +49,10 @@ import org.reflections.Reflections;
  *   ODH_SG_PASSWD - database password (no default)
  *
  * Usage:
- *   SchemaGenerator PREFIX OUTPUTFILE
+ *   SchemaGenerator PREFIX STRATEGYCLASS OUTPUTFILE
  *
  * Example:
- *   SchemaGenerator it.bz.idm.bdp.dal /tmp/schema_dump.sql
+ *   SchemaGenerator it.bz.idm.bdp.dal it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql
  *
  * We assume that it is a Postgis dialect, and that only @Entity annotated classes are important.
  *
@@ -67,9 +67,9 @@ public class SchemaGenerator {
 	public static void main(String[] args) throws SQLException {
 		Map<String, String> env = System.getenv();
 
-		if (args.length != 2) {
+		if (args.length != 3) {
 			System.out.println(
-				"SCHEMA GENERATOR - Dump the Hibernate SQL DDL script into a file" +
+				"\nSCHEMA GENERATOR - Dump the Hibernate SQL DDL script into a file" +
 				"\n" +
 				"  Generate a schema dump of all entities inside a given path and write it into a file.\n" +
 				"  The output patterns are defined inside the implicit naming strategy class.\n" +
@@ -80,17 +80,26 @@ public class SchemaGenerator {
 				"  *   ODH_SG_USER   - database user (default = <PGUSER_DEFAULT>)\n" +
 				"  *   ODH_SG_PASSWD - database password (no default)" +
 				"\n" +
-				"  USAGE:" +
-				"    java -cp 'ENTITY_MODEL.jar:schemagenerator-x.y.z.jar' it.bz.idm.bdp.tools.SchemaGenerator ENTITY_MODEL_PATH_PREFIX OUTPUTFILE" +
+				"  USAGE: \n" +
+				"    java -cp 'ENTITY_MODEL.jar:schemagenerator-x.y.z.jar' \\ \n" +
+				"         it.bz.idm.bdp.tools.SchemaGenerator \\ \n" +
+				"         ENTITY_MODEL_PATH_PREFIX \\ \n" +
+				"         STRATEGYCLASS \\ \n" +
+				"         OUTPUTFILE \n" +
 				"\n" +
-				"  EXAMPLE:" +
-				"    java -cp 'dal/target/dal-2.0.0.jar:tools/target/schemagenerator-1.0.0.jar' it.bz.idm.bdp.tools.SchemaGenerator it.bz.idm.bdp.dal /tmp/schema_dump.sql" +
+				"  EXAMPLE: \n" +
+				"    java -cp 'dal/target/dal-2.0.0.jar:tools/target/schemagenerator-1.0.0.jar' \\ \n" +
+				"         it.bz.idm.bdp.tools.SchemaGenerator \\ \n" +
+				"         it.bz.idm.bdp.dal \\ \n" +
+				"         it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy \\ \n" +
+				"         /tmp/schema_dump.sql \n" +
 				"\n");
 			System.exit(1);
 		}
 
 		String pathPrefix = args[0];
-		String outputFile = args[1];
+		String namingStrategy = args[1];
+		String outputFile = args[2];
 
 		/*
 		 * Show what we load, to be sure we dump the correct entities...
@@ -123,7 +132,7 @@ public class SchemaGenerator {
 		StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder()
 				.applySetting("hibernate.connection.datasource", ds)
 				.applySetting("hibernate.dialect", HIBERNATE_DIALECT)
-				.applySetting("hibernate.implicit_naming_strategy", SchemaGeneratorImplicitNamingStrategy.class.getCanonicalName())
+				.applySetting("hibernate.implicit_naming_strategy", namingStrategy)
 				;
 
 		MetadataSources metaDataSources = new MetadataSources(registryBuilder.build());
