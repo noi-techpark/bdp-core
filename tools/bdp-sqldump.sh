@@ -33,7 +33,10 @@ CLASSPATH="$DTO:$DAL:$GEN"
 # Classes and paths
 GENERATORMAIN='it.bz.idm.bdp.tools.SchemaGenerator'
 CLASSPREFIX="it.bz.idm.bdp.dal"
-STRATEGYCLASS='it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
+
+# We do not use a strategy class in BDP prior to 2.0.0
+STRATEGYCLASS='-'
+#STRATEGYCLASS='it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
 
 # Output
 OUTPUTPATH="$BDPROOT/dal/src/main/resources/META-INF/sql"

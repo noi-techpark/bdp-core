@@ -138,6 +138,15 @@ Luckily on the reader side there exists already a Java implementation for the AP
 More informations will be available soon.
 
 ## Installation guide
+
+The following section is partially deprecated. Please use the `quickbuild.sh` script to setup your environment. Usage information can be found inside the script. The configuration of the script must be made inside the script itself.
+
+Example:
+```
+    PGUSER=postgres PGPASSWORD=yourpassword ./quickbuild.sh
+```
+
+
 ### Prerequisits
 - postgresql 9.3 or higher with postgis 2.2 extension
 - application server (we use tomcat8)

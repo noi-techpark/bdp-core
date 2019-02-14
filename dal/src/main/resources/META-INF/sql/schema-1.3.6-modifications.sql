@@ -83,7 +83,7 @@ INSERT INTO bdprules(role_id, station_id, type_id, period)
     VALUES ((SELECT id FROM bdprole WHERE name = 'ADMIN'), null, null, null);
 
 -- create default admin user and association to admin role
-insert into bdpuser(email, enabled, password, token_expired)
+insert into bdpuser(email, enabled, password, tokenexpired)
 	values('admin', true, crypt('123456789', gen_salt('bf')), false);
 insert into bdpusers_bdproles(user_id,role_id)
     select u.id, r.id from bdpuser u
