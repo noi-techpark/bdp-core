@@ -443,11 +443,11 @@ from (
 where subs.station_id = intimev2.metadata.station_id;
 
 insert into intimev2.type (cname, cunit, description, rtype, created_on)
-values ('occupacy', null, 'Occupacy of a parking area', 'Count', now());
+values ('occupied', null, 'Occupacy of a parking area', 'Count', now());
 
 insert into intimev2.measurement (station_id, type_id, created_on, timestamp, doublevalue, period)
 select station_id
-		, (select id from intimev2.type where cname = 'occupacy')
+		, (select id from intimev2.type where cname = 'occupied')
 		, case when createdate is null then lastupdate else createdate end
 		, lastupdate
 		, occupacy
@@ -457,7 +457,7 @@ where occupacy >= 0;
 
 insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, doublevalue, period)
 select station_id
-		, (select id from intimev2.type where cname = 'occupacy')
+		, (select id from intimev2.type where cname = 'occupied')
 		, case when createdate is null then lastupdate else createdate end
 		, lastupdate
 		, occupacy
