@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -156,6 +157,11 @@ public class DataType {
 				dto = new TypeDto();
 				dto.setId(id);
 				dto.setUnit(type.getCunit());
+				if (type.getDescription() != null) {
+					Map<String, String> desc = new HashMap<String, String>();
+					desc.put("default", type.getDescription().trim());
+					dto.setDesc(desc);
+				}
 				dto.setTypeOfMeasurement(type.getRtype());
 				dtos.put(id, dto);
 			}
@@ -179,7 +185,8 @@ public class DataType {
 	 * <p>
 	 * We use the new function {@link findTypes} internally, and convert the
 	 * {@link TypeDto} output into string arrays, because we do not want to duplicate
-	 * the finding-types query.
+	 * the finding-types query.  Finally, we need to create duplicate types for each
+	 * acquisition interval.
 	 * </p>
 	 *
 	 * @param em			The Entity Manager
@@ -192,13 +199,20 @@ public class DataType {
 		List<TypeDto> typeDtoList = findTypes(em, stationType, stationId);
 		List<String[]> result = new ArrayList<>();
 		for (TypeDto item : typeDtoList) {
-			String[] arr = {
-					item.getId(),
-					item.getUnit() == null ? "" : item.getUnit(),
-					item.getDesc().isEmpty() ? "" : item.getDesc().entrySet().iterator().next().getValue(),
-					item.getAcquisitionIntervals().isEmpty() ? "" : item.getAcquisitionIntervals().iterator().next().toString()
-				};
-			result.add(arr);
+			Iterator<Integer> acqIntIterator = item.getAcquisitionIntervals().iterator();
+			do {
+				String interval = "";
+				if (acqIntIterator.hasNext()) {
+					interval = acqIntIterator.next().toString();
+				}
+				String[] arr = {
+						item.getId(),
+						item.getUnit() == null ? "" : item.getUnit(),
+						item.getDesc().isEmpty() ? "" : item.getDesc().entrySet().iterator().next().getValue(),
+						interval
+					};
+				result.add(arr);
+			} while (acqIntIterator.hasNext());
 		}
 		return result;
 	}
