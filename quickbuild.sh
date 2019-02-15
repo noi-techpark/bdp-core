@@ -329,8 +329,8 @@ test_installation() {
     MSG_ERR=$1
     shift
     CMD="$@"
-    echo -n "Check '$CMD'... "
-    $CMD && echo "--> OK" || { echo "--> ERROR: $MSG_ERR"; exit 1; }
+    echo -n "Check '$CMD'"
+    $CMD && echo " --> OK" || { echo " --> ERROR: $MSG_ERR"; exit 1; }
 }
 
 test_first() {
@@ -356,13 +356,15 @@ test_first() {
 
     echo "Check Java Version == $JAVA_VERSION... "
     (java -version 2>&1 | grep "$JAVA_VERSION") > /dev/null && {
-        echo "--> OK"
+        echo " --> OK"
     } || {
-        echo "--> FAILED... please install it, or use another Java version at your own risk"
+        echo " --> ERROR: Please install it, or use another Java version at your own risk"
         exit 1
     }
 
-    test_installation "File $PXMLFILE not writeable." test -w $PXMLFILE
+    test_installation "File $PXMLFILE not readable." test -r $PXMLFILE.dist
+    PXMLDIR=$(dirname $PXMLFILE)
+    test_installation "Folder $PXMLDIR not writeable." test -w $PXMLDIR
     test_installation "File $MODSSQL not readable." test -r $MODSSQL
     test_installation "File $DUMPSQL not readable." test -r $DUMPSQL
     test_installation "/usr/sbin/service not executable." test -x /usr/sbin/service
