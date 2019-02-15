@@ -43,6 +43,9 @@ LOGS=/var/log/opendatahub
 LOGSDC=$LOGS/data-collectors
 LOGSWS=$LOGS/webservices
 
+# Java
+JAVA_VERSION=1.8
+
 # Log files owner/group
 # If you use tomcat as standalone installation, choose user tomcat or tomcat8,
 # depending on your system. $USER should be choosen, if you start the
@@ -79,7 +82,7 @@ PGSCHEMA=intime333
 # user $PGUSER must have read access to that database.
 PGDBDEFAULT=postgres
 
-# Persistence.xml file is used for db access and contains all PG* variables above
+# The persistence.xml file is used for db access and contains all PG* variables above
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
 
 # DUMPSQL is what we've got from pg_dump after a Hibernate create execution
@@ -345,7 +348,15 @@ test_first() {
     test_installation "missing... please install it" which mvn
     test_installation "missing... please install it" which psql
     test_installation "missing... please install it" which xmlstarlet
-    test_installation "missing... please install it" java -version 2>&1 | grep 1.8
+
+    echo "Check Java Version == $JAVA_VERSION... "
+    (java -version 2>&1 | grep "$JAVA_VERSION") > /dev/null && {
+        echo "--> OK"
+    } || {
+        echo "--> FAILED... please install it, or use another Java version at your own risk"
+        exit 1
+    }
+
     test_installation "File $PXMLFILE not writeable." test -w $PXMLFILE
     test_installation "File $MODSSQL not readable." test -r $MODSSQL
     test_installation "File $DUMPSQL not readable." test -r $DUMPSQL
