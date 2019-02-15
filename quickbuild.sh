@@ -2,8 +2,8 @@
 
 ###############################################################################
 # WARNING
-# This script is provided AS IS and has been tested on a Ubuntu 18.04 and
-# Debian 9. If you are using it on a different Linux distro or on a different
+# This script is provided AS IS and has been tested on a Ubuntu 18.04, Mint 19.1
+# and Debian 9. If you are using it on a different Linux distro or on a different
 # platform, you must verify the correctness of paths on your workstation and
 # that the commands used are the same on your PC.
 # You need to provide your password during the execution of this script.
@@ -24,8 +24,10 @@
 #
 # http://opendatahub.readthedocs.io/en/latest/howto/development.html
 #
-# If you run it with a DUMPFILE environment variable set, it creates a new
-# pg_dump out of a Hibernate create.
+# You must set the following environmental variables before execution:
+# - PGUSER - Postgres user, that has privileges to create schemas and tables
+# - PGPASSWORD - Postgres user's password
+# - SQLVERSION - Schema version of dump and modification scripts inside DAL
 #
 ###############################################################################
 
@@ -85,12 +87,15 @@ PGDBDEFAULT=postgres
 # The persistence.xml file is used for db access and contains all PG* variables above
 PXMLFILE=$BDPROOT/dal/src/main/resources/META-INF/persistence.xml
 
+# Schema dump version, that we want to use for this build
+SQLVERSION=$SQLVERSION
+
 # DUMPSQL is what we've got from pg_dump after a Hibernate create execution
-DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-dump.sql
+DUMPSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-$SQLVERSION-dump.sql
 
 # MODSSQL is what we need to modify manually, to have a complete usable schema
 # for bdp-core to run correctly.
-MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-2.0.0-modifications.sql
+MODSSQL=$BDPROOT/dal/src/main/resources/META-INF/sql/schema-$SQLVERSION-modifications.sql
 
 
 ###############################################################################
