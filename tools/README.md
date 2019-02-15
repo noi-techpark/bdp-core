@@ -17,6 +17,14 @@ with underscores.  For more details see code comments.
   `mvn clean package`
 
 ### Example execution:
+Configure the PostgreSQL connection via environmental variables:
+* `ODH_SG_SERVER` - database server name (optional, default = localhost)
+* `ODH_SG_DBNAME` - database name
+* `ODH_SG_USER`   - database user (optional, default = postgres)
+* `ODH_SG_PASSWD` - database password
+NB: This configuration is not needed, you can also leave it unset, but it will generate a warning. See
+[Known issues](#known-issues) for details.
+
 Dump BDP/dal entity classes:
 ```
     java -cp '../dto/target/dto-2.0.0.jar:../dal/target/dal-2.0.0.jar:target/schemagenerator-1.0.0.jar' \
