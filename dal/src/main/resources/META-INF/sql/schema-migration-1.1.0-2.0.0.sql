@@ -638,6 +638,12 @@ create table intimev2.measurementmobile as select * from intimev1.measurementmob
 
 create table intimev2.measurementmobilehistory as select * from intimev1.measurementmobilehistory;
 
+CREATE INDEX "fki_measuremenmobile-station" ON intimev2.measurementmobilehistory USING btree (station_id);
+CREATE INDEX no2_1_microgm3_ma ON intimev2.measurementmobilehistory USING btree (no2_1_microgm3_ma);
+CREATE INDEX no2_1_ppb_index ON intimev2.measurementmobilehistory USING btree (no2_1_ppb);
+CREATE INDEX ts_ms_index ON intimev2.measurementmobilehistory USING btree (ts_ms);
+
+
 insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
 select
 	case when created_on is null then timestamp else created_on end
