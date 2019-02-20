@@ -82,14 +82,10 @@ public class MeasurementString extends M {
 		return stringValue;
 	}
 
-	public void setValue(String value) {
-		this.stringValue = value;
-	}
-
 	@Override
 	public void setValue(Object value) {
 		if (value instanceof String)
-			this.setValue(value);
+			this.stringValue = (String) value;
 	}
 
 	@Override

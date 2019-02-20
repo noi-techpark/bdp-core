@@ -156,7 +156,7 @@ public abstract class MHistory implements Serializable {
 							continue;
 						}
 						em.getTransaction().begin();
-						
+
 						//TODO: remove period check once it gets removed from database
 						Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
 						if (period == null){
@@ -282,7 +282,7 @@ public abstract class MHistory implements Serializable {
 		}
 		return dtos;
 	}
-	
+
 	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
 		List<MHistory> result = QueryBuilder
 				.init(em)

@@ -81,15 +81,12 @@ public class Measurement extends M {
 		return doubleValue;
 	}
 
-	public void setValue(Double value) {
-		this.doubleValue = value;
-	}
-
 	@Override
 	public void setValue(Object value) {
 		if (value instanceof Number) {
-			Number numberValue =(Number)value;
-			this.setValue(numberValue.doubleValue());
+			this.doubleValue = ((Number) value).doubleValue();
+		} else if (value instanceof Double) {
+			this.doubleValue = (Double) value;
 		}
 	}
 
