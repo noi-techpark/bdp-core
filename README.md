@@ -139,11 +139,11 @@ More informations will be available soon.
 
 ## Installation guide
 
-The following section is partially deprecated. Please use the `quickbuild.sh` script to setup your environment. Usage information can be found inside the script. The configuration of the script must be made inside the script itself.
+The following section is partially deprecated. Please use the `quickbuild.sh` script to setup your environment. Usage information can be found inside the script. The configuration of the script must be made inside the script itself. The `SQLVERSION` variable specifies the dump and modification SQL script versions inside DAL.
 
 Example:
 ```
-    PGUSER=postgres PGPASSWORD=yourpassword ./quickbuild.sh
+    PGUSER=postgres PGPASSWORD=yourpassword SQLVERSION=1.3.6 ./quickbuild.sh
 ```
 
 
