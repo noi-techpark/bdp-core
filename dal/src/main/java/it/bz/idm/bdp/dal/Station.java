@@ -400,7 +400,7 @@ public class Station {
 		if (dtos == null || dtos.isEmpty()) {
 			return;
 		}
-		List<Station> stations = findStationsByOrigin(em, dtos.get(0).getOrigin());
+		List<Station> stations = findStationsByOrigin(em, dtos.get(0).getOrigin(),dtos.get(0).getStationType());
 		if (stations == null) {
 			return;
 		}
@@ -421,12 +421,13 @@ public class Station {
 		em.getTransaction().commit();
 	}
 
-	private static List<Station> findStationsByOrigin(EntityManager em, String origin) {
+	private static List<Station> findStationsByOrigin(EntityManager em, String origin, String stationType) {
 		if (origin == null || origin.isEmpty()) {
 			return null;
 		}
-		return em.createQuery("select station from Station station where station.origin = :origin", Station.class)
+		return em.createQuery("select station from Station station where station.origin = :origin and stationtype=:stationtype", Station.class)
 				 .setParameter("origin", origin)
+				 .setParameter("stationtype", stationType)
 				 .getResultList();
 	}
 
