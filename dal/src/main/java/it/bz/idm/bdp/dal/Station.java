@@ -425,10 +425,11 @@ public class Station {
 		if (origin == null || origin.isEmpty()) {
 			return null;
 		}
-		return em.createQuery("select station from Station station where station.origin = :origin and stationtype=:stationtype", Station.class)
-				 .setParameter("origin", origin)
-				 .setParameter("stationtype", stationType)
-				 .getResultList();
+		QueryBuilder builder = QueryBuilder.init(em)
+				.addSql("select station from Station station where station.origin = :origin")
+				.setParameter("origin", origin)
+				.setParameterIfNotNull("stationtype", stationType, " and stationtype=:stationtype");
+		return builder.buildResultList(Station.class);
 	}
 
 	public List<StationDto> findChildren(EntityManager em, String stationId) {
