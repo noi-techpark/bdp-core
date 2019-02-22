@@ -396,6 +396,13 @@ public class Station {
 		this.metaData.setJson(metaData);
 	}
 
+	/**
+	 * Synchronizes stations state, active stations are provided by a  data collector.
+	 * Queries database for stations with a specific origin and if provided, stationtype.
+	 * Deactivates stations in db which are not in the provided list and activates the ones which are.
+	 * @param em   entity manager
+	 * @param dtos active stations, provdied by the corresponding data-collector
+	 */
 	public static void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		if (dtos == null || dtos.isEmpty()) {
 			return;
