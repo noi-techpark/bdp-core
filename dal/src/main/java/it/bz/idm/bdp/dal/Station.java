@@ -59,6 +59,14 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.StationDto;
 
+
+/**
+ * @author Bertolla Patrick
+ * @author Peter Moser
+ * Station is the entity representing a point in space where a measurement occurred. It can be anything which has the capacity to measure something.
+ * Examples are sensors, parkinglots, cars, meterologystations ...
+ * Each station can also have a parent station, like a car can have a carsharingparkinglot as it's parent 
+ */
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 public class Station {
@@ -111,6 +119,17 @@ public class Station {
 		setName(stationName);
 	}
 
+	/**
+	 * Queries database on metadata of the specified station. Metadata consists of
+	 * defined fields like stationcode(uuid) and optional metadata which gets
+	 * versioned and only the newest one is used
+	 *
+	 * @param em          entity manager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param station
+	 * @return detail information/metadata of the specified station(s)
+	 */
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
 		List<Station> resultList = new ArrayList<Station>();
 		if (station == null)
@@ -119,7 +138,11 @@ public class Station {
 			resultList.add(station);
 		return convertToDto(resultList);
 	}
-
+	/**
+	 * Takes informations from database fields and all metadata infos from jsonb field and converts it to a serializable objects
+	 * @param resultList station entities to convert to valid dtos
+	 * @return valid StationDto containing serializable informations of the station entity
+	 */
 	public static List<StationDto> convertToDto(List<Station> resultList) {
 		List<StationDto> stationList = new ArrayList<StationDto>();
 		for (Station s : resultList) {
@@ -129,7 +152,8 @@ public class Station {
 		return stationList;
 	}
 
-	public static StationDto convertToDto(Station s) {
+
+	private static StationDto convertToDto(Station s) {
 		Double x = null,y = null;
 		if (s.getPointprojection() != null){
 			y = s.getPointprojection().getY();
@@ -228,6 +252,13 @@ public class Station {
 		return metaDataHistory;
 	}
 
+	/**
+	 * @param em          entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param isActive
+	 * @return list of unique stringidentifier for each active station of a specific stationtype
+	 */
 	public static List<String> findStationCodes(EntityManager em, String stationType, boolean isActive) {
 		return em.createQuery("select station.stationcode from Station station where station.active = :active and station.stationtype = :stationtype", String.class)
 				 .setParameter("active", isActive)
@@ -236,22 +267,44 @@ public class Station {
 	}
 
 
+	/**
+	 * @param em          entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param isActive    activity state provided by the datacollector
+	 * @return			  a list of station entities filtered by their activitystate and station typology
+	 */
 	public static List<Station> findStations(EntityManager em, String stationType, boolean isActive) {
 		return em.createQuery("select station from Station station where station.active = :active and station.stationtype = :stationtype", Station.class)
 				 .setParameter("active", isActive)
 				 .setParameter("stationtype", stationType)
 				 .getResultList();
 	}
+	/**
+	 * @param em entitymanager
+	 * @return unfiltered station entities
+	 */
 	public static List<Station> findStations(EntityManager em){
 		return em.createQuery("select station from Station station", Station.class)
 				 .getResultList();
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @return unique stringidentifiers for each existing stationtype
+	 */
 	public static List<String> findStationTypes(EntityManager em) {
 		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class)
 				 .getResultList();
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param stationCode unique identifier of a station
+	 * @return station entity filtered by stationcode and stationtype
+	 */
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
 		if(stationCode == null || stationType == null || stationType.isEmpty())
 			return null;
@@ -299,6 +352,13 @@ public class Station {
 		return new CoordinateDto(coordinate.x,coordinate.y);
 	}
 
+	/**
+	 * Overrides all stations metadata with the current provided by the specific datacollector. Keep in mind that metadata gets versioned.
+	 * @param em entitymanager
+	 * @param stationType  typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param data list of stationdtos provided by a datacollector
+	 */
 	public static void syncStations(EntityManager em, String stationType, List<StationDto> data) {
 		syncActiveOfExistingStations(em, data);
 		em.getTransaction().begin();
@@ -323,9 +383,9 @@ public class Station {
 	}
 
 	/**
-	 * @param em
-	 * @param dto
-	 * @throws JPAException
+	 * @param em entity manager
+	 * @param dto stationdto
+	 * @throws JPAException is thrown if geographical transformation from one projection to another fails
 	 */
 	private static void sync(EntityManager em, StationDto dto) {
 		Station existingStation = Station.findStation(em, dto.getStationType(), dto.getId());
@@ -371,6 +431,9 @@ public class Station {
 	/**
 	 * Create a new meta data entry, if it does not yet exist or if it is different from
 	 * the previously inserted one.
+	 * @param em entitymanager
+	 * @param metaData new metadata map provided by the datacollector
+	 * @param existingStation current entity retrieved from database
 	 */
 	protected static void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
 		if (metaData == null)
@@ -401,7 +464,7 @@ public class Station {
 	 * Queries database for stations with a specific origin and if provided, stationtype.
 	 * Deactivates stations in db which are not in the provided list and activates the ones which are.
 	 * @param em   entity manager
-	 * @param dtos active stations, provdied by the corresponding data-collector
+	 * @param dtos active stations, provided by the corresponding data-collector
 	 */
 	public static void syncActiveOfExistingStations(EntityManager em, List<StationDto> dtos) {
 		if (dtos == null || dtos.isEmpty()) {
@@ -428,6 +491,14 @@ public class Station {
 		em.getTransaction().commit();
 	}
 
+	/**
+	 * 
+	 * @param em entitymanager
+	 * @param origin datacollector identifier where the data origins from
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @return list of station enities filtered by stationtype and datacollector origin
+	 */
 	private static List<Station> findStationsByOrigin(EntityManager em, String origin, String stationType) {
 		if (origin == null || origin.isEmpty()) {
 			return null;
@@ -439,6 +510,12 @@ public class Station {
 		return builder.buildResultList(Station.class);
 	}
 
+	/**
+	 * Retrieves and serializes all child stations which have the station with stationId as identifier as their parent
+	 * @param em entitymanager
+	 * @param stationId unique identifier of a station
+	 * @return list of serializable pojos representing the station entities
+	 */
 	public List<StationDto> findChildren(EntityManager em, String stationId) {
 		List<Station> stations = em.createQuery("select station from Station station where station.parent.stationcode = :parentId", Station.class)
 								   .setParameter("parentId", stationId)
@@ -459,6 +536,13 @@ public class Station {
 				.buildSingleResultOrNull(Station.class);
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param origin stringidentifier of the datacollector from where data origins
+	 * @return list of stationentities filtered by stationtype and origin
+	 */
 	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
 		try {
 			return QueryBuilder
