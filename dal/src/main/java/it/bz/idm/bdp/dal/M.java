@@ -35,6 +35,16 @@ import javax.persistence.MappedSuperclass;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 
+/**
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *<p>
+ * This entity contains always the <strong>newest entry of a specific station, type and period</strong><br/>
+ * You will find all data in the class {@link MHistory}
+ * Each measurement <strong>must</strong> extend this base class to keep integrity.<br/>
+ * It contains the 2 most important references to station and type and also utility queries for all measurements.
+ *</p>
+ */
 @MappedSuperclass
 @Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class M implements Serializable {
@@ -126,13 +136,13 @@ public abstract class M implements Serializable {
 	 * Hibernate does not support {@code UNION ALL} queries, hence we must retrieve all
 	 * last record entries of all subclasses and compare programmatically.
 	 *
-	 * @param em
-	 * @param station
-	 * @param type
-	 * @param period
-	 * @param role
-	 * @param table
-	 * @return
+	 * @param em entity manager
+	 * @param station entity {@link Station} to filter by
+	 * @param type entity {@link DataType} to filter by
+	 * @param period intervall between measurements to filter by
+	 * @param role authorisazion level of the current user
+	 * @param table implementation of m which we need to query
+	 * @return date of the last inserted record
 	 */
 	public static <T> Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
@@ -162,10 +172,10 @@ public abstract class M implements Serializable {
 	 * Use {@link M#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)},
 	 * if you need permission handling.
 	 *
-	 * @param em
-	 * @param station
-	 * @param type
-	 * @param period
+	 * @param em entity manager
+	 * @param station entity {@link Station} to filter by
+	 * @param type entity {@link DataType} to filter by
+	 * @param period intervall between measurements to filter by
 	 * @param table
 	 * @return
 	 */

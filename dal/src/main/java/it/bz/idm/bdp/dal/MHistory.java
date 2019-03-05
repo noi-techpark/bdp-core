@@ -43,6 +43,20 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
+/**
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *<p>
+ * This entity contains is used for all measurements and is the biggest container for the data<br/>
+ * Each measurement <strong>must</strong> extend this base class to keep integrity.<br/>
+ * It contains the 2 most important references to station and type and also contains generic<br/>
+ * methods on how data gets stored and retrieved
+ *</p>
+ */
+/**
+ * @author patrick
+ *
+ */
 @MappedSuperclass
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class MHistory implements Serializable {
@@ -129,6 +143,20 @@ public abstract class MHistory implements Serializable {
 	public abstract void setValue(Object value);
 	public abstract Object getValue();
 
+	/**
+	 * <p>
+	 * persists all measurement data send to the writer from datacollectors to the database.<br/>
+	 * This "monstermethod"(refactorready?) goes down the datatree and persists all new records<br/>
+	 * it also updates the newest measurement in {@link M}, if it really is newer
+	 * </p>
+	 * @param em entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param dataMap  container for data send from datacollector containing measurements<br/>
+	 * Data is received in a tree structure, containing in the first level the identifier of the correlated station,<br/>
+	 * on the second level the identifier of the correlated datatype and on the last level the data itself
+	 * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
+	 */
 	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
 		boolean givenDataOK = false;
 		boolean stationFound = false;
@@ -283,6 +311,23 @@ public abstract class MHistory implements Serializable {
 		return dtos;
 	}
 
+	/**
+	 * <p>
+	 * the only method which requests history data from the biggest existing tables in the underlying db,<br/>
+	 * it's very important that indexes are set correctly to avoid bad performance
+	 * </p>
+	 * @param em entitymanager
+	 * @param typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param identifier unique station identifier, required
+	 * @param cname unique type identifier, required
+	 * @param start time filter start in milliseconds UTC for query, required
+	 * @param end time filter start in milliseconds UTC for query, required
+	 * @param period intervall between measurements
+	 * @param role authorization level of the current session
+	 * @param tableObject implementation which calls this method to decide which table to query, required
+	 * @return a list of measurements from history tables
+	 */
 	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
 		List<MHistory> result = QueryBuilder
 				.init(em)

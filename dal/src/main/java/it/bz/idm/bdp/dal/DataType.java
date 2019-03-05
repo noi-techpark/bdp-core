@@ -49,7 +49,7 @@ import it.bz.idm.bdp.dto.TypeDto;
 /**
  * @author Patrick Bertolla
  * @author Peter Moser
- * DataType defines what you are measuring. Every measurement references exactly one datatype, which gives you the required information to interpret it correctly
+ * DataType defines what you are measuring. Every measurement {@link MHistory} references exactly one datatype, which gives you the required information to interpret it correctly
  */
 @Table(name="type",
 	uniqueConstraints = {

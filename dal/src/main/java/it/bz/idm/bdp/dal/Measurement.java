@@ -38,6 +38,13 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 
+/**
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *
+ * Implementation for measurements cache of type double
+ *
+ */
 @Table(name = "measurement", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
 @Entity
 public class Measurement extends M {

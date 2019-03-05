@@ -39,6 +39,13 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 
+/**
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *
+ * Implementation for measurements of type double
+ *
+ */
 @Table(name = "measurementhistory")
 @Entity
 public class MeasurementHistory extends MHistory {

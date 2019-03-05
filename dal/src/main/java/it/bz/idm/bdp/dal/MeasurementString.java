@@ -36,6 +36,14 @@ import org.hibernate.annotations.ColumnDefault;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 
+
+/**
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *
+ * Implementation for measurements of type string
+ *
+ */
 @Table(name="measurementstring")
 @Entity
 public class MeasurementString extends M {
