@@ -46,6 +46,11 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
 
+/**
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ * DataType defines what you are measuring. Every measurement references exactly one datatype, which gives you the required information to interpret it correctly
+ */
 @Table(name="type",
 	uniqueConstraints = {
 			@UniqueConstraint(columnNames = {"cname"})
@@ -120,20 +125,39 @@ public class DataType {
 		this.rtype = rtype;
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @param cname unique identifier for a datatype
+	 * @return a datatype entity from database
+	 */
 	public static DataType findByCname(EntityManager em, String cname) {
 		return QueryBuilder
 				.init(em)
 				.addSql("SELECT type FROM DataType type WHERE type.cname = :cname")
 				.setParameter("cname", cname)
 				.buildSingleResultOrNull(DataType.class);
-
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @return a list of unique stringidentifier, each representing a datatype 
+	 */
 	public static List<String> findTypeNames(EntityManager em) {
 		return em.createQuery("SELECT t.cname FROM DataType t GROUP BY t.cname", String.class)
 				 .getResultList();
 	}
-
+	
+	/**
+	 * <p>Finds datatypes grouped by period and only if at least one record of the specific datatype exists in the db.<br/>
+	 *  It can also be filtered by a specific station.
+	 *  </p>
+	 * @param em entitymanager
+	 * @param stationType typology of the specific station e.g. MeteoStation,
+	 *                    Environmentstation etc.
+	 * @param stationId unique stringidentifier of a specific station entity
+	 * @param subClass Measurementimplementation class which to read from
+	 * @return
+	 */
 	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId, Class<T> subClass) {
 		List<Object[]> resultList = QueryBuilder
 				.init(em)
@@ -217,6 +241,11 @@ public class DataType {
 		return result;
 	}
 
+	/**
+	 * Upserts a list of datatypes, but does not override type description if already provided in db
+	 * @param em entitymanager
+	 * @param data list of datatypes provided by a datacollector
+	 */
 	public static void sync(EntityManager em, List<DataTypeDto> data) {
 		try {
 			em.getTransaction().begin();
