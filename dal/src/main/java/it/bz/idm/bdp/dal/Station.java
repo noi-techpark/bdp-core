@@ -63,7 +63,7 @@ import it.bz.idm.bdp.dto.StationDto;
 /**
  * @author Bertolla Patrick
  * @author Peter Moser
- * Station is the entity representing a point in space where a measurement occurred. It can be anything which has the capacity to measure something.
+ * Station is where you are measuring and who is measuring it. It's representing a point in space where a measurement occurred. It can be anything which has the capacity to measure something.
  * Examples are sensors, parkinglots, cars, meterologystations ...
  * Each station can also have a parent station, like a car can have a carsharingparkinglot as it's parent 
  */
