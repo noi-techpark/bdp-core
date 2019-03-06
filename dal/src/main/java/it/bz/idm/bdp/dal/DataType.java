@@ -85,7 +85,7 @@ public class DataType {
 	 * @param cname unique identifier for a datatype
 	 * @param cunit unit of specific measurements
 	 * @param description of a specific measurements
-	 * @param rtype
+	 * @param rtype metric of a specific measurements
 	 */
 	public DataType(String cname,  String cunit, String description, String rtype) {
 		this(cname);

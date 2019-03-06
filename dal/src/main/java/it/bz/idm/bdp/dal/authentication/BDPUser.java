@@ -81,6 +81,7 @@ public class BDPUser {
 	private List<BDPRole> roles;
 
 	public BDPUser() {
+		super();
 	}
 
 	/**
