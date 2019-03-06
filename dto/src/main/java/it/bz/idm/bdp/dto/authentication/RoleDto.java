@@ -23,6 +23,11 @@ package it.bz.idm.bdp.dto.authentication;
 import java.io.Serializable;
 import java.util.Collection;
 
+/**
+ * Data transfer object representing the role which can be associated to multiple users and can have multiple permissions
+ * @author Peter Moser
+ *
+ */
 public class RoleDto implements Serializable {
 	private static final long serialVersionUID = 8239304102791965397L;
 	private String name;
@@ -32,12 +37,21 @@ public class RoleDto implements Serializable {
 	public RoleDto() {
 	}
 
+	/**
+	 * @param name unique name
+	 * @param description what is the main purpose of this role
+	 */
 	public RoleDto(String name, String description) {
 		this.name = name;
 		this.description = description;
 		this.users = null;
 	}
 
+	/**
+	 * @param name unique name
+	 * @param description what is the main purpose of this role
+	 * @param users
+	 */
 	public RoleDto(String name, String description, Collection<UserDto> users) {
 		this.name = name;
 		this.description = description;
