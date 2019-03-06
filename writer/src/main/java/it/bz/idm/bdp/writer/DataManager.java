@@ -45,9 +45,21 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
+/**
+ * Writer API
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ *
+ */
 @Component
 public class DataManager {
 
+	/**
+	 * @param stationType all datasets must have stations as reference with given stationtype
+	 * @param responseLocation
+	 * @param dataMap containing all data as measuerment in a tree structure
+	 * @return correct response status code
+	 */
 	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -59,6 +71,12 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @param stationType stations of only this type get synchronized
+	 * @param dtos list of all station data transfer object provided by a given data collector
+	 * @param responseLocation
+	 * @return correct response status code
+	 */
 	public static ResponseEntity<?> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -70,6 +88,11 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @param dtos list of all type data transfer object provided by a given data collector
+	 * @param responseLocation
+	 * @return correct response status code
+	 */
 	public static ResponseEntity<?> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -81,6 +104,13 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @param stationType the station will be of this type
+	 * @param stationCode unique identifier of a station
+	 * @param dataTypeName unique identifier of a datatype
+	 * @param period interval between 2 measurements
+	 * @return a date object representing the time when the specific measurement was updated last
+	 */
 	public static Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
 		if (stationType == null || stationType.isEmpty()
 				|| stationCode == null || stationCode.isEmpty()
@@ -114,6 +144,12 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @param stationType type to filter for
+	 * @param origin to filter for
+	 * @return list of station dtos converted from station entities
+	 * @throws JPAException
+	 */
 	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -124,6 +160,9 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @return list of unique stationtype identifier
+	 */
 	public static List<String> getStationTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -134,6 +173,9 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * @return list of unique datatype identifier
+	 */
 	public static List<String> getDataTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
@@ -144,6 +186,11 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * Does nothing right now
+	 * @param stations list of data transferobjects 
+	 */
+	@Deprecated
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {

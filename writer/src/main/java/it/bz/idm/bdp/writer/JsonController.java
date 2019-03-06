@@ -38,6 +38,12 @@ import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
+/**
+ * Spring controller handling json requests to the writer API.
+ * For more docuemntation on the single API calls refert to {@link DataManager}
+ * @author Patrick Bertolla
+ *
+ */
 @RequestMapping("/json")
 @Controller
 public class JsonController extends DataManager {
@@ -82,6 +88,7 @@ public class JsonController extends DataManager {
 		return super.pushRecords(stationType, null, dataMap);
 	}
 
+	@Deprecated
 	@Override
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
