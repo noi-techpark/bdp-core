@@ -20,6 +20,7 @@
  */
 package it.bz.idm.bdp.dto;
 
+@Deprecated
 public class TextDto extends RecordDtoImpl{
 
 	/**

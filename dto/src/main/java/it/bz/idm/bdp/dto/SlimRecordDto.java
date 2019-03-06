@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+@Deprecated
 @JsonInclude(value=Include.NON_EMPTY)
 public class SlimRecordDto {
 	private Long timestamp;

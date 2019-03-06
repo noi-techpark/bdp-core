@@ -28,6 +28,7 @@ import java.util.TreeSet;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@Deprecated
 public class TypeDto implements Serializable {
 
 	private static final long serialVersionUID = -1224947780318447560L;
