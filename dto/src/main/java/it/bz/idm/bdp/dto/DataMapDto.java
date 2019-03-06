@@ -27,6 +27,20 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
+/**
+ * <p>
+ * Container for all measurements collected from a specific data collector
+ * associated to a specific stationtype.<br/>
+ * It's a tree structure and it's possible to create as many layers as
+ * required.<br/>
+ * Currently we only support this kind of layering:<br/>
+ * Station --> DataType --> Measurements
+ * </p>
+ *
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ *
+ */
 public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 
 	private static final long serialVersionUID = -6053193762265167013L;
@@ -41,6 +55,7 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 		this.name = name;
 	}
 	public DataMapDto() {
+		super();
 	}
 	public DataMapDto(List<RecordDtoImpl> data) {
 		this.data = data;

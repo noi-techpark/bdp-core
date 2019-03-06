@@ -22,6 +22,11 @@ package it.bz.idm.bdp.dto.authentication;
 
 import java.io.Serializable;
 
+/**
+ * @author Peter Moser
+ *
+ * Data transfer object identifying a user which needs access to the database
+ */
 public class UserDto implements Serializable {
 	private static final long serialVersionUID = -151039076520008111L;
 	private String firstName;
@@ -32,8 +37,17 @@ public class UserDto implements Serializable {
 	private boolean tokenExpired;
 
 	public UserDto() {
+		super();
 	}
 
+	/**
+	 * @param firstName it's exactly what your thinking of
+	 * @param lastName see firstName
+	 * @param email a valid email-address
+	 * @param password as plain text
+	 * @param enabled if user is not enabled he can't do anything
+	 * @param tokenExpired currently the refresh token does not expire, so no worry
+	 */
 	public UserDto(String firstName, String lastName, String email, String password, boolean enabled,
 			boolean tokenExpired) {
 		super();

@@ -24,10 +24,12 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Data transfer object which is currently provided by the bluetooth boxes,
+ * containing all informations about the single record
+ * @author Patrick Bertolla
+ */
 public class OddsRecordDto implements Serializable{
-	    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1953232953360864621L;
 
 		private Long utcInMs;
@@ -91,6 +93,11 @@ public class OddsRecordDto implements Serializable{
 			this.gathered_on = gathered_on;
 		}
 
+		/**
+		 * removes all data which does not contain the minimal amount of information
+		 * required to be usefull
+		 * @param records list of records to be checked for validity
+		 */
 		public static void removeCorruptedData(List<OddsRecordDto> records) {
 			for (int i=0;i<records.size();i++) {
 				OddsRecordDto record = records.get(i);

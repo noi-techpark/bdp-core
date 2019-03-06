@@ -26,6 +26,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+/**
+ * Most simple implementation of {@link RecordDtoImpl} which additonaly to the
+ * timestamp has a value which can be anything.
+ *
+ * @author Patrick Bertolla
+ *
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 public class SimpleRecordDto extends RecordDtoImpl {
 

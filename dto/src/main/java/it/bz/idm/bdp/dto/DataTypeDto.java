@@ -26,6 +26,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+/**
+ * Data transfer object representing a specific datatype, which each measurement has a relation with
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ *
+ */
 public class DataTypeDto implements Serializable {
 
 	private static final long serialVersionUID = -2577340085858167829L;
@@ -55,8 +61,15 @@ public class DataTypeDto implements Serializable {
 	private Integer period;
 
 	public DataTypeDto() {
+		super();
 	}
 
+	/**
+	 * @param name unique identifier
+	 * @param unit of the given datatype e.g.:m²,°C,km/h
+	 * @param description a well chosen description, please use english if you can
+	 * @param rtype metric of a specific measurements e.g.: max,min,mean
+	 */
 	public DataTypeDto(String name, String unit, String description, String rtype) {
 		super();
 		this.name = name;
@@ -65,6 +78,13 @@ public class DataTypeDto implements Serializable {
 		this.rtype = rtype;
 	}
 
+	/**
+	 * @param name unique identifier
+	 * @param unit of the given datatype e.g.:m²,°C,km/h
+	 * @param description a well chosen description, please use english if you can
+	 * @param rtype metric of a specific measurements e.g.: max,min,mean
+	 * @param period interval in which this datatype is normally provided
+	 */
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
 		this(name, unit, description, rtype);
 		this.period = period;

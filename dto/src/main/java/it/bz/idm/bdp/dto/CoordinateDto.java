@@ -22,6 +22,12 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 
+
+/**
+ * Simple 2D representation of a point
+ * @author Patrick Bertolla
+ *
+ */
 public class CoordinateDto implements Serializable {
 	
 	/**
@@ -32,7 +38,13 @@ public class CoordinateDto implements Serializable {
 	private double lat;
 
 	public CoordinateDto() {
+		super();
 	}
+
+	/**
+	 * @param longitude expressed in m or degrees depending on used projection
+	 * @param latitude expressed in m or degrees depending on used projection
+	 */
 	public CoordinateDto(double longitude, double latitude) {
 		this.lon=longitude;
 		this.lat=latitude;

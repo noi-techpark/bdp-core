@@ -34,6 +34,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * Data transfer object representing a station used in both, writer and reader.
+ * @author Patrick Bertolla
+ *
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 public class StationDto implements Serializable {
 
@@ -77,8 +82,15 @@ public class StationDto implements Serializable {
 	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {
+		super();
 	}
 
+	/**
+	 * @param id unique identifier
+	 * @param name well chosen name, english is the preferred language
+	 * @param latitude of the point in space
+	 * @param longitude of the point in space
+	 */
 	public StationDto(String id, String name, Double latitude, Double longitude ) {
 		this.id = id;
 		this.name = name;

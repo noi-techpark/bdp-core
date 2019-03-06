@@ -22,6 +22,14 @@ package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
 
+/**
+ * <p>
+ * Defines a relationship between two stations<br/>
+ * the identifiers in here are taken from {@link StationDto#id}
+ * </p>
+ * @author Patrick Bertolla
+ *
+ */
 public class ChildDto implements Serializable {
 
 	/**

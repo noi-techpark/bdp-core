@@ -23,6 +23,12 @@ package it.bz.idm.bdp.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+/**
+ * Minimal measurement data transfer object to be interesting at all.
+ * Each measurement should inherit from this
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class RecordDtoImpl implements RecordDto,Comparable<RecordDtoImpl>{
 
 	private static final long serialVersionUID = -1124149647267291299L;
