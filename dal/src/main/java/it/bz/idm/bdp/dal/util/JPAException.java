@@ -22,6 +22,11 @@ package it.bz.idm.bdp.dal.util;
 
 import it.bz.idm.bdp.dto.ExceptionDto;
 
+/**
+ * Yet to be documented by
+ * @author Peter Moser
+ *
+ */
 public class JPAException extends RuntimeException {
 
 	private static final long serialVersionUID = -8271639898842999188L;

@@ -71,6 +71,13 @@ public class Measurement extends M {
 	public Measurement() {
 	}
 
+	/**
+	 * @param station entity associated with this measurement
+	 * @param type entity associated with this measurement
+	 * @param value number value for this measurement
+	 * @param timestamp UTC time of measurement detection
+	 * @param period standard interval between 2 measurements
+	 */
 	public Measurement(Station station, DataType type, Double value, Date timestamp, Integer period) {
 		super(station,type,timestamp,period);
 		this.doubleValue = value;

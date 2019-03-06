@@ -40,6 +40,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
+/**
+ * <p>
+ * User entity defining a user wanting to access data in the bdp
+ * TODO: I kindly ask the author to take better care of this xD
+ * </p>
+ * @author Peter Moser
+ *
+ */
 @Table(name = "bdpuser",
 uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"email"})
@@ -75,14 +83,33 @@ public class BDPUser {
 	public BDPUser() {
 	}
 
+	/**
+	 * @param email unique email for each user
+	 * @param password jwt token string
+	 */
 	public BDPUser(String email, String password) {
 		this(email, password, true, false);
 	}
 
+	/**
+	 * TODO: tokenExpired is deprecated and should be removed
+	 * @param email unique email for each user
+	 * @param password jwt token string
+	 * @param enabled if user is currently allowed to do anything
+	 * @param tokenExpired if token is still valid
+	 */
 	public BDPUser(String email, String password, boolean enabled, boolean tokenExpired) {
 		this(email, password, enabled, tokenExpired, null);
 	}
 
+	/**
+	 * TODO: tokenExpired is deprecated and should be removed
+	 * @param email unique email for each user
+	 * @param password jwt token string
+	 * @param enabled if user is currently allowed to do anything
+	 * @param tokenExpired if token is still valid
+	 * @param roles authentication roles associated to a single user, currently it's always one
+	 */
 	public BDPUser(String email, String password, boolean enabled,
 			boolean tokenExpired, List<BDPRole> roles) {
 		this.email = email;
@@ -140,6 +167,12 @@ public class BDPUser {
 		this.roles = roles;
 	}
 
+	/**
+	 * find a user by his email-address, which is unique
+	 * @param em entitymanager
+	 * @param email unique identifier for a user
+	 * @return user identified by the email
+	 */
 	public static BDPUser findByEmail(EntityManager em, String email) {
 		return QueryBuilder
 				.init(em)
@@ -148,6 +181,13 @@ public class BDPUser {
 				.buildSingleResultOrNull(BDPUser.class);
 	}
 
+	/**
+	 * Upserts the list of existing users
+	 * TODO: change returned object to give it significance or remove it completely
+	 * @param em entitymanager
+	 * @param data list of users to be upserted
+	 * @return always null. changeit
+	 */
 	public static Object sync(EntityManager em, List<UserDto> data) {
 		em.getTransaction().begin();
 		for (UserDto dto : data) {

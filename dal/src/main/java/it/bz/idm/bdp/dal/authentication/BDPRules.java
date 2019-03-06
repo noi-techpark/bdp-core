@@ -33,6 +33,11 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
+/**
+ * Rules defined by an administrator to decide which datasets needs which permission access
+ * @author Peter Moser
+ *
+ */
 @Table(name = "bdprules")
 @Entity
 public class BDPRules {
@@ -54,8 +59,15 @@ public class BDPRules {
 	private Integer period;
 
 	public BDPRules() {
+		super();
 	}
 
+	/**
+	 * @param role which to associate the rule with
+	 * @param station entity for which the rule is valid
+	 * @param type entity for which the rule is valid
+	 * @param period for which the rule is valid
+	 */
 	public BDPRules(BDPRole role, Station station, DataType type, Integer period) {
 		super();
 		setRole(role);
@@ -64,14 +76,26 @@ public class BDPRules {
 		setPeriod(period);
 	}
 
+	/**
+	 * @param role which to associate the rule with
+	 * @param station entity for which the rule is valid
+	 * @param type entity for which the rule is valid
+	 */
 	public BDPRules(BDPRole role, Station station, DataType type) {
 		this(role, station, type, null);
 	}
 
+	/**
+	 * @param role which to associate the rule with
+	 * @param station entity for which the rule is valid
+	 */
 	public BDPRules(BDPRole role, Station station) {
 		this(role, station, null);
 	}
 
+	/**
+	 * @param role which to associate the rule with
+	 */
 	public BDPRules(BDPRole role) {
 		this(role, null);
 	}

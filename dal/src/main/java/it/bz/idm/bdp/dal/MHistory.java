@@ -86,6 +86,12 @@ public abstract class MHistory implements Serializable {
 	public MHistory() {
 		this.created_on = new Date();
 	}
+	/**
+	 * @param station entity the measurement refers to
+	 * @param type entity the measurement refers to
+	 * @param timestamp UTC time of the measurement detection
+	 * @param period standard interval between 2 measurements
+	 */
 	public MHistory(Station station, DataType type, Date timestamp, Integer period) {
 		this.station = station;
 		this.type = type;

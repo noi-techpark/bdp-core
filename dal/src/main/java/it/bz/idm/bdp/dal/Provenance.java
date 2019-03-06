@@ -31,6 +31,12 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
 
+
+/**
+ * AUthor needs to document this, I'm not in the mood right now :)
+ * @author Peter Moser
+ *
+ */
 @Table(
 	name = "provenance",
 	indexes = {

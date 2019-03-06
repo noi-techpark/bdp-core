@@ -47,9 +47,13 @@ import it.bz.idm.bdp.dto.TypeDto;
 
 
 /**
+ * <p>
+ * DataType defines what you are measuring. Every measurement {@link MHistory}<br/>
+ * references exactly one datatype, which gives you the required information to<br/>
+ * interpret it correctly
+ * </p>
  * @author Patrick Bertolla
  * @author Peter Moser
- * DataType defines what you are measuring. Every measurement {@link MHistory} references exactly one datatype, which gives you the required information to interpret it correctly
  */
 @Table(name="type",
 	uniqueConstraints = {
@@ -77,6 +81,12 @@ public class DataType {
 		setCreated_on(new Date());
 	}
 
+	/**
+	 * @param cname unique identifier for a datatype
+	 * @param cunit unit of specific measurements
+	 * @param description of a specific measurements
+	 * @param rtype
+	 */
 	public DataType(String cname,  String cunit, String description, String rtype) {
 		this(cname);
 		setCunit(cunit);
@@ -84,6 +94,9 @@ public class DataType {
 		setRtype(rtype);
 	}
 
+	/**
+	 * @param cname unique identifier for a datatype
+	 */
 	public DataType(String cname) {
 		this();
 		setCname(cname);
@@ -242,8 +255,11 @@ public class DataType {
 	}
 
 	/**
-	 * Upserts a list of datatypes, but does not override type description if already provided in db
-	 * @param em entitymanager
+	 * <p>
+	 * Upserts a list of datatypes, but does not override type description if<br/>
+	 * already provided in db
+	 * </p>
+	 * @param em   entitymanager
 	 * @param data list of datatypes provided by a datacollector
 	 */
 	public static void sync(EntityManager em, List<DataTypeDto> data) {

@@ -34,6 +34,17 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 
+/**
+ * <p>
+ * Utility class for access to the entity manager and retrieving informations<br/>
+ * from jpa. A static initialisazion defines the persistence unit to use defined<br/>
+ * in persistence.xml
+ * </p>
+ *
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ *
+ */
 public class JPAUtil {
 
 	public static EntityManagerFactory emFactory;
@@ -57,6 +68,10 @@ public class JPAUtil {
 		emFactory.close();
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @return names of all existing jpa entities
+	 */
 	public static List<String> getInstanceTypes(EntityManager em) {
 		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
 		List<String> types = new ArrayList<String>();
@@ -66,6 +81,10 @@ public class JPAUtil {
 		return types;
 	}
 
+	/**
+	 * @param obj any object which could be a instance of a jpa entity
+	 * @return name of the jpa entity/class of the given object
+	 */
 	public static String getEntityNameByObject(Object obj) {
 		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
 			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))

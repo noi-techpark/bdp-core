@@ -28,6 +28,11 @@ import java.util.Map.Entry;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+/**
+ * Tell me more, tell me more, tell me more ...
+ * @author Peter Moser
+ *
+ */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
 	private EntityManager em = null;

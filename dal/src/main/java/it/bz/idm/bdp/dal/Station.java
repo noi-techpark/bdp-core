@@ -61,11 +61,16 @@ import it.bz.idm.bdp.dto.StationDto;
 
 
 /**
+ * <p>
+ * Station is where you are measuring and who is measuring it. It's representing<br/>
+ * a point in space where a measurement occurred. It can be anything which has<br/>
+ * the capacity to measure something. Examples are sensors, parkinglots, cars,<br/>
+ * meterologystations ... Each station can also have a parent station, like a<br/>
+ * car can have a carsharingparkinglot as it's parent
+ * </p>
+ *
  * @author Bertolla Patrick
  * @author Peter Moser
- * Station is where you are measuring and who is measuring it. It's representing a point in space where a measurement occurred. It can be anything which has the capacity to measure something.
- * Examples are sensors, parkinglots, cars, meterologystations ...
- * Each station can also have a parent station, like a car can have a carsharingparkinglot as it's parent 
  */
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
@@ -112,6 +117,11 @@ public class Station {
 		this.active = true;
 	}
 
+	/**
+	 * @param stationType typology of a specific station
+	 * @param stationCode unique identifier of a station
+	 * @param stationName good chosen name, preferably in english
+	 */
 	public Station(String stationType, String stationCode, String stationName) {
 		this();
 		setStationtype(stationType);

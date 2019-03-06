@@ -40,6 +40,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.RoleDto;
 
+/**
+ * <p>
+ * Each role has a set of permissions associated to multiple users.<br/>
+ * A role can inherit all permissions from <strong>one parent role</strong>
+ * </p>
+ * @author Peter Moser
+ *
+ */
 @Table(name = "bdprole",
 	uniqueConstraints = {
 			@UniqueConstraint(columnNames = {"name"})
@@ -136,6 +144,11 @@ public class BDPRole {
 		this.parent = parent;
 	}
 
+	/**
+	 * @param em entitymanager
+	 * @param name unique identifier for a role
+	 * @return a single role
+	 */
 	public static BDPRole findByName(EntityManager em, String name) {
 		return QueryBuilder
 				.init(em)
@@ -144,6 +157,12 @@ public class BDPRole {
 				.buildSingleResultOrNull(BDPRole.class);
 	}
 
+	/**
+	 * TODO: fix return object, remove it or make it significant
+	 * @param em entity manager
+	 * @param data list of roles to upsert
+	 * @return always null
+	 */
 	public static Object sync(EntityManager em, List<RoleDto> data) {
 		em.getTransaction().begin();
 		for (RoleDto dto : data) {

@@ -68,7 +68,15 @@ public class MeasurementString extends M {
 	private String stringValue;
 
 	public MeasurementString() {
+		super();
 	}
+	/**
+	 * @param station entity associated with this measurement
+	 * @param type entity associated with this measurement
+	 * @param value string value for this measurement
+	 * @param timestamp UTC time of measurement detection
+	 * @param period standard interval between 2 measurements
+	 */
 	public MeasurementString(Station station, DataType type, String value, Date timestamp, Integer period) {
 		this.setStation(station);
 		this.setType(type);

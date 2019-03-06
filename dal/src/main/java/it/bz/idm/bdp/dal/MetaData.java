@@ -39,6 +39,17 @@ import org.hibernate.annotations.TypeDefs;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
+/**
+ * <p>
+ * Metadata is a versioned jsonb map containing all additional information for a<br/>
+ * {@link Station}. If a datacollector provides a different metadata object it<br/>
+ * will replace the current one shown as metadata through the API.
+ * </p>
+ *
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ *
+ */
 @TypeDefs({ @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 @Entity
 @Table(name = "metadata")
