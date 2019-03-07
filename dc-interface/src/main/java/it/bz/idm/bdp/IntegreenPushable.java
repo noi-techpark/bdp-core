@@ -28,12 +28,48 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
+/**
+ * Each datacollector must implement this methods to use the full potential of the big data platform
+ * @author Patrick Bertolla
+ *
+ */
 public interface IntegreenPushable {
-	
+
+	/**
+	 * @param data in any form with information of space, time and measurement type
+	 * @return data records ordered in a tree structure
+	 */
 	public abstract <T> DataMapDto<RecordDtoImpl> mapData(T data);
+
+	/**
+	 * @param datasourceName unique existing station typology
+	 * @param dto data map to send to writer
+	 * @return outcome of the api call
+	 */
 	public abstract Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto);
+	/**
+	 * @param datasourceName unique existing station typology
+	 * @param dtos list of station dtos to sync with existing in database
+	 * @return outcome of the api call
+	 */
 	public abstract Object syncStations(String datasourceName, StationList dtos);
+	/**
+	 * @param datasourceName unique existing station typology
+	 * @param data list of datatypes to sync with the existing in the database
+	 * @return outcome of the api call
+	 */
 	public abstract Object syncDataTypes(String datasourceName,List<DataTypeDto> data);
+	/**
+	 * @param stationCode unique identifer of a station
+	 * @param dataType unique identifier of a datatype
+	 * @param period intervall between 2 measurements
+	 * @return outcome of the api call
+	 */
 	public abstract Object getDateOfLastRecord(String stationCode,String dataType,Integer period);
+	/**
+	 * @param datasourceName  unique existing station typology
+	 * @param origin unique reference to a webservice
+	 * @return list of station dtos associated with that origin
+	 */
 	public abstract List<StationDto> fetchStations(String datasourceName, String origin);
 }

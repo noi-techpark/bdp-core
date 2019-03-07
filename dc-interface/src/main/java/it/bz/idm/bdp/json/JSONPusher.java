@@ -33,6 +33,11 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
 
+/**
+ * implementation with spring rest template
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class JSONPusher extends DataPusher {
 	private static final String SYNC_DATA_TYPES = "/syncDataTypes/";
 	private static final String SYNC_STATIONS = "/syncStations/";

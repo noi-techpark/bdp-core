@@ -24,27 +24,38 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
+/**
+ * Basic configuration for any data send to writer
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class DataPusher implements IntegreenPushable  {
 	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
 	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
 	protected static final String HOST_KEY							= "bdp_host";
 	protected static final String PORT_KEY							= "bdp_port";
-	
+
 	protected static String DEFAULT_HOST 							= "localhost";
 	protected static Integer DEFAULT_PORT							= 8080;
 	protected static String DEFAULT_ENDPOINT						= "";
-	
+
 	protected Configuration config;
 	protected String integreenTypology;
 
 	public abstract void connectToDataCenterCollector();
 	public abstract String initIntegreenTypology();
-	
+
+	/**
+	 * instanciate a new datapusher with a typology defined in implementation
+	 */
 	public DataPusher() {
 		initConfig();
 		connectToDataCenterCollector();
-		this.integreenTypology = initIntegreenTypology();	
+		this.integreenTypology = initIntegreenTypology();
 	}
+	/**
+	 * set host, port and endpoint of the writer module
+	 */
 	protected void initConfig() {
 		if (config == null)
 			try {
