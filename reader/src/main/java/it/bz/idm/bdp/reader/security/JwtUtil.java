@@ -40,6 +40,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
+/**
+ * Utility methods for Json web token authentication
+ * @author Patrick Bertolla
+ *
+ */
 @Component
 public class JwtUtil {
 	private static final SignatureAlgorithm TOKEN_SIGNATURE_ALGOITHM = SignatureAlgorithm.HS512;

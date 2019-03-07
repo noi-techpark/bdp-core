@@ -46,6 +46,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import it.bz.idm.bdp.dto.ExceptionDto;
 
+/**
+ * API exception handler mapping every exception to a serializable object {@link ExceptionDto}
+ * @author Patrick Bertolla
+ *
+ */
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{
 
@@ -92,43 +97,48 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,ex);	
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.BAD_REQUEST,ex);	
+		return buildResponse(HttpStatus.BAD_REQUEST,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
 	@Override
 	protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);	
+		return buildResponse(status,ex);
 	}
+	/**
+	 * @param httpStatus
+	 * @param ex
+	 * @return
+	 */
 	private ResponseEntity<Object> buildResponse(HttpStatus httpStatus, Exception ex) {
 		ExceptionDto dto = new ExceptionDto();
 		dto.setStatus(httpStatus.value());
@@ -136,6 +146,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 		dto.setDescription(ex.getMessage());
 		return new ResponseEntity<Object>(dto,httpStatus);
 	}
+	/**
+	 * @param ex a thrown exception which ResponseEntityExceptionHandler did not handle
+	 * @param request
+	 * @return serializable response object
+	 */
 	@ExceptionHandler({ Exception.class })
 	public ResponseEntity<Object> handleAll(final Exception ex, final WebRequest request) {
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;

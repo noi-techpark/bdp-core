@@ -28,6 +28,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Patrick Bertolla
+ * Authentication Provider for JWT
+ */
 @Component
 public class JWTAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider{
 	@Autowired
@@ -54,7 +58,7 @@ public class JWTAuthenticationProvider extends AbstractUserDetailsAuthentication
 					throws AuthenticationException {
 		JWTAuthenticationToken jwtAuthenticationToken = (JWTAuthenticationToken) authentication;
 		return userDetailsService.loadUserByUsername(jwtAuthenticationToken.getName());
-		
+
 	}
 	@Override
 	public boolean supports(Class<?> authentication) {

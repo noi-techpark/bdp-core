@@ -38,12 +38,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 
+/**
+ * Authentication filter for JWT tokens
+ * @author Patrick Bertolla
+ *
+ */
 public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 
 	private static final String TOKEN_PREFIX = "Bearer ";
 	@Autowired
 	public JwtUtil util;
-	
+
 	protected JWTTokenAuthFilter(String defaultFilterProcessesUrl) {
 		super(defaultFilterProcessesUrl);
 	}
@@ -84,5 +89,5 @@ public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 			HttpServletResponse response) {
 		return request.getHeader(HEADER_SECURITY_TOKEN) != null;
 	}
-	
+
 }

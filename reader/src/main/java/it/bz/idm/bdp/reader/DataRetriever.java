@@ -42,12 +42,23 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
+/**
+ * Reader API
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ *
+ */
 public class DataRetriever {
 
 	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given */
 	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
 
-	//API additions for V2
+	/**
+	 * API v2 proposal for datatype dto
+	 * @param type unique identifier for {@link DataType}
+	 * @param stationId unique identifier for {@link Station}
+	 * @return
+	 */
 	public List<TypeDto> getTypes(String type, String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
@@ -63,7 +74,12 @@ public class DataRetriever {
 		}
 	}
 
-	//APIv1
+	/**
+	 *
+	 * @param stationType by which to filter stations
+	 * @param stationID unique identifier of {@link Station}
+	 * @return list of station data transfer objects with all metadata of the give station
+	 */
 	public List<? extends StationDto> getStationDetails(String stationType, String stationID) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
@@ -86,6 +102,10 @@ public class DataRetriever {
 		return stations;
 	}
 
+	/**
+	 * @param type typology of a station
+	 * @return list of unique identifiers of stations with a certain station typology
+	 */
 	public List<String> getStations(String type){
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
@@ -101,6 +121,9 @@ public class DataRetriever {
 		}
 	}
 
+	/**
+	 * @return all existing typologies in the database
+	 */
 	public List<String> getStationTypes(){
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
@@ -116,6 +139,12 @@ public class DataRetriever {
 		}
 	}
 
+	/**
+	 * v2 API datatype call proposal
+	 * @param type typology of a station
+	 * @param stationId unique identifier of a station
+	 * @return all datatypes for a specific station where measurements exist
+	 */
 	public List<String[]> getDataTypes(String type, String stationId) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
@@ -131,10 +160,22 @@ public class DataRetriever {
 		}
 	}
 
+	/**
+	 * @param type typology of a station
+	 * @return list datatypes
+	 */
 	public List<String[]> getDataTypes(String type){
 		return getDataTypes(type, null);
 	}
 
+	/**
+	 * @param stationTypology
+	 * @param stationcode unique string id for a station
+	 * @param cname unique string id for a datatype
+	 * @param period interval between 2 measurements
+	 * @param principal authorization level of the request
+	 * @return date of last measured data
+	 */
 	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
@@ -166,6 +207,14 @@ public class DataRetriever {
 		}
 	}
 
+	/**
+	 * @param stationTypology
+	 * @param stationcode unique string id for a station
+	 * @param cname unique string id for a datatype
+	 * @param period interval between 2 measurements
+	 * @param principal authorization level of the request
+	 * @return last measured data record
+	 */
 	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
@@ -211,6 +260,15 @@ public class DataRetriever {
 	}
 
 
+	/**
+	 * @param stationtypology
+	 * @param identifier unique string id for a station
+	 * @param type unique string id for a datatype
+	 * @param seconds back in time from now requesting data for
+	 * @param period interval between 2 measurements
+	 * @param p authorization level of the request
+	 * @return list of measurements
+	 */
 	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period, Principal p){
 		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
@@ -218,6 +276,17 @@ public class DataRetriever {
 		return getRecords(stationtypology, identifier, type, start, end, period,seconds, p);
 	}
 
+	/**
+	 * @param stationtypology
+	 * @param identifier unique string id for a station
+	 * @param type unique string id for a datatype
+	 * @param start of the timeinterval requesting data for
+	 * @param end end of the timeinterval data for
+	 * @param period interval between 2 measurements
+	 * @param seconds back in time from now (if no start and end is defined)
+	 * @param p authorization level of the request
+	 * @return list of measurements
+	 */
 	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end, Integer period, Integer seconds, Principal p) {
 		if (start == null && end == null) {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;

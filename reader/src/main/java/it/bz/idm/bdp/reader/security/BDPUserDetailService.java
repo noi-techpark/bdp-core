@@ -29,19 +29,24 @@ import javax.persistence.EntityManager;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.User.UserBuilder;
-import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPUser;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
+/**
+ * Maps the user in database to the spring user detail
+ * @author Patrick Bertolla
+ *
+ */
 @Service
 public class BDPUserDetailService implements UserDetailsService{
 
-	
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		EntityManager manager = JPAUtil.createEntityManager();
@@ -56,7 +61,7 @@ public class BDPUserDetailService implements UserDetailsService{
 	}
 
 	private String[] castRoles(Collection<BDPRole> roles) {
-		List<String> s = new ArrayList<>(); 
+		List<String> s = new ArrayList<>();
 		for (Iterator<BDPRole> iterator = roles.iterator();iterator.hasNext();) {
 			BDPRole next = iterator.next();
 			s.add(next.getName());
