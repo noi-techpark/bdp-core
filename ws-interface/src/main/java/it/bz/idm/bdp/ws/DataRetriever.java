@@ -22,6 +22,11 @@ package it.bz.idm.bdp.ws;
 
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Configurations setter for an http implementation with token authentication
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class DataRetriever implements IntegreenRunnable {
 
 	private static final int DEFAULT_HTTP_REQUEST_TIMEOUT = 10; /* in seconds */

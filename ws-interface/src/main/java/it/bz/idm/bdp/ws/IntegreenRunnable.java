@@ -29,26 +29,90 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
+/**
+ * Currently supported reader API Calls
+ * @author patrick
+ *
+ */
+/**
+ * @author patrick
+ *
+ */
 public interface IntegreenRunnable {
 
+	/**
+	 * @return list of unique station identifiers
+	 */
 	public abstract String[] fetchStations();
-	
+
+	/**
+	 * @param stationId unique station identifier to filter by
+	 * @return list of stations with all metadata
+	 */
 	public abstract List<StationDto> fetchStationDetails(String stationId);
 
+	/**
+	 * @param station unique station identifier
+	 * @return list of datatypes filtered by stationid
+	 */
 	public abstract List<List<String>> fetchDataTypes(String station);
-	
+
+	/**
+	 * @param station unique station identifier
+	 * @return list of datatypes filtered by stationid
+	 */
 	public abstract List<TypeDto> fetchTypes(String station);
-	
+
+	/**
+	 * @param stationId unique station identifier
+	 * @param typeId unique datatype identifier
+	 * @param seconds from now back in time to query for
+	 * @param period standard interval between 2 measurements
+	 * @return list of measurments
+	 */
 	public abstract List<RecordDto> fetchRecords(String stationId, String typeId, Integer seconds, Integer period);
+	/**
+	 * @param stationId unique station identifier
+	 * @param typeId unique datatype identifier
+	 * @param start time in milliseconds UTC to query for
+	 * @param end time in milliseconds UTC to query for
+	 * @param period standard interval between 2 measurements
+	 * @return list of measurements
+	 */
 	public abstract List<RecordDto> fetchRecords(String stationId, String typeId, Long start, Long end, Integer period);
-	
+
+	/**
+	 * @param stationId unique station identifier
+	 * @param typeId unique datatype identifier
+	 * @param period standard interval between 2 measurements
+	 * @return newest record filtered by parameters
+	 */
 	public abstract RecordDto fetchNewestRecord(String stationId, String typeId, Integer period);
-	
+
+	/**
+	 * @param stationId unique station identifier
+	 * @param typeId unique datatype identifier
+	 * @param period standard interval between 2 measurements
+	 * @return date of newest record filtered by parameters
+	 */
 	public abstract Date fetchDateOfLastRecord(String stationId, String typeId, Integer period);
-	
+
+	/**
+	 * @param id unique station identifier of the parent station
+	 * @return list of stations with the common parent
+	 */
 	public abstract List<? extends ChildDto> fetchChildStations(String id);
 
+	/**
+	 * @param refreshToken authenticationToken to be allowed to fetch a new refresh token
+	 * @return accesstoken
+	 */
 	public AccessTokenDto fetchAccessToken(String refreshToken);
-	
+
+	/**
+	 * @param userName
+	 * @param password
+	 * @return jwt token containing the refresh token and the first accesstoken
+	 */
 	public JwtTokenDto fetchRefreshToken(String userName, String password);
 }

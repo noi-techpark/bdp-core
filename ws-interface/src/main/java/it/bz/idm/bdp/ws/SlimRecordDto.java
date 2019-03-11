@@ -23,16 +23,30 @@ package it.bz.idm.bdp.ws;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import it.bz.idm.bdp.dto.SimpleRecordDto;
+
+/**
+ * DTO to remove implementation details from {@link SimpleRecordDto}, therefore reducing unneeded data send through API
+ * @author Patrick Bertolla
+ *
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 public class SlimRecordDto {
 	private Long timestamp;
 	private Long created_on;
 	private Object value;
 	private Integer period;
-	
+
 	public SlimRecordDto() {
+		super();
 	}
-	
+
+	/**
+	 * @param timestamp of measurement detection
+	 * @param value of the given measurement
+	 * @param period standard interval between 2 measurements
+	 * @param created_on timestamp of creation in the opendatahub
+	 */
 	public SlimRecordDto(Long timestamp, Object value, Integer period, Long created_on) {
 		super();
 		this.timestamp = timestamp;
@@ -65,5 +79,5 @@ public class SlimRecordDto {
 	public void setCreated_on(Long created_on) {
 		this.created_on = created_on;
 	}
-	
+
 }

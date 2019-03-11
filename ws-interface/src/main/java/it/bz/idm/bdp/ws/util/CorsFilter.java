@@ -32,12 +32,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
 
-@Component	
+/**
+ * Filter that applies CORS haeders to all http requests
+ * @author Patrick Bertolla
+ *
+ */
+@Component
 public class CorsFilter implements Filter{
 
+	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
-	
+
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -48,6 +55,7 @@ public class CorsFilter implements Filter{
 		chain.doFilter(request, response);
 	}
 
+	@Override
 	public void destroy() {
 	}
 }

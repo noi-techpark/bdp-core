@@ -39,6 +39,11 @@ import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
+/**
+ * @author Patrick Bertolla
+ *
+ * Retriever implementation with a non-blocking, reactive http client
+ */
 @Component
 public class RestClient extends DataRetriever {
 

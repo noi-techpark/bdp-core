@@ -40,6 +40,11 @@ import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.ws.util.DtoParser;
 
+/**
+ * Spring MVC template with all current API calls of data retriever {@link DataRetriever}
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class RestController {
 
 	protected static final String TOKEN_POLICY = "All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).";
@@ -61,7 +66,7 @@ public abstract class RestController {
 		this.retriever = initDataRetriever();
 	}
 
-	@ApiOperation(value="Request a new authorisation token to access protected data.", 
+	@ApiOperation(value="Request a new authorisation token to access protected data.",
 			notes="If you need to access protected, closed data and you have been given a username and password, invoke this method to receive a new token.")
 	@RequestMapping(value = "refresh-token", method = RequestMethod.GET)
 	public @ResponseBody JwtTokenDto getToken(
@@ -113,7 +118,7 @@ public abstract class RestController {
 	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
 			@ApiParam(value=TYPE_PARAM, required=true) @RequestParam("name") String cname,
-			@ApiParam(value=FROM_PARAM, required=true) @RequestParam("from") Long from, 
+			@ApiParam(value=FROM_PARAM, required=true) @RequestParam("from") Long from,
 			@ApiParam(value=TO_PARAM, required=true) @RequestParam("to") Long to,
 			@ApiParam(PERIOD_PARAM) @RequestParam(value = "period", required = false) Integer period) {
 		retriever.setAccessToken(accessToken);

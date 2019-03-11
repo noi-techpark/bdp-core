@@ -27,6 +27,13 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.ws.SlimRecordDto;
 
+/**
+ * Parse from {@link SimpleRecordDto} to {@link SlimRecordDto} to avoid passing
+ * overhead information needed only for deserialization
+ *
+ * @author Patrick Bertolla
+ *
+ */
 public class DtoParser {
 	public static List<SlimRecordDto> reduce(List<RecordDto> records) {
 		List<SlimRecordDto> list = new ArrayList<>();

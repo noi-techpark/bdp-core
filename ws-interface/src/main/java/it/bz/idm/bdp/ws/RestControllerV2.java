@@ -38,12 +38,17 @@ import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
+/**
+ * Spring MVC template for the REST APIv2 proposal
+ * @author Patrick Bertolla
+ *
+ */
 public abstract class RestControllerV2 {
-	
+
 	protected DataRetriever retriever;
-	
+
 	public abstract DataRetriever initDataRetriever();
-	
+
 	@PostConstruct
 	public void init(){
 		this.retriever = initDataRetriever();
@@ -73,10 +78,10 @@ public abstract class RestControllerV2 {
 	@RequestMapping(value = {"types"}, method = RequestMethod.GET)
 	public @ResponseBody List<TypeDto> dataTypes(
 			@RequestParam(value = "station", required = false) String station) {
-			List<TypeDto> dataTypes = (List<TypeDto>) retriever.fetchTypes(station);
+			List<TypeDto> dataTypes = retriever.fetchTypes(station);
 			return dataTypes;
 	}
-	
+
 	@RequestMapping(value = {"history"}, method = RequestMethod.GET)
 	public @ResponseBody List<RecordDto> history(
 			@RequestParam("station") String station,
@@ -85,7 +90,7 @@ public abstract class RestControllerV2 {
 			@RequestParam(value = "period", required = false) Integer period) {
 		return retriever.fetchRecords(station, cname, seconds, period);
 	}
-	
+
 	@RequestMapping(value = {"records"}, method = RequestMethod.GET)
 	public @ResponseBody List<RecordDto> records(
 			@RequestParam("station") String station,
@@ -100,7 +105,7 @@ public abstract class RestControllerV2 {
 			@RequestParam("station") String station,
 			@RequestParam(value="type",required=false) String type,
 			@RequestParam(value="period",required=false) Integer period) {
-		return (RecordDto) retriever.fetchNewestRecord(station,type,period);
+		return retriever.fetchNewestRecord(station,type,period);
 	}
 
 }
