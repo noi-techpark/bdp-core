@@ -34,18 +34,6 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
 	</context-param>
-	<filter>
-		<filter-name>Remote Address Filter</filter-name>
-		<filter-class>org.apache.catalina.filters.RemoteAddrFilter</filter-class>
-		<init-param>
-			<param-name>allow</param-name>
-			<param-value>127.0.0.1</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>Remote Address Filter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
