@@ -30,6 +30,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -46,7 +47,14 @@ import it.bz.idm.bdp.dto.RecordDto;
  * Implementation for measurements of type double
  *
  */
-@Table(name = "measurementhistory")
+@Table(
+	name = "measurementhistory",
+	indexes = {
+		@Index(
+			columnList = "station_id, type_id, timestamp DESC, period"
+		)
+	}
+)
 @Entity
 public class MeasurementHistory extends MHistory {
 	@Transient
@@ -92,6 +100,7 @@ public class MeasurementHistory extends MHistory {
 		this.id = id;
 	}
 
+	@Override
 	public Double getValue() {
 		return doubleValue;
 	}

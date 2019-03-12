@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -38,7 +39,14 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 
-@Table(name="measurementstringhistory")
+@Table(
+	name = "measurementstringhistory",
+	indexes = {
+		@Index(
+			columnList = "station_id, type_id, timestamp DESC, period"
+		)
+	}
+)
 @Entity
 public class MeasurementStringHistory extends MHistory {
 
@@ -88,6 +96,7 @@ public class MeasurementStringHistory extends MHistory {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	@Override
 	public String getValue() {
 		return stringValue;
 	}

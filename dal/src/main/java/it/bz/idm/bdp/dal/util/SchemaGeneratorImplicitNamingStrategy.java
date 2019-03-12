@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.ImplicitForeignKeyNameSource;
+import org.hibernate.boot.model.naming.ImplicitIndexNameSource;
 import org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl;
 import org.hibernate.boot.model.naming.ImplicitUniqueKeyNameSource;
 import org.hibernate.boot.spi.MetadataBuildingContext;
@@ -64,6 +65,13 @@ public class SchemaGeneratorImplicitNamingStrategy extends ImplicitNamingStrateg
 			colsRef = "_pk";
 		}
 		String name = sanitizeName("fk_" + source.getTableName() + cols + "_" + source.getReferencedTableName() + colsRef);
+		return toIdentifier(name, source.getBuildingContext());
+	}
+
+	@Override
+	public Identifier determineIndexName(ImplicitIndexNameSource source) {
+		String cols = identifiersToSnakeCase(source.getColumnNames());
+		String name = sanitizeName("idx_" + source.getTableName() + cols);
 		return toIdentifier(name, source.getBuildingContext());
 	}
 

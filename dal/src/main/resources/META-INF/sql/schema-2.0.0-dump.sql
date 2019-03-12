@@ -24,10 +24,12 @@ create table metadata (id int8 default nextval('metadata_seq') not null, created
 create table provenance (id int8 default nextval('provenance_seq') not null, data_collector varchar(255) not null, data_collector_version varchar(255), lineage varchar(255) not null, primary key (id));
 create table station (id int8 default nextval('station_seq') not null, active boolean, available boolean, name varchar(255) not null, origin varchar(255), pointprojection GEOMETRY, stationcode varchar(255) not null, stationtype varchar(255) not null, meta_data_id int8, parent_id int8, primary key (id));
 create table type (id int8 default nextval('type_seq') not null, cname varchar(255) not null, created_on timestamp, cunit varchar(255), description varchar(255), rtype varchar(255), primary key (id));
-create index bdppermissions_stp_idx on bdppermissions (station_id, type_id, period);
+create index idx_bdppermissions_station_id_type_id_period on bdppermissions (station_id, type_id, period);
 alter table bdprole add constraint uc_bdprole_name unique (name);
 alter table bdpuser add constraint uc_bdpuser_email unique (email);
-create index measurement_tsdesc_idx on measurement (timestamp desc);
+create index idx_measurement_timestamp on measurement (timestamp desc);
+create index idx_measurementhistory_station_id_type_id_timestamp_period on measurementhistory (station_id, type_id, timestamp desc, period);
+create index idx_measurementstringhistory_st_on_id_type_id_timestamp_period_ on measurementstringhistory (station_id, type_id, timestamp desc, period);
 alter table provenance add constraint uc_provenance_lineage_data_collector_data_collector_version unique (lineage, data_collector, data_collector_version);
 alter table station add constraint uc_station_stationcode_stationtype unique (stationcode, stationtype);
 alter table type add constraint uc_type_cname unique (cname);
