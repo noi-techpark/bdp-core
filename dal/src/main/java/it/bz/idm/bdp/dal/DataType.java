@@ -49,7 +49,7 @@ import it.bz.idm.bdp.dto.TypeDto;
 /**
  * <p>
  * DataType defines what you are measuring. Every measurement {@link MHistory}<br/>
- * references exactly one datatype, which gives you the required information to<br/>
+ * references exactly one data type, which gives you the required information to<br/>
  * interpret it correctly
  * </p>
  * @author Patrick Bertolla
@@ -82,7 +82,7 @@ public class DataType {
 	}
 
 	/**
-	 * @param cname unique identifier for a datatype
+	 * @param cname unique identifier for a data type
 	 * @param cunit unit of specific measurements
 	 * @param description of a specific measurements
 	 * @param rtype metric of a specific measurements
@@ -95,7 +95,7 @@ public class DataType {
 	}
 
 	/**
-	 * @param cname unique identifier for a datatype
+	 * @param cname unique identifier for a data type
 	 */
 	public DataType(String cname) {
 		this();
@@ -139,9 +139,9 @@ public class DataType {
 	}
 
 	/**
-	 * @param em entitymanager
-	 * @param cname unique identifier for a datatype
-	 * @return a datatype entity from database
+	 * @param em entity manager
+	 * @param cname unique identifier for a data type
+	 * @return a data type entity from database
 	 */
 	public static DataType findByCname(EntityManager em, String cname) {
 		return QueryBuilder
@@ -152,19 +152,19 @@ public class DataType {
 	}
 
 	/**
-	 * @param em entitymanager
-	 * @return a list of unique stringidentifier, each representing a datatype 
+	 * @param em entity manager
+	 * @return a list of unique string identifier, each representing a data type
 	 */
 	public static List<String> findTypeNames(EntityManager em) {
 		return em.createQuery("SELECT t.cname FROM DataType t GROUP BY t.cname", String.class)
 				 .getResultList();
 	}
-	
+
 	/**
-	 * <p>Finds datatypes grouped by period and only if at least one record of the specific datatype exists in the db.<br/>
+	 * <p>Finds data types grouped by period and only if at least one record of the specific data type exists in the db.<br/>
 	 *  It can also be filtered by a specific station.
 	 *  </p>
-	 * @param em entitymanager
+	 * @param em entity manager
 	 * @param stationType typology of the specific station e.g. MeteoStation,
 	 *                    Environmentstation etc.
 	 * @param stationId unique stringidentifier of a specific station entity
@@ -256,11 +256,11 @@ public class DataType {
 
 	/**
 	 * <p>
-	 * Upserts a list of datatypes, but does not override type description if<br/>
+	 * Upserts a list of data types, but does not override type description if<br/>
 	 * already provided in db
 	 * </p>
-	 * @param em   entitymanager
-	 * @param data list of datatypes provided by a datacollector
+	 * @param em   entity manager
+	 * @param data list of data types provided by a data collector
 	 */
 	public static void sync(EntityManager em, List<DataTypeDto> data) {
 		try {

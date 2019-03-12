@@ -44,18 +44,14 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 /**
- * @author Peter Moser
- * @author Patrick Bertolla
  *<p>
- * This entity contains is used for all measurements and is the biggest container for the data<br/>
+ * This entity contains all measurements and is the biggest container for the data<br/>
  * Each measurement <strong>must</strong> extend this base class to keep integrity.<br/>
  * It contains the 2 most important references to station and type and also contains generic<br/>
  * methods on how data gets stored and retrieved
  *</p>
- */
-/**
- * @author patrick
- *
+ * @author Peter Moser
+ * @author Patrick Bertolla
  */
 @MappedSuperclass
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
