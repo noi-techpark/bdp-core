@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -135,6 +136,10 @@ public class QueryBuilder {
 	 */
 	public <T> List<T> buildResultList(Class<T> resultClass) {
 		return build(resultClass).getResultList();
+	}
+
+	public <T> Stream<T> buildResultStream(Class<T> resultClass) {
+		return buildResultList(resultClass).stream();
 	}
 
 	/**
