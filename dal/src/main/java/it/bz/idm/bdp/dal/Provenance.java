@@ -40,7 +40,10 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(
 	name = "provenance",
 	indexes = {
-		@Index(name = "idx_provenance_l_dc_dcv", unique = true, columnList = "lineage, data_collector, data_collector_version")
+		@Index(
+			unique = true,
+			columnList = "lineage, data_collector, data_collector_version"
+		)
 	}
 )
 @Entity
