@@ -64,10 +64,7 @@ public class DataRetriever {
 		try{
 			return DataType.findTypes(em, type, stationId);
 		}catch(Exception e){
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -90,12 +87,9 @@ public class DataRetriever {
 			}
 			if ((stationById == null && (stationID == null || stationID.isEmpty())) || (stationById != null && stationType.equals(stationById.getStationtype())))
 				stations = Station.findStationsDetails(em, stationType, stationById);
-		}catch(Exception e){
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
-		}finally{
+		} catch(Exception e) {
+			throw JPAException.unnest(e);
+		} finally {
 			if (em.isOpen())
 				em.close();
 		}
@@ -111,10 +105,7 @@ public class DataRetriever {
 		try{
 			return Station.findStationCodes(em, type, true);
 		} catch(Exception e) {
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -129,10 +120,7 @@ public class DataRetriever {
 		try{
 			return Station.findStationTypes(em);
 		} catch(Exception e) {
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -150,10 +138,7 @@ public class DataRetriever {
 		try{
 			return DataType.findDataTypes(em, type, stationId);
 		}catch(Exception e){
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		}finally{
 			if (em.isOpen())
 				em.close();
@@ -197,10 +182,7 @@ public class DataRetriever {
 			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, type, period, role);
 			return date1.after(date2) ? date1 : date2;
 		} catch(Exception e) {
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -246,10 +228,7 @@ public class DataRetriever {
 
 			return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(), latestStringEntry.getValue(), latestStringEntry.getPeriod());
 		} catch(Exception e) {
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -309,10 +288,7 @@ public class DataRetriever {
 				return records;
 			}
 		} catch(Exception e) {
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			e.printStackTrace();
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();

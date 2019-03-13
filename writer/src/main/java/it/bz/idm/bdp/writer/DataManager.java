@@ -134,10 +134,7 @@ public class DataManager {
 			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role);
 			return date1.after(date2) ? date1 : date2;
 		} catch (Exception e) {
-			if (!(e instanceof JPAException)) {
-				e.printStackTrace();
-			}
-			throw e;
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -188,7 +185,7 @@ public class DataManager {
 
 	/**
 	 * Does nothing right now
-	 * @param stations list of data transferobjects 
+	 * @param stations list of data transferobjects
 	 */
 	@Deprecated
 	public void patchStations(List<StationDto> stations) {

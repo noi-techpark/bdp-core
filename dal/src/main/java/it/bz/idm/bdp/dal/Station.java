@@ -383,10 +383,7 @@ public class Station {
 				sync(em, dto);
 			} catch (Exception e) {
 				em.getTransaction().rollback();
-				if (e instanceof JPAException)
-					throw (JPAException) e;
-				e.printStackTrace();
-				throw new JPAException(e.getMessage(), e);
+				throw JPAException.unnest(e);
 			}
 		}
 		em.getTransaction().commit();
@@ -502,7 +499,7 @@ public class Station {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param em entitymanager
 	 * @param origin datacollector identifier where the data origins from
 	 * @param stationType typology of the specific station e.g. MeteoStation,

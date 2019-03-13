@@ -286,9 +286,7 @@ public class DataType {
 		} catch (Exception e) {
 			e.printStackTrace();
 			em.getTransaction().rollback();
-			if (e instanceof JPAException)
-				throw (JPAException) e;
-			throw new JPAException(e.getMessage(), e);
+			throw JPAException.unnest(e);
 		}
 	}
 }

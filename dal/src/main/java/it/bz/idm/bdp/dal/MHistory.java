@@ -291,11 +291,9 @@ public abstract class MHistory implements Serializable {
 			}
 
 		} catch(Exception ex) {
-			if (! (ex instanceof JPAException))
-				ex.printStackTrace();
 			if (em.getTransaction().isActive())
 				em.getTransaction().rollback();
-			throw ex;
+			throw JPAException.unnest(e);
 		} finally {
 			em.clear();
 			if (em.isOpen())
