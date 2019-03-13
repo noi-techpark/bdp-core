@@ -63,9 +63,9 @@ with x as (
           (x.station_id is not null and x.type_id is not null and x.period is null and not e_stationid and not e_typeid) or
           (x.station_id is not null and x.type_id is not null and x.period is not null and not e_stationid and not e_typeid and not e_period);
 
-CREATE INDEX bdppermissions_stp_idx ON bdppermissions USING btree (station_id, type_id, period);
-CREATE INDEX bdppermissions_role_id_idx ON bdppermissions USING btree (role_id);
-CREATE UNIQUE INDEX bdppermissions_uuid_idx ON bdppermissions USING btree (uuid);
+CREATE UNIQUE INDEX idx_bdppermissions_uuid ON bdppermissions USING btree (uuid);
+CREATE UNIQUE INDEX idx_bdppermissions_role_id_station_id_type_id_period on bdppermissions using btree(role_id, station_id, type_id, period);
+CREATE INDEX idx_bdppermissions_role_id ON bdppermissions USING btree (role_id);
 COMMENT ON MATERIALIZED VIEW bdppermissions IS 'Materialized view to simulate row-level-security';
 
 
@@ -92,8 +92,3 @@ insert into bdpusers_bdproles(user_id,role_id)
 
 REFRESH MATERIALIZED VIEW bdppermissions;
 
-------------------------------------------------------------------------------------------------------------------------
--- Additional indexes
-------------------------------------------------------------------------------------------------------------------------
-CREATE INDEX measurementhistory_tsdesc_idx ON measurementhistory USING btree ("timestamp" DESC);
-CREATE INDEX measurementstringhistory_tsdesc_idx ON measurementstringhistory USING btree ("timestamp" DESC);
