@@ -318,14 +318,14 @@ public abstract class MHistory implements Serializable {
 	 * the only method which requests history data from the biggest existing tables in the underlying db,<br/>
 	 * it's very important that indexes are set correctly to avoid bad performance
 	 * </p>
-	 * @param em entitymanager
+	 * @param em entity manager
 	 * @param typology of the specific station e.g. MeteoStation,
 	 *                    Environmentstation etc.
 	 * @param identifier unique station identifier, required
 	 * @param cname unique type identifier, required
 	 * @param start time filter start in milliseconds UTC for query, required
 	 * @param end time filter start in milliseconds UTC for query, required
-	 * @param period intervall between measurements
+	 * @param period interval between measurements
 	 * @param role authorization level of the current session
 	 * @param tableObject implementation which calls this method to decide which table to query, required
 	 * @return a list of measurements from history tables
@@ -339,9 +339,10 @@ public abstract class MHistory implements Serializable {
 						"AND (record.type = p.type OR p.type = null)",
 						"AND (record.period = p.period OR p.period = null)",
 						"AND p.role = :role",
-						"AND record.station.stationtype = :stationtype",
-						"AND record.station.stationcode = :stationcode",
-						"AND record.type.cname = :cname",
+						"AND record.station = (",
+							"SELECT s FROM Station s WHERE s.stationtype = :stationtype AND s.stationcode = :stationcode",
+						")",
+						"AND record.type = (SELECT t FROM DataType t WHERE t.cname = :cname)",
 						"AND record.timestamp between :start AND :end")
 				.setParameterIfNotNull("period", period, "AND record.period = :period")
 				.setParameter("stationtype", stationtype)
