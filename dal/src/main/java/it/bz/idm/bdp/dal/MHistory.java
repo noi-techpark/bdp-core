@@ -290,7 +290,7 @@ public abstract class MHistory implements Serializable {
 				throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
 			}
 
-		} catch(Exception ex) {
+		} catch(Exception e) {
 			if (em.getTransaction().isActive())
 				em.getTransaction().rollback();
 			throw JPAException.unnest(e);
