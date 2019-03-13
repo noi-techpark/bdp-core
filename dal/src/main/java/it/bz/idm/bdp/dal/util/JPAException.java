@@ -75,6 +75,24 @@ public class JPAException extends RuntimeException {
 		this.schemaDtoClass = schemaDtoClass;
 	}
 
+	/**
+	 * We do not want to nest JPAExceptions, which should report issues to the API user.
+	 * That is, it should always return the very first error, that occurred and got enough
+	 * information to solve an API call issue. We also want to show stack traces for debug
+	 * purposes, if it is not an already described exception (not an JPAException).
+	 *
+	 * @param e is a caught Exception
+	 * @return JPAException, which is a described runtime exception, ready for API consumers
+	 *
+	 * @author Peter Moser
+	 */
+	public static JPAException unnest(Exception e) {
+		if (e instanceof JPAException)
+			return (JPAException) e;
+		e.printStackTrace();
+		return new JPAException(e.getMessage(), e);
+	}
+
 	public ExceptionDto getExceptionDto() {
 		return exceptionDto;
 	}
