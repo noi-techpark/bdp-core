@@ -55,7 +55,7 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
  */
 @MappedSuperclass
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public abstract class MHistory implements Serializable {
+public abstract class MeasurementAbstractHistory implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,7 +79,7 @@ public abstract class MHistory implements Serializable {
 
 	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
 
-	public MHistory() {
+	public MeasurementAbstractHistory() {
 		this.created_on = new Date();
 	}
 	/**
@@ -88,7 +88,7 @@ public abstract class MHistory implements Serializable {
 	 * @param timestamp UTC time of the measurement detection
 	 * @param period standard interval between 2 measurements
 	 */
-	public MHistory(Station station, DataType type, Date timestamp, Integer period) {
+	public MeasurementAbstractHistory(Station station, DataType type, Date timestamp, Integer period) {
 		this.station = station;
 		this.type = type;
 		this.timestamp = timestamp;
@@ -149,7 +149,7 @@ public abstract class MHistory implements Serializable {
 	 * <p>
 	 * persists all measurement data send to the writer from datacollectors to the database.<br/>
 	 * This "monstermethod"(refactorready?) goes down the datatree and persists all new records<br/>
-	 * it also updates the newest measurement in {@link M}, if it really is newer
+	 * it also updates the newest measurement in {@link MeasurementAbstract}, if it really is newer
 	 * </p>
 	 * @param em entitymanager
 	 * @param stationType typology of the specific station e.g. MeteoStation,
@@ -193,9 +193,9 @@ public abstract class MHistory implements Serializable {
 							System.err.println("pushRecords: No period specified. Skipping...");
 							continue;
 						}
-						M latestNumberMeasurement = M.findLatestEntry(em, station, type, period, Measurement.class);
+						MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
 						long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
-						M latestStringMeasurement = M.findLatestEntry(em, station, type, period, MeasurementString.class);
+						MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
 						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
 						Date created_on = new Date();
@@ -301,9 +301,9 @@ public abstract class MHistory implements Serializable {
 		}
 	}
 
-	private static List<RecordDto> castToDtos(List<MHistory> result, boolean setPeriod) {
+	private static List<RecordDto> castToDtos(List<MeasurementAbstractHistory> result, boolean setPeriod) {
 		List<RecordDto> dtos = new ArrayList<>();
-		for (MHistory m : result) {
+		for (MeasurementAbstractHistory m : result) {
 			SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), setPeriod ? m.getPeriod() : null);
 			dto.setCreated_on(m.getCreated_on().getTime());
 			dtos.add(dto);
@@ -329,7 +329,7 @@ public abstract class MHistory implements Serializable {
 	 * @return a list of measurements from history tables
 	 */
 	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
-		List<MHistory> result = QueryBuilder
+		List<MeasurementAbstractHistory> result = QueryBuilder
 				.init(em)
 				.addSql("SELECT record")
 				.addSql("FROM  " + tableObject.getClass().getSimpleName() + " record, BDPPermissions p",
@@ -350,7 +350,7 @@ public abstract class MHistory implements Serializable {
 				.setParameter("end", end)
 				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp")
-				.buildResultList(MHistory.class);
-		return MHistory.castToDtos(result, period == null);
+				.buildResultList(MeasurementAbstractHistory.class);
+		return MeasurementAbstractHistory.castToDtos(result, period == null);
 	}
 }

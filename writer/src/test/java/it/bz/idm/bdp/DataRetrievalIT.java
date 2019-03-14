@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.M;
+import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -62,7 +62,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		Integer period = 500;
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getStationcode());
-		M latestEntry = new Measurement().findLatestEntry(em, station, type, period, role);
+		MeasurementAbstract latestEntry = new Measurement().findLatestEntry(em, station, type, period, role);
 		assertNotNull(latestEntry);
 		assertEquals(period, latestEntry.getPeriod());
 		assertTrue(this.station.getActive());

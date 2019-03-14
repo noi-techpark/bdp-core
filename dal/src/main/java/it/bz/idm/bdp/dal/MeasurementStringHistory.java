@@ -48,7 +48,7 @@ import it.bz.idm.bdp.dto.RecordDto;
 	}
 )
 @Entity
-public class MeasurementStringHistory extends MHistory {
+public class MeasurementStringHistory extends MeasurementAbstractHistory {
 
 	@Transient
 	private static final long serialVersionUID = 8968054299664379971L;

@@ -56,7 +56,7 @@ import it.bz.idm.bdp.dto.RecordDto;
 	}
 )
 @Entity
-public class MeasurementHistory extends MHistory {
+public class MeasurementHistory extends MeasurementAbstractHistory {
 	@Transient
 	private static final long serialVersionUID = 2900270107783989197L;
 
@@ -111,7 +111,7 @@ public class MeasurementHistory extends MHistory {
 
 	@Override
 	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
-		return MHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
+		return MeasurementAbstractHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
 	}
 	@Override
 	public void setValue(Object value) {

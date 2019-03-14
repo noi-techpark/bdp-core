@@ -35,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.M;
+import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -96,9 +96,9 @@ public class SecurityIT extends WriterTestSetup {
 		assertNotNull(station);
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		assertNotNull(type);
-		M m = new Measurement().findLatestEntry(em, station, null, null, role2);
+		MeasurementAbstract m = new Measurement().findLatestEntry(em, station, null, null, role2);
 		assertNotNull(m);
-		M m2 = new Measurement().findLatestEntry(em, station, null, null, role1);
+		MeasurementAbstract m2 = new Measurement().findLatestEntry(em, station, null, null, role1);
 		assertNull(m2);
 	}
 

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.MHistory;
+import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Station;
@@ -63,7 +63,7 @@ public class DataManager {
 	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			MHistory.pushRecords(em, stationType, dataMap);
+			MeasurementAbstractHistory.pushRecords(em, stationType, dataMap);
 			return ResponseEntity.created(responseLocation).build();
 		} finally {
 			if (em.isOpen())

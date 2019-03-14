@@ -48,7 +48,7 @@ import it.bz.idm.bdp.dto.TypeDto;
 
 /**
  * <p>
- * DataType defines what you are measuring. Every measurement {@link MHistory}<br/>
+ * DataType defines what you are measuring. Every measurement {@link MeasurementAbstractHistory}<br/>
  * references exactly one data type, which gives you the required information to<br/>
  * interpret it correctly
  * </p>

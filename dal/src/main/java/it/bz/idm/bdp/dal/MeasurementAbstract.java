@@ -41,7 +41,7 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
  *         <p>
  *         This entity contains always the <strong>newest entry of a specific<br/>
  *         station, type and period</strong><br/>
- *         You will find all historic data in the class {@link MHistory} Each<br/>
+ *         You will find all historic data in the class {@link MeasurementAbstractHistory} Each<br/>
  *         measurement <strong>must</strong> extend this base class to keep<br/>
  *         integrity.<br/>
  *         It contains the 2 most important references to station and type and<br/>
@@ -50,7 +50,7 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
  */
 @MappedSuperclass
 @Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class M implements Serializable {
+public abstract class MeasurementAbstract implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -72,11 +72,11 @@ public abstract class M implements Serializable {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	private Provenance provenance;
 
-	public abstract M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
 	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
 	public abstract void setValue(Object value);
 
-	public M() {
+	public MeasurementAbstract() {
 		this.created_on = new Date();
 	}
 
@@ -86,7 +86,7 @@ public abstract class M implements Serializable {
 	 * @param timestamp UTC time of the measurement detection
 	 * @param period standard interval between 2 measurements
 	 */
-	public M(Station station, DataType type, Date timestamp, Integer period) {
+	public MeasurementAbstract(Station station, DataType type, Date timestamp, Integer period) {
 		this.station = station;
 		this.type = type;
 		this.timestamp = timestamp;
@@ -178,7 +178,7 @@ public abstract class M implements Serializable {
 	 *
 	 * <p> THIS METHOD SEES ALL DATA, SO CAREFUL WHEN YOU USE IT </p>
 	 *
-	 * Use {@link M#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)},
+	 * Use {@link MeasurementAbstract#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)},
 	 * if you need permission handling.
 	 *
 	 * @param em entity manager
@@ -188,7 +188,7 @@ public abstract class M implements Serializable {
 	 * @param table
 	 * @return
 	 */
-	public static <T extends M> M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, Class<T> subClass) {
+	public static <T extends MeasurementAbstract> MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period, Class<T> subClass) {
 		if (station == null)
 			return null;
 
@@ -208,9 +208,9 @@ public abstract class M implements Serializable {
 	 * @param period intervall between measurements to filter by
 	 * @param role authorization level of the current session
 	 * @param table measurement implementation table to search in
-	 * @return newest measurement {@link M} of a specific station. It can also be narrowed down to type and period
+	 * @return newest measurement {@link MeasurementAbstract} of a specific station. It can also be narrowed down to type and period
 	 */
-	protected static <T extends M> M findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
+	protected static <T extends MeasurementAbstract> MeasurementAbstract findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
 		if (station == null)
 			return null;
 

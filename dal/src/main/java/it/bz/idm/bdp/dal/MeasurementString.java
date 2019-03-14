@@ -46,7 +46,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
  */
 @Table(name="measurementstring")
 @Entity
-public class MeasurementString extends M {
+public class MeasurementString extends MeasurementAbstract {
 
 	@Transient
 	private static final long serialVersionUID = -4378235887347510723L;
@@ -105,12 +105,12 @@ public class MeasurementString extends M {
 	}
 
 	@Override
-	public M findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return M.findLatestEntryImpl(em, station, type, period, role, this);
+	public MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
+		return MeasurementAbstract.findLatestEntryImpl(em, station, type, period, role, this);
 	}
 
 	@Override
 	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return M.getDateOfLastRecordImpl(em, station, type, period, role, this);
+		return MeasurementAbstract.getDateOfLastRecordImpl(em, station, type, period, role, this);
 	}
 }
