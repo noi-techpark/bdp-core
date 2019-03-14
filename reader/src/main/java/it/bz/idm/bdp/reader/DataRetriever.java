@@ -32,6 +32,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementHistory;
 import it.bz.idm.bdp.dal.MeasurementString;
+import it.bz.idm.bdp.dal.MeasurementStringHistory;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.authentication.BDPUser;
@@ -285,7 +286,7 @@ public class DataRetriever {
 			Station station = Station.findStation(em, stationtypology, identifier);
 			if (station != null) {
 				records.addAll(new MeasurementHistory().findRecords(em, stationtypology, identifier, type, start, end, period, role));
-				return records;
+				records.addAll(new MeasurementStringHistory().findRecords(em, stationtypology, identifier, type, start, end, period, role));
 			}
 		} catch(Exception e) {
 			throw JPAException.unnest(e);
