@@ -34,6 +34,7 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -51,8 +52,12 @@ import it.bz.idm.bdp.dto.RecordDto;
 	name = "measurementhistory",
 	indexes = {
 		@Index(
-			columnList = "station_id, type_id, timestamp DESC, period",
-			unique = true
+			columnList = "station_id, type_id, timestamp DESC, period"
+		)
+	},
+	uniqueConstraints = {
+		@UniqueConstraint(
+			columnNames = {"station_id", "type_id", "timestamp", "period", "double_value"}
 		)
 	}
 )
