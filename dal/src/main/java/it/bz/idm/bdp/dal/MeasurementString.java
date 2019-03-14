@@ -28,9 +28,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -44,7 +46,19 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
  * Implementation for measurements of type string
  *
  */
-@Table(name="measurementstring")
+@Table(
+	name = "measurementstring",
+	indexes = {
+		@Index(
+			columnList = "timestamp desc"
+		)
+	},
+	uniqueConstraints = {
+		@UniqueConstraint(
+			columnNames = {"station_id", "type_id", "period"}
+		)
+	}
+)
 @Entity
 public class MeasurementString extends MeasurementAbstract {
 

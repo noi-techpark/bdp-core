@@ -33,6 +33,7 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -45,7 +46,19 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
  * Implementation for measurements cache of type double
  *
  */
-@Table(name = "measurement", indexes = { @Index(columnList = "timestamp desc", name = "measurement_tsdesc_idx") })
+@Table(
+	name = "measurement",
+	indexes = {
+		@Index(
+			columnList = "timestamp desc"
+		)
+	},
+	uniqueConstraints = {
+		@UniqueConstraint(
+			columnNames = {"station_id", "type_id", "period"}
+		)
+	}
+)
 @Entity
 public class Measurement extends MeasurementAbstract {
 

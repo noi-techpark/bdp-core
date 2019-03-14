@@ -28,8 +28,11 @@ create index idx_bdppermissions_station_id_type_id_period on bdppermissions (sta
 alter table bdprole add constraint uc_bdprole_name unique (name);
 alter table bdpuser add constraint uc_bdpuser_email unique (email);
 create index idx_measurement_timestamp on measurement (timestamp desc);
-create index idx_measurementhistory_station_id_type_id_timestamp_period on measurementhistory (station_id, type_id, timestamp desc, period);
-create index idx_measurementstringhistory_st_on_id_type_id_timestamp_period_ on measurementstringhistory (station_id, type_id, timestamp desc, period);
+alter table measurement add constraint uc_measurement_station_id_type_id_period unique (station_id, type_id, period);
+alter table measurementhistory add constraint uc_measurementhistory_station_id_type_id_timestamp_period unique (station_id, type_id, timestamp desc, period);
+create index idx_measurementstring_timestamp on measurementstring (timestamp desc);
+alter table measurementstring add constraint uc_measurementstring_station_id_type_id_period unique (station_id, type_id, period);
+alter table measurementstringhistory add constraint uc_measurementstringhistory_station_id_type_id_timestamp_period unique (station_id, type_id, timestamp desc, period);
 alter table provenance add constraint uc_provenance_lineage_data_collector_data_collector_version unique (lineage, data_collector, data_collector_version);
 alter table station add constraint uc_station_stationcode_stationtype unique (stationcode, stationtype);
 alter table type add constraint uc_type_cname unique (cname);

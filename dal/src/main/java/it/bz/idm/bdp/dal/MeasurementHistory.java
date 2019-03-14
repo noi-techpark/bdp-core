@@ -51,7 +51,8 @@ import it.bz.idm.bdp.dto.RecordDto;
 	name = "measurementhistory",
 	indexes = {
 		@Index(
-			columnList = "station_id, type_id, timestamp DESC, period"
+			columnList = "station_id, type_id, timestamp DESC, period",
+			unique = true
 		)
 	}
 )
