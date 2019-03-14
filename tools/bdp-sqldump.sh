@@ -39,38 +39,32 @@ STRATEGYCLASS='it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
 OUTPUTPATH="$BDPROOT/dal/src/main/resources/META-INF/sql"
 OUTPUTFILE="$OUTPUTPATH/schema-$OUTPUTVERSION-dump.sql"
 
-# Build the jar file, if it does not yet exist
+cd tools
+mvn clean package
+cd -
 test -f "$GEN" || {
-    cd tools
-    mvn clean package
-    cd -
-    test -f "$GEN" || {
-        echo "ERROR: $GEN not found. Maybe you have a version mismatch with $VERSION. See:"
-        ls $(dirname $GEN)/*.jar
-        exit 1
-    }
-}
-test -f "$DTO" || {
-    cd dto
-    mvn clean package
-    cd -
-    test -f "$DTO" || {
-        echo "ERROR: $DTO not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
-        ls $(dirname $DTO)/*.jar
-        exit 1
-    }
-}
-test -f "$DAL" || {
-    cd dal
-    mvn clean package
-    cd -
-    test -f "$DAL" || {
-        echo "ERROR: $DAL not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
-        ls $(dirname $DAL)/*.jar
-        exit 1
-    }
+    echo "ERROR: $GEN not found. Maybe you have a version mismatch with $VERSION. See:"
+    ls $(dirname $GEN)/*.jar
+    exit 1
 }
 
+cd dto
+mvn clean package
+cd -
+test -f "$DTO" || {
+    echo "ERROR: $DTO not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
+    ls $(dirname $DTO)/*.jar
+    exit 1
+}
+
+cd dal
+mvn clean package
+cd -
+test -f "$DAL" || {
+    echo "ERROR: $DAL not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
+    ls $(dirname $DAL)/*.jar
+    exit 1
+}
 
 # Do not overwrite existing files, move them to .backup
 EXISTED=""
