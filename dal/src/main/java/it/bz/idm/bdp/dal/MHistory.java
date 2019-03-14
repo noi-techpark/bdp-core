@@ -301,10 +301,10 @@ public abstract class MHistory implements Serializable {
 		}
 	}
 
-	private static List<RecordDto> castToDtos(List<MHistory> result) {
+	private static List<RecordDto> castToDtos(List<MHistory> result, boolean setPeriod) {
 		List<RecordDto> dtos = new ArrayList<>();
 		for (MHistory m : result) {
-			SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), m.getPeriod());
+			SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), setPeriod ? m.getPeriod() : null);
 			dto.setCreated_on(m.getCreated_on().getTime());
 			dtos.add(dto);
 		}
@@ -351,6 +351,6 @@ public abstract class MHistory implements Serializable {
 				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp")
 				.buildResultList(MHistory.class);
-		return MHistory.castToDtos(result);
+		return MHistory.castToDtos(result, period == null);
 	}
 }

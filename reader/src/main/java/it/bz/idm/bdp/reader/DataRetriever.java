@@ -272,9 +272,7 @@ public class DataRetriever {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
 			start = new Date(end.getTime() - (seconds * 1000l));
-		}
-
-		if (start == null || end == null) {
+		} else if (start == null || end == null) {
 			throw new JPAException("Provided interval not valid: [" + start + ", " + end + "]. Set 'start' and 'end', or leave both null.");
 		}
 
