@@ -82,24 +82,24 @@ public class DataType {
 	}
 
 	/**
-	 * @param cname unique identifier for a data type
+	 * @param dataType unique identifier for a data type
 	 * @param cunit unit of specific measurements
 	 * @param description of a specific measurements
 	 * @param rtype metric of a specific measurements
 	 */
-	public DataType(String cname,  String cunit, String description, String rtype) {
-		this(cname);
+	public DataType(String dataType, String cunit, String description, String rtype) {
+		this(dataType);
 		setCunit(cunit);
 		setDescription(description);
 		setRtype(rtype);
 	}
 
 	/**
-	 * @param cname unique identifier for a data type
+	 * @param dataType unique identifier for a data type
 	 */
-	public DataType(String cname) {
+	public DataType(String dataType) {
 		this();
-		setCname(cname);
+		setCname(dataType);
 	}
 	public Long getId() {
 		return id;
@@ -110,8 +110,8 @@ public class DataType {
 	public String getCname() {
 		return cname;
 	}
-	public void setCname(String cname) {
-		this.cname = cname;
+	public void setCname(String dataType) {
+		this.cname = dataType;
 	}
 	public Date getCreated_on() {
 		return created_on;
@@ -140,14 +140,14 @@ public class DataType {
 
 	/**
 	 * @param em entity manager
-	 * @param cname unique identifier for a data type
+	 * @param dataType unique identifier for a data type
 	 * @return a data type entity from database
 	 */
-	public static DataType findByCname(EntityManager em, String cname) {
+	public static DataType findByCname(EntityManager em, String dataType) {
 		return QueryBuilder
 				.init(em)
 				.addSql("SELECT type FROM DataType type WHERE type.cname = :cname")
-				.setParameter("cname", cname)
+				.setParameter("cname", dataType)
 				.buildSingleResultOrNull(DataType.class);
 	}
 
@@ -167,17 +167,17 @@ public class DataType {
 	 * @param em entity manager
 	 * @param stationType typology of the specific station e.g. MeteoStation,
 	 *                    Environmentstation etc.
-	 * @param stationId unique stringidentifier of a specific station entity
+	 * @param stationCode unique stringidentifier of a specific station entity
 	 * @param subClass Measurementimplementation class which to read from
 	 * @return
 	 */
-	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId, Class<T> subClass) {
+	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationCode, Class<T> subClass) {
 		List<Object[]> resultList = QueryBuilder
 				.init(em)
 				.addSql("SELECT type, m.period FROM " + subClass.getSimpleName() + " m INNER JOIN m.type type",
 						"WHERE m.station.stationtype = :stationType")
 				.setParameter("stationType", stationType)
-				.setParameterIf("station", stationId, "AND m.station.stationcode = :station", stationId != null && !stationId.isEmpty())
+				.setParameterIf("station", stationCode, "AND m.station.stationcode = :station", stationCode != null && !stationCode.isEmpty())
 				.addSql("GROUP BY type, m.period")
 				.buildResultList(Object[].class);
 
@@ -209,16 +209,27 @@ public class DataType {
 		return types;
 	}
 
-	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationId) {
-		List<TypeDto> resultDouble = findTypes(em, stationType, stationId, Measurement.class);
-		List<TypeDto> resultString = findTypes(em, stationType, stationId, MeasurementString.class);
+	/**
+	 * Finds data types according station types and station codes grouped by period and only if
+	 * at least one record of the specific data type exists.
+	 *
+	 * @param em			entity manager
+	 * @param stationType	typology of a {@link Station}
+	 * @param stationCode	unique identifier of a {@link Station}
+	 *
+	 * @return a list of data types with all their details
+	 */
+	public static List<TypeDto> findTypes(EntityManager em, String stationType, String stationCode) {
+		List<TypeDto> resultDouble = findTypes(em, stationType, stationCode, Measurement.class);
+		List<TypeDto> resultString = findTypes(em, stationType, stationCode, MeasurementString.class);
 		resultDouble.addAll(resultString);
 		return new ArrayList<>(new HashSet<>(resultDouble));
 	}
 
 	/**
-	 * Find data types and return them as a list of string arrays with 4 elements each: <br />
-	 * <code> [[ID, UNIT, DESCRIPTION, INTERVAL], ...] </code>
+	 * Find data types and return them as a list of string arrays with 4 elements each:
+	 * <code> [ID, UNIT, DESCRIPTION, INTERVAL] </code>
+	 *
 	 * <p>
 	 * We use the new function {@link findTypes} internally, and convert the
 	 * {@link TypeDto} output into string arrays, because we do not want to duplicate
@@ -228,12 +239,12 @@ public class DataType {
 	 *
 	 * @param em			The Entity Manager
 	 * @param stationType	Station type, i.e., {@code EnvironmentStation}
-	 * @param stationId		Station ID, i.e., {@code BZ:01}
+	 * @param stationCode	Station ID, i.e., {@code BZ:01}
 	 * @return				List of string arrays with 4 elements each, see above <br />
 	 * 						or an empty string array, if nothing can be found
 	 */
-	public static List<String[]> findDataTypes(EntityManager em, String stationType, String stationId) {
-		List<TypeDto> typeDtoList = findTypes(em, stationType, stationId);
+	public static List<String[]> findDataTypes(EntityManager em, String stationType, String stationCode) {
+		List<TypeDto> typeDtoList = findTypes(em, stationType, stationCode);
 		List<String[]> result = new ArrayList<>();
 		for (TypeDto item : typeDtoList) {
 			Iterator<Integer> acqIntIterator = item.getAcquisitionIntervals().iterator();

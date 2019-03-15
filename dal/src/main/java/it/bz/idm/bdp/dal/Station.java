@@ -62,11 +62,13 @@ import it.bz.idm.bdp.dto.StationDto;
 
 /**
  * <p>
- * Station is where you are measuring and who is measuring it. It's representing<br/>
- * a point in space where a measurement occurred. It can be anything which has<br/>
- * the capacity to measure something. Examples are sensors, parkinglots, cars,<br/>
- * meterologystations ... Each station can also have a parent station, like a<br/>
- * car can have a carsharingparkinglot as it's parent
+ * Station is a point in space, which measures something. Stations have a name and are categorized in station
+ * types {@link Station#stationtype}.
+ * </p>
+ * <p>
+ * Each station can also have a parent station, like a car can have a car sharing parking-lot as it's parent.
+ * Finally, a station holds also a meta data JSON object, that can be anything, that provides additional
+ * information about that station.
  * </p>
  *
  * @author Bertolla Patrick
@@ -206,16 +208,21 @@ public class Station {
 		return stationcode;
 	}
 
-	public void setStationcode(String stationcode) {
-		this.stationcode = stationcode;
+	public void setStationcode(String stationCode) {
+		this.stationcode = stationCode;
 	}
 
+	/**
+	 * <p>The category or typology of this station.</p>
+	 * For example:<br />
+	 * <code>car, parkingLot, weatherStation</code>
+	 */
 	public String getStationtype() {
 		return stationtype;
 	}
 
-	public void setStationtype(String stationtype) {
-		this.stationtype = stationtype;
+	public void setStationtype(String stationType) {
+		this.stationtype = stationType;
 	}
 
 	public Boolean getActive() {
@@ -440,16 +447,16 @@ public class Station {
 	 * the previously inserted one.
 	 * @param em entitymanager
 	 * @param metaData new metadata map provided by the datacollector
-	 * @param existingStation current entity retrieved from database
+	 * @param station current entity retrieved from database
 	 */
-	protected static void syncMetaData(EntityManager em, Map<String, Object> metaData, Station existingStation) {
+	protected static void syncMetaData(EntityManager em, Map<String, Object> metaData, Station station) {
 		if (metaData == null)
 			return;
 
-		boolean metaDataExists = (existingStation.getMetaData() != null && existingStation.getMetaData().getJson() != null);
-		if (!metaDataExists || (metaDataExists && !existingStation.getMetaData().getJson().equals(metaData))) {
-			existingStation.setMetaData(metaData);
-			em.persist(existingStation.getMetaData());
+		boolean metaDataExists = (station.getMetaData() != null && station.getMetaData().getJson() != null);
+		if (!metaDataExists || (metaDataExists && !station.getMetaData().getJson().equals(metaData))) {
+			station.setMetaData(metaData);
+			em.persist(station.getMetaData());
 		}
 	}
 
@@ -520,12 +527,12 @@ public class Station {
 	/**
 	 * Retrieves and serializes all child stations which have the station with stationId as identifier as their parent
 	 * @param em entitymanager
-	 * @param stationId unique identifier of a station
+	 * @param stationCode unique identifier of a station
 	 * @return list of serializable pojos representing the station entities
 	 */
-	public List<StationDto> findChildren(EntityManager em, String stationId) {
+	public List<StationDto> findChildren(EntityManager em, String stationCode) {
 		List<Station> stations = em.createQuery("select station from Station station where station.parent.stationcode = :parentId", Station.class)
-								   .setParameter("parentId", stationId)
+								   .setParameter("parentId", stationCode)
 								   .getResultList();
 		return convertToDto(stations);
 	}

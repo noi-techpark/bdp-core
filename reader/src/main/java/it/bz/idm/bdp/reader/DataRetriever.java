@@ -44,26 +44,34 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 
 /**
- * Reader API
+ * Reader API - Data retriever
+ *
+ * <p>The reader's purpose is to provide data to any consumer web service. It can access
+ * the DB below read-only. The <code>DataRetriever</code> connects to the persistence layer,
+ * retrieves data from it and translates it into DTOs (data transport objects).</p>
+ *
  * @author Patrick Bertolla
  * @author Peter Moser
  *
  */
 public class DataRetriever {
 
-	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given */
+	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given (currently 1 day) */
 	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
 
 	/**
-	 * API v2 proposal for datatype dto
-	 * @param type unique identifier for {@link DataType}
-	 * @param stationId unique identifier for {@link Station}
-	 * @return
+	 * Gets data types of either all stations of a certain station type, or of a single station
+	 * with a certain station type and code.
+	 *
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station} (ignored, if null)
+	 *
+	 * @return a list of data types
 	 */
-	public List<TypeDto> getTypes(String type, String stationId) {
+	public List<TypeDto> getTypes(String stationType, String stationCode) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			return DataType.findTypes(em, type, stationId);
+			return DataType.findTypes(em, stationType, stationCode);
 		}catch(Exception e){
 			throw JPAException.unnest(e);
 		} finally {
@@ -73,20 +81,24 @@ public class DataRetriever {
 	}
 
 	/**
+	 * Get a list of {@link Station}s with all their details
 	 *
-	 * @param stationType by which to filter stations
-	 * @param stationID unique identifier of {@link Station}
-	 * @return list of station data transfer objects with all metadata of the give station
+	 * <p>If you want only a list of station IDs use {@link DataRetriever#getStations}</p>
+	 *
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 *
+	 * @return list of station data transfer objects with all meta data of the give station
 	 */
-	public List<? extends StationDto> getStationDetails(String stationType, String stationID) {
+	public List<? extends StationDto> getStationDetails(String stationType, String stationCode) {
 		List<StationDto> stations = new ArrayList<StationDto>();
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Station stationById = null;
-			if (stationID != null && !stationID.isEmpty()) {
-				stationById = Station.findStation(em, stationType, stationID);
+			if (stationCode != null && !stationCode.isEmpty()) {
+				stationById = Station.findStation(em, stationType, stationCode);
 			}
-			if ((stationById == null && (stationID == null || stationID.isEmpty())) || (stationById != null && stationType.equals(stationById.getStationtype())))
+			if ((stationById == null && (stationCode == null || stationCode.isEmpty())) || (stationById != null && stationType.equals(stationById.getStationtype())))
 				stations = Station.findStationsDetails(em, stationType, stationById);
 		} catch(Exception e) {
 			throw JPAException.unnest(e);
@@ -98,13 +110,18 @@ public class DataRetriever {
 	}
 
 	/**
-	 * @param type typology of a station
+	 * Get a list of {@link Station} codes
+	 *
+	 * <p>If you want a list of station details use {@link DataRetriever#getStationDetails}</p>
+	 *
+	 * @param stationType typology of a {@link Station}
+	 *
 	 * @return list of unique identifiers of stations with a certain station typology
 	 */
-	public List<String> getStations(String type){
+	public List<String> getStations(String stationType){
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			return Station.findStationCodes(em, type, true);
+			return Station.findStationCodes(em, stationType, true);
 		} catch(Exception e) {
 			throw JPAException.unnest(e);
 		} finally {
@@ -114,7 +131,9 @@ public class DataRetriever {
 	}
 
 	/**
-	 * @return all existing typologies in the database
+	 * Get a list of station types (see {@link Station#getStationtype()})
+	 *
+	 * @return all station types (typologies)
 	 */
 	public List<String> getStationTypes(){
 		EntityManager em = JPAUtil.createEntityManager();
@@ -129,15 +148,19 @@ public class DataRetriever {
 	}
 
 	/**
-	 * v2 API datatype call proposal
-	 * @param type typology of a station
-	 * @param stationId unique identifier of a station
-	 * @return all datatypes for a specific station where measurements exist
+	 * Get a list of data types as string arrays with 4 elements each
+	 * <code> [ID, UNIT, DESCRIPTION, INTERVAL] </code>
+	 * for all stations of a certain typology and a specific code.
+	 *
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station} (optional)
+	 *
+	 * @return all data types for a specific station where measurements exist
 	 */
-	public List<String[]> getDataTypes(String type, String stationId) {
+	public List<String[]> getDataTypes(String stationType, String stationCode) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try{
-			return DataType.findDataTypes(em, type, stationId);
+			return DataType.findDataTypes(em, stationType, stationCode);
 		}catch(Exception e){
 			throw JPAException.unnest(e);
 		}finally{
@@ -147,33 +170,40 @@ public class DataRetriever {
 	}
 
 	/**
-	 * @param type typology of a station
-	 * @return list datatypes
+	 * Get a list of data types as string arrays with 4 elements each
+	 * <code> [ID, UNIT, DESCRIPTION, INTERVAL] </code>
+	 * for all stations of a certain typology.
+	 *
+	 * @param stationType typology of a {@link Station}
+	 *
+	 * @return all data types for a specific station where measurements exist
 	 */
-	public List<String[]> getDataTypes(String type){
-		return getDataTypes(type, null);
+	public List<String[]> getDataTypes(String stationType){
+		return getDataTypes(stationType, null);
 	}
 
 	/**
-	 * @param stationTypology
-	 * @param stationcode unique string id for a station
-	 * @param cname unique string id for a datatype
+	 * Get the date, when the last measured data has been recorded
+	 *
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
 	 * @param period interval between 2 measurements
 	 * @param principal authorization level of the request
+	 *
 	 * @return date of last measured data
 	 */
-	public Date getDateOfLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
+	public Date getDateOfLastRecord(String stationType, String stationCode, String dataType, Integer period, Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		Date date = new Date(-1);
 		try {
-			Station station = Station.findStation(em, stationTypology, stationcode);
+			Station station = Station.findStation(em, stationType, stationCode);
 			if (station == null)
 				return date;
 
 			DataType type = null;
-			if (cname != null) {
-				type = DataType.findByCname(em, cname);
+			if (dataType != null) {
+				type = DataType.findByCname(em, dataType);
 				if (type == null)
 					return date;
 			}
@@ -191,22 +221,25 @@ public class DataRetriever {
 	}
 
 	/**
-	 * @param stationTypology
-	 * @param stationcode unique string id for a station
-	 * @param cname unique string id for a datatype
+	 * Get the last measured record
+	 *
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 * @param dataType unique identifiers for a {@link DataType}
 	 * @param period interval between 2 measurements
 	 * @param principal authorization level of the request
+	 *
 	 * @return last measured data record
 	 */
-	public RecordDto getLastRecord(String stationTypology, String stationcode, String cname, Integer period,Principal principal) {
+	public RecordDto getLastRecord(String stationType, String stationCode, String dataType, Integer period, Principal principal) {
 		EntityManager em = JPAUtil.createEntityManager();
 		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 		try {
-			Station station = Station.findStation(em, stationTypology, stationcode);
+			Station station = Station.findStation(em, stationType, stationCode);
 			if (station == null)
 				return null;
 
-			DataType type = DataType.findByCname(em, cname);
+			DataType type = DataType.findByCname(em, dataType);
 
 			Measurement latestEntry = (Measurement) new Measurement().findLatestEntry(em, station, type, period, role);
 			MeasurementString latestStringEntry = (MeasurementString) new MeasurementString().findLatestEntry(em, station, type, period, role);
@@ -235,39 +268,41 @@ public class DataRetriever {
 				em.close();
 		}
 	}
-	public RecordDto getNewestRecord(String typology, String stationId, String typeId, Integer period, Principal principal) {
-		return getLastRecord(typology, stationId, typeId, period, principal);
+	public RecordDto getNewestRecord(String stationType, String stationCode, String dataType, Integer period, Principal principal) {
+		return getLastRecord(stationType, stationCode, dataType, period, principal);
 	}
 
 
 	/**
-	 * @param stationtypology
-	 * @param identifier unique string id for a station
-	 * @param type unique string id for a datatype
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 * @param dataType unique identifiers for a {@link DataType}
 	 * @param seconds back in time from now requesting data for
 	 * @param period interval between 2 measurements
-	 * @param p authorization level of the request
+	 * @param principal authorization level of the request
+	 *
 	 * @return list of measurements
 	 */
-	public List<RecordDto> getRecords(String stationtypology,String identifier, String type, Integer seconds, Integer period, Principal p){
+	public List<RecordDto> getRecords(String stationType, String stationCode, String dataType, Integer seconds, Integer period, Principal principal){
 		seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 		Date end = new Date();
 		Date start = new Date(end.getTime()-(seconds*1000l));
-		return getRecords(stationtypology, identifier, type, start, end, period,seconds, p);
+		return getRecords(stationType, stationCode, dataType, start, end, period, seconds, principal);
 	}
 
 	/**
-	 * @param stationtypology
-	 * @param identifier unique string id for a station
-	 * @param type unique string id for a datatype
-	 * @param start of the timeinterval requesting data for
-	 * @param end end of the timeinterval data for
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 * @param dataType unique identifiers for a {@link DataType}
+	 * @param start of the time interval requesting data for
+	 * @param end end of the time interval data for
 	 * @param period interval between 2 measurements
 	 * @param seconds back in time from now (if no start and end is defined)
-	 * @param p authorization level of the request
+	 * @param principal authorization level of the request
+	 *
 	 * @return list of measurements
 	 */
-	public List<RecordDto> getRecords(String stationtypology, String identifier, String type, Date start, Date end, Integer period, Integer seconds, Principal p) {
+	public List<RecordDto> getRecords(String stationType, String stationCode, String dataType, Date start, Date end, Integer period, Integer seconds, Principal principal) {
 		if (start == null && end == null) {
 			seconds = seconds == null ? DEFAULT_SECONDS : seconds;
 			end = new Date();
@@ -277,14 +312,14 @@ public class DataRetriever {
 		}
 
 		EntityManager em = JPAUtil.createEntityManager();
-		BDPRole role = p != null ? getRoleByPrincipal(p, em) : BDPRole.fetchGuestRole(em);
+		BDPRole role = principal != null ? getRoleByPrincipal(principal, em) : BDPRole.fetchGuestRole(em);
 
 		List<RecordDto> records = new ArrayList<RecordDto>();
 		try {
-			Station station = Station.findStation(em, stationtypology, identifier);
+			Station station = Station.findStation(em, stationType, stationCode);
 			if (station != null) {
-				records.addAll(new MeasurementHistory().findRecords(em, stationtypology, identifier, type, start, end, period, role));
-				records.addAll(new MeasurementStringHistory().findRecords(em, stationtypology, identifier, type, start, end, period, role));
+				records.addAll(new MeasurementHistory().findRecords(em, stationType, stationCode, dataType, start, end, period, role));
+				records.addAll(new MeasurementStringHistory().findRecords(em, stationType, stationCode, dataType, start, end, period, role));
 			}
 		} catch(Exception e) {
 			throw JPAException.unnest(e);
