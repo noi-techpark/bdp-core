@@ -268,10 +268,6 @@ public class DataRetriever {
 				em.close();
 		}
 	}
-	public RecordDto getNewestRecord(String stationType, String stationCode, String dataType, Integer period, Principal principal) {
-		return getLastRecord(stationType, stationCode, dataType, period, principal);
-	}
-
 
 	/**
 	 * @param stationType typology of a {@link Station}

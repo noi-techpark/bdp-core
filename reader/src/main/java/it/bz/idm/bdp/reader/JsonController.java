@@ -107,13 +107,12 @@ public class JsonController extends DataRetriever{
 		return super.getLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/newest-record", method = RequestMethod.GET)
-	@Override
 	public @ResponseBody RecordDto getNewestRecord(@RequestParam String stationType,
 												   @RequestParam String stationId,
 												   @RequestParam(required=false) String typeId,
 												   @RequestParam(required=false) Integer period,
 												   Principal principal) {
-		return super.getNewestRecord(stationType, stationId, typeId, period, principal);
+		return super.getLastRecord(stationType, stationId, typeId, period, principal);
 	}
 	@RequestMapping(value = "/records", method = RequestMethod.GET)
 	public @ResponseBody List<RecordDto> getRecords(@RequestParam String stationType,
