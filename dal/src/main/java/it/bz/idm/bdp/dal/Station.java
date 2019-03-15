@@ -61,15 +61,12 @@ import it.bz.idm.bdp.dto.StationDto;
 
 
 /**
- * <p>
- * Station is a point in space, which measures something. Stations have a name and are categorized in station
- * types {@link Station#stationtype}.
- * </p>
- * <p>
- * Each station can also have a parent station, like a car can have a car sharing parking-lot as it's parent.
+ * Station is a point in space, where a measurement occurred. Stations have a name and are categorized in station
+ * types. See {@link Station#getStationtype()}.
+ *
+ * <p> Each station can also have a parent station, like a car can have a car sharing parking-lot as it's parent.
  * Finally, a station holds also a meta data JSON object, that can be anything, that provides additional
- * information about that station.
- * </p>
+ * information about that station.</p>
  *
  * @author Bertolla Patrick
  * @author Peter Moser
@@ -120,9 +117,9 @@ public class Station {
 	}
 
 	/**
-	 * @param stationType typology of a specific station
-	 * @param stationCode unique identifier of a station
-	 * @param stationName good chosen name, preferably in english
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 * @param stationName good chosen name, preferably in English
 	 */
 	public Station(String stationType, String stationCode, String stationName) {
 		this();
@@ -132,15 +129,14 @@ public class Station {
 	}
 
 	/**
-	 * Queries database on metadata of the specified station. Metadata consists of
-	 * defined fields like stationcode(uuid) and optional metadata which gets
+	 * Queries database on meta data of the specified station. Meta data consists of
+	 * defined fields like stationcode(uuid) and optional meta data which gets
 	 * versioned and only the newest one is used
 	 *
 	 * @param em          entity manager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
+	 * @param stationType typology of a {@link Station}
 	 * @param station
-	 * @return detail information/metadata of the specified station(s)
+	 * @return detail information/meta data of the specified station(s)
 	 */
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
 		List<Station> resultList = new ArrayList<Station>();
@@ -213,8 +209,8 @@ public class Station {
 	}
 
 	/**
-	 * <p>The category or typology of this station.</p>
-	 * For example:<br />
+	 * <p>Get the category or typology of this station.</p>
+	 * For example:
 	 * <code>car, parkingLot, weatherStation</code>
 	 */
 	public String getStationtype() {
@@ -270,11 +266,10 @@ public class Station {
 	}
 
 	/**
-	 * @param em          entitymanager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
+	 * @param em          entity manager
+	 * @param stationType typology of a {@link Station}
 	 * @param isActive
-	 * @return list of unique stringidentifier for each active station of a specific stationtype
+	 * @return list of unique string identifier for each active station of a specific station type
 	 */
 	public static List<String> findStationCodes(EntityManager em, String stationType, boolean isActive) {
 		return em.createQuery("select station.stationcode from Station station where station.active = :active and station.stationtype = :stationtype", String.class)
@@ -285,11 +280,10 @@ public class Station {
 
 
 	/**
-	 * @param em          entitymanager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param isActive    activity state provided by the datacollector
-	 * @return			  a list of station entities filtered by their activitystate and station typology
+	 * @param em          entity manager
+	 * @param stationType typology of a {@link Station}
+	 * @param isActive    activity state provided by the data collector
+	 * @return			  a list of station entities filtered by their activity state and station typology
 	 */
 	public static List<Station> findStations(EntityManager em, String stationType, boolean isActive) {
 		return em.createQuery("select station from Station station where station.active = :active and station.stationtype = :stationtype", Station.class)
@@ -298,7 +292,7 @@ public class Station {
 				 .getResultList();
 	}
 	/**
-	 * @param em entitymanager
+	 * @param em entity manager
 	 * @return unfiltered station entities
 	 */
 	public static List<Station> findStations(EntityManager em){
@@ -307,8 +301,8 @@ public class Station {
 	}
 
 	/**
-	 * @param em entitymanager
-	 * @return unique stringidentifiers for each existing stationtype
+	 * @param em entity manager
+	 * @return unique string identifiers for each existing station type
 	 */
 	public static List<String> findStationTypes(EntityManager em) {
 		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class)
@@ -316,11 +310,10 @@ public class Station {
 	}
 
 	/**
-	 * @param em entitymanager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param stationCode unique identifier of a station
-	 * @return station entity filtered by stationcode and stationtype
+	 * @param em entity manager
+	 * @param stationType typology of a {@link Station}
+	 * @param stationCode unique identifier of a {@link Station}
+	 * @return station entity filtered by station code and station type
 	 */
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
 		if(stationCode == null || stationType == null || stationType.isEmpty())
@@ -370,11 +363,12 @@ public class Station {
 	}
 
 	/**
-	 * Overrides all stations metadata with the current provided by the specific datacollector. Keep in mind that metadata gets versioned.
-	 * @param em entitymanager
-	 * @param stationType  typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param data list of stationdtos provided by a datacollector
+	 * Overrides all stations meta data with the current provided by the specific data collector.
+	 * Keep in mind that meta data gets versioned.
+	 *
+	 * @param em entity manager
+	 * @param stationType typology of a {@link Station}
+	 * @param data list of station DTOs provided by a data collector
 	 */
 	public static void syncStations(EntityManager em, String stationType, List<StationDto> data) {
 		syncActiveOfExistingStations(em, data);
@@ -398,7 +392,7 @@ public class Station {
 
 	/**
 	 * @param em entity manager
-	 * @param dto stationdto
+	 * @param dto station DTO
 	 * @throws JPAException is thrown if geographical transformation from one projection to another fails
 	 */
 	private static void sync(EntityManager em, StationDto dto) {
@@ -445,8 +439,9 @@ public class Station {
 	/**
 	 * Create a new meta data entry, if it does not yet exist or if it is different from
 	 * the previously inserted one.
-	 * @param em entitymanager
-	 * @param metaData new metadata map provided by the datacollector
+	 *
+	 * @param em entity manager
+	 * @param metaData new meta data map provided by the data collector
 	 * @param station current entity retrieved from database
 	 */
 	protected static void syncMetaData(EntityManager em, Map<String, Object> metaData, Station station) {
@@ -465,7 +460,7 @@ public class Station {
 	 * and not update an existing one, to keep the history of all meta data
 	 * changes.
 	 *
-	 * @param metaData
+	 * @param metaData new meta data map
 	 */
 	private void setMetaData(Map<String, Object> metaData) {
 		this.metaData = new MetaData();
@@ -475,8 +470,9 @@ public class Station {
 
 	/**
 	 * Synchronizes stations state, active stations are provided by a  data collector.
-	 * Queries database for stations with a specific origin and if provided, stationtype.
-	 * Deactivates stations in db which are not in the provided list and activates the ones which are.
+	 * Queries database for stations with a specific origin and if provided, station type.
+	 * Deactivates stations in DB which are not in the provided list and activates the ones which are.
+	 *
 	 * @param em   entity manager
 	 * @param dtos active stations, provided by the corresponding data-collector
 	 */
@@ -507,10 +503,9 @@ public class Station {
 
 	/**
 	 *
-	 * @param em entitymanager
-	 * @param origin datacollector identifier where the data origins from
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
+	 * @param em entity manager
+	 * @param origin data collector identifier where the data origins from
+	 * @param stationType typology of a {@link Station}
 	 * @return list of station enities filtered by stationtype and datacollector origin
 	 */
 	private static List<Station> findStationsByOrigin(EntityManager em, String origin, String stationType) {
@@ -526,9 +521,9 @@ public class Station {
 
 	/**
 	 * Retrieves and serializes all child stations which have the station with stationId as identifier as their parent
-	 * @param em entitymanager
+	 * @param em entity manager
 	 * @param stationCode unique identifier of a station
-	 * @return list of serializable pojos representing the station entities
+	 * @return list of station DTOs
 	 */
 	public List<StationDto> findChildren(EntityManager em, String stationCode) {
 		List<Station> stations = em.createQuery("select station from Station station where station.parent.stationcode = :parentId", Station.class)
@@ -551,11 +546,10 @@ public class Station {
 	}
 
 	/**
-	 * @param em entitymanager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param origin stringidentifier of the datacollector from where data origins
-	 * @return list of stationentities filtered by stationtype and origin
+	 * @param em entity manager
+	 * @param stationType typology of a {@link Station}
+	 * @param origin string identifier of the data collector from where data origins
+	 * @return list of station entities filtered by station type and origin
 	 */
 	public static List<Station> findStations(EntityManager em, String stationType, String origin) {
 		try {

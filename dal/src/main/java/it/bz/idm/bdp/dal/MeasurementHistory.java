@@ -42,11 +42,12 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 
 /**
+ * Implementation for a list of measurements of type <code>double</code>.
+ *
+ * <p>Extends {@link MeasurementAbstractHistory}.</p>
+ *
  * @author Peter Moser
  * @author Patrick Bertolla
- *
- * Implementation for measurements of type double
- *
  */
 @Table(
 	name = "measurementhistory",
