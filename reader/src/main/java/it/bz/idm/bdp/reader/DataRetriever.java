@@ -57,7 +57,7 @@ import it.bz.idm.bdp.dto.TypeDto;
 public class DataRetriever {
 
 	/** Default seconds while retrieving records, when no [start, end], nor "seconds" are given (currently 1 day) */
-	private static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
+	public static final int DEFAULT_SECONDS = 60 * 60 * 24; // one day
 
 	/**
 	 * Gets data types of either all stations of a certain station type, or of a single station
@@ -270,11 +270,16 @@ public class DataRetriever {
 	}
 
 	/**
+	 * Get all measurements filtered by given parameters
+	 *
+	 * <p>If no <code>seconds</code> are provided, we go back {@link DataRetriever#DEFAULT_SECONDS}
+	 * seconds from now.</p>
+	 *
 	 * @param stationType typology of a {@link Station}
 	 * @param stationCode unique identifier of a {@link Station}
 	 * @param dataType unique identifiers for a {@link DataType}
-	 * @param seconds back in time from now requesting data for
-	 * @param period interval between 2 measurements
+	 * @param seconds back in time from now requesting data for (optional)
+	 * @param period interval between 2 measurements (optional)
 	 * @param principal authorization level of the request
 	 *
 	 * @return list of measurements
@@ -287,6 +292,11 @@ public class DataRetriever {
 	}
 
 	/**
+	 * Get all measurements filtered by given parameters
+	 *
+	 * <p>If no <code>[start, end]</code> interval is provided, we go back {@link DataRetriever#DEFAULT_SECONDS}
+	 * seconds from now.</p>
+	 *
 	 * @param stationType typology of a {@link Station}
 	 * @param stationCode unique identifier of a {@link Station}
 	 * @param dataType unique identifiers for a {@link DataType}
@@ -326,6 +336,14 @@ public class DataRetriever {
 		return records;
 	}
 
+	/**
+	 * Get the {@link BDPRole} associated to a given principal
+	 *
+	 * @param principal authorization level of the request
+	 * @param em entity manager
+	 *
+	 * @return a {@link BDPRole}, or null if not found
+	 */
 	private BDPRole getRoleByPrincipal(Principal principal, EntityManager em) {
 		BDPUser user = BDPUser.findByEmail(em, principal.getName());
 		BDPRole role = user==null || user.getRoles().isEmpty() ? null : user.getRoles().get(0);
