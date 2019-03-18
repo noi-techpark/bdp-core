@@ -445,7 +445,7 @@ where subs.station_id = intimev2.metadata.station_id;
 insert into intimev2.type (cname, cunit, description, rtype, created_on)
 values ('occupied', null, 'Occupacy of a parking area', 'Count', now());
 
-insert into intimev2.measurement (station_id, type_id, created_on, timestamp, doublevalue, period)
+insert into intimev2.measurement (station_id, type_id, created_on, timestamp, double_value, period)
 select station_id
 		, (select id from intimev2.type where cname = 'occupied')
 		, case when createdate is null then lastupdate else createdate end
@@ -455,7 +455,7 @@ select station_id
 from intimev1.carparkingdynamic
 where occupacy >= 0;
 
-insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, doublevalue, period)
+insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, double_value, period)
 select station_id
 		, (select id from intimev2.type where cname = 'occupied')
 		, case when createdate is null then lastupdate else createdate end
@@ -606,23 +606,23 @@ where json = '{}'::jsonb;
 insert into intimev2.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
 insert into intimev2.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
 
-insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurement (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurement where value is not null;
 
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurementhistory where id >= 0 and id < 100000000 and value is not null;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurementhistory where id >= 100000000 and id < 200000000 and value is not null;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurementhistory where id >= 200000000 and id < 300000000 and value is not null;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurementhistory where id >= 300000000 and id < 400000000 and value is not null;
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
 from intimev1.measurementhistory where id >= 400000000 and id < 500000000 and value is not null;
 
@@ -644,7 +644,7 @@ CREATE INDEX no2_1_ppb_index ON intimev2.measurementmobilehistory USING btree (n
 CREATE INDEX ts_ms_index ON intimev2.measurementmobilehistory USING btree (ts_ms);
 
 
-insert into intimev2.measurementhistory (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select
 	case when created_on is null then timestamp else created_on end
 	, timestamp
@@ -655,7 +655,7 @@ select
 	, 1 /* provenance ID, see above */
 from intimev1.elaborationhistory where value is not null;
 
-insert into intimev2.measurement (created_on, timestamp, doublevalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurement (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select
 	case when created_on is null then timestamp else created_on end
 	, timestamp
