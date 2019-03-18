@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         BDP_DATABASE_SCHEMA = "intime"
-        BDP_DATABASE_HOST = "prod-tomcat-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
         BDP_DATABASE_NAME = "bdp"
         BDP_DATABASE_READ_USER = "bdp_readonly"
