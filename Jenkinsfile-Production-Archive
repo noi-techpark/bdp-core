@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence')
+        BDP_DATABASE_CONFIG = credentials('bdp-core-prod-persistence-v2')
     }
 
     stages {
@@ -23,12 +23,12 @@ pipeline {
         }
         stage('Build - Reader') {
             steps {
-               sh 'cd reader && mvn -B package -DfinalName=reader'
+               sh 'cd reader && mvn -B package -DfinalName=reader2'
             }
         }
         stage('Build - Writer') {
             steps {
-               sh 'cd writer && mvn -B package -DfinalName=writer'
+               sh 'cd writer && mvn -B package -DfinalName=writer2'
             }
         }
         stage('Archive') {
