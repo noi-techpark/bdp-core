@@ -299,5 +299,6 @@ public class DataType {
 			em.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		}
+		em.getTransaction().commit();
 	}
 }
