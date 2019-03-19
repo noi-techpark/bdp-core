@@ -249,18 +249,26 @@ public class DataRetriever {
 			}
 
 			if (latestEntry == null && latestStringEntry != null) {
-				return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(), latestStringEntry.getValue(), latestStringEntry.getPeriod());
+				return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(),
+										   latestStringEntry.getValue(),
+										   latestStringEntry.getCreated_on().getTime());
 			}
 
 			if (latestEntry != null && latestStringEntry == null) {
-				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(), latestEntry.getValue(), latestEntry.getPeriod());
+				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(),
+										   latestEntry.getValue(),
+										   latestEntry.getCreated_on().getTime());
 			}
 
 			if (latestEntry.getTimestamp().after(latestStringEntry.getTimestamp())) {
-				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(), latestEntry.getValue(), latestEntry.getPeriod());
+				return new SimpleRecordDto(latestEntry.getTimestamp().getTime(),
+										   latestEntry.getValue(),
+										   latestEntry.getCreated_on().getTime());
 			}
 
-			return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(), latestStringEntry.getValue(), latestStringEntry.getPeriod());
+			return new SimpleRecordDto(latestStringEntry.getTimestamp().getTime(),
+									   latestStringEntry.getValue(),
+									   latestStringEntry.getCreated_on().getTime());
 		} catch(Exception e) {
 			throw JPAException.unnest(e);
 		} finally {

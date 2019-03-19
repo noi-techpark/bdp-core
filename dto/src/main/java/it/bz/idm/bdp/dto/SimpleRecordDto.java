@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
- * Most simple implementation of {@link RecordDtoImpl} which additonaly to the
+ * Most simple implementation of {@link RecordDtoImpl} which additionally to the
  * timestamp has a value which can be anything.
  *
  * @author Patrick Bertolla
@@ -48,22 +48,27 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	private Long created_on;
 
 	public SimpleRecordDto() {
-	}
-	public SimpleRecordDto(Long timestamp, Double value) {
 		super();
-		this.timestamp = timestamp;
-		this.value = value;
 	}
 	public SimpleRecordDto(Long timestamp, Object value) {
-		super();
+		this();
 		this.timestamp = timestamp;
 		this.value = value;
 	}
+	public SimpleRecordDto(Long timestamp, Double value) {
+		this(timestamp, (Object) value);
+	}
 	public SimpleRecordDto(Long timestamp, Object value, Integer period) {
-		super();
-		this.timestamp = timestamp;
-		this.value = value;
-		this.period = period;
+		this(timestamp, value);
+		setPeriod(period);
+	}
+	public SimpleRecordDto(Long timestamp, Object value, Long created_on) {
+		this(timestamp, value);
+		setCreated_on(created_on);
+	}
+	public SimpleRecordDto(Long timestamp, Object value, Integer period, Long created_on) {
+		this(timestamp, value, period);
+		setCreated_on(created_on);
 	}
 	public Long getCreated_on() {
 		return created_on;
@@ -86,7 +91,7 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	}
 	@JsonIgnore
 	public boolean isValid() {
-		return value!=null&&timestamp!=null&&period!=null;
+		return value != null && timestamp != null && period != null;
 	}
 
 	@Override
