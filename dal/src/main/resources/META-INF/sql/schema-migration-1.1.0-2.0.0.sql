@@ -34,19 +34,19 @@ $$;
 -------------------------------------------------------------------------------------------------------------
 -- type
 -------------------------------------------------------------------------------------------------------------
--- select * from intimev1.type where timestamp is not null
+-- select * from intime.type where timestamp is not null
 -- table intimev2.type;
 insert into intimev2.type
-select id, cname, created_on, cunit, description, rtype from intimev1.type;
+select id, cname, created_on, cunit, description, rtype from intime.type;
 select setval('intimev2.type_seq', (select max(id) from intimev2.type));
 
 -------------------------------------------------------------------------------------------------------------
 -- station
 -------------------------------------------------------------------------------------------------------------
 --table intimev2.station;
---select * from intimev1.station limit 10;
+--select * from intime.station limit 10;
 insert into intimev2.station
-select id, active, available, name, origin, pointprojection, stationcode, stationtype, null, parent_id from intimev1.station;
+select id, active, available, name, origin, pointprojection, stationcode, stationtype, null, parent_id from intime.station;
 select setval('intimev2.station_seq', (select max(id) from intimev2.station));
 
 insert into intimev2.metadata (station_id, created_on, json)
@@ -56,11 +56,11 @@ select id
 		 'municipality', case when char_length(municipality) > 0 then municipality else null end,
 		 'description', case when char_length(description) > 0 then description else null end)
 	   ) as j
-from intimev1.station;
+from intime.station;
 select setval('intimev2.metadata_seq', (select max(id) from intimev2.metadata));
 
 update intimev2.station
-set metadata_id = subj.mid
+set meta_data_id = subj.mid
 from (
 	select s.id sid, m.id mid
 	from intimev2.metadata m, intimev2.station s
@@ -78,10 +78,10 @@ delete from intimev2.bdpuser;
 delete from intimev2.bdprules;
 delete from intimev2.bdprole;
 
-insert into intimev2.bdpuser table intimev1.bdpuser;
-insert into intimev2.bdprole table intimev1.bdprole;
-insert into intimev2.bdpusers_bdproles table intimev1.bdpusers_bdproles;
-insert into intimev2.bdprules table intimev1.bdprules;
+insert into intimev2.bdpuser table intime.bdpuser;
+insert into intimev2.bdprole table intime.bdprole;
+insert into intimev2.bdpusers_bdproles table intime.bdpusers_bdproles;
+insert into intimev2.bdprules table intime.bdprules;
 
 
 -------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select station_id bike, bikesharingstation_id station
-	from intimev1.bicyclebasicdata
+	from intime.bicyclebasicdata
 ) subs
 where id = subs.bike;
 
@@ -102,7 +102,7 @@ update intimev2.metadata
 set json = coalesce(json || subs.j, subs.j)
 from (
 	select station_id sid, jsonb_build_object('bikes', jsonb_object_agg(cname, max_available::int)) j
-	from intimev1.bikesharingstationbasicdata b
+	from intime.bikesharingstationbasicdata b
 	join type t on b.type_id = t.id
 	group by sid
 ) subs
@@ -138,9 +138,9 @@ from (
 				)
 			)) j
 	from intimev2.station s
-	join intimev1.carpoolinghubbasicdata c on s.id = c.station_id
-	join intimev1.carpoolinghubbasicdata_translation ct on ct.carpoolinghubbasicdata_id = c.id
-	join intimev1.translation t on ct.i18n_id = t.id
+	join intime.carpoolinghubbasicdata c on s.id = c.station_id
+	join intime.carpoolinghubbasicdata_translation ct on ct.carpoolinghubbasicdata_id = c.id
+	join intime.translation t on ct.i18n_id = t.id
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -149,7 +149,7 @@ update intimev2.station
 set parent_id = subs.hub
 from (
 	select station_id usr, hub_id hub
-	from intimev1.carpoolinguserbasicdata
+	from intime.carpoolinguserbasicdata
 ) subs
 where id = subs.usr;
 
@@ -187,12 +187,12 @@ from (
 			)) j
 	from intimev2.station s
 	join intimev2.station par on s.parent_id = par.id
-	join intimev1.carpoolinguserbasicdata c on s.id = c.station_id
-	join intimev1.carpoolinguserbasicdata_translation ct on ct.carpoolinguserbasicdata_id = c.id
-	join intimev1.translation t on ct.location_id = t.id
-	join intimev1.carpoolinghubbasicdata parc on par.id = parc.station_id
-	join intimev1.carpoolinghubbasicdata_translation parct on parct.carpoolinghubbasicdata_id = parc.id
-	join intimev1.translation part on parct.i18n_id = part.id
+	join intime.carpoolinguserbasicdata c on s.id = c.station_id
+	join intime.carpoolinguserbasicdata_translation ct on ct.carpoolinguserbasicdata_id = c.id
+	join intime.translation t on ct.location_id = t.id
+	join intime.carpoolinghubbasicdata parc on par.id = parc.station_id
+	join intime.carpoolinghubbasicdata_translation parct on parct.carpoolinghubbasicdata_id = parc.id
+	join intime.translation part on parct.i18n_id = part.id
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -207,7 +207,7 @@ from (
 				'brand', brand,
 				'licensePlate', licenseplate
 			)) j
-	from intimev1.carsharingcarstationbasicdata
+	from intime.carsharingcarstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -216,7 +216,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select station_id car, carsharingstation_id station
-	from intimev1.carsharingcarstationbasicdata
+	from intime.carsharingcarstationbasicdata
 ) subs
 where id = subs.car;
 
@@ -235,7 +235,7 @@ from (
 				'availableVehicles', parking,
 				'spontaneously', spontaneously
 			)) j
-	from intimev1.carsharingstationbasicdata
+	from intime.carsharingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -250,7 +250,7 @@ from (
 				'brand', brand,
 				'licensePlate', licenseplate
 			)) j
-	from intimev1.carsharingcarstationbasicdata
+	from intime.carsharingcarstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -294,9 +294,9 @@ CREATE TABLE intimev2.copert_emisfact (
 	CONSTRAINT copert_emisfact_id FOREIGN KEY (copert_parcom_id) REFERENCES intimev2.copert_parcom(id)
 );
 
-insert into intimev2.classification table intimev1.classification;
-insert into intimev2.copert_parcom table intimev1.copert_parcom;
-insert into intimev2.copert_emisfact table intimev1.copert_emisfact;
+insert into intimev2.classification table intime.classification;
+insert into intimev2.copert_parcom table intime.copert_parcom;
+insert into intimev2.copert_emisfact table intime.copert_emisfact;
 
 
 --------------------------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ from (
 					'outletTypeCode', plugtype
 				)
 			) j
-	from intimev1.echargingplugbasicdata
+	from intime.echargingplugbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -323,7 +323,7 @@ update intimev2.station
 set parent_id = subs.station
 from (
 	select estation_id station, station_id plug
-	from intimev1.echargingplugbasicdata
+	from intime.echargingplugbasicdata
 ) subs
 where id = subs.plug;
 
@@ -348,7 +348,7 @@ from (
 				)
 			)) j
 	from intimev2.station s
-	join intimev1.echargingplugoutlet o on o.plug_id = s.id
+	join intime.echargingplugoutlet o on o.plug_id = s.id
 	join intimev2.metadata m on m.station_id = s.id
 	group by s.id
 ) subs
@@ -376,7 +376,7 @@ from (
 				'accessType', accesstype,
 				'categories', categories
 			)) j
-	from intimev1.echargingstationbasicdata
+	from intime.echargingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -403,7 +403,7 @@ from (
 						else string_to_array(categories, ',')
 					end
 			)) j
-	from intimev1.echargingstationbasicdata
+	from intime.echargingstationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -435,7 +435,7 @@ from (
 				 'state', state,
 				 'womancapacity', womencapacity
 				)) j
-		from intimev1.carparkingbasicdata
+		from intime.carparkingbasicdata
 	)
 	select station_id, case when j::text = '{}'::text then null else j end
 	from jsonobj
@@ -452,7 +452,7 @@ select station_id
 		, lastupdate
 		, occupacy
 		, 300  			-- set 5 minutes = 300 seconds, since the lastupdate column shows more-or-less those differences
-from intimev1.carparkingdynamic
+from intime.carparkingdynamic
 where occupacy >= 0;
 
 insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, double_value, period)
@@ -462,7 +462,7 @@ select station_id
 		, lastupdate
 		, occupacy
 		, 300  			-- set 5 minutes = 300 seconds, since the lastupdate column shows more-or-less those differences
-from intimev1.carparkingdynamichistory
+from intime.carparkingdynamichistory
 where occupacy >= 0;
 
 
@@ -476,7 +476,7 @@ from (
 			, jsonb_strip_nulls(jsonb_build_object(
 				'area', area
 			)) j
-	from intimev1.meteostationbasicdata
+	from intime.meteostationbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -484,7 +484,7 @@ where subs.station_id = intimev2.metadata.station_id;
 -- linkbasicdata
 --------------------------------------------------------------------------------------------------------
 insert into intimev2.edge (id, edgedata_id, origin_id, destination_id, linegeometry, directed)
-select id, station_id, origin_id, destination_id, linegeometry, true from intimev1.linkbasicdata;
+select id, station_id, origin_id, destination_id, linegeometry, true from intime.linkbasicdata;
 select setval('intimev2.edge_seq', (select max(id) from intimev2.edge));
 
 update intimev2.metadata
@@ -496,7 +496,7 @@ from (
 				'lat', ST_X(ST_Transform(points.geom, 4326)),
 				'lon', ST_Y(ST_Transform(points.geom, 4326))
 			)) coords
-		from intimev1.linkbasicdata l, st_dumppoints(l.linegeometry) as points(path, geom)
+		from intime.linkbasicdata l, st_dumppoints(l.linegeometry) as points(path, geom)
 		group by 1
 	)
 	select station_id
@@ -507,7 +507,7 @@ from (
 				'destination', dest.stationcode,
 				'coordinates', coords
 			)) j
-	from intimev1.linkbasicdata l
+	from intime.linkbasicdata l
 	join intimev2.station dest on l.destination_id = dest.id
 	join lbd on lbd.id = l.station_id
 ) subs
@@ -527,7 +527,7 @@ from (
 				'speed_default', speed_default,
 				'linegeometry', linegeometry
 			)) j
-	from intimev1.streetbasicdata
+	from intime.streetbasicdata
 ) subs
 where subs.station_id = intimev2.metadata.station_id;
 
@@ -548,7 +548,7 @@ sel as (
 			, 'TrafficStreetFactor' as stationtype
 			, id_arco
 			, id_spira
-	from intimev1.trafficstreetfactor
+	from intime.trafficstreetfactor
 	join station s on id_arco = s.id
 	join station s2 on id_spira = s2.id
 	order by rn
@@ -576,7 +576,7 @@ select now()
 			'length', length,
 			'hv_perc', hv_perc
 		)
-from intimev1.trafficstreetfactor t
+from intime.trafficstreetfactor t
 join edge e on e.origin_id = t.id_arco and e.destination_id = t.id_spira;
 
 
@@ -587,13 +587,13 @@ join edge e on e.origin_id = t.id_arco and e.destination_id = t.id_spira;
 -- Update station-to-metadata foreign keys
 -- NB: this must be the last thing to do, because we update metadata foreign keys multiple times
 update intimev2.station
-set metadata_id = subj.mid
+set meta_data_id = subj.mid
 from (
 	select s.id sid, m.id mid
 	from intimev2.metadata m, intimev2.station s
 	where m.station_id = s.id
 ) subj
-where id = subj.sid and metadata_id is null;
+where id = subj.sid and meta_data_id is null;
 
 -- Remove all empty JSON objects from metadata
 update intimev2.metadata
@@ -603,45 +603,45 @@ where json = '{}'::jsonb;
 --------------------------------------------------------------------------------------------------------
 -- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
 --------------------------------------------------------------------------------------------------------
-insert into intimev2.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
-insert into intimev2.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
+insert into intimev2.provenance (id, lineage, data_collector) values (1, 'NOI', 'Migration from V1: Elaborations');
+insert into intimev2.provenance (id, lineage, data_collector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
 
 insert into intimev2.measurement (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurement where value is not null;
+from intime.measurement where value is not null;
 
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id >= 0 and id < 100000000 and value is not null;
+from intime.measurementhistory where id >= 0 and id < 100000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id >= 100000000 and id < 200000000 and value is not null;
+from intime.measurementhistory where id >= 100000000 and id < 200000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id >= 200000000 and id < 300000000 and value is not null;
+from intime.measurementhistory where id >= 200000000 and id < 300000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id >= 300000000 and id < 400000000 and value is not null;
+from intime.measurementhistory where id >= 300000000 and id < 400000000 and value is not null;
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
-from intimev1.measurementhistory where id >= 400000000 and id < 500000000 and value is not null;
+from intime.measurementhistory where id >= 400000000 and value is not null;
 
-insert into intimev2.measurementstring (created_on, timestamp, stringvalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementstring (created_on, timestamp, string_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, 1 /* instant, will be removed in the near future */, 2 /* provenance ID, see above */
-from intimev1.measurementstring where value is not null;
+from intime.measurementstring where value is not null;
 
-insert into intimev2.measurementstringhistory (created_on, timestamp, stringvalue, station_id, type_id, period, provenance_id)
+insert into intimev2.measurementstringhistory (created_on, timestamp, string_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, 1 /* instant, will be removed in the near future */, 2 /* provenance ID, see above */
-from intimev1.measurementstringhistory where value is not null;
+from intime.measurementstringhistory where value is not null;
 
-create table intimev2.measurementmobile as select * from intimev1.measurementmobile;
+create table intimev2.measurementmobile as select * from intime.measurementmobile;
 
-create table intimev2.measurementmobilehistory as select * from intimev1.measurementmobilehistory;
+create table intimev2.measurementmobilehistory as select * from intime.measurementmobilehistory;
 
-CREATE INDEX "fki_measuremenmobile-station" ON intimev2.measurementmobilehistory USING btree (station_id);
-CREATE INDEX no2_1_microgm3_ma ON intimev2.measurementmobilehistory USING btree (no2_1_microgm3_ma);
-CREATE INDEX no2_1_ppb_index ON intimev2.measurementmobilehistory USING btree (no2_1_ppb);
-CREATE INDEX ts_ms_index ON intimev2.measurementmobilehistory USING btree (ts_ms);
+CREATE INDEX idx_measurementmobilehistory_station_id ON intimev2.measurementmobilehistory USING btree (station_id);
+CREATE INDEX idx_measurementmobilehistory_no2_1_microgm3_ma ON intimev2.measurementmobilehistory USING btree (no2_1_microgm3_ma);
+CREATE INDEX idx_measurementmobilehistory_no2_1_ppb ON intimev2.measurementmobilehistory USING btree (no2_1_ppb);
+CREATE INDEX idx_measurementmobilehistory_ts_ms ON intimev2.measurementmobilehistory USING btree (ts_ms);
 
 
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
@@ -653,7 +653,7 @@ select
 	, type_id
 	, period
 	, 1 /* provenance ID, see above */
-from intimev1.elaborationhistory where value is not null;
+from intime.elaborationhistory where value is not null;
 
 insert into intimev2.measurement (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select
@@ -664,4 +664,46 @@ select
 	, type_id
 	, period
 	, 1 /* provenance ID, see above */
-from intimev1.elaboration where value is not null;
+from intime.elaboration where value is not null;
+
+DELETE FROM intimev2.measurementstring a USING intimev2.measurementstring b
+WHERE
+    a.id < b.id
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period;
+
+DELETE FROM intimev2.measurementstringhistory a USING intimev2.measurementstringhistory b
+WHERE
+    a.id < b.id
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.value = b.value;
+
+DELETE FROM intimev2.measurement a USING intimev2.measurement b
+WHERE
+    a.id < b.id
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period;
+
+alter table measurement add constraint uc_measurement_station_id_type_id_period unique (station_id, type_id, period);
+
+DELETE FROM intimev2.measurementhistory a USING intimev2.measurementhistory b
+WHERE
+    a.id < b.id
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.value = b.value;
+
+   
+alter table measurement 
+add constraint uc_measurement_station_id_type_id_period 
+unique (station_id, type_id, period);
+   
+alter table measurementhistory 
+add constraint uc_measurementhistory_station_i__timestamp_period_double_value_ 
+unique (station_id, type_id, timestamp, period, double_value);   
+
+alter table measurementstring 
+add constraint uc_measurementstring_station_id_type_id_period 
+unique (station_id, type_id, period);
+
+alter table measurementstringhistory 
+add constraint uc_measurementstringhistory_sta__timestamp_period_string_value_ 
+unique (station_id, type_id, timestamp, period, string_value);
+
+
+
