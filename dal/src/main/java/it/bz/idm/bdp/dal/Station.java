@@ -136,6 +136,7 @@ public class Station {
 	 * @param em          entity manager
 	 * @param stationType typology of a {@link Station}
 	 * @param station
+	 *
 	 * @return detail information/meta data of the specified station(s)
 	 */
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
@@ -146,9 +147,13 @@ public class Station {
 			resultList.add(station);
 		return convertToDto(resultList);
 	}
+
 	/**
-	 * Takes informations from database fields and all metadata infos from jsonb field and converts it to a serializable objects
-	 * @param resultList station entities to convert to valid dtos
+	 * Takes informations from database fields and all meta data information from JSON field and
+	 * converts it to a serializable objects
+	 *
+	 * @param resultList station entities to convert to valid DTOs
+	 *
 	 * @return valid StationDto containing serializable informations of the station entity
 	 */
 	public static List<StationDto> convertToDto(List<Station> resultList) {
@@ -269,6 +274,7 @@ public class Station {
 	 * @param em          entity manager
 	 * @param stationType typology of a {@link Station}
 	 * @param isActive
+	 *
 	 * @return list of unique string identifier for each active station of a specific station type
 	 */
 	public static List<String> findStationCodes(EntityManager em, String stationType, boolean isActive) {
@@ -283,6 +289,7 @@ public class Station {
 	 * @param em          entity manager
 	 * @param stationType typology of a {@link Station}
 	 * @param isActive    activity state provided by the data collector
+	 *
 	 * @return			  a list of station entities filtered by their activity state and station typology
 	 */
 	public static List<Station> findStations(EntityManager em, String stationType, boolean isActive) {
@@ -293,6 +300,7 @@ public class Station {
 	}
 	/**
 	 * @param em entity manager
+	 *
 	 * @return unfiltered station entities
 	 */
 	public static List<Station> findStations(EntityManager em){
@@ -302,6 +310,7 @@ public class Station {
 
 	/**
 	 * @param em entity manager
+	 *
 	 * @return unique string identifiers for each existing station type
 	 */
 	public static List<String> findStationTypes(EntityManager em) {
@@ -313,6 +322,7 @@ public class Station {
 	 * @param em entity manager
 	 * @param stationType typology of a {@link Station}
 	 * @param stationCode unique identifier of a {@link Station}
+	 *
 	 * @return station entity filtered by station code and station type
 	 */
 	private static Station findStation(EntityManager em, String stationType, Object stationCode) {
@@ -393,6 +403,7 @@ public class Station {
 	/**
 	 * @param em entity manager
 	 * @param dto station DTO
+	 *
 	 * @throws JPAException is thrown if geographical transformation from one projection to another fails
 	 */
 	private static void sync(EntityManager em, StationDto dto) {
@@ -506,7 +517,8 @@ public class Station {
 	 * @param em entity manager
 	 * @param origin data collector identifier where the data origins from
 	 * @param stationType typology of a {@link Station}
-	 * @return list of station enities filtered by stationtype and datacollector origin
+	 *
+	 * @return list of station entities filtered by station type and data collector origin
 	 */
 	private static List<Station> findStationsByOrigin(EntityManager em, String origin, String stationType) {
 		if (origin == null || origin.isEmpty()) {
@@ -521,8 +533,10 @@ public class Station {
 
 	/**
 	 * Retrieves and serializes all child stations which have the station with stationId as identifier as their parent
+	 *
 	 * @param em entity manager
 	 * @param stationCode unique identifier of a station
+	 *
 	 * @return list of station DTOs
 	 */
 	public List<StationDto> findChildren(EntityManager em, String stationCode) {
