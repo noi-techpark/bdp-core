@@ -56,7 +56,7 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,
 															   @RequestParam("stationId") String stationId,
-															   @RequestParam(value="typeId") String typeId,
+															   @RequestParam(value="typeId", required=false) String typeId,
 															   @RequestParam(value="period", required=false) Integer period) {
 		return ResponseEntity.ok(DataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
