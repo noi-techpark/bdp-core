@@ -124,9 +124,7 @@ public class DataManager {
 				throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
 			}
 			DataType dataType = DataType.findByCname(em, dataTypeName);
-			if (dataType == null) {
-				throw new JPAException("Data type '" + dataTypeName + "' not found.", HttpStatus.NOT_FOUND.value());
-			}
+
 			BDPRole role = BDPRole.fetchAdminRole(em);
 
 			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
