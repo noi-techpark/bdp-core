@@ -39,11 +39,13 @@ import org.hibernate.annotations.TypeDefs;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
+import it.bz.idm.bdp.dto.StationDto;
+
 /**
  * <p>
- * Metadata is a versioned jsonb map containing all additional information for a<br/>
- * {@link Station}. If a datacollector provides a different metadata object it<br/>
- * will replace the current one shown as metadata through the API.
+ * MetaData is a versioned JSONB map containing all additional information for a<br/>
+ * {@link Station}. If a data collector provides a different meta data object it<br/>
+ * will replace the current one shown as meta data through the API.
  * </p>
  *
  * @author Peter Moser
@@ -78,6 +80,13 @@ public class MetaData {
 		return json;
 	}
 
+	/**
+	 * Set JSON data (= meta data). We do not eliminate null values here,
+	 * because we want to set values to null to remove them from the result.
+	 * For instance, when retrieving a {@link StationDto}.
+	 *
+	 * @param metaData a key/object map, containing whatever you want
+	 */
 	public void setJson(Map<String, Object> metaData) {
 		this.json = metaData;
 	}

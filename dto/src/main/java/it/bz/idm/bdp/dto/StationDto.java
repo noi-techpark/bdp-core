@@ -23,6 +23,7 @@ package it.bz.idm.bdp.dto;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -162,7 +163,11 @@ public class StationDto implements Serializable {
 	}
 
 	public void setMetaData(Map<String, Object> metaData) {
-		this.metaData = metaData;
+		for (Entry<String, Object> entry : metaData.entrySet()) {
+			if (entry.getValue() != null && entry.getKey() != null) {
+				this.metaData.put(entry.getKey(), entry.getValue());
+			}
+		}
 	}
 
 	@JsonIgnore
