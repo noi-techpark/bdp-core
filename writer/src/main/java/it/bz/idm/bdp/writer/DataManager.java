@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
@@ -113,8 +113,7 @@ public class DataManager {
 	 */
 	public static Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
 		if (stationType == null || stationType.isEmpty()
-				|| stationCode == null || stationCode.isEmpty()
-				|| dataTypeName == null || dataTypeName.isEmpty()) {
+				|| stationCode == null || stationCode.isEmpty()) {
 			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
 		EntityManager em = JPAUtil.createEntityManager();
