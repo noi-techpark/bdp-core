@@ -665,7 +665,7 @@ where subs.station_id = intimev2.metadata.station_id;
 --------------------------------------------------------------------------------------------------------
 -- linkbasicdata
 --------------------------------------------------------------------------------------------------------
-insert into intimev2.edge (id, edgedata_id, origin_id, destination_id, linegeometry, directed)
+insert into intimev2.edge (id, edge_data_id, origin_id, destination_id, linegeometry, directed)
 select id, station_id, origin_id, destination_id, linegeometry, true from intime.linkbasicdata;
 select setval('intimev2.edge_seq', (select max(id) from intimev2.edge));
 
@@ -742,7 +742,7 @@ sel as (
 	returning id as station_id
 )
 , ins2 as (
-	insert into intimev2.edge (edgedata_id, origin_id, destination_id)
+	insert into intimev2.edge (edge_data_id, origin_id, destination_id)
 	select station_id, id_arco, id_spira
 	from (select *, row_number() over () as rn from ins1) i
 	join sel s using (rn)
@@ -752,7 +752,7 @@ select * from ins2;
 
 insert into intimev2.metadata (created_on, station_id, json)
 select now()
-		, e.edgedata_id
+		, e.edge_data_id
 		, jsonb_build_object(
 			'factor', factor,
 			'length', length,
@@ -785,8 +785,8 @@ where json = '{}'::jsonb;
 --------------------------------------------------------------------------------------------------------
 -- measurement(string|mobile), measurement(string|mobile)history, elaboration & elaborationhistory
 --------------------------------------------------------------------------------------------------------
-insert into intimev2.provenance (id, lineage, datacollector) values (1, 'NOI', 'Migration from V1: Elaborations');
-insert into intimev2.provenance (id, lineage, datacollector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
+insert into intimev2.provenance (id, lineage, data_collector) values (1, 'NOI', 'Migration from V1: Elaborations');
+insert into intimev2.provenance (id, lineage, data_collector) values (2, 'VARIOUS', 'Migration from V1: Measurements');
 
 insert into intimev2.measurement (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 2 /* provenance ID, see above */
@@ -856,7 +856,7 @@ WHERE
 DELETE FROM intimev2.measurementstringhistory a USING intimev2.measurementstringhistory b
 WHERE
     a.id < b.id
-    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.value = b.value;
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.string_value = b.string_value;
 
 DELETE FROM intimev2.measurement a USING intimev2.measurement b
 WHERE
@@ -866,7 +866,7 @@ WHERE
 DELETE FROM intimev2.measurementhistory a USING intimev2.measurementhistory b
 WHERE
     a.id < b.id
-    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.value = b.value;
+    AND a.station_id = b.station_id AND a.type_id = b.type_id AND a.period = b.period AND a.timestamp = b.timestamp AND a.double_value = b.double_value;
 
    
 alter table measurement 
