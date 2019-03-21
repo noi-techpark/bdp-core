@@ -22,6 +22,16 @@ insert into intimev2.type(cname, created_on, cunit, description, rtype)
 select cname, created_on, cunit, description, rtype from intime.type
 on conflict do nothing;
 
+-- measurement
+delete from intimev2.measurement;
+insert into intimev2.measurement (created_on, period, timestamp, double_value, station_id, type_id, provenance_id)
+select created_on, period, timestamp, value, station_id, type_id, 4 from intime.measurement;
+
+-- measurementstring
+delete from intimev2.measurementstring;
+insert into intimev2.measurementstring (created_on, period, timestamp, double_value, station_id, type_id, provenance_id)
+select created_on, period, timestamp, value, station_id, type_id, 5 from intime.measurementstring;
+
 -- carparkingdynamichistory
 insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, double_value, period, provenance_id)
 select station_id
