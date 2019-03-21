@@ -25,12 +25,14 @@ on conflict do nothing;
 -- measurement
 delete from intimev2.measurement;
 insert into intimev2.measurement (created_on, period, timestamp, double_value, station_id, type_id, provenance_id)
-select created_on, period, timestamp, value, station_id, type_id, 4 from intime.measurement;
+select created_on, period, timestamp, value, station_id, type_id, 4 from intime.measurement
+where value is not null;
 
 -- measurementstring
 delete from intimev2.measurementstring;
-insert into intimev2.measurementstring (created_on, period, timestamp, double_value, station_id, type_id, provenance_id)
-select created_on, period, timestamp, value, station_id, type_id, 5 from intime.measurementstring;
+insert into intimev2.measurementstring (created_on, period, timestamp, string_value, station_id, type_id, provenance_id)
+select created_on, period, timestamp, value, station_id, type_id, 5 from intime.measurementstring
+where value is not null;
 
 -- carparkingdynamichistory
 insert into intimev2.measurementhistory (station_id, type_id, created_on, timestamp, double_value, period, provenance_id)
