@@ -1,18 +1,36 @@
+/*
+ * This script takes the DELTA from the old schema and transfers it to the new one.
+ * The boundary of the DELTA is the last measured record within the new schema.
+ *
+ * We insert only new data types and stations, that is, we do not update changed data of
+ * existing types and stations.
+ *
+ * We then fetch the DELTAs from elaborationhistory, measurementhistory, measurementstringhistory,
+ * and carparkingdynamichistory and insert them into measurementhistory and measurementstringhistory
+ * respectively.
+ *
+ * We mark all new measurements with the provencance defined below.
+ *
+ * We print the last created_on value from measurementhistory and measurementstringhistory at the
+ * beginning and the end, such that, we keep track of what has been done.
+ *
+ * Finally, we also compare station and data type tables with the old ones, and print differences.
+ *
+ * @author Peter Moser
+ *
+ */
+
 -- When do we have inserted the last entries in measurement tables (before update)?
 select max(created_on) from intimev2.measurementhistory
 union all
 select max(created_on) from intimev2.measurementstringhistory;
 
-insert into intimev2.provenance (id, lineage, data_collector) values 
-    (3, 'NOI', 'Delta script from V1: carparkingdynamichistory'), 
-    (4, 'NOI', 'Delta script from V1: measurementhistory'),
-    (5, 'NOI', 'Delta script from V1: measurementstringhistory'),
-    (6, 'NOI', 'Delta script from V1: elaborationhistory')
-on conflict do nothing;
-
-
 -- DELTA MIGRATION START ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 begin;
+
+insert into intimev2.provenance (id, lineage, data_collector)
+values (3, 'VARIOUS', 'Delta migration-script from V1 to V2')
+on conflict do nothing;
 
 insert into intimev2.station(active, available, name, origin, pointprojection, stationcode, stationtype, parent_id)
 select active, available, name, origin, pointprojection, stationcode, stationtype, parent_id from intime.station
@@ -25,13 +43,13 @@ on conflict do nothing;
 -- measurement
 delete from intimev2.measurement;
 insert into intimev2.measurement (created_on, period, timestamp, double_value, station_id, type_id, provenance_id)
-select created_on, period, timestamp, value, station_id, type_id, 4 from intime.measurement
+select created_on, period, timestamp, value, station_id, type_id, 3 from intime.measurement
 where value is not null;
 
 -- measurementstring
 delete from intimev2.measurementstring;
 insert into intimev2.measurementstring (created_on, period, timestamp, string_value, station_id, type_id, provenance_id)
-select created_on, period, timestamp, value, station_id, type_id, 5 from intime.measurementstring
+select created_on, period, timestamp, value, station_id, type_id, 3 from intime.measurementstring
 where value is not null;
 
 -- carparkingdynamichistory
@@ -49,15 +67,15 @@ on conflict do nothing;
 
 -- measurementhistory
 insert into intimev2.measurementhistory (created_on, timestamp, double_value, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, 4 /* provenance ID, see above */
-from intime.measurementhistory where created_on > (select max(created_on) from intimev2.measurementhistory) --now() - interval '1 day' 
+select created_on, timestamp, value, station_id, type_id, period, 3 /* provenance ID, see above */
+from intime.measurementhistory where created_on > (select max(created_on) from intimev2.measurementhistory) --now() - interval '1 day'
 and value is not null
 on conflict do nothing;
 
 -- measurementstringhistory
 insert into intimev2.measurementstringhistory (created_on, timestamp, string_value, station_id, type_id, period, provenance_id)
-select created_on, timestamp, value, station_id, type_id, period, 5 /* provenance ID, see above */
-from intime.measurementhistory where created_on > (select max(created_on) from intimev2.measurementstringhistory) --now() - interval '1 day' 
+select created_on, timestamp, value, station_id, type_id, period, 3 /* provenance ID, see above */
+from intime.measurementhistory where created_on > (select max(created_on) from intimev2.measurementstringhistory) --now() - interval '1 day'
 and value is not null
 on conflict do nothing;
 
@@ -70,7 +88,7 @@ select
 	, station_id
 	, type_id
 	, period
-	, 6 /* provenance ID, see above */
+	, 3 /* provenance ID, see above */
 from intime.elaborationhistory where created_on > (select max(created_on) from intimev2.measurementhistory) --now() - interval '1 day' and value is not null
 on conflict do nothing;
 
