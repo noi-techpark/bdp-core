@@ -163,6 +163,12 @@ public class StationDto implements Serializable {
 	}
 
 	public void setMetaData(Map<String, Object> metaData) {
+		if (metaData == null) {
+			this.metaData = null;
+			return;
+		}
+
+
 		for (Entry<String, Object> entry : metaData.entrySet()) {
 			if (entry.getValue() != null && entry.getKey() != null) {
 				this.metaData.put(entry.getKey(), entry.getValue());
