@@ -66,16 +66,13 @@ Let the ORM handle the schema creation which will create all tables, views, sequ
 
 #### Entity structure
 The core strutcture of the bdp is quiet simple. There exists 3 entities on which all relies on
-  - **Station** : Represents the origin of the data which only needs an idenfier, a coordinate and a so called stationtype. Additional fields are the provider of the data, a name and description.
+  - **Station** : Represents the origin of the data which needs an identifier, a name, a coordinate and a so called stationtype. It also should contain the origin of the data, the current *active* state(if actively used or not) and if it has another station which it regards as parent, a reference to it. For all remaining data which enrich the station we created a field *metadata* which can hold any kind of meta information and get saved as a JSON object which gets versioned. To understand the functionality and the main job of this entity check the source code https://github.com/idm-suedtirol/bdp-core/blob/master/dal/src/main/java/it/bz/idm/bdp/dal/Station.java
 
-	Station is an abstract class containing generic operations and fields, valid for all type of stations. **MeasurementStation** extends Station and contains the business logic on how DataRecords which are measurements get stored to the database through the entities **Measurement** and **MeasurementHistory**. Measurements are identified by a timestamp, a double precision value, a reference to the type and a reference to the station.
-	**ElaborationStation** works quite similar but handles data which are elaborations created with data already contained inside the bigdataplatform. **Elaboration** and **ElaborationHistory** get used to store this data and are quite similar to Measurement and MeasurementHistory.
-	ElaborationStation and MeasurementStation are abstract classes which get extended by different classes containing the identifier of a stationtype.
+ 	*Example*: ```
+	station can be of stationtype **MeteoStation**, have a identifier `89935GW` and a position `latitude":46.24339407235059,"longitude":11.199431152658656`.
+	It can have additional information like
+	```
 
-	Sometimes incoming data data might be not numbers, but Strings. These kind of data is stored throught the entities **MeasurementString** and **MeasurementStringHistory**.
-
-  *Example*: station can be of stationtype **MeteoStation**, have a identifier `89935GW` and a position `latitude":46.24339407235059,"longitude":11.199431152658656`
-	It extends MeasurementStation and therefore needs close to no additional implementation to store data.
   - **DataType**: Represents the typology of the data in form of a unique name and a unit. Description and type of measurement can also be provided.
 
   *Example*: temperature can have a unit `°C` and can be an `average` value of the last 5 minutes.
