@@ -10,8 +10,8 @@ pipeline {
         TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
         TESTSERVER_TOMCAT_CREDENTIALS=credentials('testserver-tomcat8-credentials')
 
-        BDP_DATABASE_SCHEMA = "intimev2dc"
-        BDP_DATABASE_HOST = "test-tomcat-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        BDP_DATABASE_SCHEMA = "intimev2"
+        BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
         BDP_DATABASE_NAME = "bdp"
         BDP_DATABASE_READ_USER = "bdp_readonly"
