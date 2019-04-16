@@ -120,7 +120,9 @@ public class DataManager {
 		try {
 			Station station = Station.findStation(em, stationType, stationCode);
 			if (station == null) {
-				throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
+				return new Date(0);
+				//TODO: find another way to fix this since it causes regressions
+				//throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
 			}
 			DataType dataType = DataType.findByCname(em, dataTypeName);
 
