@@ -88,4 +88,55 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 		return existingMap;
 	}
 
+	/**
+	 * @param stationId station identifier
+	 * @param typeId type identifier
+	 * @param dto record to add in the correct leaf of the tree
+	 */
+	public void addRecord(String stationId, String typeId, SimpleRecordDto dto) {
+		if (dto != null && dto.isValid()){
+			DataMapDto<RecordDtoImpl> dataMapDto = contstructTree(stationId, typeId);
+			dataMapDto.getData().add(dto);
+		}
+	}
+
+	/**
+	 * @param stationId station identifier
+	 * @param typeId type identifier
+	 * @param dtos records to add in the correct leaf of the tree
+	 */
+	public void addRecords(String stationId, String typeId, List<SimpleRecordDto> dtos) {
+		if (dtos != null && !dtos.isEmpty()){
+			DataMapDto<RecordDtoImpl> dataMapDto = contstructTree(stationId, typeId);
+			dataMapDto.getData().addAll(dtos);
+		}
+	}
+
+	/**
+	 * @param stationId station identifier
+	 * @param typeId type identifier
+	 * @param dto records to add in the correct leaf of the tree
+	 * @return the data records container identified by station and type
+	 * @throws IllegalAccessError this method works only for the root of a tree and not for the station mapping or type mapping objects
+	 *
+	 */
+	private DataMapDto<RecordDtoImpl> contstructTree(String stationId, String typeId){
+		if (!this.getData().isEmpty())
+			throw new IllegalAccessError("This method only works for the root of your tree");
+		if (stationId== null || typeId == null)
+			throw new IllegalArgumentException("parameters can not be null");
+
+		DataMapDto<RecordDtoImpl> typeMap = this.getBranch().get(stationId);
+		if (typeMap == null) {
+			typeMap = new DataMapDto<>();
+			this.getBranch().put(stationId, typeMap);
+		}
+		DataMapDto<RecordDtoImpl> dataMapDto = typeMap.getBranch().get(typeId);
+		if (dataMapDto == null) {
+			dataMapDto = new DataMapDto<>();
+			typeMap.getBranch().put(typeId, dataMapDto);
+		}
+		return dataMapDto;
+	}
+
 }
