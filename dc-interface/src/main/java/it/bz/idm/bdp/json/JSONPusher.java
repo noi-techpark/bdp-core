@@ -61,6 +61,7 @@ public abstract class JSONPusher extends DataPusher {
 
 
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
+		dto.clean();
 		return pushData(this.integreenTypology, dto);
 	}
 
