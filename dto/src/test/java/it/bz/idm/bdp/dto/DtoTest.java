@@ -56,6 +56,7 @@ public class DtoTest {
 		assertFalse(childMapDto.getData().isEmpty());
 		assertTrue(dto.getData().isEmpty());
 		assertEquals(((SimpleRecordDto)childOfChildMapDto.getData().get(0)).getValue(),new Double(2));
+	}
 
 	@Test
 	public void testAddRecords() {
@@ -75,4 +76,13 @@ public class DtoTest {
 		assertEquals(3, dataMap.getData().size());
 	}
 
+	@Test
+	public void testCleanMap() {
+		DataMapDto<RecordDtoImpl> stationMap = new DataMapDto<>();
+		stationMap.addRecord(STATION_ID, TYPE1_ID, new SimpleRecordDto(new Date().getTime(), 5.,1));
+		stationMap.getBranch().put(EMPTY_STATION_BRANCH_ID, new DataMapDto<>());
+		stationMap.clean();
+		assertNull(stationMap.getBranch().get(EMPTY_STATION_BRANCH_ID));
+		assertEquals(1, stationMap.getBranch().size());
+	}
 }

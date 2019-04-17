@@ -139,4 +139,15 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 		return dataMapDto;
 	}
 
+	/**
+	 *Removes all branches containing no data records in the Measurement level
+	 */
+	public void clean() {
+		for (Map.Entry<String, DataMapDto<RecordDtoImpl>> stationEntry: this.getBranch().entrySet()) {
+			Map<String, DataMapDto<RecordDtoImpl>> typeMap = stationEntry.getValue().getBranch();
+			typeMap.entrySet().removeIf(entry -> entry.getValue().getData().isEmpty());
+		}
+		this.getBranch().entrySet().removeIf(entry -> entry.getValue().getBranch().isEmpty());
+	}
+
 }
