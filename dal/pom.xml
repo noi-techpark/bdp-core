@@ -236,7 +236,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>maven-repo.opendatahub.bz.it</id>
-            <url>s3://it.bz.opendatahub/snapshot</url>
+            <url>s3://it.bz.opendatahub/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>maven-repo.opendatahub.bz.it</id>
