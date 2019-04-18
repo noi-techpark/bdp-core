@@ -71,7 +71,7 @@
         </repository>
         <repository>
             <id>maven-repo.opendatahub.bz.it</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
         </repository>
     </repositories>
 
@@ -236,7 +236,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>maven-repo.opendatahub.bz.it</id>
-            <url>s3://it.bz.opendatahub/snapshots</url>
+            <url>s3://it.bz.opendatahub/snapshot</url>
         </snapshotRepository>
         <repository>
             <id>maven-repo.opendatahub.bz.it</id>
