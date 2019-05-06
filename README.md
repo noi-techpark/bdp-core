@@ -5,10 +5,13 @@ It collects and exposes data sets of various domains.
 
 This platform collects heterogeneous data of different sources and different domains, does elaborations on it and serves the raw and elaborated data through a REST interface.
 
+For a detail introduction, please see our [Big Data Platform Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
+
 The Big Data Platform Core is free software. It is licensed under GNU GENERAL
 PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 [![reuse compliant](https://reuse.software/badge/reuse-compliant.svg)](https://reuse.software/)
+
 
 ----
 
@@ -19,6 +22,12 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 
 - [CORE](#core)
+  - [WRITER](#writer)
+    - [dc-interface](#dc-interface)
+  - [READER](#reader)
+    - [Authentication](#authentication)
+    - [Authorization](#authorization)
+    - [ws-interface](#ws-interface)
   - [DAL](#dal)
     - [Station](#station)
     - [DataType](#datatype)
@@ -28,12 +37,6 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
     - [StationDto](#stationdto)
     - [DataTypeDto](#datatypedto)
     - [SimpleRecordDto](#simplerecorddto)
-  - [WRITER](#writer)
-    - [dc-interface](#dc-interface)
-  - [READER](#reader)
-    - [Authentication](#authentication)
-    - [Authorization](#authorization)
-    - [ws-interface](#ws-interface)
 - [Installation guide](#installation-guide)
 - [Flight rules](#flight-rules)
   - [I want to generate a new schema dump out of Hibernate's Entity classes](#i-want-to-generate-a-new-schema-dump-out-of-hibernates-entity-classes)
@@ -51,6 +54,72 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 ## CORE
 
 The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the web services which serve the data.
+
+The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services. Both are described in the following chapters.
+
+### WRITER
+The writer is a REST API, which pushes data as JSON defined in the DTOs to the DB. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The DAL is a big and shared part between writer and reader, which saves and retrieves the data through abstraction. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
+
+The full API description can be found inside [JsonController.java](https://github.com/noi-techpark/bdp-core/blob/master/writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
+
+Finally, we provide an interface to facilitate data collector development under Java. See the next chapter for more details.
+
+#### dc-interface
+The dc-interface contains the API through which components can communicate with the BDP writer. Just include the `dc-interface` [maven dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project) in your project and use the existing [JSON client implementation](https://github.com/noi-techpark/bdp-core/blob/master/dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
+
+The API contains several methods. We describe the most important methods here, for the rest see [JSONPusher.java](https://github.com/noi-techpark/bdp-core/blob/master/dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java) implementation.
+
+**`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
+
+This method is required to get the date of the last valid record
+
+
+**`Object syncStations(List<StationDto> data)`**
+
+This method is used to create, update, and deactivate stations of a specific typology; `data` must be a list of StationDto's
+
+**`Object syncDataTypes(List<DataTypeDto> data)`**
+
+This method is used to create and update(and therefore upsert) data types; `data` must be a list of DataTypeDto
+
+**`Object pushData(DataMapDto<? extends RecordDtoImpl> dto)`**
+
+This is the place, where you place all the data you want to pass to the writer. The data in here gets saved in form of a tree.
+
+Each branch can have multiple child branches, but can also have data itself, which means it can have indefinite depth.
+Right now, by our internal conventions we store everything on the second level, like this:
+
+```
++- Station
+   |
+   +- DataType
+      |
+      `-Data
+```
+
+As value you can put a list of [SimpleRecordDto.java](https://github.com/noi-techpark/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java), which contains all the data points with a specific station and  a specific type. Each point is represented as timestamp and value. To better understand the structure, see the [DataMapDto.java](https://github.com/noi-techpark/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java) source.
+
+  
+### READER
+
+The reader is an API exposing data through a [JSON REST service](https://github.com/noi-techpark/bdp-core/blob/master/ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
+It depends on the DAL module and retrieves data by querying the underlying database through JPA query language.
+
+#### Authentication
+The reader side handles authentication for non-opendata through an OAuth authentication mechanism using [JSON Web Tokens (JWT)](https://jwt.io/) through the [Java JWT library](https://github.com/jwtk/jjwt).
+
+> If you want to access closed data, write a request to info@opendatahub.bz.it.
+
+#### Authorization
+Each user we create is associated to a *ROLE*, which has a set of permissions. The rules which define these permissions are inserted manually into `/dal/src/main/resources/META-INF/sql/opendatarules.sql`.
+
+Two default roles exist:
+- *ADMIN*, which has full access on all existing data in the database
+- *GUEST*, which has restricted access to all data published under an open data license. Everybody who is not authenticated is therefore automatically using this role to access data.
+
+#### ws-interface
+If you create a Java client to access data from the reader's API, you may use this library. Just include the `ws-interface` [maven dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project) in your project and implement the abstract [JSON client implementation](https://github.com/noi-techpark/bdp-core/blob/master/ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
+
 
 ### DAL
 
@@ -119,71 +188,6 @@ Describes a specific type of data. We define the structure inside [DataTypeDto.j
 
 #### SimpleRecordDto
 Describes the measured value. We define the structure inside [SimpleRecordDto.java](https://github.com/noi-techpark/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java)
-
-
-### WRITER
-The writer is a REST API, which pushes data as JSON defined in the DTOs to the DB. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The DAL is a big and shared part between writer and reader, which saves and retrieves the data through abstraction. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
-
-The full API description can be found inside [JsonController.java](https://github.com/noi-techpark/bdp-core/blob/master/writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
-
-Finally, we provide an interface to facilitate data collector development under Java. See the next chapter for more details.
-
-#### dc-interface
-The dc-interface contains the API through which components can communicate with the BDP writer. Just include the `dc-interface` [maven dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project) in your project and use the existing [JSON client implementation](https://github.com/noi-techpark/bdp-core/blob/master/dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
-
-The API contains several methods. We describe the most important methods here, for the rest see [JSONPusher.java](https://github.com/noi-techpark/bdp-core/blob/master/dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java) implementation.
-
-**`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
-
-This method is required to get the date of the last valid record
-
-
-**`Object syncStations(List<StationDto> data)`**
-
-This method is used to create, update, and deactivate stations of a specific typology; `data` must be a list of StationDto's
-
-**`Object syncDataTypes(List<DataTypeDto> data)`**
-
-This method is used to create and update(and therefore upsert) data types; `data` must be a list of DataTypeDto
-
-**`Object pushData(DataMapDto<? extends RecordDtoImpl> dto)`**
-
-This is the place, where you place all the data you want to pass to the writer. The data in here gets saved in form of a tree.
-
-Each branch can have multiple child branches, but can also have data itself, which means it can have indefinite depth.
-Right now, by our internal conventions we store everything on the second level, like this:
-
-```
-+- Station
-   |
-   +- DataType
-      |
-      `-Data
-```
-
-As value you can put a list of [SimpleRecordDto.java](https://github.com/noi-techpark/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java), which contains all the data points with a specific station and  a specific type. Each point is represented as timestamp and value. To better understand the structure, see the [DataMapDto.java](https://github.com/noi-techpark/bdp-core/blob/master/dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java) source.
-
-  
-### READER
-
-The reader is an API exposing data through a [JSON REST service](https://github.com/noi-techpark/bdp-core/blob/master/ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
-It depends on the DAL module and retrieves data by querying the underlying database through JPA query language.
-
-#### Authentication
-The reader side handles authentication for non-opendata through an OAuth authentication mechanism using [JSON Web Tokens (JWT)](https://jwt.io/) through the [Java JWT library](https://github.com/jwtk/jjwt).
-
-> If you want to access closed data, write a request to info@opendatahub.bz.it.
-
-#### Authorization
-Each user we create is associated to a *ROLE*, which has a set of permissions. The rules which define these permissions are inserted manually into `/dal/src/main/resources/META-INF/sql/opendatarules.sql`.
-
-Two default roles exist:
-- *ADMIN*, which has full access on all existing data in the database
-- *GUEST*, which has restricted access to all data published under an open data license. Everybody who is not authenticated is therefore automatically using this role to access data.
-
-#### ws-interface
-If you create a Java client to access data from the reader's API, you may use this library. Just include the `ws-interface` [maven dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project) in your project and implement the abstract [JSON client implementation](https://github.com/noi-techpark/bdp-core/blob/master/ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
-
 
 ## Installation guide
 
