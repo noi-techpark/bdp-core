@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
