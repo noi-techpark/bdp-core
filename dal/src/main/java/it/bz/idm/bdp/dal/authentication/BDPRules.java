@@ -34,7 +34,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
 /**
- * Rules defined by an administrator to decide which datasets needs which permission access
+ * Rules defined by an administrator to decide which data set needs which permission access
  * @author Peter Moser
  *
  */

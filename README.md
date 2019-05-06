@@ -5,7 +5,7 @@ It collects and exposes data sets of various domains.
 
 This platform collects heterogeneous data of different sources and different domains, does elaborations on it and serves the raw and elaborated data through a REST interface.
 
-For a detail introduction, please see our [Big Data Platform Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
+For a detailed introduction, see our [Big Data Platform Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
 
 The Big Data Platform Core is free software. It is licensed under GNU GENERAL
 PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
