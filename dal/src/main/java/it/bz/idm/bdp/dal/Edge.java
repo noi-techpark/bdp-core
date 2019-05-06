@@ -36,6 +36,19 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
+/**
+ * This class is a model of an edge with meta data.
+ *
+ * <p>We do not want to change the API for v2, hence we need to keep edges
+ * as stations to retrieve "edge labels" with station API calls. This means that we use
+ * "station" as container class.
+ *
+ * <p> An edge is therefore a station-triple like <code>(origin, destination, edge_data)</code>,
+ * and some additional information, like directed, which describes if the edge has a direction, and
+ * a line-geometry, which describe trajectories on a map.
+ *
+ * @author Peter Moser
+ */
 @Table(name = "edge")
 @Entity
 public class Edge {
@@ -62,11 +75,7 @@ public class Edge {
 	@ManyToOne(optional = false)
 	protected Station destination;
 
-	/**
-	 * We model an edge with meta data, therefore we use "station" as container class.
-	 * In addition, we do not want to change the API for v2, hence we need to keep edges
-	 * as stations to retrieve "edge labels" with station API calls.
-	 *
+	/*
 	 * FIXME This should be changed to use meta data separately, and point from edges
 	 * and stations (=nodes) to it directly. We must think of how to group historical
 	 * meta data records inside the meta data table itself.

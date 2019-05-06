@@ -33,9 +33,15 @@ import org.hibernate.annotations.ColumnDefault;
 
 
 /**
- * AUthor needs to document this, I'm not in the mood right now :)
- * @author Peter Moser
+ * <p>Data provenance combines each measurement with it's origin (data collector). It is a tool to
+ * create traceability in a data analytics environment and collection process, to find the root
+ * cause of data errors. It provides cleansing capabilities to a data warehouse.
  *
+ * <p>For example, if we find out after some time, that the data collector "Parking Collector v1.3"
+ * had a bug, it is easy to remove all wrongly inserted data, because we had an association between
+ * that data collector and each collected measurement.
+ *
+ * @author Peter Moser
  */
 @Table(
 	name = "provenance",

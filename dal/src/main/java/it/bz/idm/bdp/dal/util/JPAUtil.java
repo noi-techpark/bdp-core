@@ -36,9 +36,9 @@ import javax.persistence.metamodel.ManagedType;
 
 /**
  * <p>
- * Utility class for access to the entity manager and retrieving informations<br/>
- * from jpa. A static initialisazion defines the persistence unit to use defined<br/>
- * in persistence.xml
+ * Utility class to access the entity manager and retrieve information
+ * from JPA. A static initialization defines the persistence unit, which should be used.
+ * Configuration will be done through META-INF/persistence.xml and META-INF/persistence.properties
  * </p>
  *
  * @author Patrick Bertolla

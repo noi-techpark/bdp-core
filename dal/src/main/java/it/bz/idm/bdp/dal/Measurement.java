@@ -40,11 +40,10 @@ import org.hibernate.annotations.ColumnDefault;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 
 /**
- * @author Peter Moser
- * @author Patrick Bertolla
- *
  * Implementation for measurements cache of type double
  *
+ * @author Peter Moser
+ * @author Patrick Bertolla
  */
 @Table(
 	name = "measurement",

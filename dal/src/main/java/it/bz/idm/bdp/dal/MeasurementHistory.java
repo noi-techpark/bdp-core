@@ -88,15 +88,14 @@ public class MeasurementHistory extends MeasurementAbstractHistory {
 	}
 
 	/**
-	 * TODO: remove created_on from the constructor since it's set automatically on creation time
 	 * @param station entity associated with this measurement
 	 * @param type entity associated with this measurement
 	 * @param value number value for this measurement
 	 * @param timestamp UTC time of measurement detection
 	 * @param period standard interval between 2 measurements
 	 */
-	public MeasurementHistory(Station station, DataType type, Double value, Date timestamp, Integer period, Date created_on) {
-		super(station,type,timestamp,period);
+	public MeasurementHistory(Station station, DataType type, Double value, Date timestamp, Integer period) {
+		super(station, type, timestamp, period);
 		setValue(value);
 	}
 

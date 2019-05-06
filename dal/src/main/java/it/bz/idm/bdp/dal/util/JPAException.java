@@ -23,7 +23,10 @@ package it.bz.idm.bdp.dal.util;
 import it.bz.idm.bdp.dto.ExceptionDto;
 
 /**
- * Yet to be documented by
+ * JPAException, which is a well-described runtime exception, ready for API consumers.
+ * The main goal for such an exception is to provide enough information to an API consumer
+ * to handle API errors as easy as possible. Do not expose internal errors.
+ *
  * @author Peter Moser
  *
  */

@@ -30,9 +30,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 /**
- * Tell me more, tell me more, tell me more ...
- * @author Peter Moser
+ * Create an instance of TypedQuery for executing a Java Persistence query language statement.
+ * This is a convenience class, that supports conditional query statements and emulates getSingleResult
+ * without not-found or non-unique-result exceptions.
  *
+ * @author Peter Moser
  */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();

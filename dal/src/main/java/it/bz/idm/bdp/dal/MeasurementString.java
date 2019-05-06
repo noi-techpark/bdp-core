@@ -40,11 +40,10 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 
 
 /**
+ *  Implementation for measurements of type string
+ *
  * @author Peter Moser
  * @author Patrick Bertolla
- *
- * Implementation for measurements of type string
- *
  */
 @Table(
 	name = "measurementstring",
