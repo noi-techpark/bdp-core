@@ -47,9 +47,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import it.bz.idm.bdp.dto.ExceptionDto;
 
 /**
- * Exception handler for spring mvc rest calls
- * @author Patrick Bertolla
+ * Exception handler for Spring MVC rest calls
  *
+ * @author Patrick Bertolla
  */
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{

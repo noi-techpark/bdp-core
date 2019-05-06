@@ -44,6 +44,11 @@ import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 import it.bz.idm.bdp.reader.security.JwtUtil;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @Controller
 public class JsonController extends DataRetriever{
 

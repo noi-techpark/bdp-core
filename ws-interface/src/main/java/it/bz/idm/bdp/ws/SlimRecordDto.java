@@ -27,8 +27,8 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 /**
  * DTO to remove implementation details from {@link SimpleRecordDto}, therefore reducing unneeded data send through API
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 @JsonInclude(value=Include.NON_EMPTY)
 public class SlimRecordDto {
@@ -45,7 +45,7 @@ public class SlimRecordDto {
 	 * @param timestamp of measurement detection
 	 * @param value of the given measurement
 	 * @param period standard interval between 2 measurements
-	 * @param created_on timestamp of creation in the opendatahub
+	 * @param created_on timestamp of creation of a measurement record
 	 */
 	public SlimRecordDto(Long timestamp, Object value, Integer period, Long created_on) {
 		super();

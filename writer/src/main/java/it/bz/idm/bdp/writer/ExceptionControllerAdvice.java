@@ -55,6 +55,13 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.ExceptionDto;
 
+/**
+ * Catch and handle various exceptions. We use this to provide an unique representation of
+ * all error messages to the API consumer.
+ *
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ */
 @ControllerAdvice
 public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 

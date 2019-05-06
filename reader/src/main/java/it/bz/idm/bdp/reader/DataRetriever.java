@@ -52,7 +52,6 @@ import it.bz.idm.bdp.dto.TypeDto;
  *
  * @author Patrick Bertolla
  * @author Peter Moser
- *
  */
 public class DataRetriever {
 

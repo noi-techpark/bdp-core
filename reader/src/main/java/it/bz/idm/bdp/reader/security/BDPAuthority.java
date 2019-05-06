@@ -22,11 +22,13 @@ package it.bz.idm.bdp.reader.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public class BDPAuthority implements GrantedAuthority {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 8800386213485106274L;
 
 	@Override

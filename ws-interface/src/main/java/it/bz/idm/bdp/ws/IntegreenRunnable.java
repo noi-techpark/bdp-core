@@ -29,14 +29,11 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.TypeDto;
 import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
+
 /**
  * Currently supported reader API Calls
- * @author patrick
  *
- */
-/**
- * @author patrick
- *
+ * @author Patrick Bertolla
  */
 public interface IntegreenRunnable {
 

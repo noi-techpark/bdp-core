@@ -27,13 +27,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @Service
 public class JwtUser implements UserDetails {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -814329267978486549L;
-	
+
 	private String name;
 	private List<GrantedAuthority> authorities;
 	public JwtUser() {
@@ -70,5 +72,5 @@ public class JwtUser implements UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 }

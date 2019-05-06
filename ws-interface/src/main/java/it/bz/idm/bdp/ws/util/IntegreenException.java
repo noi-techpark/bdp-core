@@ -25,6 +25,11 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 public class IntegreenException implements Serializable{
 

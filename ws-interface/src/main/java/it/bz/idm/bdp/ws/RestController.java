@@ -42,8 +42,8 @@ import it.bz.idm.bdp.ws.util.DtoParser;
 
 /**
  * Spring MVC template with all current API calls of data retriever {@link DataRetriever}
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public abstract class RestController {
 

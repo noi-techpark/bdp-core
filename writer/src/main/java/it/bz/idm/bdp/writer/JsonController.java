@@ -39,10 +39,10 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
 /**
- * Spring controller handling json requests to the writer API.
- * For more docuemntation on the single API calls refert to {@link DataManager}
- * @author Patrick Bertolla
+ * Spring controller handling JSON requests to the writer API.
+ * For more documentation on the single API calls refer to {@link DataManager}
  *
+ * @author Patrick Bertolla
  */
 @RequestMapping("/json")
 @Controller

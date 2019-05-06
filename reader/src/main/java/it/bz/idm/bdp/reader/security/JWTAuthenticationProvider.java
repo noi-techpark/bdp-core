@@ -29,8 +29,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 /**
- * @author Patrick Bertolla
  * Authentication Provider for JWT
+ *
+ * @author Patrick Bertolla
  */
 @Component
 public class JWTAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider{

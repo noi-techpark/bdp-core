@@ -41,9 +41,9 @@ import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
 /**
- * Utility methods for Json web token authentication
- * @author Patrick Bertolla
+ * Utility methods for JSON web token authentication
  *
+ * @author Patrick Bertolla
  */
 @Component
 public class JwtUtil {
@@ -51,16 +51,16 @@ public class JwtUtil {
 
 	@Value("${jwt.secret}")
 	private String secret;
-	
+
 	@Value("${jwt.accessTokenValidityInMinutes}")
 	private Integer accessTokenValidityInMinutes;
 
 	/**
 	 * Tries to parse specified String as a JWT token. If successful, returns User object with username, id and role prefilled (extracted from token).
 	 * If unsuccessful (token is invalid or not containing all required user properties), simply returns null.
-	 * 
+	 *
 	 * @param token the JWT token to parse
-	 * @return 
+	 * @return
 	 * @return the User object extracted from specified token or null if a token is invalid.
 	 */
 	public UserDetails parseToken(String token) {
@@ -84,14 +84,14 @@ public class JwtUtil {
 	/**
 	 * Generates a JWT token containing username as subject, and userId and role as additional claims. These properties are taken from the specified
 	 * User object. Tokens validity is infinite.
-	 * 
+	 *
 	 * @param userDetails the user for which the token will be generated
 	 * @return the JWT token object containing AccessToken and RefreshToken
 	 */
 	public JwtTokenDto generateToken(UserDetails userDetails) {
 		JwtTokenDto token = new JwtTokenDto();
 		Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
-		String roles =""; 
+		String roles ="";
 		for (GrantedAuthority auth: userDetails.getAuthorities()){
 			if (!roles.isEmpty())
 				roles+=",";
@@ -115,7 +115,7 @@ public class JwtUtil {
 	private AccessTokenDto getAccessToken(String name, Collection<? extends GrantedAuthority> collection) {
 		Date nowPlusMinutes= Timestamp.valueOf(LocalDateTime.now().plusMinutes(accessTokenValidityInMinutes));
 		Claims claims = Jwts.claims().setSubject(name).setExpiration(nowPlusMinutes);
-		String roles =""; 
+		String roles ="";
 		for (GrantedAuthority auth: collection){
 			if (!roles.isEmpty())
 				roles+=",";

@@ -48,8 +48,8 @@ import it.bz.idm.bdp.dto.ExceptionDto;
 
 /**
  * API exception handler mapping every exception to a serializable object {@link ExceptionDto}
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{

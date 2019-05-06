@@ -26,6 +26,11 @@ import org.springframework.context.annotation.Bean;
 
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public class JPADataSource {
 
 	@Bean

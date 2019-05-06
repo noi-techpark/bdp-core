@@ -29,6 +29,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public class TokenSimpleUrlAuthenticationSuccessHandler extends
 		SimpleUrlAuthenticationSuccessHandler{
 
@@ -37,5 +42,5 @@ public class TokenSimpleUrlAuthenticationSuccessHandler extends
 			HttpServletResponse response, Authentication auth) throws IOException,
 			ServletException {
 	}
-	
+
 }

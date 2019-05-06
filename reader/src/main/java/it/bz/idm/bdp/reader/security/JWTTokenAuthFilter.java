@@ -40,8 +40,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 /**
  * Authentication filter for JWT tokens
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 

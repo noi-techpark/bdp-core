@@ -30,15 +30,16 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 
 /**
  * Job scheduler which should handle maintenance jobs on the big data platform
+ *
  * @author Patrick Bertolla
  */
 @Configuration
 @EnableScheduling
 public class JobScheduler {
-	
+
 	@Value("classpath:META-INF/sql/opendatarules.sql")
 	private Resource sql;
-	
+
 	/**
 	 * Updates permissions by executing the given script
 	 * @throws Exception

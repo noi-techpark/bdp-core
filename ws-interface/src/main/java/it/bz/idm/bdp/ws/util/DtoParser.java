@@ -32,7 +32,6 @@ import it.bz.idm.bdp.ws.SlimRecordDto;
  * overhead information needed only for deserialization
  *
  * @author Patrick Bertolla
- *
  */
 public class DtoParser {
 	public static List<SlimRecordDto> reduce(List<RecordDto> records) {

@@ -40,8 +40,8 @@ import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
 /**
  * Spring MVC template for the REST APIv2 proposal
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public abstract class RestControllerV2 {
 

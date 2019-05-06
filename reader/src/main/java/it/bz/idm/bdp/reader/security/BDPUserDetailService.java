@@ -39,9 +39,9 @@ import it.bz.idm.bdp.dal.authentication.BDPUser;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
 /**
- * Maps the user in database to the spring user detail
- * @author Patrick Bertolla
+ * Maps the user inside the database to the spring user detail
  *
+ * @author Patrick Bertolla
  */
 @Service
 public class BDPUserDetailService implements UserDetailsService{

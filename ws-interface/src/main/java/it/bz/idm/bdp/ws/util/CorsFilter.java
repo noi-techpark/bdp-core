@@ -33,9 +33,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
 /**
- * Filter that applies CORS haeders to all http requests
- * @author Patrick Bertolla
+ * Filter that applies CORS headers to all HTTP requests
  *
+ * @author Patrick Bertolla
  */
 @Component
 public class CorsFilter implements Filter{
