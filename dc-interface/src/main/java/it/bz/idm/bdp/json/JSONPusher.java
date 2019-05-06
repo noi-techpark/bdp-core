@@ -34,7 +34,8 @@ import it.bz.idm.bdp.dto.StationList;
 
 
 /**
- * implementation with spring rest template
+ * Send data as JSON-format to the writer. Implementation with spring REST template.
+ *
  * @author Patrick Bertolla
  *
  */

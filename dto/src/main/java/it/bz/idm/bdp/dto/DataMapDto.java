@@ -30,11 +30,11 @@ import java.util.TreeMap;
 /**
  * <p>
  * Container for all measurements collected from a specific data collector
- * associated to a specific stationtype.<br/>
+ * associated to a specific station type.
  * It's a tree structure and it's possible to create as many layers as
- * required.<br/>
+ * required.
  * Currently we only support this kind of layering:<br/>
- * Station --> DataType --> Measurements
+ * <code>Station --> DataType --> Measurements</code>
  * </p>
  *
  * @author Patrick Bertolla

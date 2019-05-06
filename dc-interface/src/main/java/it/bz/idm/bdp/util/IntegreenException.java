@@ -22,16 +22,18 @@ package it.bz.idm.bdp.util;
 
 import java.io.Serializable;
 
-public class IntegreenException implements Serializable{
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
+public class IntegreenException implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4321307588943252863L;
 
 	public IntegreenException() {
 	}
-	
+
 	public IntegreenException(String name, String descString) {
 		this.exceptionName = name;
 		this.exceptionMessage = descString;
@@ -56,5 +58,5 @@ public class IntegreenException implements Serializable{
 	public void setExceptionName(String exceptionName) {
 		this.exceptionName = exceptionName;
 	}
-	
+
 }

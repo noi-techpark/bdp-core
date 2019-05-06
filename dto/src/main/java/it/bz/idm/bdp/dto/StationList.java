@@ -25,7 +25,7 @@ import java.util.Collection;
 
 /**
  * StationList as a DTO got added due to the following reason:<br>
- * "There was an issue with the serialization of polymorfic objets when using generics, which
+ * "There was an issue with the serialization of polymorphic objects when using generics, which
  * means the specific implementation of the StationDto did not get serialized correctly.
  * For example a CarsharingStationDto got serialized as StationDto instead."
  */
@@ -37,9 +37,5 @@ public class StationList extends ArrayList<StationDto>{
 	public StationList() {
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2408060694809964354L;
-
 }

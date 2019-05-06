@@ -25,11 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Minimal implementation of the dto returned by Nominatim
- * @author Patrick Bertolla
+ * Minimal implementation of the DTO returned by Nominatim (a TIM service, which provides
+ * address data giving coordinates.)
  *
+ * @author Patrick Bertolla
  */
-public class NominatimDto implements Serializable{
+public class NominatimDto implements Serializable {
 
 	private static final long serialVersionUID = -3369918936655035312L;
 

@@ -23,9 +23,9 @@ package it.bz.idm.bdp.dto.authentication;
 import java.io.Serializable;
 
 /**
- * @author Peter Moser
- *
  * Data transfer object identifying a user which needs access to the database
+ *
+ * @author Peter Moser
  */
 public class UserDto implements Serializable {
 	private static final long serialVersionUID = -151039076520008111L;

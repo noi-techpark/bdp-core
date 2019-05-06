@@ -24,20 +24,18 @@ import java.io.Serializable;
 
 /**
  * <p>
- * Defines a relationship between two stations<br/>
- * the identifiers in here are taken from {@link StationDto#id}
+ * Defines a relationship between two stations.
+ * The identifiers in here are taken from {@link StationDto#id}
  * </p>
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public class ChildDto implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7990410431929026069L;
-	private String identifier;	
+	private String identifier;
 	private String station;
+
 	public String getIdentifier() {
 		return identifier;
 	}

@@ -36,9 +36,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Data transfer object representing a station used in both, writer and reader.
- * @author Patrick Bertolla
+ * Data transfer object representing a station, which is a point (probably, on a map)
+ * that measures data.
  *
+ * @author Patrick Bertolla
  */
 @JsonInclude(value=Include.NON_EMPTY)
 public class StationDto implements Serializable {

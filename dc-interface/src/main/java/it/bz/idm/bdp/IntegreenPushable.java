@@ -29,9 +29,10 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
 /**
- * Each datacollector must implement this methods to use the full potential of the big data platform
- * @author Patrick Bertolla
+ * Each data collector must implement these methods. It provides allows to push data
+ * to the writer, which then saves everything to the DB.
  *
+ * @author Patrick Bertolla
  */
 public interface IntegreenPushable {
 

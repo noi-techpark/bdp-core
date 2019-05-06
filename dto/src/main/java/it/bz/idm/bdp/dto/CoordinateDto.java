@@ -25,14 +25,11 @@ import java.io.Serializable;
 
 /**
  * Simple 2D representation of a point
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public class CoordinateDto implements Serializable {
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -4490883796363760913L;
 	private double lon;
 	private double lat;
@@ -61,5 +58,5 @@ public class CoordinateDto implements Serializable {
 	public void setLat(double lat) {
 		this.lat = lat;
 	}
-	
+
 }

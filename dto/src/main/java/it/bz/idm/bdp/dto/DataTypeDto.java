@@ -27,10 +27,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
- * Data transfer object representing a specific datatype, which each measurement has a relation with
+ * Data transfer object representing a specific data type, which each measurement has a relation with
+ *
  * @author Patrick Bertolla
  * @author Peter Moser
- *
  */
 public class DataTypeDto implements Serializable {
 
@@ -66,9 +66,9 @@ public class DataTypeDto implements Serializable {
 
 	/**
 	 * @param name unique identifier
-	 * @param unit of the given datatype e.g.:m²,°C,km/h
-	 * @param description a well chosen description, please use english if you can
-	 * @param rtype metric of a specific measurements e.g.: max,min,mean
+	 * @param unit of the given data type, e.g., m²,°C, km/h
+	 * @param description a well chosen description, please use English if you can
+	 * @param rtype metric of a specific measurements, e.g., max, min, mean
 	 */
 	public DataTypeDto(String name, String unit, String description, String rtype) {
 		super();
@@ -80,10 +80,10 @@ public class DataTypeDto implements Serializable {
 
 	/**
 	 * @param name unique identifier
-	 * @param unit of the given datatype e.g.:m²,°C,km/h
-	 * @param description a well chosen description, please use english if you can
-	 * @param rtype metric of a specific measurements e.g.: max,min,mean
-	 * @param period interval in which this datatype is normally provided
+	 * @param unit of the given data type, e.g., m²,°C, km/h
+	 * @param description a well chosen description, please use English if you can
+	 * @param rtype metric of a specific measurements, e.g., max, min, mean
+	 * @param period interval in which this data type is normally provided
 	 */
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
 		this(name, unit, description, rtype);

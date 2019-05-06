@@ -22,13 +22,17 @@ package it.bz.idm.bdp.dto.security;
 
 import java.io.Serializable;
 
-public class JwtTokenDto implements Serializable{
-	/**
-	 * 
-	 */
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
+public class JwtTokenDto implements Serializable {
+
 	private static final long serialVersionUID = -4803002714159014982L;
 	private AccessTokenDto accessToken;
 	private String refreshToken;
+
 	public AccessTokenDto getAccessToken() {
 		return accessToken;
 	}
@@ -41,7 +45,4 @@ public class JwtTokenDto implements Serializable{
 	public void setRefreshToken(String refreshToken) {
 		this.refreshToken = refreshToken;
 	}
-	
-
-	
 }

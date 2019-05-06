@@ -23,16 +23,13 @@ package it.bz.idm.bdp.dto;
 @Deprecated
 public class FullRecordDto extends RecordDtoImpl{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5279857732736895894L;
 	private String station;
 	private String type;
 	private Object value;
 	private Integer period;
 
-	
+
 	public FullRecordDto(Long timestamp, Object value, String station, String type, Integer period) {
 		this.timestamp = timestamp;
 		this.value = value;
@@ -61,8 +58,8 @@ public class FullRecordDto extends RecordDtoImpl{
 	public Object getValue() {
 		return this.value;
 	}
-	
-	
+
+
 	public Integer getPeriod() {
 		return period;
 	}

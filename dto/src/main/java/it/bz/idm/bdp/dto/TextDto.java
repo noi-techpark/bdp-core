@@ -23,13 +23,9 @@ package it.bz.idm.bdp.dto;
 @Deprecated
 public class TextDto extends RecordDtoImpl{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8824412836092026904L;
 	private String text;
-	
-	
+
 	public TextDto() {
 	}
 	public TextDto(Long timestamp, String text) {

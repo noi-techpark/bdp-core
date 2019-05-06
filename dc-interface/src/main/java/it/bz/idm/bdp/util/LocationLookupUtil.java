@@ -33,9 +33,9 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Client to reverse lookup a coordinate on Openstreetmap
- * @author Patrick Bertolla
+ * Client to reverse lookup a coordinate on OpenStreetMap
  *
+ * @author Patrick Bertolla
  */
 public class LocationLookupUtil {
 
