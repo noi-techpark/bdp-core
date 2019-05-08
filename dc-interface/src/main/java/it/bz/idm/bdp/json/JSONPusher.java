@@ -1,6 +1,8 @@
 /**
  * dc-interface - Data Collector Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +36,8 @@ import it.bz.idm.bdp.dto.StationList;
 
 
 /**
- * implementation with spring rest template
+ * Send data as JSON-format to the writer. Implementation with spring REST template.
+ *
  * @author Patrick Bertolla
  *
  */
@@ -61,6 +64,7 @@ public abstract class JSONPusher extends DataPusher {
 
 
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
+		dto.clean();
 		return pushData(this.integreenTypology, dto);
 	}
 

@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +29,8 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 /**
  * DTO to remove implementation details from {@link SimpleRecordDto}, therefore reducing unneeded data send through API
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 @JsonInclude(value=Include.NON_EMPTY)
 public class SlimRecordDto {
@@ -45,7 +47,7 @@ public class SlimRecordDto {
 	 * @param timestamp of measurement detection
 	 * @param value of the given measurement
 	 * @param period standard interval between 2 measurements
-	 * @param created_on timestamp of creation in the opendatahub
+	 * @param created_on timestamp of creation of a measurement record
 	 */
 	public SlimRecordDto(Long timestamp, Object value, Integer period, Long created_on) {
 		super();

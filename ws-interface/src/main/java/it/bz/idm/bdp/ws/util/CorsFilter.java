@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +35,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
 /**
- * Filter that applies CORS haeders to all http requests
- * @author Patrick Bertolla
+ * Filter that applies CORS headers to all HTTP requests
  *
+ * @author Patrick Bertolla
  */
 @Component
 public class CorsFilter implements Filter{

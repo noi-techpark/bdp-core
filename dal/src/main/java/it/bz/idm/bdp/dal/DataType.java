@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +54,7 @@ import it.bz.idm.bdp.dto.TypeDto;
  * references exactly one data type, which gives you the required information to<br/>
  * interpret it correctly
  * </p>
+ *
  * @author Patrick Bertolla
  * @author Peter Moser
  */
@@ -161,14 +164,13 @@ public class DataType {
 	}
 
 	/**
-	 * <p>Finds data types grouped by period and only if at least one record of the specific data type exists in the db.<br/>
+	 * <p>Finds data types grouped by period and only if at least one record of the specific data type exists in the DB.<br/>
 	 *  It can also be filtered by a specific station.
 	 *  </p>
 	 * @param em entity manager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param stationCode unique stringidentifier of a specific station entity
-	 * @param subClass Measurementimplementation class which to read from
+	 * @param stationType typology of the specific station, e.g., MeteoStation, EnvironmentStation
+	 * @param stationCode unique string identifier of a specific station entity
+	 * @param subClass Measurement implementation class which to read from
 	 * @return
 	 */
 	public static <T> List<TypeDto> findTypes(EntityManager em, String stationType, String stationCode, Class<T> subClass) {
@@ -267,8 +269,8 @@ public class DataType {
 
 	/**
 	 * <p>
-	 * Upserts a list of data types, but does not override type description if<br/>
-	 * already provided in db
+	 * Inserts or updates a list of data types, but does not override type description if<br/>
+	 * already provided in DB.
 	 * </p>
 	 * @param em   entity manager
 	 * @param data list of data types provided by a data collector

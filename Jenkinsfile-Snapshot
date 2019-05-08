@@ -7,15 +7,16 @@ pipeline {
     }
 
     parameters {
-        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git')
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH', description: 'Choose a branch. The tag and version bump commit will be made on it.'
+        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you, so write only a plain version')
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose a branch. The tag and version bump commit will be made on it.'
     }
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because we the maven AWS plugin needs them to retrieve meta data
     environment {
-        S3_REPO_ID='maven-repo.opendatahub.bz.it-release'
+        S3_REPO_ID='maven-repo.opendatahub.bz.it-snapshot'
         AWS_ACCESS_KEY=credentials('s3_repo_username')
         AWS_SECRET_KEY=credentials('s3_repo_password')
+        SNAPSHOT_VERSION="${params.TAG}-SNAPSHOT"
     }
 
     stages {
@@ -43,7 +44,7 @@ pipeline {
         }
         stage('Version Bump') {
             steps {
-                sh "./quickversionbump.sh '${params.TAG}'"
+                sh "./quickversionbump.sh '${SNAPSHOT_VERSION}'"
             }
         }
         stage('Deploy dto') {
@@ -67,8 +68,8 @@ pipeline {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
                     sh "git commit -a -m 'Version ${params.TAG}' --allow-empty"
-                    sh "git tag -d ${params.TAG} || true"
-                    sh "git tag -a ${params.TAG} -m ${params.TAG}"
+                    sh "git tag -d ${SNAPSHOT_VERSION} || true"
+                    sh "git tag -a ${SNAPSHOT_VERSION} -m ${SNAPSHOT_VERSION}"
                     sh "mkdir -p ~/.ssh"
                     sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
                     sh "git push origin HEAD:${params.BRANCH} --follow-tags"

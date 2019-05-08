@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +31,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public class TokenSimpleUrlAuthenticationSuccessHandler extends
 		SimpleUrlAuthenticationSuccessHandler{
 
@@ -37,5 +44,5 @@ public class TokenSimpleUrlAuthenticationSuccessHandler extends
 			HttpServletResponse response, Authentication auth) throws IOException,
 			ServletException {
 	}
-	
+
 }

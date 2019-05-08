@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,17 +38,16 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 /**
+ * <p>This entity contains always the <strong>newest entry of a specific
+ * station, type and period</strong>.
+ * You will find all historic data in the class {@link MeasurementAbstractHistory}. Each
+ * measurement <strong>must</strong> extend this base class to keep integrity.
+ *
+ * <p>It contains the 2 most important references to station and type and
+ * also utility queries for all measurements.
+ *
  * @author Peter Moser
  * @author Patrick Bertolla
- *         <p>
- *         This entity contains always the <strong>newest entry of a specific<br/>
- *         station, type and period</strong><br/>
- *         You will find all historic data in the class {@link MeasurementAbstractHistory} Each<br/>
- *         measurement <strong>must</strong> extend this base class to keep<br/>
- *         integrity.<br/>
- *         It contains the 2 most important references to station and type and<br/>
- *         also utility queries for all measurements.
- *         </p>
  */
 @MappedSuperclass
 @Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
@@ -148,8 +149,8 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param em entity manager
 	 * @param station entity {@link Station} to filter by
 	 * @param type entity {@link DataType} to filter by
-	 * @param period intervall between measurements to filter by
-	 * @param role authorisazion level of the current user
+	 * @param period interval between measurements to filter by
+	 * @param role authorization level of the current user
 	 * @param table implementation of m which we need to query
 	 * @return date of the last inserted record
 	 */
@@ -184,7 +185,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param em entity manager
 	 * @param station entity {@link Station} to filter by
 	 * @param type entity {@link DataType} to filter by
-	 * @param period intervall between measurements to filter by
+	 * @param period interval between measurements to filter by
 	 * @param table
 	 * @return
 	 */
@@ -205,7 +206,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param em entity manager
 	 * @param station entity {@link Station} to filter by
 	 * @param type entity {@link DataType} to filter by
-	 * @param period intervall between measurements to filter by
+	 * @param period interval between measurements to filter by
 	 * @param role authorization level of the current session
 	 * @param table measurement implementation table to search in
 	 * @return newest measurement {@link MeasurementAbstract} of a specific station. It can also be narrowed down to type and period

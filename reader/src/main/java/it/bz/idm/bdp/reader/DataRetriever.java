@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +54,6 @@ import it.bz.idm.bdp.dto.TypeDto;
  *
  * @author Patrick Bertolla
  * @author Peter Moser
- *
  */
 public class DataRetriever {
 

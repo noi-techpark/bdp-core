@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,9 +49,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import it.bz.idm.bdp.dto.ExceptionDto;
 
 /**
- * Exception handler for spring mvc rest calls
- * @author Patrick Bertolla
+ * Exception handler for Spring MVC rest calls
  *
+ * @author Patrick Bertolla
  */
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler{

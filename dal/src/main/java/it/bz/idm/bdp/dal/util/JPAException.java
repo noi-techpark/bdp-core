@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +25,10 @@ package it.bz.idm.bdp.dal.util;
 import it.bz.idm.bdp.dto.ExceptionDto;
 
 /**
- * Yet to be documented by
+ * JPAException, which is a well-described runtime exception, ready for API consumers.
+ * The main goal for such an exception is to provide enough information to an API consumer
+ * to handle API errors as easy as possible. Do not expose internal errors.
+ *
  * @author Peter Moser
  *
  */

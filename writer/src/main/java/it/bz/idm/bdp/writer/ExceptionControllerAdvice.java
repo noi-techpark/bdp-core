@@ -1,6 +1,8 @@
 /**
  * writer - Data Writer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +57,13 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.ExceptionDto;
 
+/**
+ * Catch and handle various exceptions. We use this to provide an unique representation of
+ * all error messages to the API consumer.
+ *
+ * @author Peter Moser
+ * @author Patrick Bertolla
+ */
 @ControllerAdvice
 public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 

@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +32,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 /**
- * Tell me more, tell me more, tell me more ...
- * @author Peter Moser
+ * Create an instance of TypedQuery for executing a Java Persistence query language statement.
+ * This is a convenience class, that supports conditional query statements and emulates getSingleResult
+ * without not-found or non-unique-result exceptions.
  *
+ * @author Peter Moser
  */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();

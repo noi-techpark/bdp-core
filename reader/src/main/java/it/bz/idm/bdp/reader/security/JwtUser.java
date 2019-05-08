@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,13 +29,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @Service
 public class JwtUser implements UserDetails {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -814329267978486549L;
-	
+
 	private String name;
 	private List<GrantedAuthority> authorities;
 	public JwtUser() {
@@ -70,5 +74,5 @@ public class JwtUser implements UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 }

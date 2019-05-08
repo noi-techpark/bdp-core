@@ -37,7 +37,7 @@
     <packaging>jar</packaging>
     <name>BDP Schema Generator</name>
     <url>http://maven.apache.org</url>
-    <inceptionYear>2018</inceptionYear>
+    <inceptionYear>2019</inceptionYear>
     <description>SQL DDL dumper for the Big Data Platform</description>
 
     <properties>
@@ -233,8 +233,8 @@
                 <configuration>
                     <header>../GPL-3.0-header.txt</header>
                     <properties>
-                        <owner>IDM Südtirol - Alto Adige</owner>
-                        <email>info@idm-suedtirol.com</email>
+                        <owner>NOI Techpark - Südtirol / Alto Adige</owner>
+                        <email>info@opendatahub.bz.it</email>
                     </properties>
                     <excludes>
                         <exclude>bin/**</exclude>

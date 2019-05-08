@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +24,14 @@ package it.bz.idm.bdp.dto;
 
 import java.util.List;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public interface BDPAdapter {
-	
+
 	public abstract StationDto convert2StationDto(Object station);
 	public abstract List<DataTypeDto> convert2DatatypeDtos(List<? extends Object> types);
-	
+
 }

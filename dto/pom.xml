@@ -2,7 +2,9 @@
 <!--
 
     dto - Data Transport Objects for an object-relational mapping
+
     Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+    Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,8 +28,8 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dto</artifactId>
-    <version>2.0.0</version>
-    <inceptionYear>2018</inceptionYear>
+    <version>2.1.0</version>
+    <inceptionYear>2019</inceptionYear>
     <description>Data Transport Objects for an object-relational mapping</description>
 
     <properties>
@@ -36,8 +38,8 @@
     </properties>
     <repositories>
         <repository>
-            <id>maven-repo.opendatahub.bz.it</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
         </repository>
     </repositories>
     <dependencies>
@@ -105,8 +107,8 @@
                 <configuration>
                     <header>../GPL-3.0-header.txt</header>
                     <properties>
-                        <owner>IDM Südtirol - Alto Adige</owner>
-                        <email>info@idm-suedtirol.com</email>
+                        <owner>NOI Techpark - Südtirol / Alto Adige</owner>
+                        <email>info@opendatahub.bz.it</email>
                     </properties>
                     <excludes>
                         <exclude>bin/**</exclude>
@@ -135,12 +137,15 @@
     </build>
     <distributionManagement>
         <snapshotRepository>
-            <id>maven-repo.opendatahub.bz.it</id>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <name>Open Data Hub AWS S3 Snapshot Repository</name>
             <url>s3://it.bz.opendatahub/snapshot</url>
         </snapshotRepository>
         <repository>
-            <id>maven-repo.opendatahub.bz.it</id>
+            <id>maven-repo.opendatahub.bz.it-release</id>
+            <name>Open Data Hub AWS S3 Release Repository</name>
             <url>s3://it.bz.opendatahub/release</url>
         </repository>
     </distributionManagement>
+
 </project>

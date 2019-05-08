@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +27,19 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 public class IntegreenException implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4321307588943252863L;
 
 	public IntegreenException() {
 	}
-	
+
 	public IntegreenException(String name, String descString) {
 		this.exceptionName = name;
 		this.exceptionMessage = descString;
@@ -60,5 +64,5 @@ public class IntegreenException implements Serializable{
 	public void setExceptionName(String exceptionName) {
 		this.exceptionName = exceptionName;
 	}
-	
+
 }

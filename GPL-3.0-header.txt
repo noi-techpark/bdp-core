@@ -1,4 +1,6 @@
 ${project.name} - ${project.description}
+
+Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
 Copyright © ${project.inceptionYear} ${owner} (${email})
 
 This program is free software: you can redistribute it and/or modify

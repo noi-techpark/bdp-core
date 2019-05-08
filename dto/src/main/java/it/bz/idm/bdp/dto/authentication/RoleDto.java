@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +27,8 @@ import java.util.Collection;
 
 /**
  * Data transfer object representing the role which can be associated to multiple users and can have multiple permissions
- * @author Peter Moser
  *
+ * @author Peter Moser
  */
 public class RoleDto implements Serializable {
 	private static final long serialVersionUID = 8239304102791965397L;

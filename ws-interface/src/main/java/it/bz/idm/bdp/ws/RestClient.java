@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,9 +42,9 @@ import it.bz.idm.bdp.dto.security.AccessTokenDto;
 import it.bz.idm.bdp.dto.security.JwtTokenDto;
 
 /**
- * @author Patrick Bertolla
+ * Retriever implementation with a non-blocking, reactive HTTP client
  *
- * Retriever implementation with a non-blocking, reactive http client
+ * @author Patrick Bertolla
  */
 @Component
 public class RestClient extends DataRetriever {

@@ -1,6 +1,8 @@
 /**
  * writer - Data Writer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +32,16 @@ import it.bz.idm.bdp.dal.util.JPAUtil;
 
 /**
  * Job scheduler which should handle maintenance jobs on the big data platform
+ *
  * @author Patrick Bertolla
  */
 @Configuration
 @EnableScheduling
 public class JobScheduler {
-	
+
 	@Value("classpath:META-INF/sql/opendatarules.sql")
 	private Resource sql;
-	
+
 	/**
 	 * Updates permissions by executing the given script
 	 * @throws Exception

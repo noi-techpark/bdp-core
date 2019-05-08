@@ -1,6 +1,8 @@
 /**
  * dc-interface - Data Collector Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Minimal implementation of the dto returned by Nominatim
- * @author Patrick Bertolla
+ * Minimal implementation of the DTO returned by Nominatim (a TIM service, which provides
+ * address data giving coordinates.)
  *
+ * @author Patrick Bertolla
  */
-public class NominatimDto implements Serializable{
+public class NominatimDto implements Serializable {
 
 	private static final long serialVersionUID = -3369918936655035312L;
 

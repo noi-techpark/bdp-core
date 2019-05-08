@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +35,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	protected final Log logger = LogFactory.getLog(this.getClass());

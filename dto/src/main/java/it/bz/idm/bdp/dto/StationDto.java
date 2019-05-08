@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +38,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Data transfer object representing a station used in both, writer and reader.
- * @author Patrick Bertolla
+ * Data transfer object representing a station, which is a point (probably, on a map)
+ * that measures data.
  *
+ * @author Patrick Bertolla
  */
 @JsonInclude(value=Include.NON_EMPTY)
 public class StationDto implements Serializable {

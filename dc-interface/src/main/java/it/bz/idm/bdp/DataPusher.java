@@ -1,6 +1,8 @@
 /**
  * dc-interface - Data Collector Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +27,9 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
- * Basic configuration for any data send to writer
- * @author Patrick Bertolla
+ * Basic configuration for any sender providing data to the writer
  *
+ * @author Patrick Bertolla
  */
 public abstract class DataPusher implements IntegreenPushable  {
 	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
@@ -46,7 +48,7 @@ public abstract class DataPusher implements IntegreenPushable  {
 	public abstract String initIntegreenTypology();
 
 	/**
-	 * instanciate a new datapusher with a typology defined in implementation
+	 * Instantiate a new data pusher with a typology defined in implementation
 	 */
 	public DataPusher() {
 		initConfig();

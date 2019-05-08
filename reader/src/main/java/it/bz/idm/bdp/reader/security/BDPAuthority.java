@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +24,13 @@ package it.bz.idm.bdp.reader.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
 public class BDPAuthority implements GrantedAuthority {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 8800386213485106274L;
 
 	@Override

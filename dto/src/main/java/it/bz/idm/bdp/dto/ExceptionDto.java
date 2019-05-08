@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +25,15 @@ package it.bz.idm.bdp.dto;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * A representation of an Exception shown to the consumers of an API. We want to
+ * provide an error, an error code and a description that should help to solve that error.
+ * In addition, if the error comes from a wrongly provided JSON, the valid JSON schema
+ * gets shown. Finally, if the error triggers a HTTP error code, that status gets reported
+ * as well.
+ *
+ * @author Peter Moser
+ */
 public class ExceptionDto implements Serializable {
 	private static final long serialVersionUID = -2644337056228195945L;
 	private Integer status;

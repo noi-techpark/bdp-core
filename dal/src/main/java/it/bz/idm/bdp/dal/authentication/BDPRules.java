@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +36,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Station;
 
 /**
- * Rules defined by an administrator to decide which datasets needs which permission access
+ * Rules defined by an administrator to decide which data set needs which permission access
  * @author Peter Moser
  *
  */

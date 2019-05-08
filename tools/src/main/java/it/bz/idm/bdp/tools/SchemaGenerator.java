@@ -39,22 +39,24 @@ import org.postgresql.ds.PGSimpleDataSource;
 import org.reflections.Reflections;
 
 /**
- * Generate a schema dump of all entities inside a given path and write it into a file.
+ * <p>Generate a schema dump of all entities inside a given path and write it into a file.
  * The output patterns are defined inside the implicit naming strategy class.
  *
- * Configure connections to PostgreSQL with environmental variables:
- *   ODH_SG_SERVER - database server name (default = <PGSERVER_DEFAULT>)
- *   ODH_SG_DBNAME - database name (ex., bdp, no default)
- *   ODH_SG_USER   - database user (default = <PGUSER_DEFAULT>)
- *   ODH_SG_PASSWD - database password (no default)
+ * <p>Configure connections to PostgreSQL with environmental variables:</p>
+ * <ul>
+ *   <li><code>ODH_SG_SERVER</code> - database server name (default = <PGSERVER_DEFAULT>)
+ *   <li><code>ODH_SG_DBNAME</code> - database name (ex., bdp, no default)
+ *   <li><code>ODH_SG_USER</code>   - database user (default = <PGUSER_DEFAULT>)
+ *   <li><code>ODH_SG_PASSWD</code> - database password (no default)
+ * </ul>
  *
- * Usage:
- *   SchemaGenerator PREFIX STRATEGYCLASS OUTPUTFILE
+ * <p>Usage:
+ *   <code>SchemaGenerator PREFIX STRATEGYCLASS OUTPUTFILE</code>
  *
- * Example:
- *   SchemaGenerator it.bz.idm.bdp.dal it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql
+ * <p>Example:
+ *   <code>SchemaGenerator it.bz.idm.bdp.dal it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql</code>
  *
- * We assume that it is a Postgis dialect, and that only @Entity annotated classes are important.
+ * <p>We assume that it is a Postgis dialect, and that only @Entity annotated classes are important.
  *
  * @author Peter Moser
  */

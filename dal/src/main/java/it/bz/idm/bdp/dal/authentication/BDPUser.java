@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +43,10 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.authentication.UserDto;
 
 /**
- * <p>
- * User entity defining a user wanting to access data in the bdp
- * TODO: I kindly ask the author to take better care of this xD
- * </p>
- * @author Peter Moser
+ * User entity defining a person, that wants to access data. Each user has an
+ * associated role, which defines the access to specific data sets.
  *
+ * @author Peter Moser
  */
 @Table(name = "bdpuser",
 uniqueConstraints = {
@@ -72,6 +72,7 @@ public class BDPUser {
 	@ColumnDefault(value = "true")
 	private boolean enabled;
 
+	// TODO: tokenExpired is deprecated and should be removed
 	@Column(nullable = false)
 	@ColumnDefault(value = "false")
 	private boolean tokenExpired;
@@ -86,16 +87,15 @@ public class BDPUser {
 
 	/**
 	 * @param email unique email for each user
-	 * @param password jwt token string
+	 * @param password JSON Web Token (JWT) string
 	 */
 	public BDPUser(String email, String password) {
 		this(email, password, true, false);
 	}
 
 	/**
-	 * TODO: tokenExpired is deprecated and should be removed
 	 * @param email unique email for each user
-	 * @param password jwt token string
+	 * @param password JSON Web Token (JWT) string
 	 * @param enabled if user is currently allowed to do anything
 	 * @param tokenExpired if token is still valid
 	 */
@@ -104,15 +104,13 @@ public class BDPUser {
 	}
 
 	/**
-	 * TODO: tokenExpired is deprecated and should be removed
 	 * @param email unique email for each user
-	 * @param password jwt token string
+	 * @param password JSON Web Token (JWT) string
 	 * @param enabled if user is currently allowed to do anything
 	 * @param tokenExpired if token is still valid
 	 * @param roles authentication roles associated to a single user, currently it's always one
 	 */
-	public BDPUser(String email, String password, boolean enabled,
-			boolean tokenExpired, List<BDPRole> roles) {
+	public BDPUser(String email, String password, boolean enabled, boolean tokenExpired, List<BDPRole> roles) {
 		this.email = email;
 		this.password = password;
 		this.enabled = enabled;
@@ -169,8 +167,9 @@ public class BDPUser {
 	}
 
 	/**
-	 * find a user by his email-address, which is unique
-	 * @param em entitymanager
+	 * Find a user by an unique email-address
+	 *
+	 * @param em entity manager
 	 * @param email unique identifier for a user
 	 * @return user identified by the email
 	 */
@@ -183,13 +182,12 @@ public class BDPUser {
 	}
 
 	/**
-	 * Upserts the list of existing users
-	 * TODO: change returned object to give it significance or remove it completely
-	 * @param em entitymanager
-	 * @param data list of users to be upserted
-	 * @return always null. changeit
+	 * Inserts or updates the list of existing users.
+	 *
+	 * @param em entity manager
+	 * @param data list of users
 	 */
-	public static Object sync(EntityManager em, List<UserDto> data) {
+	public static void sync(EntityManager em, List<UserDto> data) {
 		em.getTransaction().begin();
 		for (UserDto dto : data) {
 			BDPUser user = BDPUser.findByEmail(em, dto.getEmail());
@@ -202,6 +200,5 @@ public class BDPUser {
 			}
 		}
 		em.getTransaction().commit();
-		return null;
 	}
 }

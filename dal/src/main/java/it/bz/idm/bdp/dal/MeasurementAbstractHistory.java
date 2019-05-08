@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +46,11 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
 /**
- *<p>
- * This entity contains all measurements and is the biggest container for the data<br/>
- * Each measurement <strong>must</strong> extend this base class to keep integrity.<br/>
- * It contains the 2 most important references to station and type and also contains generic<br/>
- * methods on how data gets stored and retrieved
- *</p>
+ * <p>This entity contains all measurements and is the biggest container for the data.
+ * Each measurement <strong>must</strong> extend this base class to keep integrity.
+ * It contains the two most important references to station and type and also contains generic
+ * methods on how data gets stored and retrieved.
+ *
  * @author Peter Moser
  * @author Patrick Bertolla
  */
@@ -147,16 +148,15 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
 	/**
 	 * <p>
-	 * persists all measurement data send to the writer from datacollectors to the database.<br/>
-	 * This "monstermethod"(refactorready?) goes down the datatree and persists all new records<br/>
+	 * persists all measurement data send to the writer from data collectors to the database.<br/>
+	 * This method goes down the data tree and persists all new records<br/>
 	 * it also updates the newest measurement in {@link MeasurementAbstract}, if it really is newer
 	 * </p>
-	 * @param em entitymanager
-	 * @param stationType typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
-	 * @param dataMap  container for data send from datacollector containing measurements<br/>
+	 * @param em entity manager
+	 * @param stationType typology of the specific station, e.g., MeteoStation, EnvironmentStation
+	 * @param dataMap  container for data send from data collector containing measurements<br/>
 	 * Data is received in a tree structure, containing in the first level the identifier of the correlated station,<br/>
-	 * on the second level the identifier of the correlated datatype and on the last level the data itself
+	 * on the second level the identifier of the correlated data type and on the last level the data itself
 	 * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
 	 */
 	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
@@ -198,7 +198,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 						MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
 						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
-						Date created_on = new Date();
 						SimpleRecordDto newestStringDto = null;
 						SimpleRecordDto newestNumberDto = null;
 						for (RecordDto recordDto : dataRecords) {
@@ -216,7 +215,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							if (valueObj instanceof Number) {
 								if (latestNumberMeasurementTime < dateOfMeasurement) {
 									Double value = ((Number)valueObj).doubleValue();
-									MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod(), created_on);
+									MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
 									em.persist(record);
 								}
 								if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
@@ -226,7 +225,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							} else if (valueObj instanceof String) {
 								if (latestStringMeasurementTime < dateOfMeasurement) {
 									String value = (String) valueObj;
-									MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod(), created_on);
+									MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
 									em.persist(record);
 								}
 								if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
@@ -313,12 +312,11 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
 	/**
 	 * <p>
-	 * the only method which requests history data from the biggest existing tables in the underlying db,<br/>
+	 * the only method which requests history data from the biggest existing tables in the underlying DB,<br/>
 	 * it's very important that indexes are set correctly to avoid bad performance
 	 * </p>
 	 * @param em entity manager
-	 * @param typology of the specific station e.g. MeteoStation,
-	 *                    Environmentstation etc.
+	 * @param typology of the specific station, e.g., MeteoStation, EnvironmentStation
 	 * @param identifier unique station identifier, required
 	 * @param cname unique type identifier, required
 	 * @param start time filter start in milliseconds UTC for query, required

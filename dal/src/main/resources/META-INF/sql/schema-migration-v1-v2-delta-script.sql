@@ -75,7 +75,7 @@ on conflict do nothing;
 -- measurementstringhistory
 insert into intimev2.measurementstringhistory (created_on, timestamp, string_value, station_id, type_id, period, provenance_id)
 select created_on, timestamp, value, station_id, type_id, period, 3 /* provenance ID, see above */
-from intime.measurementhistory where created_on > (select max(created_on) from intimev2.measurementstringhistory) --now() - interval '1 day'
+from intime.measurementstringhistory where created_on > (select max(created_on) from intimev2.measurementstringhistory) --now() - interval '1 day'
 and value is not null
 on conflict do nothing;
 

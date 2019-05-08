@@ -1,6 +1,8 @@
 /**
  * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +42,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 /**
  * Authentication filter for JWT tokens
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public class JWTTokenAuthFilter extends AbstractAuthenticationProcessingFilter{
 

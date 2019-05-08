@@ -1,6 +1,8 @@
 /**
  * dc-interface - Data Collector Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +31,10 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 
 /**
- * Each datacollector must implement this methods to use the full potential of the big data platform
- * @author Patrick Bertolla
+ * Each data collector must implement these methods. It provides allows to push data
+ * to the writer, which then saves everything to the DB.
  *
+ * @author Patrick Bertolla
  */
 public interface IntegreenPushable {
 

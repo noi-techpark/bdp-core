@@ -1,6 +1,8 @@
 /**
  * writer - Data Writer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,17 +49,17 @@ import it.bz.idm.bdp.dto.StationDto;
 
 /**
  * Writer API
+ *
  * @author Patrick Bertolla
  * @author Peter Moser
- *
  */
 @Component
 public class DataManager {
 
 	/**
-	 * @param stationType all datasets must have stations as reference with given stationtype
+	 * @param stationType all data sets must have stations as reference with given station type
 	 * @param responseLocation
-	 * @param dataMap containing all data as measuerment in a tree structure
+	 * @param dataMap containing all data as measurement in a tree structure
 	 * @return correct response status code
 	 */
 	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
@@ -107,7 +109,7 @@ public class DataManager {
 	/**
 	 * @param stationType the station will be of this type
 	 * @param stationCode unique identifier of a station
-	 * @param dataTypeName unique identifier of a datatype
+	 * @param dataTypeName unique identifier of a data type
 	 * @param period interval between 2 measurements
 	 * @return a date object representing the time when the specific measurement was updated last
 	 */
@@ -143,7 +145,7 @@ public class DataManager {
 	/**
 	 * @param stationType type to filter for
 	 * @param origin to filter for
-	 * @return list of station dtos converted from station entities
+	 * @return list of station DTOs converted from station entities
 	 * @throws JPAException
 	 */
 	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
@@ -157,7 +159,7 @@ public class DataManager {
 	}
 
 	/**
-	 * @return list of unique stationtype identifier
+	 * @return list of unique station type identifier
 	 */
 	public static List<String> getStationTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
@@ -170,7 +172,7 @@ public class DataManager {
 	}
 
 	/**
-	 * @return list of unique datatype identifier
+	 * @return list of unique data type identifier
 	 */
 	public static List<String> getDataTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
@@ -184,7 +186,7 @@ public class DataManager {
 
 	/**
 	 * Does nothing right now
-	 * @param stations list of data transferobjects
+	 * @param stations list of data transfer objects
 	 */
 	@Deprecated
 	public void patchStations(List<StationDto> stations) {

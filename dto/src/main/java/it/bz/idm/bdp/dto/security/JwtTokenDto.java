@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +24,17 @@ package it.bz.idm.bdp.dto.security;
 
 import java.io.Serializable;
 
-public class JwtTokenDto implements Serializable{
-	/**
-	 * 
-	 */
+/**
+ * TODO Please, describe it!
+ *
+ * @author Patrick Bertolla
+ */
+public class JwtTokenDto implements Serializable {
+
 	private static final long serialVersionUID = -4803002714159014982L;
 	private AccessTokenDto accessToken;
 	private String refreshToken;
+
 	public AccessTokenDto getAccessToken() {
 		return accessToken;
 	}
@@ -41,7 +47,4 @@ public class JwtTokenDto implements Serializable{
 	public void setRefreshToken(String refreshToken) {
 		this.refreshToken = refreshToken;
 	}
-	
-
-	
 }

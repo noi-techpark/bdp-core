@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +44,8 @@ import it.bz.idm.bdp.ws.util.DtoParser;
 
 /**
  * Spring MVC template with all current API calls of data retriever {@link DataRetriever}
- * @author Patrick Bertolla
  *
+ * @author Patrick Bertolla
  */
 public abstract class RestController {
 

@@ -1,6 +1,8 @@
 /**
  * dto - Data Transport Objects for an object-relational mapping
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +25,9 @@ package it.bz.idm.bdp.dto;
 @Deprecated
 public class TextDto extends RecordDtoImpl{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8824412836092026904L;
 	private String text;
-	
-	
+
 	public TextDto() {
 	}
 	public TextDto(Long timestamp, String text) {

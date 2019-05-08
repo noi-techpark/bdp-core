@@ -1,6 +1,8 @@
 /**
  * BDP data - Data Access Layer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,18 +82,16 @@ public class MeasurementStringHistory extends MeasurementAbstractHistory {
 	}
 
 	/**
-	 * TODO: remove created_on from the constructor since it's set automatically on creation time
 	 * @param station entity associated with this measurement
 	 * @param type entity associated with this measurement
 	 * @param value string value for this measurement
 	 * @param timestamp UTC time of measurement detection
 	 * @param period standard interval between 2 measurements
 	 */
-	public MeasurementStringHistory(Station station, DataType type, String value, Date timestamp, Integer period, Date created_on) {
+	public MeasurementStringHistory(Station station, DataType type, String value, Date timestamp, Integer period) {
 		setStation(station);
 		setType(type);
 		setTimestamp(timestamp);
-		setCreated_on(created_on);
 		setPeriod(period);
 		setValue(value);
 	}

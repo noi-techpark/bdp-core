@@ -1,6 +1,8 @@
 /**
  * ws-interface - Web Service Interface for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +25,9 @@ package it.bz.idm.bdp.ws;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * Configurations setter for an http implementation with token authentication
- * @author Patrick Bertolla
+ * Configurations setter for an HTTP implementation with token authentication
  *
+ * @author Patrick Bertolla
  */
 public abstract class DataRetriever implements IntegreenRunnable {
 

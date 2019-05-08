@@ -1,6 +1,8 @@
 /**
  * writer - Data Writer for the Big Data Platform
+ *
  * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +41,10 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
 /**
- * Spring controller handling json requests to the writer API.
- * For more docuemntation on the single API calls refert to {@link DataManager}
- * @author Patrick Bertolla
+ * Spring controller handling JSON requests to the writer API.
+ * For more documentation on the single API calls refer to {@link DataManager}
  *
+ * @author Patrick Bertolla
  */
 @RequestMapping("/json")
 @Controller
