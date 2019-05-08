@@ -39,7 +39,7 @@
     </properties>
     <repositories>
         <repository>
-            <id>maven-repo.opendatahub.bz.it</id>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
             <name>OpenDataHub</name>
             <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
         </repository>
@@ -144,11 +144,13 @@
     </build>
     <distributionManagement>
         <snapshotRepository>
-            <id>maven-repo.opendatahub.bz.it</id>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <name>Open Data Hub AWS S3 Snapshot Repository</name>
             <url>s3://it.bz.opendatahub/snapshot</url>
         </snapshotRepository>
         <repository>
-            <id>maven-repo.opendatahub.bz.it</id>
+            <id>maven-repo.opendatahub.bz.it-release</id>
+            <name>Open Data Hub AWS S3 Release Repository</name>
             <url>s3://it.bz.opendatahub/release</url>
         </repository>
     </distributionManagement>
