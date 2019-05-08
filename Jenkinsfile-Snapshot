@@ -7,15 +7,16 @@ pipeline {
     }
 
     parameters {
-        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag')
+        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you, so write only a plain version')
         gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH'
     }
 
+    // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because we the maven AWS plugin needs them to retrieve meta data
     environment {
-        S3_REPO_ID='maven-repo.opendatahub.bz.it'
-        S3_REPO_USERNAME=credentials('s3_repo_username')
-        S3_REPO_PASSWORD=credentials('s3_repo_password')
-	SNAPSHOT_VERSION="${params.TAG}-SNAPSHOT"
+        S3_REPO_ID='maven-repo.opendatahub.bz.it-snapshot'
+        AWS_ACCESS_KEY=credentials('s3_repo_username')
+        AWS_SECRET_KEY=credentials('s3_repo_password')
+        SNAPSHOT_VERSION="${params.TAG}-SNAPSHOT"
     }
 
     stages {
@@ -25,8 +26,8 @@ pipeline {
                 sh 'echo "    <servers>" >> ~/.m2/settings.xml'
                 sh 'echo "        <server>" >> ~/.m2/settings.xml'
                 sh 'echo "            <id>${S3_REPO_ID}</id>" >> ~/.m2/settings.xml'
-                sh 'echo "            <username>${S3_REPO_USERNAME}</username>" >> ~/.m2/settings.xml'
-                sh 'echo "            <password>${S3_REPO_PASSWORD}</password>" >> ~/.m2/settings.xml'
+                sh 'echo "            <username>${AWS_ACCESS_KEY}</username>" >> ~/.m2/settings.xml'
+                sh 'echo "            <password>${AWS_SECRET_KEY}</password>" >> ~/.m2/settings.xml'
                 sh 'echo "        </server>" >> ~/.m2/settings.xml'
                 sh 'echo "    </servers>" >> ~/.m2/settings.xml'
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
