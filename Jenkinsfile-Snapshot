@@ -59,10 +59,10 @@ pipeline {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
                     sh "git tag -d ${SNAPSHOT_VERSION} || true"
-                    sh "git tag ${SNAPSHOT_VERSION}"
+                    sh "git tag -a ${SNAPSHOT_VERSION} -m ${SNAPSHOT_VERSION}"
                     sh "mkdir -p ~/.ssh"
                     sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
-                    sh "git push origin ${SNAPSHOT_VERSION}"
+                    sh "git push origin HEAD:${SNAPSHOT_VERSION} --follow-tags"
                 }
             }
         }
