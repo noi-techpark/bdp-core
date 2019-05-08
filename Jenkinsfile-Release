@@ -8,7 +8,7 @@ pipeline {
 
     parameters {
         string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git')
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH'
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH', description: 'Choose a branch. The tag and version bump commit will be made on it.'
     }
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because we the maven AWS plugin needs them to retrieve meta data
