@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
-                sh 'test "${params.BRANCH}" = "development" -o "${params.BRANCH}" = "master" || false'
+                sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
