@@ -24,11 +24,7 @@ pipeline {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
                 sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
-                sshagent (credentials: ['jenkins_github_ssh_key']) {
-                    sh "git config --global user.email 'info@opendatahub.bz.it'"
-                    sh "git config --global user.name 'Jenkins'"
-                    sh "echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true"
-                }
+                sh "echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true"
             }
         }
         stage('Configure') {
@@ -69,7 +65,7 @@ pipeline {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
-                    sh "git commit -a -m 'Version ${params.TAG}' --allow-empty"
+                    sh "git commit -a -m 'Version ${VERSION}' --allow-empty"
                     sh "git tag -d ${VERSION} || true"
                     sh "git tag -a ${VERSION} -m ${VERSION}"
                     sh "mkdir -p ~/.ssh"
