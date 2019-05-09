@@ -7,25 +7,24 @@ pipeline {
     }
 
     parameters {
-        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git')
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'master', type: 'PT_BRANCH', description: 'Choose a branch. The tag and version bump commit will be made on it.'
+        string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you if you choose the development branch, so write only a plain version')
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose either master or development as branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the master branch, if you want to make a SNAPSHOT release use development.'
     }
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because we the maven AWS plugin needs them to retrieve meta data
     environment {
-        S3_REPO_ID='maven-repo.opendatahub.bz.it-release'
         AWS_ACCESS_KEY=credentials('s3_repo_username')
         AWS_SECRET_KEY=credentials('s3_repo_password')
+        REL_TYPE="${params.BRANCH == "development" ? "snapshot" : "release"}"
+        VERSION="${params.BRANCH == "development" ? "${params.TAG}-SNAPSHOT" : "${params.TAG}"}"
+        S3_REPO_ID="${params.BRANCH == "development" ? "maven-repo.opendatahub.bz.it-snapshot" : "maven-repo.opendatahub.bz.it-release"}"
     }
 
     stages {
-        stage('Check if TAG exists') {
+        stage('Check if BRANCH is correct and TAG exists') {
             steps {
-                sshagent (credentials: ['jenkins_github_ssh_key']) {
-                    sh "git config --global user.email 'info@opendatahub.bz.it'"
-                    sh "git config --global user.name 'Jenkins'"
-                    sh "echo CHECK IF TAG ${params.TAG} ALREADY EXISTS; git rev-parse ${params.TAG} >/dev/null 2>&1 && false || true"
-                }
+                sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
+                sh "echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true"
             }
         }
         stage('Configure') {
@@ -41,9 +40,9 @@ pipeline {
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
             }
         }
-        stage('Version Bump') {
+        stage('Preparation for release') {
             steps {
-                sh "./quickversionbump.sh '${params.TAG}'"
+                sh "./quickrelease.sh $REL_TYPE '${params.TAG}'"
             }
         }
         stage('Deploy dto') {
@@ -66,9 +65,9 @@ pipeline {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
                     sh "git config --global user.name 'Jenkins'"
-                    sh "git commit -a -m 'Version ${params.TAG}' --allow-empty"
-                    sh "git tag -d ${params.TAG} || true"
-                    sh "git tag -a ${params.TAG} -m ${params.TAG}"
+                    sh "git commit -a -m 'Version ${VERSION}' --allow-empty"
+                    sh "git tag -d ${VERSION} || true"
+                    sh "git tag -a ${VERSION} -m ${VERSION}"
                     sh "mkdir -p ~/.ssh"
                     sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
                     sh "git push origin HEAD:${params.BRANCH} --follow-tags"
