@@ -22,13 +22,6 @@
  exit;
 **Contributors (sorted by number of commits):**
 
-* Peter Moser <p.moser@noi.bz.it>
-* Patrick Bertolla <p.bertolla@noi.bz.it>
-* Alex Lanz <alex@krumer.it>
-* Jenkins automated commits <no-reply@opendatahub.bz.it>
-* Stefano David <stefano.david.bz@gmail.com>
-* Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
-* Patrick Ohnewein <p.ohnewein@noi.bz.it>
-* Davide Montesin <d@vide.bz>
+*  <p.moser@noi.bz.it>
 
 *To update the contributors list just run this file with bash. Prefix a name with % in .mailmap to set a contact as preferred*
