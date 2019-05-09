@@ -25,6 +25,7 @@ do
 
     $CMD -u "/pom:project/pom:version" -v $VERSION $FOLDER/pom.xml
     $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dto']/pom:version" -v $VERSION $FOLDER/pom.xml
+    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dal']/pom:version" -v $VERSION $FOLDER/pom.xml
 done
 
 # UPDATING CONTRIBUTORS.rst...
