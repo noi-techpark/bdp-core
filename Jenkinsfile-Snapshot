@@ -42,9 +42,9 @@ pipeline {
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
             }
         }
-        stage('Version Bump') {
+        stage('Preparation for release') {
             steps {
-                sh "./quickversionbump.sh '${SNAPSHOT_VERSION}'"
+                sh "./quickrelease.sh snapshot '${params.TAG}'"
             }
         }
         stage('Deploy dto') {
