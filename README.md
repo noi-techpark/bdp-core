@@ -53,12 +53,12 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 ## CORE
 
-The core of the platform contains all the business logic which handles connections with the database, with the data collectors which provide the data and with the web services which serve the data.
+The core of the platform contains all the business logic which handles connections to the database, to the data collectors which provide the data and to the web services which serve the data.
 
-The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services. Both are described in the following chapters.
+The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services.
 
 ### WRITER
-The writer is a REST API, which pushes data as JSON defined in the DTOs to the DB. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The DAL is a big and shared part between writer and reader, which saves and retrieves the data through abstraction. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
+The writer is a REST API, which takes JSON DTOs, deserializes and validates them and finally stores them in the database. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
 
 The full API description can be found inside [JsonController.java](https://github.com/noi-techpark/bdp-core/blob/master/writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
 
@@ -123,7 +123,7 @@ If you create a Java client to access data from the reader's API, you may use th
 
 ### DAL
 
-DAL is the layer which communicates with the DB underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometries. The whole module got developed with PostgreSQL as database and Postgis as an extension, but should also work with other RDBMS (nobody knows :)).
+DAL is the layer which communicates with the DB underneath used by the so called reader and writer modules. The communication is handled through the ORM Hibernate and its spatial component for geometries. The whole module got developed using PostgreSQL as database and Postgis as an extension, but should also work with other RDBMS (nobody knows :)).
 
 Connection pooling is handled by [HikariCP](https://github.com/noi-techpark/bdp-core) for high speed connections to the DB.
 
