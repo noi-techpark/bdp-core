@@ -25,7 +25,7 @@ package it.bz.idm.bdp.dto.security;
 import java.io.Serializable;
 
 /**
- * TODO Please, describe it!
+ * JSON web token dto which contains access and refresh tokens
  *
  * @author Patrick Bertolla
  */
