@@ -1,0 +1,4 @@
+driver=org.postgresql.Driver
+url=jdbc:postgresql://localhost:5432/your_database?currentSchema=your_schema
+dbuser=your_user
+dbpassword=your_password
