@@ -12,7 +12,15 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import com.jsoniter.JsonIterator;
+
 public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
+
+	private static boolean ignoreNull = false;
+
+	public static synchronized void setIgnoreNull(boolean ignoreNull) {
+		ColumnMapRowMapper.ignoreNull = ignoreNull;
+	}
 
 	@Override
 	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -21,7 +29,12 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 		Map<String, Object> mapOfColumnValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, i);
-			mapOfColumnValues.putIfAbsent(getColumnKey(column), getColumnValue(rs, i));
+			Object value = getColumnValue(rs, i);
+
+			if (ColumnMapRowMapper.ignoreNull && value == null)
+				continue;
+
+			mapOfColumnValues.putIfAbsent(getColumnKey(column), value);
 		}
 		return mapOfColumnValues;
 	}
@@ -76,6 +89,8 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 			switch (pgObjType) {
 				case "geometry":
 					return PGgeometry.geomFromString(pgObj.getValue());
+				case "jsonb":
+					return JsonIterator.deserialize(pgObj.getValue());
 				default:
 					throw new RuntimeException("PGobject type " + pgObjType + " not supported!");
 			}

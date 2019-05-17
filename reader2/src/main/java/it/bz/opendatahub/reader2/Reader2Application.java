@@ -1,8 +1,6 @@
 package it.bz.opendatahub.reader2;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.jsoniter.output.JsonStream;
 
+import it.bz.opendatahub.reader2.utils.ColumnMapRowMapper;
 import it.bz.opendatahub.reader2.utils.JsonIterPostgresSupport;
 import it.bz.opendatahub.reader2.utils.JsonIterSqlTimestampSupport;
 import it.bz.opendatahub.reader2.utils.QueryBuilder;
@@ -32,68 +30,26 @@ public class Reader2Application implements CommandLineRunner {
 		SpringApplication.run(Reader2Application.class, args);
 	}
 
-	public List<String> fetchStationTypes01() {
-		log.info("/ -> getStationTypes");
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		return jdbcTemplate.queryForList("select jsonb_agg(stationtype) from (select stationtype from station group by stationtype) c", parameters, String.class);
-	}
-
-	public String fetchStationTypes02() {
-		log.info("/ -> getStationTypes");
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		List<String> queryForList = jdbcTemplate.queryForList("select stationtype from station group by stationtype", parameters, String.class);
-		return JsonStream.serialize(queryForList);
-	}
-
-	public String fetchStationTypes03() {
-		log.info("/ -> getStationTypes");
+	public String fetchStationTypes() {
 		return QueryBuilder
 				.init()
 				.addSql("select stationtype from station group by stationtype")
 				.buildJson(String.class);
 	}
 
-	// TODO stationTypeList should allow * for all stations
-	//      Parse them accordingly (SQL-injection?)
-	public List<Map<String, Object>> fetchStations01(String stationTypeList) {
-		log.info("/ -> getStations");
-
-		Set<String> stationTypeSet = new HashSet<String>();
-		for (String stationType : stationTypeList.split(",")) {
-			stationTypeSet.add(stationType.trim());
-		}
-
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("types", stationTypeSet);
-
-		return jdbcTemplate.queryForList("SELECT row_to_json(c) FROM (select * from station WHERE stationtype in (:types)) c", parameters);
-	}
-
-	// TODO stationTypeList should allow * for all stations
-	//      Parse them accordingly (SQL-injection?)
-	public String fetchStations02(String stationTypeList) {
-		log.info("/ -> getStations");
-
+	public String fetchStations(String stationTypeList, long limit, long offset, String select) {
 		Set<String> stationTypeSet = csvToSet(stationTypeList);
-
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("types", stationTypeSet);
-		List<Map<String, Object>> queryForList = jdbcTemplate.queryForList("select * from station WHERE stationtype in (:types)", parameters);
-		return JsonStream.serialize(queryForList);
-	}
-
-	// TODO stationTypeList should allow * for all stations
-	//      Parse them accordingly (SQL-injection?)
-	public String fetchStations03(String stationTypeList) {
-		log.info("/ -> getStations");
-
-		Set<String> stationTypeSet = csvToSet(stationTypeList);
-
 		return QueryBuilder
 				.init()
-				.addSql("select * from station")
+				.addSql("select s.name, s.origin, s.pointprojection coord, s.stationcode, s.stationtype, m.json metadata from station s",
+						"left join metadata m on m.station_id = s.id",
+						"left join station p on s.parent_id = p.id",
+						"left join metadata pm on pm.station_id = p.id",
+						"where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet,
-						"WHERE stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+						"and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				.setParameterIf("limit", new Long(limit), "limit :limit", limit > 0)
+				.setParameterIf("offset", new Long(offset), "offset :offset", offset >= 0)
 				.buildJson();
 	}
 
@@ -103,7 +59,7 @@ public class Reader2Application implements CommandLineRunner {
 
 		return QueryBuilder
 				.init()
-				.addSql("select s.*, t.*, m.period, m.",
+				.addSql("select s.*, t.*, m.period, m.timestamp",
 					 "from measurement m",
 					 "join station s on m.station_id = s.id",
 					 "join type t on m.type_id = t.id",
@@ -118,27 +74,25 @@ public class Reader2Application implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-//		List<String> fetchStationTypes = fetchStationTypes01();
-//		fetchStationTypes.forEach(s -> log.info(s));
-
+		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(jdbcTemplate);
-
+		ColumnMapRowMapper.setIgnoreNull(true);
 		JsonStream.setIndentionStep(4);
 		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
 		JsonIterPostgresSupport.enable();
 
-//		System.out.println(JsonStream.serialize(new Point(1,2)));
-//
-//		System.exit(0);
+		/* Run queries */
+//		String fetchStationTypes = fetchStationTypes();
+//		System.out.println(fetchStationTypes);
 
-//		String stationTypes = fetchStationTypes03();
-//		log.info(stationTypes);
+		String stations = fetchStations("ParkingStation, Bicycle", -1, 10, "");
+//		String stations = fetchStations("Bicycle");
+//		String stations = fetchStations("*");
 
-//		String stations = fetchStations03("ParkingStation, Bicycle");
-//		String stations = fetchStations03("Bicycle");
+		System.out.println(stations);
 
-		String stations = fetchStationsAndTypes("ParkingStation", "occupied");
-		log.info(stations);
+//		String stations = fetchStationsAndTypes("ParkingStation", "occupied");
+//		log.info(stations);
 
 		log.info("READY.");
 	}

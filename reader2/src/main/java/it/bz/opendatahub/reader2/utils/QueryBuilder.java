@@ -30,12 +30,15 @@ public class QueryBuilder {
 	 */
 	public static synchronized void setup(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		if (QueryBuilder.npjt != null) {
-			throw new RuntimeException("QueryBuilder.init can only be called once");
+			throw new RuntimeException("QueryBuilder.setup can only be called once");
 		}
 		QueryBuilder.npjt = namedParameterJdbcTemplate;
 	}
 
 	public static QueryBuilder init() {
+		if (QueryBuilder.npjt == null) {
+			throw new RuntimeException("Missing JDBC template. Run QueryBuilder.setup before initialization.");
+		}
 		return new QueryBuilder();
 	}
 
