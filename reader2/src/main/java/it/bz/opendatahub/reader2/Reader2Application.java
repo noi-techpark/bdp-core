@@ -118,7 +118,7 @@ public class Reader2Application implements CommandLineRunner {
 		return JsonStream.serialize(result);
 	}
 
-	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit, long offset, String select) {
+	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit, long offset, String select, String role) {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
@@ -127,6 +127,13 @@ public class Reader2Application implements CommandLineRunner {
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, me.timestamp, ",
 						QueryBuilder.expandSelect(select, COLUMN_EXPANSION, ""),
 						"from measurement me",
+						"join bdppermissions pe on (",
+								"(me.station_id = pe.station_id OR pe.station_id is null)",
+								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
+								"AND (me.period = pe.period OR pe.period is null)",
+								"AND pe.role_id = (select id from bdprole r where r.name = '" +
+								(role == null ? role = "GUEST" : role) + "')",
+							")",
 						"join station s on me.station_id = s.id",
 						"left join metadata m on m.id = s.meta_data_id",
 						"left join station p on s.parent_id = p.id",
@@ -244,7 +251,7 @@ public class Reader2Application implements CommandLineRunner {
 //		System.out.println(stations);
 
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
-		String stations = fetchStationsAndTypes("ParkingStation", "*", 2, 0, null);//"sorigin, sname, tunit, ttype");
+		String stations = fetchStationsAndTypes("ParkingStation", "*", 2, 0, null, "GUEST");//"sorigin, sname, tunit, ttype");
 		System.out.println(stations);
 
 		log.info("READY.");
