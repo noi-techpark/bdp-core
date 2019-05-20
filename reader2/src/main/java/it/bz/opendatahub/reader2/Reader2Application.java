@@ -124,7 +124,7 @@ public class Reader2Application implements CommandLineRunner {
 
 		QueryBuilder query = QueryBuilder
 				.init()
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, me.timestamp, ",
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ",
 						QueryBuilder.expandSelect(select, COLUMN_EXPANSION, ""),
 						"from measurement me",
 						"join bdppermissions pe on (",
@@ -154,12 +154,11 @@ public class Reader2Application implements CommandLineRunner {
 		}
 
 		Map<String, Object> result = new HashMap<String, Object>();
-
 		String stationTypePrev = "";
 		String stationCodePrev = "";
-
 		List<Object> stations = null;
 		List<Object> datatypes = null;
+
 		for (Map<String, Object> rec : queryResult) {
 			String stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
 
@@ -172,7 +171,16 @@ public class Reader2Application implements CommandLineRunner {
 
 			String stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
 			if (! stationCodePrev.equalsIgnoreCase(stationCodeAct)) {
-				Map<String, Object> station = makeObject(rec, COLUMN_EXPANSION_STATION);
+				// Cleanup pseudo fields, which were not part of the query result
+				if (datatypes != null && datatypes.isEmpty()) {
+					try {
+						((Map<String, Object>) stations.get(stations.size() - 1)).remove("sdatatypes");
+					} catch (Exception e) {
+						// Nothing to do
+					}
+				}
+
+				Map<String, Object> station = makeObjectOrNull(rec, COLUMN_EXPANSION_STATION);
 				stations.add(station);
 				stationCodePrev = stationCodeAct;
 				datatypes = new ArrayList<Object>();
@@ -180,21 +188,32 @@ public class Reader2Application implements CommandLineRunner {
 			}
 
 //			System.out.println(rec);
+			Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE);
+			if (dataType != null) {
+				datatypes.add(dataType);
+			}
+		}
 
-			datatypes.add(makeObject(rec, COLUMN_EXPANSION_DATATYPE));
+		// Cleanup pseudo fields, which were not part of the query result
+		if (datatypes != null && datatypes.isEmpty()) {
+			try {
+				((Map<String, Object>) stations.get(stations.size() - 1)).remove("sdatatypes");
+			} catch (Exception e) {
+				// Nothing to do
+			}
 		}
 
 		return JsonStream.serialize(result);
 	}
 
-	private static Map<String, Object> makeObject(Map<String, Object> record, Map<String, Object> objDefinition) {
+	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, Map<String, Object> objDefinition) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (Entry<String, Object> entry : record.entrySet()) {
 			if (objDefinition.containsKey(entry.getKey())) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
-		return result;
+		return result.isEmpty() ? null : result;
 	}
 
 
@@ -251,7 +270,8 @@ public class Reader2Application implements CommandLineRunner {
 //		System.out.println(stations);
 
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
-		String stations = fetchStationsAndTypes("ParkingStation", "*", 2, 0, null, "GUEST");//"sorigin, sname, tunit, ttype");
+//		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
+		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sname, tname", "GUEST");
 		System.out.println(stations);
 
 		log.info("READY.");
