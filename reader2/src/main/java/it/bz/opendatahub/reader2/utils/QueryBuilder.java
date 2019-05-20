@@ -1,8 +1,10 @@
 package it.bz.opendatahub.reader2.utils;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -18,7 +20,7 @@ import com.jsoniter.output.JsonStream;
  */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
-	private static NamedParameterJdbcTemplate npjt;
+	protected static NamedParameterJdbcTemplate npjt;
 	MapSqlParameterSource parameters = new MapSqlParameterSource();
 
 	/**
@@ -218,5 +220,61 @@ public class QueryBuilder {
 			addSql(sqlPart[i]);
 		}
 		return this;
+	}
+
+	public QueryBuilder addLimit(long limit) {
+		setParameterIf("limit", new Long(limit), "limit :limit", limit > 0);
+		return this;
+	}
+
+	public QueryBuilder addOffset(long offset) {
+		setParameterIf("offset", new Long(offset), "offset :offset", offset >= 0);
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String expandSelect(String select, Map<String, Object> selectDef, String alias) {
+		StringBuffer sb = new StringBuffer();
+		Set<String> columnAliases;
+		if (select == null || select.trim().equals("*")) {
+			columnAliases = selectDef.keySet();
+		} else {
+			columnAliases = csvToSet(select);
+		}
+
+		for (String columnAlias : columnAliases) {
+			if (!selectDef.containsKey(columnAlias)) {
+				throw new RuntimeException("Key " + columnAlias + " does not exist!");
+			}
+			Object def = selectDef.get(columnAlias);
+			if (def == null)
+				continue;
+			if (def instanceof String) {
+				sb.append(def)
+				  .append(" as ")
+				  .append(columnAlias)
+				  .append(", ");
+			} else if (def instanceof Map) {
+				sb.append(expandSelect(null, (Map<String, Object>) def, null))
+				  .append(", ");
+			} else {
+				throw new RuntimeException("A select definition must contain either Strings or Maps!");
+			}
+		}
+		return sb.length() >= 3 ? sb.substring(0, sb.length() - 2) : sb.toString();
+	}
+
+	public static Set<String> csvToSet(final String csv) {
+		Set<String> resultSet = new HashSet<String>();
+		for (String value : csv.split(",")) {
+			value = value.trim();
+			if (value.equals("*")) {
+				resultSet.clear();
+				resultSet.add(value);
+				return resultSet;
+			}
+			resultSet.add(value);
+		}
+		return resultSet;
 	}
 }

@@ -2,6 +2,8 @@ package it.bz.opendatahub.reader2.utils;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.postgis.Point;
 
@@ -25,7 +27,12 @@ public class JsonIterPostgresSupport {
         JsoniterSpi.registerTypeEncoder(Point.class, new Encoder.ReflectionEncoder() {
             @Override
             public void encode(Object obj, JsonStream stream) throws IOException {
-            	stream.writeVal(((Point)obj).toString());
+            	Point point = (Point)obj;
+            	Map<String, Object> result = new HashMap<String, Object>();
+            	result.put("srid", point.getSrid());
+            	result.put("x", point.getX());
+            	result.put("y", point.getY());
+            	stream.writeVal(result);
             }
 
             @Override
