@@ -3,6 +3,7 @@ package it.bz.opendatahub.reader2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -40,6 +41,17 @@ public class Reader2Application implements CommandLineRunner {
 				.addSql("select stationtype from station group by stationtype")
 				.buildJson(String.class);
 	}
+
+	final static Map<String, Object> COLUMN_EXPANSION_MEASUREMENT = new HashMap<String, Object>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put("mvalidtime", "me.timestamp");
+			put("mtransactiontime", "me.created_on");
+			put("mperiod", "me.period");
+			put("mvalue", "me.double_value");
+		}
+	};
+
 	final static Map<String, Object> COLUMN_EXPANSION_DATATYPE = new HashMap<String, Object>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -47,8 +59,7 @@ public class Reader2Application implements CommandLineRunner {
 			put("tunit", "t.cunit");
 			put("ttype", "t.rtype");
 			put("tdescription", "t.description");
-			put("tlastmeasurement", "me.timestamp");
-			put("tperiod", "me.period");
+			put("tlastmeasurement", COLUMN_EXPANSION_MEASUREMENT);
 		}
 	};
 
@@ -70,6 +81,7 @@ public class Reader2Application implements CommandLineRunner {
 		{
 			putAll(COLUMN_EXPANSION_STATION);
 			putAll(COLUMN_EXPANSION_DATATYPE);
+			putAll(COLUMN_EXPANSION_MEASUREMENT);
 		}
 	};
 
@@ -79,9 +91,9 @@ public class Reader2Application implements CommandLineRunner {
 
 		QueryBuilder query = QueryBuilder
 				.init()
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, ",
-						QueryBuilder.expandSelect(select, COLUMN_EXPANSION, ""),
-						"from station s",
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, ")
+				.expandSelect(select, COLUMN_EXPANSION, "")
+				.addSql("from station s",
 						"left join metadata m on m.station_id = s.id",
 						"left join station p on s.parent_id = p.id",
 						"where true")
@@ -121,12 +133,11 @@ public class Reader2Application implements CommandLineRunner {
 	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit, long offset, String select, String role) {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
-
-		QueryBuilder query = QueryBuilder
+		List<Map<String, Object>> queryResult = QueryBuilder
 				.init()
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ",
-						QueryBuilder.expandSelect(select, COLUMN_EXPANSION, ""),
-						"from measurement me",
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
+				.expandSelect(select, COLUMN_EXPANSION, "")
+				.addSql("from measurement me",
 						"join bdppermissions pe on (",
 								"(me.station_id = pe.station_id OR pe.station_id is null)",
 								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
@@ -143,67 +154,60 @@ public class Reader2Application implements CommandLineRunner {
 				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "AND t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
-				.addOffset(offset);
+				.addOffset(offset)
+				.build();
 
-		List<Map<String, Object>> queryResult = null;
-
-		try {
-			queryResult = query.build();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		Map<String, Object> result = new HashMap<String, Object>();
 		String stationTypePrev = "";
+		String stationTypeAct = "";
 		String stationCodePrev = "";
-		List<Object> stations = null;
+		String stationCodeAct = "";
+		Map<String, Object> stations = null;
 		List<Object> datatypes = null;
 
-		for (Map<String, Object> rec : queryResult) {
-			String stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
+		ListIterator<Map<String, Object>> it = queryResult.listIterator();
 
-			if (! stationTypePrev.equalsIgnoreCase(stationTypeAct)) {
-				result.put(stationTypeAct, null);
-				stationTypePrev = stationTypeAct;
-				stations = new ArrayList<Object>();
-				result.put(stationTypeAct, stations);
-			}
+		Map<String, Object> rec = it.hasNext() ? it.next() : null;
+		stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
+		stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
+		System.out.println(rec);
 
-			String stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-			if (! stationCodePrev.equalsIgnoreCase(stationCodeAct)) {
-				// Cleanup pseudo fields, which were not part of the query result
-				if (datatypes != null && datatypes.isEmpty()) {
-					try {
-						((Map<String, Object>) stations.get(stations.size() - 1)).remove("sdatatypes");
-					} catch (Exception e) {
-						// Nothing to do
-					}
-				}
+		/* Accumulate station types */
+		Map<String, Object> stationTypes = new HashMap<String, Object>();
+		while (rec != null) {
 
+			/* Accumulate stations */
+			stations = new HashMap<String, Object>();
+			stationTypePrev = stationTypeAct;
+			do {
 				Map<String, Object> station = makeObjectOrNull(rec, COLUMN_EXPANSION_STATION);
-				stations.add(station);
-				stationCodePrev = stationCodeAct;
+				stations.put(stationCodeAct, station);
+				System.out.println("S = " + stationCodeAct);
+
+				/* Accumulate data types */
 				datatypes = new ArrayList<Object>();
+				stationCodePrev = stationCodeAct;
+				do {
+					Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE);
+					if (dataType != null) {
+						datatypes.add(dataType);
+					}
+
+					if (it.hasNext()) {
+						rec = it.next();
+						stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
+						stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
+						System.out.println(rec);
+					} else {
+						rec = null;
+					}
+				} while (rec != null && stationCodePrev.equalsIgnoreCase(stationCodeAct));
 				station.put("sdatatypes", datatypes);
-			}
 
-//			System.out.println(rec);
-			Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE);
-			if (dataType != null) {
-				datatypes.add(dataType);
-			}
+			} while (rec != null && stationTypePrev.equalsIgnoreCase(stationTypeAct));
+			stationTypes.put(stationTypePrev, stations);
 		}
 
-		// Cleanup pseudo fields, which were not part of the query result
-		if (datatypes != null && datatypes.isEmpty()) {
-			try {
-				((Map<String, Object>) stations.get(stations.size() - 1)).remove("sdatatypes");
-			} catch (Exception e) {
-				// Nothing to do
-			}
-		}
-
-		return JsonStream.serialize(result);
+		return JsonStream.serialize(stationTypes);
 	}
 
 	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, Map<String, Object> objDefinition) {
@@ -224,7 +228,7 @@ public class Reader2Application implements CommandLineRunner {
 		QueryBuilder.setup(jdbcTemplate);
 
 		// The API should have a flag to remove null values (what should be default?)
-		ColumnMapRowMapper.setIgnoreNull(true);
+		ColumnMapRowMapper.setIgnoreNull(false);
 		JsonStream.setIndentionStep(4);
 //		JsonIterUnicodeSupport.enable();
 		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
@@ -271,7 +275,8 @@ public class Reader2Application implements CommandLineRunner {
 
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
-		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sname, tname", "GUEST");
+//		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
+		String stations = fetchStationsAndTypes("*", "*", 30, 0, "*", "ADMIN");
 		System.out.println(stations);
 
 		log.info("READY.");

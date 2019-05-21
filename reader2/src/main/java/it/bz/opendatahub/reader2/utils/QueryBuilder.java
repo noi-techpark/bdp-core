@@ -233,7 +233,7 @@ public class QueryBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String expandSelect(String select, Map<String, Object> selectDef, String alias) {
+	private static String _expandSelect(String select, Map<String, Object> selectDef, String alias) {
 		StringBuffer sb = new StringBuffer();
 		Set<String> columnAliases;
 		if (select == null || select.trim().equals("*")) {
@@ -244,7 +244,7 @@ public class QueryBuilder {
 
 		for (String columnAlias : columnAliases) {
 			if (!selectDef.containsKey(columnAlias)) {
-				throw new RuntimeException("Key " + columnAlias + " does not exist!");
+				throw new RuntimeException("Key '" + columnAlias + "' does not exist!");
 			}
 			Object def = selectDef.get(columnAlias);
 			if (def == null)
@@ -255,13 +255,18 @@ public class QueryBuilder {
 				  .append(columnAlias)
 				  .append(", ");
 			} else if (def instanceof Map) {
-				sb.append(expandSelect(null, (Map<String, Object>) def, null))
+				sb.append(_expandSelect(null, (Map<String, Object>) def, null))
 				  .append(", ");
 			} else {
 				throw new RuntimeException("A select definition must contain either Strings or Maps!");
 			}
 		}
 		return sb.length() >= 3 ? sb.substring(0, sb.length() - 2) : sb.toString();
+	}
+
+	public QueryBuilder expandSelect(String select, Map<String, Object> selectDef, String alias) {
+		addSql(_expandSelect(select, selectDef, alias));
+		return this;
 	}
 
 	public static Set<String> csvToSet(final String csv) {
