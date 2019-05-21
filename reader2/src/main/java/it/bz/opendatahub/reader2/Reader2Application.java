@@ -67,19 +67,33 @@ public class Reader2Application implements CommandLineRunner {
 		private static final long serialVersionUID = 1L;
 		{
 			put("sname", "s.name");
+			put("stype", "s.stationtype");
+			put("scode", "s.stationcode");
 			put("sorigin", "s.origin");
 			put("scoordinate", "s.pointprojection");
-			put("stype", "s.stationtype");
 			put("sparent", "p.stationcode");
 			put("smetadata", "m.json");
 			put("sdatatypes", COLUMN_EXPANSION_DATATYPE);
 		}
 	};
 
+	final static Map<String, Object> COLUMN_EXPANSION_PARENTSTATION = new HashMap<String, Object>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put("pname", "p.name");
+			put("ptype", "p.stationtype");
+			put("pcoordinate", "s.pointprojection");
+			put("pcode", "p.stationcode");
+			put("porigin", "p.origin");
+		}
+	};
+
+
 	final static Map<String, Object> COLUMN_EXPANSION = new HashMap<String, Object>() {
 		private static final long serialVersionUID = 1L;
 		{
 			putAll(COLUMN_EXPANSION_STATION);
+			putAll(COLUMN_EXPANSION_PARENTSTATION);
 			putAll(COLUMN_EXPANSION_DATATYPE);
 			putAll(COLUMN_EXPANSION_MEASUREMENT);
 		}
@@ -180,6 +194,10 @@ public class Reader2Application implements CommandLineRunner {
 			stationTypePrev = stationTypeAct;
 			do {
 				Map<String, Object> station = makeObjectOrNull(rec, COLUMN_EXPANSION_STATION);
+				if (station == null) {
+					continue;
+				}
+				station.put("sparent", makeObjectOrNull(rec, COLUMN_EXPANSION_PARENTSTATION));
 				stations.put(stationCodeAct, station);
 				System.out.println("S = " + stationCodeAct);
 
@@ -189,6 +207,7 @@ public class Reader2Application implements CommandLineRunner {
 				do {
 					Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE);
 					if (dataType != null) {
+						dataType.put("tmeasurement", makeObjectOrNull(rec, COLUMN_EXPANSION_MEASUREMENT));
 						datatypes.add(dataType);
 					}
 
@@ -227,8 +246,8 @@ public class Reader2Application implements CommandLineRunner {
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(jdbcTemplate);
 
-		// The API should have a flag to remove null values (what should be default?)
-		ColumnMapRowMapper.setIgnoreNull(false);
+		// The API should have a flag to remove null values (what should be default? <-- true)
+		ColumnMapRowMapper.setIgnoreNull(true);
 		JsonStream.setIndentionStep(4);
 //		JsonIterUnicodeSupport.enable();
 		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
@@ -254,8 +273,8 @@ public class Reader2Application implements CommandLineRunner {
 //		System.exit(0);
 
 		/* Run queries */
-//		String fetchStationTypes = fetchStationTypes();
-//		System.out.println(fetchStationTypes);
+		String fetchStationTypes = fetchStationTypes();
+		System.out.println(fetchStationTypes);
 
 //		String stations = fetchStations("ParkingStation, Bicycle", 120, -10, "sorigin, sname, smetadata");
 //		String stations = fetchStations("Bicycle");
@@ -276,7 +295,7 @@ public class Reader2Application implements CommandLineRunner {
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		String stations = fetchStationsAndTypes("*", "*", 30, 0, "*", "ADMIN");
+		String stations = fetchStationsAndTypes("EChargingPlug", "*", 3, 0, "*", "ADMIN");
 		System.out.println(stations);
 
 		log.info("READY.");
