@@ -63,20 +63,6 @@ public class Reader2Application implements CommandLineRunner {
 		}
 	};
 
-	final static Map<String, Object> COLUMN_EXPANSION_STATION = new HashMap<String, Object>() {
-		private static final long serialVersionUID = 1L;
-		{
-			put("sname", "s.name");
-			put("stype", "s.stationtype");
-			put("scode", "s.stationcode");
-			put("sorigin", "s.origin");
-			put("scoordinate", "s.pointprojection");
-			put("sparent", "p.stationcode");
-			put("smetadata", "m.json");
-			put("sdatatypes", COLUMN_EXPANSION_DATATYPE);
-		}
-	};
-
 	final static Map<String, Object> COLUMN_EXPANSION_PARENTSTATION = new HashMap<String, Object>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -88,6 +74,19 @@ public class Reader2Application implements CommandLineRunner {
 		}
 	};
 
+	final static Map<String, Object> COLUMN_EXPANSION_STATION = new HashMap<String, Object>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put("sname", "s.name");
+			put("stype", "s.stationtype");
+			put("scode", "s.stationcode");
+			put("sorigin", "s.origin");
+			put("scoordinate", "s.pointprojection");
+			put("sparent", COLUMN_EXPANSION_PARENTSTATION);
+			put("smetadata", "m.json");
+			put("sdatatypes", COLUMN_EXPANSION_DATATYPE);
+		}
+	};
 
 	final static Map<String, Object> COLUMN_EXPANSION = new HashMap<String, Object>() {
 		private static final long serialVersionUID = 1L;
@@ -144,7 +143,8 @@ public class Reader2Application implements CommandLineRunner {
 		return JsonStream.serialize(result);
 	}
 
-	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit, long offset, String select, String role) {
+	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit,
+			long offset, String select, String role, boolean ignoreNull) {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 		List<Map<String, Object>> queryResult = QueryBuilder
@@ -183,7 +183,7 @@ public class Reader2Application implements CommandLineRunner {
 		Map<String, Object> rec = it.hasNext() ? it.next() : null;
 		stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
 		stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-		System.out.println(rec);
+		log.debug(rec.toString());
 
 		/* Accumulate station types */
 		Map<String, Object> stationTypes = new HashMap<String, Object>();
@@ -193,29 +193,24 @@ public class Reader2Application implements CommandLineRunner {
 			stations = new HashMap<String, Object>();
 			stationTypePrev = stationTypeAct;
 			do {
-				Map<String, Object> station = makeObjectOrNull(rec, COLUMN_EXPANSION_STATION);
-				if (station == null) {
-					continue;
-				}
-				station.put("sparent", makeObjectOrNull(rec, COLUMN_EXPANSION_PARENTSTATION));
+				Map<String, Object> station = makeObjectOrEmptyMap(rec, COLUMN_EXPANSION_STATION, ignoreNull);
 				stations.put(stationCodeAct, station);
-				System.out.println("S = " + stationCodeAct);
+				log.debug("S = " + stationCodeAct);
 
 				/* Accumulate data types */
 				datatypes = new ArrayList<Object>();
+				datatypes.add(station.get("sdatatypes"));
 				stationCodePrev = stationCodeAct;
 				do {
-					Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE);
-					if (dataType != null) {
-						dataType.put("tmeasurement", makeObjectOrNull(rec, COLUMN_EXPANSION_MEASUREMENT));
-						datatypes.add(dataType);
-					}
-
 					if (it.hasNext()) {
 						rec = it.next();
 						stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
 						stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-						System.out.println(rec);
+						log.debug(rec.toString());
+						Map<String, Object> dataType = makeObjectOrNull(rec, COLUMN_EXPANSION_DATATYPE, ignoreNull);
+						if (dataType != null) {
+							datatypes.add(dataType);
+						}
 					} else {
 						rec = null;
 					}
@@ -229,25 +224,38 @@ public class Reader2Application implements CommandLineRunner {
 		return JsonStream.serialize(stationTypes);
 	}
 
-	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, Map<String, Object> objDefinition) {
+	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, Map<String, Object> objDefinition, boolean ignoreNull) {
+		Map<String, Object> result = makeObjectOrEmptyMap(record, objDefinition, ignoreNull);
+		return result.isEmpty() ? null : result;
+	}
+
+	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, Map<String, Object> objDefinition, boolean ignoreNull) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		for (Entry<String, Object> entry : record.entrySet()) {
-			if (objDefinition.containsKey(entry.getKey())) {
-				result.put(entry.getKey(), entry.getValue());
+		for (Entry<String, Object> def : objDefinition.entrySet()) {
+			if (record.containsKey(def.getKey())) {
+				result.put(def.getKey(), record.get(def.getKey()));
+			} else if (def.getValue() instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> subObject = makeObjectOrNull(record, (Map<String, Object>) def.getValue(), ignoreNull);
+				if (subObject != null || !ignoreNull) {
+					result.put(def.getKey(), subObject);
+				}
 			}
 		}
-		return result.isEmpty() ? null : result;
+		return result;
 	}
 
 
 	@Override
 	public void run(String... args) throws Exception {
 
+		boolean ignoreNull = true;
+
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(jdbcTemplate);
 
 		// The API should have a flag to remove null values (what should be default? <-- true)
-		ColumnMapRowMapper.setIgnoreNull(true);
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 		JsonStream.setIndentionStep(4);
 //		JsonIterUnicodeSupport.enable();
 		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
@@ -258,45 +266,45 @@ public class Reader2Application implements CommandLineRunner {
 //		String z = JsonStream.serialize(y);
 //
 //		for (byte c : x.getBytes()) {
-//			System.out.println(c + " : " + Character.toString((char) c));
+//			log.debug(c + " : " + Character.toString((char) c));
 //		}
-//		System.out.println();
+//		log.debug();
 //
 //		for (byte c : z.getBytes()) {
-//			System.out.println(c + " : " + Character.toString((char) c));
+//			log.debug(c + " : " + Character.toString((char) c));
 //		}
-//		System.out.println();
+//		log.debug();
 //
-//		System.out.println(new String(z.getBytes(), "UTF-8"));
-//		System.out.println(new String(x.getBytes("UTF-8"), "UTF-8"));
+//		log.debug(new String(z.getBytes(), "UTF-8"));
+//		log.debug(new String(x.getBytes("UTF-8"), "UTF-8"));
 //
 //		System.exit(0);
 
 		/* Run queries */
 		String fetchStationTypes = fetchStationTypes();
-		System.out.println(fetchStationTypes);
+		log.debug(fetchStationTypes);
 
 //		String stations = fetchStations("ParkingStation, Bicycle", 120, -10, "sorigin, sname, smetadata");
 //		String stations = fetchStations("Bicycle");
 //		String stations = fetchStations("*", 20, -1, "name, metadata");
 //		String stations = fetchStations("ParkingStation, Bicycle", 20, -1, "name, type, metadata");
 
-//		System.out.println(stations);
+//		log.debug(stations);
 
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 20, 0, "sorigin, sname, tunit, ttype");
-//		System.out.println(stations);
+//		log.debug(stations);
 //
 //		stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 20, 20, "sorigin, sname, tunit, ttype");
-//		System.out.println(stations);
+//		log.debug(stations);
 //
 //		stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 20, 40, "sorigin, sname, tunit, ttype");
-//		System.out.println(stations);
+//		log.debug(stations);
 
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		String stations = fetchStationsAndTypes("EChargingPlug", "*", 3, 0, "*", "ADMIN");
-		System.out.println(stations);
+		String stations = fetchStationsAndTypes("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull);
+		log.info(stations);
 
 		log.info("READY.");
 	}
