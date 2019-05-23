@@ -1,8 +1,5 @@
 package it.bz.idm.bdp.reader2;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -33,61 +30,35 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
             return;
         }
 
-		boolean ignoreNull = true;
+		boolean ignoreNull = false;
 
 		SelectExpansion se = new SelectExpansion();
 
-		Map<String, Object> seMeasurement = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("mvalidtime", "me.timestamp");
-				put("mtransactiontime", "me.created_on");
-				put("mperiod", "me.period");
-				put("mvalue", "me.double_value");
-			}
-		};
+		se.addExpansion("station", "sname", "s.name");
+		se.addExpansion("station", "stype", "s.stationtype");
+		se.addExpansion("station", "scode", "s.stationcode");
+		se.addExpansion("station", "sorigin", "s.origin");
+		se.addExpansion("station", "scoordinate", "s.pointprojection");
+		se.addExpansion("station", "smetadata", "m.json");
+		se.addSubExpansion("station", "sparent", "parent");
+		se.addSubExpansion("station", "sdatatypes", "datatype");
 
-		Map<String, Object> seDatatype = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("tname", "t.cname");
-				put("tunit", "t.cunit");
-				put("ttype", "t.rtype");
-				put("tdescription", "t.description");
-				put("tlastmeasurement", seMeasurement);
-			}
-		};
+		se.addExpansion("parent", "pname", "p.name");
+		se.addExpansion("parent", "ptype", "p.stationtype");
+		se.addExpansion("parent", "pcoordinate", "p.pointprojection");
+		se.addExpansion("parent", "pcode", "p.stationcode");
+		se.addExpansion("parent", "porigin", "p.origin");
 
-		Map<String, Object> seParent = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("pname", "p.name");
-				put("ptype", "p.stationtype");
-				put("pcoordinate", "s.pointprojection");
-				put("pcode", "p.stationcode");
-				put("porigin", "p.origin");
-			}
-		};
+		se.addExpansion("datatype", "tname", "t.cname");
+		se.addExpansion("datatype", "tunit", "t.cunit");
+		se.addExpansion("datatype", "ttype", "t.rtype");
+		se.addExpansion("datatype", "tdescription", "t.description");
+		se.addSubExpansion("datatype", "tlastmeasurement", "measurement");
 
-		Map<String, Object> seStation = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("sname", "s.name");
-				put("stype", "s.stationtype");
-				put("scode", "s.stationcode");
-				put("sorigin", "s.origin");
-				put("scoordinate", "s.pointprojection");
-				put("smetadata", "m.json");
-				put("sparent", seParent);
-				put("sdatatypes", seDatatype);
-			}
-		};
-
-		se.addExpansion("station", seStation);
-		se.addExpansion("parent", seParent);
-		se.addExpansion("datatype", seDatatype);
-		se.addExpansion("measurement", seMeasurement);
-
+		se.addExpansion("measurement", "mvalidtime", "me.timestamp");
+		se.addExpansion("measurement", "mtransactiontime", "me.created_on");
+		se.addExpansion("measurement", "mperiod", "me.period");
+		se.addExpansion("measurement", "mvalue", "me.double_value");
 
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(se);
@@ -102,3 +73,4 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 	}
 
 }
+

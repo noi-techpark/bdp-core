@@ -13,14 +13,27 @@ public class SelectExpansion {
 		expansion.put(defName, definition);
 	}
 
-	// Needed?
-	public void addSubExpansion(final String defName, final String jsonName, Map<String, Object> definition) throws Exception {
-		Map<String, Object> exp = expansion.get(defName);
-		if (exp == null) {
-			throw new Exception("Expansion with name '" + defName + "' not found!");
-		}
-		exp.put(jsonName, definition);
+	public void addExpansion(final String defName, String alias, String column) {
+		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
+		definition.put(alias, column);
+		expansion.put(defName, definition);
 	}
+
+	public void addSubExpansion(final String defName, String alias, String subDefName) {
+		Map<String, Object> subDefinition = expansion.getOrDefault(subDefName, new HashMap<String, Object>());
+		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
+		definition.put(alias, subDefinition);
+		expansion.put(defName, definition);
+	}
+
+//	// Needed?
+//	public void addSubExpansion(final String defName, final String jsonName, Map<String, Object> definition) throws Exception {
+//		Map<String, Object> exp = expansion.get(defName);
+//		if (exp == null) {
+//			throw new Exception("Expansion with name '" + defName + "' not found!");
+//		}
+//		exp.put(jsonName, definition);
+//	}
 
 	public Map<String, Object> getExpansion(final String defName) {
 		return expansion.get(defName);

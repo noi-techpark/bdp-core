@@ -31,7 +31,7 @@ public class DataFetcher {
 				.expandSelect()
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
-				.addSqlIfAliasOrDefinition("left join station p on s.parent_id = p.id", "parent", "sparent")
+				.addSqlIfAliasOrDefinition("left join station p on s.parent_id = p.id", "parent", "sparent") // create a map inside SE that contains all references to a sub-select-definition
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.addSql("order by _stationtype, _stationcode")
@@ -68,9 +68,9 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select)
+				.init(select, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
-//				.expandSelect(select, COLUMN_EXPANSION, true, false)
+				.expandSelect()
 				.addSql("from measurement me",
 						"join bdppermissions pe on (",
 								"(me.station_id = pe.station_id OR pe.station_id is null)",
