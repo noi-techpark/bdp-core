@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.reader2.utils.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.QueryExecutor;
 import it.bz.idm.bdp.reader2.utils.SelectExpansion;
 
 public class DataFetcher {
@@ -42,7 +43,7 @@ public class DataFetcher {
 		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
 
 		nanoTime = System.nanoTime();
-		List<Map<String, Object>> queryResult = query.build();
+		List<Map<String, Object>> queryResult = QueryExecutor.init().build(query.getSql());
 		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
 
 		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
@@ -85,7 +86,11 @@ public class DataFetcher {
 		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
 
 		nanoTime = System.nanoTime();
-		List<Map<String, Object>> queryResult = query.build();
+		List<Map<String, Object>> queryResult = QueryExecutor
+				.init()
+				.addParameters(query.getParameters())
+				.build(query.getSql());
+
 		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
 
 		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
@@ -178,10 +183,9 @@ public class DataFetcher {
 	}
 
 	public String fetchStationTypes() {
-		return QueryBuilder
-				.init(null)
-				.addSql("select stationtype from station group by stationtype")
-				.buildJson(String.class);
+		return QueryExecutor
+				.init()
+				.buildJson("select stationtype from station group by stationtype", String.class);
 	}
 
 

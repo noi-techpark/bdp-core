@@ -1,15 +1,10 @@
 package it.bz.idm.bdp.reader2.utils;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-
-import com.jsoniter.output.JsonStream;
 
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
@@ -20,9 +15,8 @@ import com.jsoniter.output.JsonStream;
  */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
-	private static NamedParameterJdbcTemplate npjt;
 	private static SelectExpansion se;
-	private MapSqlParameterSource parameters = new MapSqlParameterSource();
+	private Map<String, Object> parameters = new HashMap<String, Object>();
 
 	public Set<String> columnAliases;
 	public Map<String, String> exp;
@@ -39,29 +33,26 @@ public class QueryBuilder {
 	 *
 	 * @param namedParameterJdbcTemplate {@link EntityManager}
 	 */
-	public static synchronized void setup(NamedParameterJdbcTemplate namedParameterJdbcTemplate, SelectExpansion selectExpansion) {
-		if (selectExpansion == null || namedParameterJdbcTemplate == null) {
-			throw new RuntimeException("No SelectExpansion or NamedParameterJdbcTemplate defined!");
+	public static synchronized void setup(SelectExpansion selectExpansion) {
+		if (selectExpansion == null) {
+			throw new RuntimeException("No SelectExpansion defined!");
 		}
-		if (QueryBuilder.npjt != null || QueryBuilder.se != null) {
+		if (QueryBuilder.se != null) {
 			throw new RuntimeException("QueryBuilder.setup can only be called once");
 		}
-		QueryBuilder.npjt = namedParameterJdbcTemplate;
 		QueryBuilder.se = selectExpansion;
 	}
 
+
 	public static QueryBuilder init(final String select, String... selectDefNames) {
-		if (QueryBuilder.npjt == null) {
-			throw new RuntimeException("Missing JDBC template. Run QueryBuilder.setup before initialization.");
-		}
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
 		return new QueryBuilder(select, selectDefNames);
 	}
 
-	public static QueryBuilder init(NamedParameterJdbcTemplate namedParameterJdbcTemplate, SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
-		QueryBuilder.setup(namedParameterJdbcTemplate,selectExpansion);
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
+		QueryBuilder.setup(selectExpansion);
 		return QueryBuilder.init(select, selectDefNames);
 	}
 
@@ -125,65 +116,9 @@ public class QueryBuilder {
 	 */
 	public QueryBuilder setParameter(String name, Object value) {
 		if (name != null && !name.isEmpty()) {
-			parameters.addValue(name, value);
+			parameters.put(name, value);
 		}
 		return this;
-	}
-
-	/**
-	 * Build the current query and execute it via {@link NamedParameterJdbcTemplate#query}
-	 *
-	 * @return A list of (key, value) pairs
-	 */
-	public List<Map<String, Object>> build() {
-		return npjt.query(sql.toString(), parameters, new ColumnMapRowMapper());
-	}
-
-	public <T> List<T> build(Class<T> resultClass) {
-		return npjt.queryForList(sql.toString(), parameters, resultClass);
-	}
-
-	/**
-	 * Build the current query and execute it via {@link NamedParameterJdbcTemplate#query},
-	 * finally serialize it into a JSON string
-	 *
-	 * @return List of <code>resultClass</code> objects
-	 */
-	public String buildJson() {
-		return JsonStream.serialize(build());
-	}
-
-	public <T> String buildJson(Class<T> resultClass) {
-		return JsonStream.serialize(build(resultClass));
-	}
-
-	/**
-	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
-	 * return null, if {@link javax.persistence.TypedQuery#getResultList} has no results,
-	 * and leave exceptions to proper errors.
-	 *
-	 * @param resultClass Type of the query result
-	 * @return topmost result or null if not found
-	 */
-	public <T> T buildSingleResultOrNull(Class<T> resultClass) {
-		return buildSingleResultOrAlternative(resultClass, null);
-	}
-
-	/**
-	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
-	 * return <code>alternative</code>, if {@link javax.persistence.TypedQuery#getResultList}
-	 * has no results, and leave exceptions to proper errors.
-	 *
-	 * @param resultClass Type of the query result
-	 * @param alternative to be returned, if {@link javax.persistence.TypedQuery#getResultList} does not return results
-	 * @return topmost result or 'alternative' if not found
-	 */
-	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
-		List<T> list = build(resultClass);
-		if (list == null || list.isEmpty()) {
-			return alternative;
-		}
-		return list.get(0);
 	}
 
 	/**
@@ -337,12 +272,16 @@ public class QueryBuilder {
 		return resultSet;
 	}
 
-	public StringBuilder getSql() {
-		return sql;
+	public String getSql() {
+		return sql.toString();
 	}
 
 	public SelectExpansion getSelectExpansion() {
 		return se;
+	}
+
+	public Map<String, Object> getParameters() {
+		return parameters;
 	}
 
 }

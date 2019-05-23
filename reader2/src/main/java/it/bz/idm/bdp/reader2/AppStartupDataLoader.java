@@ -15,6 +15,7 @@ import it.bz.idm.bdp.reader2.utils.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.JsonIterPostgresSupport;
 import it.bz.idm.bdp.reader2.utils.JsonIterSqlTimestampSupport;
 import it.bz.idm.bdp.reader2.utils.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.QueryExecutor;
 import it.bz.idm.bdp.reader2.utils.SelectExpansion;
 
 
@@ -89,7 +90,8 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 
 
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
-		QueryBuilder.setup(jdbcTemplate, se);
+		QueryBuilder.setup(se);
+		QueryExecutor.setup(jdbcTemplate);
 
 		// The API should have a flag to remove null values (what should be default? <-- true)
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
