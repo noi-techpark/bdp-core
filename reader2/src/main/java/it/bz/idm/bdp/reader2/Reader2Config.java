@@ -1,4 +1,4 @@
-package it.bz.opendatahub.reader2;
+package it.bz.idm.bdp.reader2;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan("it.bz.opendatahub")
@@ -34,6 +37,19 @@ public class Reader2Config {
 		driverManagerDataSource.setPassword(environment.getProperty(PASSWORD));
 		driverManagerDataSource.setDriverClassName(environment.getProperty(DRIVER));
 
+		HikariConfig config = new HikariConfig("/hikari.properties");
+        HikariDataSource dataSource = new HikariDataSource(config);
+
+//		driverClassName=com.mysql.jdbc.Driver
+//				jdbcUrl=jdbc:mysql://localhost:3306/testdb?useSSL=false
+//				maximumPoolSize=20
+//				username=testuser
+//				password=test623
+//				dataSource.cachePrepStmts=true
+//				dataSource.prepStmtCacheSize=250
+//				dataSource.prepStmtCacheSqlLimit=2048
+
+
 		Connection c;
 		try {
 			c = driverManagerDataSource.getConnection();
@@ -45,6 +61,7 @@ public class Reader2Config {
 
 //		Connection c = npjt.getJdbcTemplate().getDataSource().getConnection();
 
-		return driverManagerDataSource;
+//		return driverManagerDataSource;
+		return dataSource;
 	}
 }

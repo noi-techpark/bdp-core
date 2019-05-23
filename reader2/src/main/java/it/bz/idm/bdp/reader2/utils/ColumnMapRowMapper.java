@@ -1,4 +1,4 @@
-package it.bz.opendatahub.reader2.utils;
+package it.bz.idm.bdp.reader2.utils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

@@ -20,95 +20,32 @@ public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
-	private static SelectExpansion se;
-
-	public DataFetcher() {
-
-		se = new SelectExpansion();
-
-		Map<String, Object> seMeasurement = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("mvalidtime", "me.timestamp");
-				put("mtransactiontime", "me.created_on");
-				put("mperiod", "me.period");
-				put("mvalue", "me.double_value");
-			}
-		};
-
-		Map<String, Object> seDatatype = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("tname", "t.cname");
-				put("tunit", "t.cunit");
-				put("ttype", "t.rtype");
-				put("tdescription", "t.description");
-				put("tlastmeasurement", seMeasurement);
-			}
-		};
-
-		Map<String, Object> seParent = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("pname", "p.name");
-				put("ptype", "p.stationtype");
-				put("pcoordinate", "s.pointprojection");
-				put("pcode", "p.stationcode");
-				put("porigin", "p.origin");
-			}
-		};
-
-		Map<String, Object> seStation = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("sname", "s.name");
-				put("stype", "s.stationtype");
-				put("scode", "s.stationcode");
-				put("sorigin", "s.origin");
-				put("scoordinate", "s.pointprojection");
-				put("smetadata", "m.json");
-				put("sparent", seParent);
-				put("sdatatypes", seDatatype);
-			}
-		};
-
-		se.addExpansion("station", seStation);
-		se.addExpansion("parent", seParent);
-		se.addExpansion("datatype", seDatatype);
-		se.addExpansion("measurement", seMeasurement);
-	}
-
-
 	public String fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
-		log.info("FETCHSTATIONS");
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
-
-		Set<String> columnAliases = se.getColumnAliases(select, "station", "parent");
-
-		Map<String, String> exp = se._expandSelect(columnAliases, "station", "parent");//QueryBuilder._expandSelect(select, COLUMN_EXPANSION_STATION, false, false);
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init()
+				.init(select, "station", "parent")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
-//				.expandSelect(select, se.getExpansion("station"), se.getExpansion("parent"))
-				.addSql("," + exp.get("station"))
-				.addSqlIfNotNull("," + exp.get("parent"), exp.get("parent"))
+				.expandSelect("station", "parent")
 				.addSql("from station s")
-				.addSqlIf("left join metadata m on m.id = s.meta_data_id", columnAliases.contains("smetadata"))
-				.addSqlIfNotNull("left join station p on s.parent_id = p.id", exp.get("parent"))
+				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.addSql("order by _stationtype, _stationcode")
 				.addLimit(limit)
 				.addOffset(offset);
+
+		System.out.println(query.getSql());
+
 		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
 
 		nanoTime = System.nanoTime();
 		List<Map<String, Object>> queryResult = query.build();
 		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
 
-		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult);
+		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 
 		nanoTime = System.nanoTime();
 		String serialize = JsonStream.serialize(stationTypes);
@@ -124,7 +61,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init()
+				.init(select)
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
 //				.expandSelect(select, COLUMN_EXPANSION, true, false)
 				.addSql("from measurement me",
@@ -151,7 +88,7 @@ public class DataFetcher {
 		List<Map<String, Object>> queryResult = query.build();
 		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
 
-		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult);
+		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 
 		nanoTime = System.nanoTime();
 		String serialize = JsonStream.serialize(stationTypes);
@@ -159,7 +96,7 @@ public class DataFetcher {
 		return serialize;
 	}
 
-	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult) {
+	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se) {
 		long nanoTime;
 		nanoTime = System.nanoTime();
 		String stationTypePrev = "";
@@ -242,7 +179,7 @@ public class DataFetcher {
 
 	public String fetchStationTypes() {
 		return QueryBuilder
-				.init()
+				.init(null)
 				.addSql("select stationtype from station group by stationtype")
 				.buildJson(String.class);
 	}

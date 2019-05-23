@@ -1,4 +1,4 @@
-package it.bz.opendatahub.reader2.utils;
+package it.bz.idm.bdp.reader2.utils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,8 +20,17 @@ import com.jsoniter.output.JsonStream;
  */
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
-	protected static NamedParameterJdbcTemplate npjt;
-	MapSqlParameterSource parameters = new MapSqlParameterSource();
+	private static NamedParameterJdbcTemplate npjt;
+	private static SelectExpansion se;
+	private MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+	public Set<String> columnAliases;
+	public Map<String, String> exp;
+
+	public QueryBuilder(final String select, String... selectDefNames) {
+		columnAliases = se.getColumnAliases(select, selectDefNames);
+		exp = se._expandSelect(columnAliases, selectDefNames);
+	}
 
 	/**
 	 * Create a new {@link QueryBuilder} instance
@@ -30,23 +39,30 @@ public class QueryBuilder {
 	 *
 	 * @param namedParameterJdbcTemplate {@link EntityManager}
 	 */
-	public static synchronized void setup(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-		if (QueryBuilder.npjt != null) {
+	public static synchronized void setup(NamedParameterJdbcTemplate namedParameterJdbcTemplate, SelectExpansion selectExpansion) {
+		if (selectExpansion == null || namedParameterJdbcTemplate == null) {
+			throw new RuntimeException("No SelectExpansion or NamedParameterJdbcTemplate defined!");
+		}
+		if (QueryBuilder.npjt != null || QueryBuilder.se != null) {
 			throw new RuntimeException("QueryBuilder.setup can only be called once");
 		}
 		QueryBuilder.npjt = namedParameterJdbcTemplate;
+		QueryBuilder.se = selectExpansion;
 	}
 
-	public static QueryBuilder init() {
+	public static QueryBuilder init(final String select, String... selectDefNames) {
 		if (QueryBuilder.npjt == null) {
 			throw new RuntimeException("Missing JDBC template. Run QueryBuilder.setup before initialization.");
 		}
-		return new QueryBuilder();
+		if (QueryBuilder.se == null) {
+			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
+		}
+		return new QueryBuilder(select, selectDefNames);
 	}
 
-	public static QueryBuilder init(NamedParameterJdbcTemplate namedParameterJdbcTemplate)  {
-		QueryBuilder.setup(namedParameterJdbcTemplate);
-		return QueryBuilder.init();
+	public static QueryBuilder init(NamedParameterJdbcTemplate namedParameterJdbcTemplate, SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
+		QueryBuilder.setup(namedParameterJdbcTemplate,selectExpansion);
+		return QueryBuilder.init(select, selectDefNames);
 	}
 
 	/**
@@ -198,6 +214,22 @@ public class QueryBuilder {
 		return this;
 	}
 
+	public QueryBuilder addSqlIfAlias(String sqlPart, String alias) {
+		if (sqlPart != null && !sqlPart.isEmpty() && columnAliases.contains(alias)) {
+			sql.append(" ");
+			sql.append(sqlPart);
+		}
+		return this;
+	}
+
+	public QueryBuilder addSqlIfDefinition(String sqlPart, String selectDefName) {
+		if (sqlPart != null && !sqlPart.isEmpty() && exp.containsKey(selectDefName)) {
+			sql.append(" ");
+			sql.append(sqlPart);
+		}
+		return this;
+	}
+
 	/**
 	 * Append <code>sqlPart</code> to the end of the SQL string, if
 	 * <code>object</code> is not null.
@@ -232,11 +264,36 @@ public class QueryBuilder {
 		return this;
 	}
 
+	public QueryBuilder expandSelect(final String... selectDef) {
+		if (selectDef != null && selectDef.length > 0) {
+			for (String def : selectDef) {
+				String expansion = exp.get(def);
+				if (expansion != null) {
+					sql.append(", ");
+					sql.append(expansion);
+				}
+			}
+		}
+		return this;
+	}
+
+	public QueryBuilder expandSelect(boolean condition, final String... selectDef) {
+		if (condition) {
+			return expandSelect(selectDef);
+		}
+		return this;
+	}
+
+	public QueryBuilder expandSelect(String select, Map<String, Object> selectDef, boolean recurse, boolean optional) {
+		addSql(_expandSelect(select, selectDef, recurse, optional));
+		return this;
+	}
+
 	@SuppressWarnings("unchecked")
-	private static String _expandSelect(String select, Map<String, Object> selectDef, String alias) {
+	public static String _expandSelect(String select, Map<String, Object> selectDef, boolean recurse, boolean optional) {
 		StringBuffer sb = new StringBuffer();
 		Set<String> columnAliases;
-		if (select == null || select.trim().equals("*")) {
+		if (!optional && (select == null || select.trim().equals("*"))) {
 			columnAliases = selectDef.keySet();
 		} else {
 			columnAliases = csvToSet(select);
@@ -255,18 +312,15 @@ public class QueryBuilder {
 				  .append(columnAlias)
 				  .append(", ");
 			} else if (def instanceof Map) {
-				sb.append(_expandSelect(null, (Map<String, Object>) def, null))
-				  .append(", ");
+				if (recurse) {
+					sb.append(_expandSelect(null, (Map<String, Object>) def, recurse, optional))
+					  .append(", ");
+				}
 			} else {
 				throw new RuntimeException("A select definition must contain either Strings or Maps!");
 			}
 		}
 		return sb.length() >= 3 ? sb.substring(0, sb.length() - 2) : sb.toString();
-	}
-
-	public QueryBuilder expandSelect(String select, Map<String, Object> selectDef, String alias) {
-		addSql(_expandSelect(select, selectDef, alias));
-		return this;
 	}
 
 	public static Set<String> csvToSet(final String csv) {
@@ -282,4 +336,13 @@ public class QueryBuilder {
 		}
 		return resultSet;
 	}
+
+	public StringBuilder getSql() {
+		return sql;
+	}
+
+	public SelectExpansion getSelectExpansion() {
+		return se;
+	}
+
 }
