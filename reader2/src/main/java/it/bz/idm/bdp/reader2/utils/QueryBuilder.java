@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
@@ -22,6 +23,9 @@ public class QueryBuilder {
 	public Map<String, String> exp;
 
 	public QueryBuilder(final String select, String... selectDefNames) {
+		if (QueryBuilder.se == null) {
+			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
+		}
 		columnAliases = se.getColumnAliases(select, selectDefNames);
 		exp = se._expandSelect(columnAliases, selectDefNames);
 	}
@@ -45,9 +49,6 @@ public class QueryBuilder {
 
 
 	public static QueryBuilder init(final String select, String... selectDefNames) {
-		if (QueryBuilder.se == null) {
-			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
-		}
 		return new QueryBuilder(select, selectDefNames);
 	}
 
@@ -165,6 +166,13 @@ public class QueryBuilder {
 		return this;
 	}
 
+	// TODO this should work automatic if addSqlIfDefinition is used (via SelectExpansion sub-Maps)
+	public QueryBuilder addSqlIfAliasOrDefinition(String sqlPart, String selectDefName, String alias) {
+		addSqlIfAlias(sqlPart, alias);
+		addSqlIfDefinition(sqlPart, selectDefName);
+		return this;
+	}
+
 	/**
 	 * Append <code>sqlPart</code> to the end of the SQL string, if
 	 * <code>object</code> is not null.
@@ -200,15 +208,28 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelect(final String... selectDef) {
-		if (selectDef != null && selectDef.length > 0) {
-			for (String def : selectDef) {
-				String expansion = exp.get(def);
-				if (expansion != null) {
-					sql.append(", ");
-					sql.append(expansion);
-				}
+		if (selectDef == null || selectDef.length == 0) {
+			return expandSelect();
+		}
+		StringJoiner sj = new StringJoiner(", ");
+		for (String def : selectDef) {
+			String expansion = exp.get(def);
+			if (expansion != null) {
+				sj.add(expansion);
 			}
 		}
+		sql.append(sj.toString());
+		return this;
+	}
+
+	public QueryBuilder expandSelect() {
+		StringJoiner sj = new StringJoiner(", ");
+		for (String expansion : exp.values()) {
+			if (expansion != null) {
+				sj.add(expansion);
+			}
+		}
+		sql.append(sj.toString());
 		return this;
 	}
 

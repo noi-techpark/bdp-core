@@ -46,6 +46,7 @@ public class SelectExpansion {
 		return _expandSelect(columnAliases, selectDefNames);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, String> _expandSelect(Set<String> columnAliases, String... selectDefNames) {
 
 		Map<String, StringBuffer> bufferMap = new HashMap<String, StringBuffer>();
@@ -75,6 +76,7 @@ public class SelectExpansion {
 				bufferMap.put(selectDefName, sb);
 			}
 
+			// TODO make this recursive in a separate method
 			Object def = selectDef.get(columnAlias);
 			if (def == null)
 				continue;
@@ -83,9 +85,13 @@ public class SelectExpansion {
 				  .append(" as ")
 				  .append(columnAlias)
 				  .append(", ");
-//			} else if (def instanceof Map) {
-//				sb.append(_expandSelect(null, def))
-//				  .append(", ");
+			} else if (def instanceof Map) {
+				for (Entry<String, String> e : ((Map<String, String>) def).entrySet()) {
+					sb.append(e.getValue())
+					  .append(" as ")
+					  .append(e.getKey())
+					  .append(", ");
+				}
 			} else {
 				throw new RuntimeException("A select definition must contain either Strings or Maps!");
 			}

@@ -27,11 +27,11 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select, "station", "parent")
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
-				.expandSelect("station", "parent")
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, ")
+				.expandSelect()
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
-				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSqlIfAliasOrDefinition("left join station p on s.parent_id = p.id", "parent", "sparent")
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.addSql("order by _stationtype, _stationcode")
@@ -43,7 +43,13 @@ public class DataFetcher {
 		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
 
 		nanoTime = System.nanoTime();
-		List<Map<String, Object>> queryResult = QueryExecutor.init().build(query.getSql());
+		List<Map<String, Object>> queryResult = QueryExecutor
+				.init()
+				.addParameters(query.getParameters())
+				.build(query.getSql());
+
+		System.out.println(queryResult.toString());
+
 		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
 
 		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
