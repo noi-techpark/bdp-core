@@ -31,7 +31,7 @@ public class QueryBuilder {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		exp = se._expandSelect(columnAliases, selectDefNames);
+		exp = se.build(columnAliases, selectDefNames);
 	}
 
 	/**

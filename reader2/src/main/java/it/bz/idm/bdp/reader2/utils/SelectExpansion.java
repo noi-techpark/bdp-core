@@ -16,6 +16,11 @@ public class SelectExpansion {
 	}
 	private final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
 	private final Map<String, Set<String>> hierarchy = new HashMap<String, Set<String>>();
+	private final Map<String, String> aliasMap = new HashMap<String, String>();
+
+	private final Set<String> usedJSONAliases = new HashSet<String>();
+	private final Set<String> usedJSONDefNames = new HashSet<String>();
+	private final Map<String, String> expandedSelects = new HashMap<String, String>();
 
 	private boolean dirty = true;
 
@@ -39,16 +44,6 @@ public class SelectExpansion {
 		}
 	}
 
-	private Set<String> expandDefNames(String... selectDefNames) {
-		Set<String> res = new HashSet<String>();
-		for (String defName : selectDefNames) {
-			Set<String> list = hierarchy.get(defName);
-			if (list != null)
-				res.addAll(list);
-		}
-		return res;
-	}
-
 	public Map<String, Object> getExpansion(final String defName) {
 		return expansion.get(defName);
 	}
@@ -66,9 +61,11 @@ public class SelectExpansion {
 			throw new RuntimeException("Expansion definition name must be set!");
 		}
 		dirty = true;
+
 		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
 		if (alias != null) {
 			definition.put(alias, column);
+			aliasMap.put(alias, defName);
 		}
 		expansion.put(defName, definition);
 
@@ -79,82 +76,82 @@ public class SelectExpansion {
 		return definition;
 	}
 
-	public List<String> getColumnAliasesAsList(String select, String...selectDefNames) {
-		return new ArrayList<String>(getColumnAliases(select, selectDefNames));
-	}
-
-	public Set<String> getColumnAliases(String select, String... selectDefNames) {
+	private Set<String> getColumnAliases(String select, String... selectDefNames) {
 		if (select == null || select.trim().equals("*")) {
 			return getAllKeys(selectDefNames);
 		}
 		Set<String> aliases = csvToSet(select);
 
-		// XXX Just a check if exists, remove it
-		for (String alias : aliases) {
-			_findDefinitionContainingAlias(alias, selectDefNames);
-		}
-
 		return aliases;
 	}
 
-	private Map<String, Map<String, Object>> _findDefinitionContainingAlias(String alias, String... selectDefNames) {
-		Map<String, Map<String, Object>> res = new HashMap<String, Map<String, Object>>();
-		for (String defName : expandDefNames(selectDefNames)) {
-			Map<String, Object> selectDef = expansion.get(defName);
-			if (selectDef.containsKey(alias)) {
-				res.put(defName, selectDef);
-			}
-		}
-		return res;
-
-		// XXX bring this snippet back?
-//		SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + alias + "' does not exist!");
-//		ex.setData(alias);
-//		throw ex;
-	}
-
-	public Map<String, String> _expandSelect(String select, String... selectDefNames) throws Exception {
+	public void build(String select, String... selectDefNames) {
 		Set<String> columnAliases = getColumnAliases(select, selectDefNames);
-		return _expandSelect(columnAliases, selectDefNames);
-	}
-
-	public Map<String, String> _expandSelect(Set<String> columnAliases, String... selectDefNames) {
 		Map<String, StringJoiner> bufferMap = new HashMap<String, StringJoiner>();
 		StringJoiner sb = null;
 
 		for (String columnAlias : columnAliases) {
 
-			Map<String, Map<String, Object>> selectDefWithName = _findDefinitionContainingAlias(columnAlias, selectDefNames);
-			String selectDefName = (String) selectDefWithName.keySet().toArray()[0];
-			Map<String, Object> selectDef = selectDefWithName.get(selectDefName);
+			String selectDefName = aliasMap.get(columnAlias);
+			if (selectDefName == null) {
+				SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + columnAlias + "' does not exist!");
+				ex.setData(columnAlias);
+				throw ex;
+			}
+			Map<String, Object> selectDef = expansion.get(selectDefName);
+			usedJSONDefNames.add(selectDefName);
 
 			sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
 			bufferMap.put(selectDefName, sb);
 
 			Object def = selectDef.get(columnAlias);
-			buildSelectRec(def, sb, columnAlias);
+			buildRec(def, sb, columnAlias, bufferMap);
 		}
 
-		Map<String, String> result = new HashMap<String, String>();
+		expandedSelects.clear();
 		for (Entry<String, StringJoiner> entry : bufferMap.entrySet()) {
-			result.put(entry.getKey(), entry.getValue().toString());
+			if (entry.getValue() != null && entry.getValue().length() > 0) {
+				expandedSelects.put(entry.getKey(), entry.getValue().toString());
+			}
 		}
 
 		dirty = false;
-		return result;
+	}
+
+	public List<String> getUsedAliases() {
+		if (dirty)
+			throw new RuntimeException("Select expansion definition changed, run build()!");
+
+		return new ArrayList<String>(usedJSONAliases);
+	}
+
+	public List<String> getUsedDefNames() {
+		if (dirty)
+			throw new RuntimeException("Select expansion definition changed, run build()!");
+		return new ArrayList<String>(usedJSONDefNames);
+	}
+
+	public Map<String, String> getExpandedSelects() {
+		if (dirty)
+			throw new RuntimeException("Select expansion definition changed, run build()!");
+		return expandedSelects;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildSelectRec(Object def, StringJoiner sb, String alias) {
+	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap) {
 		if (def == null)
 			return;
 		if (def instanceof String) {
-			sb.add((String) def)
-			  .add(" as ")
-			  .add(alias);
+			usedJSONAliases.add(alias);
+			usedJSONDefNames.add(aliasMap.get(alias));
+			bufferMap.put(aliasMap.get(alias), sb.add("" + def + " as " + alias));
 		} else if (def instanceof Map) {
+			usedJSONAliases.add(alias);
 			for (Entry<String, Object> e : ((Map<String, Object>) def).entrySet()) {
-				buildSelectRec(e.getValue(), sb, e.getKey());
+				String selectDefName = aliasMap.get(e.getKey());
+				sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
+				bufferMap.put(selectDefName, sb);
+				buildRec(e.getValue(), sb, e.getKey(), bufferMap);
 			}
 		} else {
 			throw new RuntimeException("A select definition must contain either Strings or Maps!");
@@ -174,4 +171,31 @@ public class SelectExpansion {
 		}
 		return resultSet;
 	}
+
+	public static void main(String[] args) throws Exception {
+		SelectExpansion se = new SelectExpansion();
+		se.addExpansion("A", "a", "a.A1");
+		se.addExpansion("A", "b", "a.B1");
+		se.addExpansion("B", "x", "kkk.B1");
+		se.addSubExpansion("B", "y", "A");
+
+		se.addExpansion("X", "h", "h.h");
+
+		se.addSubExpansion("A", "c", "X");
+
+//		res = se._expandSelect("a", "A");
+//		System.out.println(res);
+//
+//		res = se._expandSelect("a", "B");
+//		System.out.println(res);
+//
+//		res = se._expandSelect("a, b", "B");
+//		System.out.println(res);
+
+		se.build("y", "B");
+		System.out.println(se.getExpandedSelects());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+	}
+
 }

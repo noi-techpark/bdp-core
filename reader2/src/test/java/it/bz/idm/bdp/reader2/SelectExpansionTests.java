@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -22,14 +21,17 @@ public class SelectExpansionTests {
 		se.addExpansion("B", "x", "kkk.B1");
 		se.addExpansion("C", "i", "o.f");
 
+		se.build("a", "A", "C");
+
 		// More select definitions than aliases
-		List<String> res = se.getColumnAliasesAsList("a", "A", "C");
+		List<String> res = se.getUsedAliases();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
 
 		// Alias that cannot be found
 		try {
-			se.getColumnAliases("a, i, x", "A", "C");
+			se.build("a, i, x", "A", "C");
+			se.getUsedAliases();
 		} catch (SimpleException e) {
 			assertEquals(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), e.getId());
 			assertEquals("x", e.getData());
@@ -49,8 +51,10 @@ public class SelectExpansionTests {
 		se.addSubExpansion("E", "j", "B");
 		se.addSubExpansion("A", "j", "A");
 
+		se.build("a", "C");
+
 		// Select definitions inside a sub-expansion
-		List<String> res = se.getColumnAliasesAsList("a", "C");
+		List<String> res = se.getUsedAliases();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
 
@@ -68,22 +72,25 @@ public class SelectExpansionTests {
 
 		se.addSubExpansion("A", "c", "X");
 
-		Map<String, String> res = null;
+		se.build("a", "A");
+		System.out.println(se.getExpandedSelects());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
 
-//		res = se._expandSelect("a", "A");
-//		System.out.println(res);
-//
-//		res = se._expandSelect("a", "B");
-//		System.out.println(res);
-//
-//		res = se._expandSelect("a, b", "B");
-//		System.out.println(res);
+		se.build("a", "B");
+		System.out.println(se.getExpandedSelects());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
 
-		res = se._expandSelect("x, y", "B");
-		System.out.println(res);
+		se.build("a, b", "B");
+		System.out.println(se.getExpandedSelects());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
 
-
-
+		se.build("x, y", "B");
+		System.out.println(se.getExpandedSelects());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
 
 	}
 
