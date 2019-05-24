@@ -1,45 +1,62 @@
 package it.bz.idm.bdp.reader2.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 public class SelectExpansion {
-	final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
 
-	public void addExpansion(final String defName, Map<String, Object> definition) {
-		expansion.put(defName, definition);
-	}
+	private final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
+	private final Map<String, Set<String>> hierarchy = new HashMap<String, Set<String>>();
 
 	public void addExpansion(final String defName, String alias, String column) {
 		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
 		definition.put(alias, column);
 		expansion.put(defName, definition);
+
+		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
+		defSet.add(defName);
+		hierarchy.put(defName, defSet);
 	}
 
 	public void addSubExpansion(final String defName, String alias, String subDefName) {
 		Map<String, Object> subDefinition = expansion.getOrDefault(subDefName, new HashMap<String, Object>());
 		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
-		definition.put(alias, subDefinition);
+		definition.put(alias, null);
 		expansion.put(defName, definition);
+		expansion.put(defName, subDefinition);
+
+		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
+		defSet.add(subDefName);
+		defSet.add(defName);
+		hierarchy.put(defName, defSet);
+
+		for (Entry<String, Set<String>> e : hierarchy.entrySet()) {
+			if (e.getKey().equals(subDefName)) {
+				defSet.addAll(hierarchy.get(subDefName));
+			}
+		}
 	}
 
-//	// Needed?
-//	public void addSubExpansion(final String defName, final String jsonName, Map<String, Object> definition) throws Exception {
-//		Map<String, Object> exp = expansion.get(defName);
-//		if (exp == null) {
-//			throw new Exception("Expansion with name '" + defName + "' not found!");
-//		}
-//		exp.put(jsonName, definition);
-//	}
+	private Set<String> expandDefNames(String... selectDefNames) {
+		Set<String> res = new HashSet<String>();
+		for (String defName : selectDefNames) {
+			Set<String> list = hierarchy.get(defName);
+			if (list != null)
+				res.addAll(list);
+		}
+		return res;
+	}
 
 	public Map<String, Object> getExpansion(final String defName) {
 		return expansion.get(defName);
 	}
 
-	private Set<String> getKeys(String... defNames) {
+	private Set<String> getAllKeys(String... defNames) {
 		Set<String> columnAliases = new HashSet<String>();
 		for (String defName : defNames) {
 			columnAliases.addAll(expansion.get(defName).keySet());
@@ -47,14 +64,37 @@ public class SelectExpansion {
 		return columnAliases;
 	}
 
-	public Set<String> getColumnAliases(String select, String... selectDefNames) {
-		if (select == null || select.trim().equals("*")) {
-			return getKeys(selectDefNames);
-		}
-		return csvToSet(select);
+	public List<String> getColumnAliasesAsList(String select, String...selectDefNames) {
+		return new ArrayList<String>(getColumnAliases(select, selectDefNames));
 	}
 
-	public Map<String, String> _expandSelect(String select, String... selectDefNames) {
+	public Set<String> getColumnAliases(String select, String... selectDefNames) {
+		if (select == null || select.trim().equals("*")) {
+			return getAllKeys(selectDefNames);
+		}
+		Set<String> aliases = csvToSet(select);
+
+		String selectDefName = null;
+		for (String alias : aliases) {
+			for (String defName : expandDefNames(selectDefNames)) {
+				Map<String, Object> selectDef = expansion.get(defName);
+				if (selectDef.containsKey(alias)) {
+					selectDefName = defName;
+					break;
+				}
+			}
+			if (selectDefName == null) {
+				SimpleException ex = new SimpleException("SELECT_EXPANSION_KEY_NOT_FOUND", "Key '" + alias + "' does not exist!");
+				ex.setData(alias);
+				throw ex;
+			}
+		}
+
+		return aliases;
+
+	}
+
+	public Map<String, String> _expandSelect(String select, String... selectDefNames) throws Exception {
 		Set<String> columnAliases = getColumnAliases(select, selectDefNames);
 		return _expandSelect(columnAliases, selectDefNames);
 	}
@@ -133,68 +173,4 @@ public class SelectExpansion {
 		}
 		return resultSet;
 	}
-
-	public static void main(String[] args) {
-		SelectExpansion se = new SelectExpansion();
-
-		Map<String, Object> seMeasurement = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("mvalidtime", "me.timestamp");
-				put("mtransactiontime", "me.created_on");
-				put("mperiod", "me.period");
-				put("mvalue", "me.double_value");
-			}
-		};
-
-		Map<String, Object> seDatatype = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("tname", "t.cname");
-				put("tunit", "t.cunit");
-				put("ttype", "t.rtype");
-				put("tdescription", "t.description");
-				put("tlastmeasurement", seMeasurement);
-			}
-		};
-
-		Map<String, Object> seParent = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("pname", "p.name");
-				put("ptype", "p.stationtype");
-				put("pcoordinate", "s.pointprojection");
-				put("pcode", "p.stationcode");
-				put("porigin", "p.origin");
-			}
-		};
-
-		Map<String, Object> seStation = new HashMap<String, Object>() {
-			private static final long serialVersionUID = 1L;
-			{
-				put("sname", "s.name");
-				put("stype", "s.stationtype");
-				put("scode", "s.stationcode");
-				put("sorigin", "s.origin");
-				put("scoordinate", "s.pointprojection");
-				put("smetadata", "m.json");
-				put("sparent", seParent);
-				put("sdatatypes", seDatatype);
-			}
-		};
-
-		se.addExpansion("station", seStation);
-		se.addExpansion("parent", seParent);
-		se.addExpansion("datatype", seDatatype);
-		se.addExpansion("measurement", seMeasurement);
-
-		try {
-			System.out.println(se._expandSelect("scode,sname,pname", "station", "parent"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-
 }

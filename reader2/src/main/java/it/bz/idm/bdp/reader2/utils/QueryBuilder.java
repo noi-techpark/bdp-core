@@ -26,7 +26,11 @@ public class QueryBuilder {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		columnAliases = se.getColumnAliases(select, selectDefNames);
+		try {
+			columnAliases = se.getColumnAliases(select, selectDefNames);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		exp = se._expandSelect(columnAliases, selectDefNames);
 	}
 
