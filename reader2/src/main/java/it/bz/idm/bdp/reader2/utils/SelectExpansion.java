@@ -10,34 +10,27 @@ import java.util.Set;
 
 public class SelectExpansion {
 
+	public static enum ERROR_CODES {
+		SELECT_EXPANSION_KEY_NOT_FOUND
+	}
 	private final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
 	private final Map<String, Set<String>> hierarchy = new HashMap<String, Set<String>>();
 
-	public void addExpansion(final String defName, String alias, String column) {
-		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
-		definition.put(alias, column);
-		expansion.put(defName, definition);
 
-		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
-		defSet.add(defName);
-		hierarchy.put(defName, defSet);
+	public void addExpansion(final String defName, String alias, String column) {
+		if (alias == null || alias.isEmpty() || column == null || column.isEmpty()) {
+			throw new RuntimeException("Expansion alias and column must be set!");
+		}
+		_addExpansion(defName, alias, column);
 	}
 
 	public void addSubExpansion(final String defName, String alias, String subDefName) {
-		Map<String, Object> subDefinition = expansion.getOrDefault(subDefName, new HashMap<String, Object>());
-		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
-		definition.put(alias, null);
-		expansion.put(defName, definition);
-		expansion.put(defName, subDefinition);
-
-		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
-		defSet.add(subDefName);
-		defSet.add(defName);
-		hierarchy.put(defName, defSet);
+		_addExpansion(defName, alias, null);
+		_addExpansion(subDefName, null, null);
 
 		for (Entry<String, Set<String>> e : hierarchy.entrySet()) {
 			if (e.getKey().equals(subDefName)) {
-				defSet.addAll(hierarchy.get(subDefName));
+				hierarchy.get(defName).addAll(e.getValue());
 			}
 		}
 	}
@@ -64,6 +57,21 @@ public class SelectExpansion {
 		return columnAliases;
 	}
 
+	private void _addExpansion(final String defName, String alias, String column) {
+		if (defName == null || defName.isEmpty()) {
+			throw new RuntimeException("Expansion definition name must be set!");
+		}
+		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
+		if (alias != null) {
+			definition.put(alias, column);
+		}
+		expansion.put(defName, definition);
+
+		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
+		defSet.add(defName);
+		hierarchy.put(defName, defSet);
+	}
+
 	public List<String> getColumnAliasesAsList(String select, String...selectDefNames) {
 		return new ArrayList<String>(getColumnAliases(select, selectDefNames));
 	}
@@ -84,14 +92,13 @@ public class SelectExpansion {
 				}
 			}
 			if (selectDefName == null) {
-				SimpleException ex = new SimpleException("SELECT_EXPANSION_KEY_NOT_FOUND", "Key '" + alias + "' does not exist!");
+				SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + alias + "' does not exist!");
 				ex.setData(alias);
 				throw ex;
 			}
 		}
 
 		return aliases;
-
 	}
 
 	public Map<String, String> _expandSelect(String select, String... selectDefNames) throws Exception {
