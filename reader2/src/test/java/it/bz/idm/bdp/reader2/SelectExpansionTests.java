@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -30,7 +31,7 @@ public class SelectExpansionTests {
 		try {
 			se.getColumnAliases("a, i, x", "A", "C");
 		} catch (SimpleException e) {
-			assertEquals(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND, e.getId());
+			assertEquals(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), e.getId());
 			assertEquals("x", e.getData());
 		}
 
@@ -52,6 +53,37 @@ public class SelectExpansionTests {
 		List<String> res = se.getColumnAliasesAsList("a", "C");
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
+
+	}
+
+	@Test
+	public void testExpansion() throws Exception {
+		SelectExpansion se = new SelectExpansion();
+		se.addExpansion("A", "a", "a.A1");
+		se.addExpansion("A", "b", "a.B1");
+		se.addExpansion("B", "x", "kkk.B1");
+		se.addSubExpansion("B", "y", "A");
+
+		se.addExpansion("X", "h", "h.h");
+
+		se.addSubExpansion("A", "c", "X");
+
+		Map<String, String> res = null;
+
+//		res = se._expandSelect("a", "A");
+//		System.out.println(res);
+//
+//		res = se._expandSelect("a", "B");
+//		System.out.println(res);
+//
+//		res = se._expandSelect("a, b", "B");
+//		System.out.println(res);
+
+		res = se._expandSelect("x, y", "B");
+		System.out.println(res);
+
+
+
 
 	}
 

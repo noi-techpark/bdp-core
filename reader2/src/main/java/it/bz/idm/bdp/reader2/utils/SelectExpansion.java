@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringJoiner;
 
 public class SelectExpansion {
 
@@ -16,6 +17,7 @@ public class SelectExpansion {
 	private final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
 	private final Map<String, Set<String>> hierarchy = new HashMap<String, Set<String>>();
 
+	private boolean dirty = true;
 
 	public void addExpansion(final String defName, String alias, String column) {
 		if (alias == null || alias.isEmpty() || column == null || column.isEmpty()) {
@@ -25,8 +27,10 @@ public class SelectExpansion {
 	}
 
 	public void addSubExpansion(final String defName, String alias, String subDefName) {
-		_addExpansion(defName, alias, null);
-		_addExpansion(subDefName, null, null);
+		Map<String, Object> subdefinition = _addExpansion(subDefName, null, null);
+		Map<String, Object> definition = _addExpansion(defName, alias, null);
+
+		definition.put(alias, subdefinition);
 
 		for (Entry<String, Set<String>> e : hierarchy.entrySet()) {
 			if (e.getKey().equals(subDefName)) {
@@ -57,10 +61,11 @@ public class SelectExpansion {
 		return columnAliases;
 	}
 
-	private void _addExpansion(final String defName, String alias, String column) {
+	private Map<String, Object> _addExpansion(final String defName, String alias, String column) {
 		if (defName == null || defName.isEmpty()) {
 			throw new RuntimeException("Expansion definition name must be set!");
 		}
+		dirty = true;
 		Map<String, Object> definition = expansion.getOrDefault(defName, new HashMap<String, Object>());
 		if (alias != null) {
 			definition.put(alias, column);
@@ -70,6 +75,8 @@ public class SelectExpansion {
 		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
 		defSet.add(defName);
 		hierarchy.put(defName, defSet);
+
+		return definition;
 	}
 
 	public List<String> getColumnAliasesAsList(String select, String...selectDefNames) {
@@ -82,23 +89,28 @@ public class SelectExpansion {
 		}
 		Set<String> aliases = csvToSet(select);
 
-		String selectDefName = null;
+		// XXX Just a check if exists, remove it
 		for (String alias : aliases) {
-			for (String defName : expandDefNames(selectDefNames)) {
-				Map<String, Object> selectDef = expansion.get(defName);
-				if (selectDef.containsKey(alias)) {
-					selectDefName = defName;
-					break;
-				}
-			}
-			if (selectDefName == null) {
-				SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + alias + "' does not exist!");
-				ex.setData(alias);
-				throw ex;
-			}
+			_findDefinitionContainingAlias(alias, selectDefNames);
 		}
 
 		return aliases;
+	}
+
+	private Map<String, Map<String, Object>> _findDefinitionContainingAlias(String alias, String... selectDefNames) {
+		Map<String, Map<String, Object>> res = new HashMap<String, Map<String, Object>>();
+		for (String defName : expandDefNames(selectDefNames)) {
+			Map<String, Object> selectDef = expansion.get(defName);
+			if (selectDef.containsKey(alias)) {
+				res.put(defName, selectDef);
+			}
+		}
+		return res;
+
+		// XXX bring this snippet back?
+//		SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + alias + "' does not exist!");
+//		ex.setData(alias);
+//		throw ex;
 	}
 
 	public Map<String, String> _expandSelect(String select, String... selectDefNames) throws Exception {
@@ -106,65 +118,47 @@ public class SelectExpansion {
 		return _expandSelect(columnAliases, selectDefNames);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, String> _expandSelect(Set<String> columnAliases, String... selectDefNames) {
-
-		Map<String, StringBuffer> bufferMap = new HashMap<String, StringBuffer>();
-		StringBuffer sb = null;
+		Map<String, StringJoiner> bufferMap = new HashMap<String, StringJoiner>();
+		StringJoiner sb = null;
 
 		for (String columnAlias : columnAliases) {
 
-			String selectDefName = null;
+			Map<String, Map<String, Object>> selectDefWithName = _findDefinitionContainingAlias(columnAlias, selectDefNames);
+			String selectDefName = (String) selectDefWithName.keySet().toArray()[0];
+			Map<String, Object> selectDef = selectDefWithName.get(selectDefName);
 
-			Map<String, Object> selectDef = null;
-			for (String defName : selectDefNames) {
-				selectDef = expansion.get(defName);
-				if (selectDef.containsKey(columnAlias)) {
-					selectDefName = defName;
-					break;
-				}
-			}
+			sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
+			bufferMap.put(selectDefName, sb);
 
-			if (selectDefName == null) {
-				throw new RuntimeException("Key '" + columnAlias + "' does not exist!");
-			}
-
-			if (bufferMap.containsKey(selectDefName)) {
-				sb = bufferMap.get(selectDefName);
-			} else {
-				sb = new StringBuffer();
-				bufferMap.put(selectDefName, sb);
-			}
-
-			// TODO make this recursive in a separate method
 			Object def = selectDef.get(columnAlias);
-			if (def == null)
-				continue;
-			if (def instanceof String) {
-				sb.append(def)
-				  .append(" as ")
-				  .append(columnAlias)
-				  .append(", ");
-			} else if (def instanceof Map) {
-				for (Entry<String, String> e : ((Map<String, String>) def).entrySet()) {
-					sb.append(e.getValue())
-					  .append(" as ")
-					  .append(e.getKey())
-					  .append(", ");
-				}
-			} else {
-				throw new RuntimeException("A select definition must contain either Strings or Maps!");
-			}
-
+			buildSelectRec(def, sb, columnAlias);
 		}
 
 		Map<String, String> result = new HashMap<String, String>();
-		for (Entry<String, StringBuffer> entry : bufferMap.entrySet()) {
-			StringBuffer buffer = entry.getValue();
-			result.put(entry.getKey(), buffer.length() >= 3 ? buffer.substring(0, buffer.length() - 2) : buffer.toString());
+		for (Entry<String, StringJoiner> entry : bufferMap.entrySet()) {
+			result.put(entry.getKey(), entry.getValue().toString());
 		}
 
+		dirty = false;
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void buildSelectRec(Object def, StringJoiner sb, String alias) {
+		if (def == null)
+			return;
+		if (def instanceof String) {
+			sb.add((String) def)
+			  .add(" as ")
+			  .add(alias);
+		} else if (def instanceof Map) {
+			for (Entry<String, Object> e : ((Map<String, Object>) def).entrySet()) {
+				buildSelectRec(e.getValue(), sb, e.getKey());
+			}
+		} else {
+			throw new RuntimeException("A select definition must contain either Strings or Maps!");
+		}
 	}
 
 	public static Set<String> csvToSet(final String csv) {
