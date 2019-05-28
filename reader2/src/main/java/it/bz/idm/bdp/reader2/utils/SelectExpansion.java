@@ -23,6 +23,7 @@ public class SelectExpansion {
 	private final Map<String, String> expandedSelects = new HashMap<String, String>();
 
 	private boolean dirty = true;
+	private static final boolean RECURSION_DEFAULT = false;
 
 	public void addExpansion(final String defName, String alias, String column) {
 		if (alias == null || alias.isEmpty() || column == null || column.isEmpty()) {
@@ -86,6 +87,10 @@ public class SelectExpansion {
 	}
 
 	public void build(String select, String... selectDefNames) {
+		build(select, RECURSION_DEFAULT, selectDefNames);
+	}
+
+	public void build(String select, boolean recursive, String... selectDefNames) {
 		Set<String> columnAliases = getColumnAliases(select, selectDefNames);
 		Map<String, StringJoiner> bufferMap = new HashMap<String, StringJoiner>();
 		StringJoiner sb = null;
@@ -105,7 +110,7 @@ public class SelectExpansion {
 			bufferMap.put(selectDefName, sb);
 
 			Object def = selectDef.get(columnAlias);
-			buildRec(def, sb, columnAlias, bufferMap);
+			buildRec(def, sb, columnAlias, bufferMap, recursive);
 		}
 
 		expandedSelects.clear();
@@ -154,7 +159,7 @@ public class SelectExpansion {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap) {
+	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap, boolean recursive) {
 		if (def == null)
 			return;
 		if (def instanceof String) {
@@ -167,7 +172,9 @@ public class SelectExpansion {
 				String selectDefName = aliasMap.get(e.getKey());
 				sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
 				bufferMap.put(selectDefName, sb);
-				buildRec(e.getValue(), sb, e.getKey(), bufferMap);
+				if (recursive) {
+					buildRec(e.getValue(), sb, e.getKey(), bufferMap, recursive);
+				}
 			}
 		} else {
 			throw new RuntimeException("A select definition must contain either Strings or Maps!");
@@ -208,7 +215,7 @@ public class SelectExpansion {
 //		res = se._expandSelect("a, b", "B");
 //		System.out.println(res);
 
-		se.build("y", "B");
+		se.build("y", true, "B");
 		System.out.println(se.getExpandedSelects());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());

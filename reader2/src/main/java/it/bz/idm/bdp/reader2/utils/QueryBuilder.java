@@ -15,15 +15,17 @@ import java.util.StringJoiner;
  * @author Peter Moser
  */
 public class QueryBuilder {
+	
+	private static final boolean RECURSION_DEFAULT = false;
 	private StringBuilder sql = new StringBuilder();
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public QueryBuilder(final String select, String... selectDefNames) {
+	public QueryBuilder(final String select, boolean recursive, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		se.build(select, selectDefNames);
+		se.build(select, recursive, selectDefNames);
 	}
 
 	/**
@@ -43,14 +45,17 @@ public class QueryBuilder {
 		QueryBuilder.se = selectExpansion;
 	}
 
-
 	public static QueryBuilder init(final String select, String... selectDefNames) {
-		return new QueryBuilder(select, selectDefNames);
+		return new QueryBuilder(select, RECURSION_DEFAULT, selectDefNames);
 	}
 
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
+	public static QueryBuilder init(final String select, boolean recursive, String... selectDefNames) {
+		return new QueryBuilder(select, recursive, selectDefNames);
+	}
+
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, boolean recursive, String... selectDefNames)  {
 		QueryBuilder.setup(selectExpansion);
-		return QueryBuilder.init(select, selectDefNames);
+		return QueryBuilder.init(select, recursive, selectDefNames);
 	}
 
 	/**
@@ -162,13 +167,6 @@ public class QueryBuilder {
 		return this;
 	}
 
-	// TODO this should work automatic if addSqlIfDefinition is used (via SelectExpansion sub-Maps)
-	public QueryBuilder addSqlIfAliasOrDefinition(String sqlPart, String selectDefName, String alias) {
-		addSqlIfAlias(sqlPart, alias);
-		addSqlIfDefinition(sqlPart, selectDefName);
-		return this;
-	}
-
 	/**
 	 * Append <code>sqlPart</code> to the end of the SQL string, if
 	 * <code>object</code> is not null.
@@ -206,9 +204,7 @@ public class QueryBuilder {
 	public QueryBuilder expandSelect(final String... selectDef) {
 		StringJoiner sj = new StringJoiner(", ");
 		for (String expansion : se.getExpandedSelects(selectDef).values()) {
-			if (expansion != null) {
-				sj.add(expansion);
-			}
+			sj.add(expansion);
 		}
 		sql.append(sj.toString());
 		return this;

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jsoniter.output.JsonStream;
 
+import it.bz.idm.bdp.reader2.utils.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.QueryBuilder;
 import it.bz.idm.bdp.reader2.utils.QueryExecutor;
 import it.bz.idm.bdp.reader2.utils.SelectExpansion;
@@ -31,16 +32,16 @@ public class DataFetcher {
 				.expandSelect()
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
-				.addSqlIfAliasOrDefinition("left join station p on s.parent_id = p.id", "parent", "sparent") // create a map inside SE that contains all references to a sub-select-definition
+				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.addSql("order by _stationtype, _stationcode")
 				.addLimit(limit)
 				.addOffset(offset);
 
-		System.out.println(query.getSql());
+		log.debug(query.getSql());
 
-		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		nanoTime = System.nanoTime();
 		List<Map<String, Object>> queryResult = QueryExecutor
@@ -48,15 +49,17 @@ public class DataFetcher {
 				.addParameters(query.getParameters())
 				.build(query.getSql());
 
-		System.out.println(queryResult.toString());
+		log.debug(queryResult.toString());
 
-		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 
 		nanoTime = System.nanoTime();
+
 		String serialize = JsonStream.serialize(stationTypes);
-		log.info("json: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
 	}
 
@@ -89,7 +92,7 @@ public class DataFetcher {
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);
-		log.info("query building: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		nanoTime = System.nanoTime();
 		List<Map<String, Object>> queryResult = QueryExecutor
@@ -97,13 +100,14 @@ public class DataFetcher {
 				.addParameters(query.getParameters())
 				.build(query.getSql());
 
-		log.info("query exec: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 
 		nanoTime = System.nanoTime();
 		String serialize = JsonStream.serialize(stationTypes);
-		log.info("json: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
 	}
 
@@ -163,7 +167,7 @@ public class DataFetcher {
 			} while (rec != null && stationTypePrev.equalsIgnoreCase(stationTypeAct));
 			stationTypes.put(stationTypePrev, stations);
 		}
-		log.info("loop: " + Long.toString(System.nanoTime() - nanoTime));
+		log.info("build result map: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return stationTypes;
 	}
 
