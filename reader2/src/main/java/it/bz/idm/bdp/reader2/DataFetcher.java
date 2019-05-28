@@ -71,7 +71,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, "station", "parent", "measurement", "datatype")
+				.init(select, true, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
 				.expandSelect()
 				.addSql("from measurement me",
