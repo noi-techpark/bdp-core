@@ -137,6 +137,22 @@ public class SelectExpansion {
 		return expandedSelects;
 	}
 
+	public Map<String, String> getExpandedSelects(final String... defNames) {
+		Map<String, String> exp = getExpandedSelects();
+		if (defNames == null || defNames.length == 0) {
+			return exp;
+		}
+		Map<String, String> res = new HashMap<String, String>();
+		for (String defName : defNames) {
+			for (String subDefName : hierarchy.get(defName)) {
+				if (exp.get(subDefName) != null) {
+					res.put(subDefName, exp.get(subDefName));
+				}
+			}
+		}
+		return res;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap) {
 		if (def == null)

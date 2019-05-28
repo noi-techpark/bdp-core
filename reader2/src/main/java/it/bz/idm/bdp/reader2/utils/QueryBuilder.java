@@ -19,19 +19,11 @@ public class QueryBuilder {
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public Set<String> columnAliases;
-	public Map<String, String> exp;
-
 	public QueryBuilder(final String select, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		try {
-			columnAliases = se.getColumnAliases(select, selectDefNames);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		exp = se.build(columnAliases, selectDefNames);
+		se.build(select, selectDefNames);
 	}
 
 	/**
@@ -155,7 +147,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfAlias(String sqlPart, String alias) {
-		if (sqlPart != null && !sqlPart.isEmpty() && columnAliases.contains(alias)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedAliases().contains(alias)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -163,7 +155,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfDefinition(String sqlPart, String selectDefName) {
-		if (sqlPart != null && !sqlPart.isEmpty() && exp.containsKey(selectDefName)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpandedSelects().containsKey(selectDefName)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -212,12 +204,8 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelect(final String... selectDef) {
-		if (selectDef == null || selectDef.length == 0) {
-			return expandSelect();
-		}
 		StringJoiner sj = new StringJoiner(", ");
-		for (String def : selectDef) {
-			String expansion = exp.get(def);
+		for (String expansion : se.getExpandedSelects(selectDef).values()) {
 			if (expansion != null) {
 				sj.add(expansion);
 			}
@@ -227,60 +215,14 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelect() {
-		StringJoiner sj = new StringJoiner(", ");
-		for (String expansion : exp.values()) {
-			if (expansion != null) {
-				sj.add(expansion);
-			}
-		}
-		sql.append(sj.toString());
-		return this;
+		return expandSelect((String[]) null);
 	}
 
 	public QueryBuilder expandSelect(boolean condition, final String... selectDef) {
 		if (condition) {
-			return expandSelect(selectDef);
+			expandSelect(selectDef);
 		}
 		return this;
-	}
-
-	public QueryBuilder expandSelect(String select, Map<String, Object> selectDef, boolean recurse, boolean optional) {
-		addSql(_expandSelect(select, selectDef, recurse, optional));
-		return this;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static String _expandSelect(String select, Map<String, Object> selectDef, boolean recurse, boolean optional) {
-		StringBuffer sb = new StringBuffer();
-		Set<String> columnAliases;
-		if (!optional && (select == null || select.trim().equals("*"))) {
-			columnAliases = selectDef.keySet();
-		} else {
-			columnAliases = csvToSet(select);
-		}
-
-		for (String columnAlias : columnAliases) {
-			if (!selectDef.containsKey(columnAlias)) {
-				throw new RuntimeException("Key '" + columnAlias + "' does not exist!");
-			}
-			Object def = selectDef.get(columnAlias);
-			if (def == null)
-				continue;
-			if (def instanceof String) {
-				sb.append(def)
-				  .append(" as ")
-				  .append(columnAlias)
-				  .append(", ");
-			} else if (def instanceof Map) {
-				if (recurse) {
-					sb.append(_expandSelect(null, (Map<String, Object>) def, recurse, optional))
-					  .append(", ");
-				}
-			} else {
-				throw new RuntimeException("A select definition must contain either Strings or Maps!");
-			}
-		}
-		return sb.length() >= 3 ? sb.substring(0, sb.length() - 2) : sb.toString();
 	}
 
 	public static Set<String> csvToSet(final String csv) {

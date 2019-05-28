@@ -16,10 +16,10 @@ public class SelectExpansionTests {
 	@Test
 	public void testFlatStructure() {
 		SelectExpansion se = new SelectExpansion();
-		se.addExpansion("A", "a", "a.A1");
-		se.addExpansion("A", "b", "a.B1");
-		se.addExpansion("B", "x", "kkk.B1");
-		se.addExpansion("C", "i", "o.f");
+		se.addExpansion("A", "a", "A.a");
+		se.addExpansion("A", "b", "A.b");
+		se.addExpansion("B", "x", "B.x");
+		se.addExpansion("C", "i", "C.i");
 
 		se.build("a", "A", "C");
 
@@ -51,9 +51,9 @@ public class SelectExpansionTests {
 		se.addSubExpansion("E", "j", "B");
 		se.addSubExpansion("A", "j", "A");
 
-		se.build("a", "C");
 
 		// Select definitions inside a sub-expansion
+		se.build("a", "C");
 		List<String> res = se.getUsedAliases();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);

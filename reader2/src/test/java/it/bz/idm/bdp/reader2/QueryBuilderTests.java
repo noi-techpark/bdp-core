@@ -6,29 +6,56 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.SelectExpansion;
 
 public class QueryBuilderTests {
 
 	@Test
 	public void testExpandSelect() {
 		String res = QueryBuilder
-				.init("sname, pname", "station", "parent")
+				.init("a, x", "A", "B")
 				.expandSelect()
 				.getSql();
 
-		assertEquals(res, "p.name as pname, s.name as sname");
+		assertEquals("A.a as a, B.x as x", res);
 
 		res = QueryBuilder
-				.init("sparent", "station", "parent")
+				.init("showA", "C")
 				.expandSelect()
 				.getSql();
 
-		assertEquals(res, "s.pointprojection as pcoordinate, p.stationcode as pcode, p.name as pname, p.stationtype as ptype, p.origin as porigin");
+		assertEquals("A.a as a, A.b as b", res);
+
+		res = QueryBuilder
+				.init("showB", "C")
+				.expandSelect()
+				.getSql();
+
+		assertEquals("A.a as a, A.b as b, B.x as x", res);
+
+		res = QueryBuilder
+				.init("showB", "C")
+				.expandSelect("C")
+				.getSql();
+
+		assertEquals("A.a as a, A.b as b, B.x as x", res);
 	}
 
 	@Before
 	public void setUpBefore() throws Exception {
-		// We load data from AppStartupDataLoader.java
+		SelectExpansion se = new SelectExpansion();
+		se.addExpansion("A", "a", "A.a");
+		se.addExpansion("A", "b", "A.b");
+
+		se.addExpansion("B", "x", "B.x");
+		se.addSubExpansion("B", "IwantA", "A");
+
+		se.addExpansion("C", "i", "C.i");
+		se.addSubExpansion("C", "showA", "A");
+		se.addSubExpansion("C", "showB", "B");
+
+
+		QueryBuilder.setup(se);
 	}
 
 }
