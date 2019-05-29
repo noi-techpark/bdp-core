@@ -22,6 +22,8 @@
  */
 package it.bz.idm.bdp.reader2.utils;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * JPAException, which is a well-described runtime exception, ready for API consumers.
@@ -38,7 +40,7 @@ public class SimpleException extends RuntimeException {
 	private String hint;
 	private String description;
 	private String id;
-	private Object data;
+	private Map<String, Object> data;
 
 	public SimpleException(String id, String error, String description, String hint, Throwable cause) {
 		super(error, cause);
@@ -78,12 +80,15 @@ public class SimpleException extends RuntimeException {
 		return id;
 	}
 
-	public Object getData() {
+	public Map<String, Object> getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
-		this.data = data;
+	public void addData(String key, Object data) {
+		if (this.data == null) {
+			this.data = new HashMap<String, Object>();
+		}
+		this.data.put(key, data);
 	}
 
 }

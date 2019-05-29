@@ -1,6 +1,7 @@
 package it.bz.idm.bdp.reader2.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,19 +12,48 @@ import java.util.StringJoiner;
 
 public class SelectExpansion {
 
-	public static enum ERROR_CODES {
-		SELECT_EXPANSION_KEY_NOT_FOUND
+	public static enum ErrorCode {
+		SELECT_EXPANSION_KEY_NOT_FOUND 			("Key '%s' does not exist!"),
+		SELECT_EXPANSION_KEY_NOT_INSIDE_DEFLIST ("Key '%s' is not reachable from the expanded select definition list: %s"),
+		SELECT_EXPANSION_DEFINITION_NOT_FOUND   ("Select definition contains an invalid name: %s");
+
+		private final String msg;
+		ErrorCode(String msg) {
+			this.msg = msg;
+		}
+		public String getMsg() {
+			return "SELECT EXPANSION ERROR: " + msg;
+		}
 	}
+
+	public static enum RecursionType {
+		NONE	(0),
+		SINGLE	(1),
+		FULL	(8);
+
+		private final int id;
+		RecursionType(int id) {
+			this.id = id;
+		}
+		public int getValue() {
+			return id;
+		}
+		public static RecursionType getDefault() {
+			return FULL;
+		}
+	}
+
 	private final Map<String, Map<String, Object>> expansion = new HashMap<String, Map<String, Object>>();
-	private final Map<String, Set<String>> hierarchy = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> hierarchyFull = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> hierarchySingle = new HashMap<String, Set<String>>();
 	private final Map<String, String> aliasMap = new HashMap<String, String>();
 
-	private final Set<String> usedJSONAliases = new HashSet<String>();
-	private final Set<String> usedJSONDefNames = new HashSet<String>();
-	private final Map<String, String> expandedSelects = new HashMap<String, String>();
+	private Set<String> usedJSONAliases = new HashSet<String>();
+	private Set<String> usedJSONDefNames = new HashSet<String>();
+	private Map<String, String> expandedSelects = new HashMap<String, String>();
 
 	private boolean dirty = true;
-	private static final boolean RECURSION_DEFAULT = false;
+
 
 	public void addExpansion(final String defName, String alias, String column) {
 		if (alias == null || alias.isEmpty() || column == null || column.isEmpty()) {
@@ -38,18 +68,20 @@ public class SelectExpansion {
 
 		definition.put(alias, subdefinition);
 
-		for (Entry<String, Set<String>> e : hierarchy.entrySet()) {
+		for (Entry<String, Set<String>> e : hierarchyFull.entrySet()) {
 			if (e.getKey().equals(subDefName)) {
-				hierarchy.get(defName).addAll(e.getValue());
+				hierarchyFull.get(defName).addAll(e.getValue());
 			}
 		}
+
+		hierarchySingle.get(defName).add(subDefName);
 	}
 
 	public Map<String, Object> getExpansion(final String defName) {
 		return expansion.get(defName);
 	}
 
-	private Set<String> getAllKeys(String... defNames) {
+	private Set<String> getAllKeys(Set<String> defNames) {
 		Set<String> columnAliases = new HashSet<String>();
 		for (String defName : defNames) {
 			columnAliases.addAll(expansion.get(defName).keySet());
@@ -70,47 +102,87 @@ public class SelectExpansion {
 		}
 		expansion.put(defName, definition);
 
-		Set<String> defSet = hierarchy.getOrDefault(defName, new HashSet<String>());
+		Set<String> defSet = hierarchyFull.getOrDefault(defName, new HashSet<String>());
 		defSet.add(defName);
-		hierarchy.put(defName, defSet);
+		hierarchyFull.put(defName, defSet);
+
+		Set<String> defSetSingle = hierarchySingle.getOrDefault(defName, new HashSet<String>());
+		defSetSingle.add(defName);
+		hierarchySingle.put(defName, defSetSingle);
 
 		return definition;
 	}
 
-	private Set<String> getColumnAliases(String select, String... selectDefNames) {
+	private Set<String> getDefNames(Set<String> selectDefNames, RecursionType recType) {
+		if (!hierarchyFull.keySet().containsAll(selectDefNames)) {
+			ErrorCode code = ErrorCode.SELECT_EXPANSION_DEFINITION_NOT_FOUND;
+			SimpleException ex = new SimpleException(code.toString(), String.format(code.getMsg(), selectDefNames.toString()));
+			ex.addData("select definitions", selectDefNames);
+			throw ex;
+		}
+		Set<String> defNames = new HashSet<String>();
+		for (String givenDefName : selectDefNames) {
+			switch (recType) {
+				case FULL:
+					defNames.addAll(hierarchyFull.get(givenDefName));
+				break;
+				case SINGLE:
+					defNames.addAll(hierarchySingle.get(givenDefName));
+				break;
+				case NONE:
+					// nothing to do
+				break;
+			}
+		}
+		return defNames;
+	}
+
+	private Set<String> getColumnAliases(String select, Set<String> selectDefNames, RecursionType recType) {
 		if (select == null || select.trim().equals("*")) {
 			return getAllKeys(selectDefNames);
 		}
-		Set<String> aliases = csvToSet(select);
 
+		Set<String> aliases = csvToSet(select);
+		for (String alias : aliases) {
+			String selectDefName = aliasMap.get(alias);
+
+			// Check if alias exists
+			if (selectDefName == null) {
+				ErrorCode code = ErrorCode.SELECT_EXPANSION_KEY_NOT_FOUND;
+				SimpleException ex = new SimpleException(code.toString(), String.format(code.getMsg(), alias));
+				ex.addData("alias", alias);
+				throw ex;
+			}
+
+			// Check if the found select definition is within the given set of definitions
+			if (!selectDefNames.contains(selectDefName)) {
+				ErrorCode code = ErrorCode.SELECT_EXPANSION_KEY_NOT_INSIDE_DEFLIST;
+				SimpleException ex = new SimpleException(code.toString(), String.format(code.getMsg(), alias, selectDefNames.toString()));
+				ex.addData("alias", alias);
+				ex.addData("select definitions", selectDefNames);
+				throw ex;
+			}
+		}
 		return aliases;
 	}
 
 	public void build(String select, String... selectDefNames) {
-		build(select, RECURSION_DEFAULT, selectDefNames);
+		build(select, RecursionType.getDefault(), selectDefNames);
 	}
 
-	public void build(String select, boolean recursive, String... selectDefNames) {
-		Set<String> columnAliases = getColumnAliases(select, selectDefNames);
+	public void build(String select, RecursionType recType, String... selectDefNames) {
+		Set<String> selectDefNameSet = getDefNames(new HashSet<String>(Arrays.asList(selectDefNames)), recType);
+		Set<String> columnAliases = getColumnAliases(select, selectDefNameSet, recType);
 		Map<String, StringJoiner> bufferMap = new HashMap<String, StringJoiner>();
 		StringJoiner sb = null;
 
 		for (String columnAlias : columnAliases) {
-
 			String selectDefName = aliasMap.get(columnAlias);
-			if (selectDefName == null) {
-				SimpleException ex = new SimpleException(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), "Key '" + columnAlias + "' does not exist!");
-				ex.setData(columnAlias);
-				throw ex;
-			}
-			Map<String, Object> selectDef = expansion.get(selectDefName);
 			usedJSONDefNames.add(selectDefName);
-
 			sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
 			bufferMap.put(selectDefName, sb);
-
-			Object def = selectDef.get(columnAlias);
-			buildRec(def, sb, columnAlias, bufferMap, recursive);
+			Object def = expansion.get(selectDefName).get(columnAlias);
+			buildRec(def, sb, columnAlias, bufferMap, recType.getValue(), selectDefNameSet);
 		}
 
 		expandedSelects.clear();
@@ -149,7 +221,7 @@ public class SelectExpansion {
 		}
 		Map<String, String> res = new HashMap<String, String>();
 		for (String defName : defNames) {
-			for (String subDefName : hierarchy.get(defName)) {
+			for (String subDefName : hierarchyFull.get(defName)) {
 				if (exp.get(subDefName) != null) {
 					res.put(subDefName, exp.get(subDefName));
 				}
@@ -159,7 +231,7 @@ public class SelectExpansion {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap, boolean recursive) {
+	private void buildRec(Object def, StringJoiner sb, String alias, Map<String, StringJoiner> bufferMap, int recursionLevel, Set<String> selectDefNames) {
 		if (def == null)
 			return;
 		if (def instanceof String) {
@@ -172,8 +244,8 @@ public class SelectExpansion {
 				String selectDefName = aliasMap.get(e.getKey());
 				sb = bufferMap.getOrDefault(selectDefName, new StringJoiner(", "));
 				bufferMap.put(selectDefName, sb);
-				if (recursive) {
-					buildRec(e.getValue(), sb, e.getKey(), bufferMap, recursive);
+				if (recursionLevel > 0 || selectDefNames.contains(selectDefName)) {
+					buildRec(e.getValue(), sb, e.getKey(), bufferMap, recursionLevel - 1, selectDefNames);
 				}
 			}
 		} else {
@@ -197,14 +269,12 @@ public class SelectExpansion {
 
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addExpansion("A", "a", "a.A1");
-		se.addExpansion("A", "b", "a.B1");
-		se.addExpansion("B", "x", "kkk.B1");
-		se.addSubExpansion("B", "y", "A");
-
-		se.addExpansion("X", "h", "h.h");
-
+		se.addExpansion("A", "a", "A.a");
+		se.addExpansion("A", "b", "A.b");
 		se.addSubExpansion("A", "c", "X");
+		se.addExpansion("B", "x", "B.x");
+		se.addSubExpansion("B", "y", "A");
+		se.addExpansion("X", "h", "X.h");
 
 //		res = se._expandSelect("a", "A");
 //		System.out.println(res);
@@ -215,10 +285,39 @@ public class SelectExpansion {
 //		res = se._expandSelect("a, b", "B");
 //		System.out.println(res);
 
-		se.build("y", true, "B");
+
+////		{}
+////		[y]
+////		[B]
+//		se.build("y", RecursionType.NONE, "B");
+//		System.out.println(se.getExpandedSelects());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//
+////		{B=B.x as x}
+////		[x, y]
+////		[B]
+//		se.build("x, y", RecursionType.NONE, "B");
+//		System.out.println(se.getExpandedSelects());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+
+//		{A=A.a as a, A.b as b, B=B.x as x}
+//		[a, b, c, x, y]
+//		[A, B]
+		se.build("x, y", RecursionType.SINGLE, "A");
 		System.out.println(se.getExpandedSelects());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
+
+////		{A=A.a as a, A.b as b, B=B.x as x, X=X.h as h}
+////		[a, b, c, x, h, y]
+////		[A, B, X]
+//		se.build("x, y", RecursionType.FULL, "B");
+//		System.out.println(se.getExpandedSelects());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+
 	}
 
 }

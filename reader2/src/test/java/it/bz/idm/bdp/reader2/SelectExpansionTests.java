@@ -8,7 +8,8 @@ import java.util.List;
 import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.SelectExpansion;
-import it.bz.idm.bdp.reader2.utils.SelectExpansion.ERROR_CODES;
+import it.bz.idm.bdp.reader2.utils.SelectExpansion.ErrorCode;
+import it.bz.idm.bdp.reader2.utils.SelectExpansion.RecursionType;
 import it.bz.idm.bdp.reader2.utils.SimpleException;
 
 public class SelectExpansionTests {
@@ -33,8 +34,8 @@ public class SelectExpansionTests {
 			se.build("a, i, x", "A", "C");
 			se.getUsedAliases();
 		} catch (SimpleException e) {
-			assertEquals(ERROR_CODES.SELECT_EXPANSION_KEY_NOT_FOUND.toString(), e.getId());
-			assertEquals("x", e.getData());
+			assertEquals(ErrorCode.SELECT_EXPANSION_KEY_NOT_INSIDE_DEFLIST.toString(), e.getId());
+			assertEquals("x", e.getData().get("alias"));
 		}
 
 	}
@@ -61,36 +62,68 @@ public class SelectExpansionTests {
 	}
 
 	@Test
+	public void testgetDefNames() throws Exception {
+		SelectExpansion se = new SelectExpansion();
+		se.addExpansion("A", "a", "A.a");
+		se.addSubExpansion("A", "c", "X");
+		se.addExpansion("B", "x", "B.x");
+		se.addSubExpansion("B", "y", "A");
+		se.addExpansion("X", "h", "X.h");
+		se.build("a", "A");
+	}
+
+	@Test
 	public void testExpansion() throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addExpansion("A", "a", "a.A1");
-		se.addExpansion("A", "b", "a.B1");
-		se.addExpansion("B", "x", "kkk.B1");
-		se.addSubExpansion("B", "y", "A");
+		se.addExpansion		("A", "a", "A.a");
+		se.addExpansion		("A", "b", "A.b");
+		se.addSubExpansion	("A", "c", "C");
+		se.addExpansion		("B", "x", "B.x");
+		se.addSubExpansion	("B", "y", "A");
+		se.addExpansion		("C", "h", "C.h");
 
-		se.addExpansion("X", "h", "h.h");
-
-		se.addSubExpansion("A", "c", "X");
 
 		se.build("a", "A");
-		System.out.println(se.getExpandedSelects());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+		assertEquals("a", se.getUsedAliases().get(0));
+		assertEquals("A", se.getUsedDefNames().get(0));
+		assertEquals("A.a as a", se.getExpandedSelects().get("A"));
+		assertTrue(se.getUsedAliases().size() == 1);
+		assertTrue(se.getUsedDefNames().size() == 1);
+		assertTrue(se.getExpandedSelects().size() == 1);
 
 		se.build("a", "B");
-		System.out.println(se.getExpandedSelects());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+		assertEquals("a", se.getUsedAliases().get(0));
+		assertEquals("A", se.getUsedDefNames().get(0));
+		assertEquals("A.a as a", se.getExpandedSelects().get("A"));
+		assertTrue(se.getUsedAliases().size() == 1);
+		assertTrue(se.getUsedDefNames().size() == 1);
+		assertTrue(se.getExpandedSelects().size() == 1);
 
 		se.build("a, b", "B");
-		System.out.println(se.getExpandedSelects());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+		assertEquals("a", se.getUsedAliases().get(0));
+		assertEquals("b", se.getUsedAliases().get(1));
+		assertEquals("A", se.getUsedDefNames().get(0));
+		assertEquals("A.a as a, A.b as b", se.getExpandedSelects().get("A"));
+		assertTrue(se.getUsedAliases().size() == 2);
+		assertTrue(se.getUsedDefNames().size() == 1);
+		assertTrue(se.getExpandedSelects().size() == 1);
 
-		se.build("x, y", "B");
-		System.out.println(se.getExpandedSelects());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+		se.build("x, y", RecursionType.SINGLE, "A", "B");
+		assertEquals("a", se.getUsedAliases().get(0));
+		assertEquals("b", se.getUsedAliases().get(1));
+		assertEquals("c", se.getUsedAliases().get(2));
+		assertEquals("x", se.getUsedAliases().get(3));
+		assertEquals("h", se.getUsedAliases().get(4));
+		assertEquals("y", se.getUsedAliases().get(5));
+		assertEquals("A", se.getUsedDefNames().get(0));
+		assertEquals("B", se.getUsedDefNames().get(1));
+		assertEquals("C", se.getUsedDefNames().get(2));
+		assertEquals("A.a as a, A.b as b", se.getExpandedSelects().get("A"));
+		assertEquals("B.x as x", se.getExpandedSelects().get("B"));
+		assertEquals("C.h as h", se.getExpandedSelects().get("C"));
+		assertEquals(6, se.getUsedAliases().size());
+		assertEquals(3, se.getUsedDefNames().size());
+		assertEquals(3, se.getExpandedSelects().size());
 
 	}
 

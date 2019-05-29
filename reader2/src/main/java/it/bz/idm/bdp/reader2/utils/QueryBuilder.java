@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
+import it.bz.idm.bdp.reader2.utils.SelectExpansion.RecursionType;
+
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
  * This is a convenience class, that supports conditional query statements and emulates getSingleResult
@@ -15,7 +17,7 @@ import java.util.StringJoiner;
  * @author Peter Moser
  */
 public class QueryBuilder {
-	
+
 	private static final boolean RECURSION_DEFAULT = false;
 	private StringBuilder sql = new StringBuilder();
 	private static SelectExpansion se;
@@ -25,7 +27,7 @@ public class QueryBuilder {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		se.build(select, recursive, selectDefNames);
+		se.build(select, recursive ? RecursionType.FULL : RecursionType.SINGLE, selectDefNames);
 	}
 
 	/**
