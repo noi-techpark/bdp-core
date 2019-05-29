@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2.utils;
+package it.bz.idm.bdp.reader2.utils.queryexecutor;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

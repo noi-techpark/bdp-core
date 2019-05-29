@@ -20,7 +20,7 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.reader2.utils;
+package it.bz.idm.bdp.reader2.utils.querybuilder;
 
 import java.util.HashMap;
 import java.util.Map;

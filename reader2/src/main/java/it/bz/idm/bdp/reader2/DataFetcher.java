@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import com.jsoniter.output.JsonStream;
 
-import it.bz.idm.bdp.reader2.utils.ColumnMapRowMapper;
-import it.bz.idm.bdp.reader2.utils.QueryBuilder;
-import it.bz.idm.bdp.reader2.utils.QueryExecutor;
-import it.bz.idm.bdp.reader2.utils.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
+import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
 
 public class DataFetcher {
 

@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2.utils;
+package it.bz.idm.bdp.reader2.utils.querybuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;

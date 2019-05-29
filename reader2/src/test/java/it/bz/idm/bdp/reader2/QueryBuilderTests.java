@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import it.bz.idm.bdp.reader2.utils.QueryBuilder;
-import it.bz.idm.bdp.reader2.utils.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 
 public class QueryBuilderTests {
 

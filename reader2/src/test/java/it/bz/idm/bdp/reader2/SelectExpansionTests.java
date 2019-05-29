@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import it.bz.idm.bdp.reader2.utils.SelectExpansion;
-import it.bz.idm.bdp.reader2.utils.SelectExpansion.ErrorCode;
-import it.bz.idm.bdp.reader2.utils.SelectExpansion.RecursionType;
-import it.bz.idm.bdp.reader2.utils.SimpleException;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SimpleException;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
 
 public class SelectExpansionTests {
 

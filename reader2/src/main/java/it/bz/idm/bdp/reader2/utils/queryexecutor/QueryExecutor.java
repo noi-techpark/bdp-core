@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2.utils;
+package it.bz.idm.bdp.reader2.utils.queryexecutor;
 
 import java.util.List;
 import java.util.Map;
@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.jsoniter.output.JsonStream;
+
+import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
 
 public class QueryExecutor {
 	private static NamedParameterJdbcTemplate npjt;

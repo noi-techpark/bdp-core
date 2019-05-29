@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2.utils;
+package it.bz.idm.bdp.reader2.utils.querybuilder;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import it.bz.idm.bdp.reader2.utils.SelectExpansion.RecursionType;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
 
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
