@@ -83,6 +83,12 @@ public class SelectDefinition {
 		return pointers;
 	}
 
+	public Map<String, Object> getPointersAndColumns() {
+		Map<String, Object> res = new HashMap<String, Object>(pointers);
+		res.putAll(columns);
+		return res;
+	}
+
 	public Set<String> getAliases() {
 		return aliases;
 	}

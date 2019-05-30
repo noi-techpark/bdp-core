@@ -174,18 +174,18 @@ public class SelectExpansion {
 		expand(_csvToSet(aliases), new HashSet<String>(Arrays.asList(defNames)));
 	}
 
-	public Set<String> getUsedAliases() {
+	public List<String> getUsedAliases() {
 		if (dirty) {
 			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting used aliases!");
 		}
-		return usedJSONAliases;
+		return new ArrayList<String>(usedJSONAliases);
 	}
 
-	public Set<String> getUsedDefNames() {
+	public List<String> getUsedDefNames() {
 		if (dirty) {
 			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting used definition names!");
 		}
-		return usedJSONDefNames;
+		return new ArrayList<String>(usedJSONDefNames);
 	}
 
 	public Map<String, String> getExpansion() {

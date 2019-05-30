@@ -44,15 +44,15 @@ public class QueryBuilderTests {
 	@Before
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addExpansion("A", "a", "A.a");
-		se.addExpansion("A", "b", "A.b");
+		se.addColumn("A", "a", "A.a");
+		se.addColumn("A", "b", "A.b");
 
-		se.addExpansion("B", "x", "B.x");
-		se.addSubExpansion("B", "IwantA", "A");
+		se.addColumn("B", "x", "B.x");
+		se.addSubDef("B", "IwantA", "A");
 
-		se.addExpansion("C", "i", "C.i");
-		se.addSubExpansion("C", "showA", "A");
-		se.addSubExpansion("C", "showB", "B");
+		se.addColumn("C", "i", "C.i");
+		se.addSubDef("C", "showA", "A");
+		se.addSubDef("C", "showB", "B");
 
 
 		QueryBuilder.setup(se);

@@ -1,13 +1,12 @@
 package it.bz.idm.bdp.reader2.utils.querybuilder;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
-
-import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
 
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
@@ -22,11 +21,11 @@ public class QueryBuilder {
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public QueryBuilder(final String select, RecursionType recType, String... selectDefNames) {
+	public QueryBuilder(final String select, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		se.build(select, recType, selectDefNames);
+		se.expand(select, selectDefNames);
 	}
 
 	/**
@@ -47,16 +46,12 @@ public class QueryBuilder {
 	}
 
 	public static QueryBuilder init(final String select, String... selectDefNames) {
-		return new QueryBuilder(select, RecursionType.getDefault(), selectDefNames);
+		return new QueryBuilder(select, selectDefNames);
 	}
 
-	public static QueryBuilder init(final String select, RecursionType recType, String... selectDefNames) {
-		return new QueryBuilder(select, recType, selectDefNames);
-	}
-
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, RecursionType recType, String... selectDefNames)  {
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
 		QueryBuilder.setup(selectExpansion);
-		return QueryBuilder.init(select, recType, selectDefNames);
+		return QueryBuilder.init(select, selectDefNames);
 	}
 
 	/**
@@ -161,7 +156,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfDefinition(String sqlPart, String selectDefName) {
-		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpandedSelects().containsKey(selectDefName)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpansion().containsKey(selectDefName)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -208,7 +203,7 @@ public class QueryBuilder {
 
 	public QueryBuilder expandSelectPrefix(String prefix, final String... selectDef) {
 		StringJoiner sj = new StringJoiner(", ");
-		for (String expansion : se.getExpandedSelects(selectDef).values()) {
+		for (String expansion : se.getExpansion(new HashSet<String>(Arrays.asList(selectDef))).values()) {
 			sj.add(expansion);
 		}
 		if (sj.length() > 0) {

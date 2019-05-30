@@ -34,31 +34,31 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 
 		SelectExpansion se = new SelectExpansion();
 
-		se.addExpansion("station", "sname", "s.name");
-		se.addExpansion("station", "stype", "s.stationtype");
-		se.addExpansion("station", "scode", "s.stationcode");
-		se.addExpansion("station", "sorigin", "s.origin");
-		se.addExpansion("station", "scoordinate", "s.pointprojection");
-		se.addExpansion("station", "smetadata", "m.json");
-		se.addSubExpansion("station", "sparent", "parent");
-		se.addSubExpansion("station", "sdatatypes", "datatype");
+		se.addColumn("measurement", "mvalidtime", "me.timestamp");
+		se.addColumn("measurement", "mtransactiontime", "me.created_on");
+		se.addColumn("measurement", "mperiod", "me.period");
+		se.addColumn("measurement", "mvalue", "me.double_value");
 
-		se.addExpansion("parent", "pname", "p.name");
-		se.addExpansion("parent", "ptype", "p.stationtype");
-		se.addExpansion("parent", "pcoordinate", "p.pointprojection");
-		se.addExpansion("parent", "pcode", "p.stationcode");
-		se.addExpansion("parent", "porigin", "p.origin");
+		se.addColumn("datatype", "tname", "t.cname");
+		se.addColumn("datatype", "tunit", "t.cunit");
+		se.addColumn("datatype", "ttype", "t.rtype");
+		se.addColumn("datatype", "tdescription", "t.description");
+		se.addSubDef("datatype", "tlastmeasurement", "measurement");
 
-		se.addExpansion("datatype", "tname", "t.cname");
-		se.addExpansion("datatype", "tunit", "t.cunit");
-		se.addExpansion("datatype", "ttype", "t.rtype");
-		se.addExpansion("datatype", "tdescription", "t.description");
-		se.addSubExpansion("datatype", "tlastmeasurement", "measurement");
+		se.addColumn("parent", "pname", "p.name");
+		se.addColumn("parent", "ptype", "p.stationtype");
+		se.addColumn("parent", "pcoordinate", "p.pointprojection");
+		se.addColumn("parent", "pcode", "p.stationcode");
+		se.addColumn("parent", "porigin", "p.origin");
 
-		se.addExpansion("measurement", "mvalidtime", "me.timestamp");
-		se.addExpansion("measurement", "mtransactiontime", "me.created_on");
-		se.addExpansion("measurement", "mperiod", "me.period");
-		se.addExpansion("measurement", "mvalue", "me.double_value");
+		se.addColumn("station", "sname", "s.name");
+		se.addColumn("station", "stype", "s.stationtype");
+		se.addColumn("station", "scode", "s.stationcode");
+		se.addColumn("station", "sorigin", "s.origin");
+		se.addColumn("station", "scoordinate", "s.pointprojection");
+		se.addColumn("station", "smetadata", "m.json");
+		se.addSubDef("station", "sparent", "parent");
+		se.addSubDef("station", "sdatatypes", "datatype");
 
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(se);

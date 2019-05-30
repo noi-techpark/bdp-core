@@ -1,7 +1,9 @@
 package it.bz.idm.bdp.reader2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -14,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectDefinition;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
 
@@ -28,7 +30,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, RecursionType.NONE, "station", "parent")
+				.init(select, "station", "parent")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
 				.expandSelectPrefix(", ")
 				.addSql("from station s")
@@ -74,7 +76,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, RecursionType.FULL, "station", "parent", "measurement", "datatype")
+				.init(select, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
 				.expandSelect()
 				.addSql("from measurement me",
@@ -144,7 +146,7 @@ public class DataFetcher {
 			stations = new HashMap<String, Object>();
 			stationTypePrev = stationTypeAct;
 			do {
-				Map<String, Object> station = makeObjectOrEmptyMap(rec, se.getExpansion("station"), ignoreNull);
+				Map<String, Object> station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
 				stations.put(stationCodeAct, station);
 				log.debug("S = " + stationCodeAct);
 
@@ -160,7 +162,7 @@ public class DataFetcher {
 						stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
 						stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
 						log.debug(rec.toString());
-						Map<String, Object> dataType = makeObjectOrNull(rec, se.getExpansion("datatype"), ignoreNull);
+						Map<String, Object> dataType = makeObjectOrNull(rec, se, ignoreNull, "datatype");
 						if (dataType != null) {
 							datatypes.add(dataType);
 						}
@@ -179,25 +181,35 @@ public class DataFetcher {
 		return stationTypes;
 	}
 
-	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, Map<String, Object> objDefinition, boolean ignoreNull) {
-		Map<String, Object> result = makeObjectOrEmptyMap(record, objDefinition, ignoreNull);
+	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
+		Map<String, Object> result = makeObjectOrEmptyMap(record, se, ignoreNull, defNames);
 		return result.isEmpty() ? null : result;
 	}
 
-	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, Map<String, Object> objDefinition, boolean ignoreNull) {
+	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
+		return makeObjectOrNull(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
+	}
+
+	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		for (Entry<String, Object> def : objDefinition.entrySet()) {
-			if (record.containsKey(def.getKey())) {
-				result.put(def.getKey(), record.get(def.getKey()));
-			} else if (def.getValue() instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> subObject = makeObjectOrNull(record, (Map<String, Object>) def.getValue(), ignoreNull);
-				if (subObject != null || !ignoreNull) {
-					result.put(def.getKey(), subObject);
+		for (Entry<String, Object> e : record.entrySet()) {
+			SelectDefinition def = se.getDefinition(e.getKey(), defNames);
+			if (def != null) {
+				if (def.isColumn(e.getKey())) {
+					result.put(e.getKey(), record.get(e.getValue()));
+				} else {
+					Map<String, Object> subObject = makeObjectOrNull(record, se, ignoreNull, defNames);
+					if (subObject != null || !ignoreNull) {
+						result.put(e.getKey(), subObject);
+					}
 				}
 			}
 		}
 		return result;
+	}
+
+	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
+		return makeObjectOrEmptyMap(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
 	}
 
 	public String fetchStationTypes() {
