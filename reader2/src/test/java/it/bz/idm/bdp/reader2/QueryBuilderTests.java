@@ -20,41 +20,43 @@ public class QueryBuilderTests {
 		assertEquals("A.a as a, B.x as x", res);
 
 		res = QueryBuilder
-				.init("showA", "C")
+				.init("y", "B", "C")
 				.expandSelect()
 				.getSql();
 
-		assertEquals("A.a as a, A.b as b", res);
+		assertEquals("C.d as d", res);
 
 		res = QueryBuilder
-				.init("showB", "C")
+				.init("d", "C")
 				.expandSelect()
 				.getSql();
 
-		assertEquals("A.a as a, A.b as b, B.x as x", res);
+		assertEquals("C.d as d", res);
 
 		res = QueryBuilder
-				.init("showB", "C")
-				.expandSelectPrefix("C")
+				.init("x, y", "A", "B")
+				.expandSelect()
 				.getSql();
 
-		assertEquals("A.a as a, A.b as b, B.x as x", res);
+		assertEquals("B.x as x", res);
+
+		res = QueryBuilder
+				.init("a,b,c", "A", "B")
+				.expandSelect("B")
+				.getSql();
+
+		assertEquals("B.x as x", res);
 	}
 
 	@Before
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addColumn("A", "a", "A.a");
-		se.addColumn("A", "b", "A.b");
-
+		se.addColumn("C", "d", "C.d");
 		se.addColumn("B", "x", "B.x");
-		se.addSubDef("B", "IwantA", "A");
-
-		se.addColumn("C", "i", "C.i");
-		se.addSubDef("C", "showA", "A");
-		se.addSubDef("C", "showB", "B");
-
-
+		se.addSubDef("B", "y", "C");
+		se.addColumn("A", "a", "A.a");
+		se.addSubDef("A", "b", "B");
+		se.addColumn("A", "c", "A.c");
 		QueryBuilder.setup(se);
 	}
 

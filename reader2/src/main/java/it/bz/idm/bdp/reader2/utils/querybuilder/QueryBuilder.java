@@ -1,6 +1,5 @@
 package it.bz.idm.bdp.reader2.utils.querybuilder;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -203,7 +202,7 @@ public class QueryBuilder {
 
 	public QueryBuilder expandSelectPrefix(String prefix, final String... selectDef) {
 		StringJoiner sj = new StringJoiner(", ");
-		for (String expansion : se.getExpansion(new HashSet<String>(Arrays.asList(selectDef))).values()) {
+		for (String expansion : se.getExpansion(selectDef).values()) {
 			sj.add(expansion);
 		}
 		if (sj.length() > 0) {

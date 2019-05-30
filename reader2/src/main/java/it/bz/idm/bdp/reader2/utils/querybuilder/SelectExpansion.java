@@ -200,6 +200,9 @@ public class SelectExpansion {
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {
+		if (defNames == null) {
+			return getExpansion();
+		}
 		Map<String, String> res = new HashMap<String, String>();
 		for (String defName : defNames) {
 			 String exp = getExpansion(defName);
@@ -210,6 +213,14 @@ public class SelectExpansion {
 		}
 		return res;
 	}
+
+	public Map<String, String> getExpansion(String... defNames) {
+		if (defNames == null) {
+			return getExpansion();
+		}
+		return getExpansion(new HashSet<String>(Arrays.asList(defNames)));
+	}
+
 
 	@Override
 	public String toString() {
