@@ -15,6 +15,7 @@ import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
 
@@ -22,14 +23,14 @@ public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
-	public String fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
+	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, "station", "parent")
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, ")
-				.expandSelect()
+				.init(select, RecursionType.NONE, "station", "parent")
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
+				.expandSelectPrefix(", ")
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
@@ -39,7 +40,7 @@ public class DataFetcher {
 				.addLimit(limit)
 				.addOffset(offset);
 
-		log.debug(query.getSql());
+		log.info(query.getSql());
 
 		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
@@ -54,10 +55,12 @@ public class DataFetcher {
 		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
-		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
+		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
+	}
 
-		nanoTime = System.nanoTime();
-
+	public String fetchStations2(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
+		Map<String, Object> stationTypes = fetchStations(stationTypeList, limit, offset, select, role, ignoreNull);
+		long nanoTime = System.nanoTime();
 		String serialize = JsonStream.serialize(stationTypes);
 		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
@@ -71,7 +74,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, false, "station", "parent", "measurement", "datatype")
+				.init(select, RecursionType.FULL, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
 				.expandSelect()
 				.addSql("from measurement me",
@@ -112,6 +115,11 @@ public class DataFetcher {
 	}
 
 	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se) {
+
+		if (queryResult == null || queryResult.isEmpty()) {
+			return new HashMap<String, Object>();
+		}
+
 		long nanoTime;
 		nanoTime = System.nanoTime();
 		String stationTypePrev = "";

@@ -35,7 +35,7 @@ public class QueryBuilderTests {
 
 		res = QueryBuilder
 				.init("showB", "C")
-				.expandSelect("C")
+				.expandSelectPrefix("C")
 				.getSql();
 
 		assertEquals("A.a as a, A.b as b, B.x as x", res);

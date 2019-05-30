@@ -90,6 +90,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 				case "geometry":
 					return PGgeometry.geomFromString(pgObj.getValue());
 				case "jsonb":
+					// FIXME Return a proper map
 					return JsonIterator.deserialize(pgObj.getValue());
 				default:
 					throw new RuntimeException("PGobject type " + pgObjType + " not supported!");

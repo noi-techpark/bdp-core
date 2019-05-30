@@ -41,21 +41,21 @@ public class JsonController {
 	@Autowired
     NamedParameterJdbcTemplate jdbcTemplate;
 
-	@GetMapping(value = "/")
+	@GetMapping(value = "/", produces = "application/json")
 	public @ResponseBody String requestStationTypes() {
 		return new DataFetcher().fetchStationTypes();
 	}
 
-	@GetMapping(value = "/{stationTypes}")
+	@GetMapping(value = "/{stationTypes}", produces = "application/json")
 	public @ResponseBody String requestStations(@PathVariable String stationTypes,
 											    @RequestParam(value="limit", required=false, defaultValue="100") Long limit,
 											    @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 											    @RequestParam(value="select", required=false) String select,
 											    @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull);
+		return new DataFetcher().fetchStations2(stationTypes, limit, offset, select, "GUEST", !showNull);
 	}
 
-	@GetMapping(value = "/{stationTypes}/{dataTypes}")
+	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
 	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
 												 @PathVariable String dataTypes,
 												 @RequestParam(value="limit", required=false, defaultValue="100") Long limit,

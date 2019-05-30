@@ -18,16 +18,15 @@ import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.RecursionType;
  */
 public class QueryBuilder {
 
-	private static final boolean RECURSION_DEFAULT = false;
 	private StringBuilder sql = new StringBuilder();
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public QueryBuilder(final String select, boolean recursive, String... selectDefNames) {
+	public QueryBuilder(final String select, RecursionType recType, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		se.build(select, recursive ? RecursionType.FULL : RecursionType.SINGLE, selectDefNames);
+		se.build(select, recType, selectDefNames);
 	}
 
 	/**
@@ -48,16 +47,16 @@ public class QueryBuilder {
 	}
 
 	public static QueryBuilder init(final String select, String... selectDefNames) {
-		return new QueryBuilder(select, RECURSION_DEFAULT, selectDefNames);
+		return new QueryBuilder(select, RecursionType.getDefault(), selectDefNames);
 	}
 
-	public static QueryBuilder init(final String select, boolean recursive, String... selectDefNames) {
-		return new QueryBuilder(select, recursive, selectDefNames);
+	public static QueryBuilder init(final String select, RecursionType recType, String... selectDefNames) {
+		return new QueryBuilder(select, recType, selectDefNames);
 	}
 
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, boolean recursive, String... selectDefNames)  {
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, RecursionType recType, String... selectDefNames)  {
 		QueryBuilder.setup(selectExpansion);
-		return QueryBuilder.init(select, recursive, selectDefNames);
+		return QueryBuilder.init(select, recType, selectDefNames);
 	}
 
 	/**
@@ -204,16 +203,27 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelect(final String... selectDef) {
+		return expandSelectPrefix("", selectDef);
+	}
+
+	public QueryBuilder expandSelectPrefix(String prefix, final String... selectDef) {
 		StringJoiner sj = new StringJoiner(", ");
 		for (String expansion : se.getExpandedSelects(selectDef).values()) {
 			sj.add(expansion);
 		}
-		sql.append(sj.toString());
+		if (sj.length() > 0) {
+			sql.append(prefix);
+			sql.append(sj.toString());
+		}
 		return this;
 	}
 
 	public QueryBuilder expandSelect() {
 		return expandSelect((String[]) null);
+	}
+
+	public QueryBuilder expandSelectPrefix(String prefix) {
+		return expandSelectPrefix(prefix, (String[]) null);
 	}
 
 	public QueryBuilder expandSelect(boolean condition, final String... selectDef) {
