@@ -20,7 +20,8 @@ pipeline {
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
 
-        READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-hikari.properties')
+        READER2_HIKARI_CONFIG = credentials('bdp-core-test-reader2-hikari.properties')
+        READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
     }
 
     stages {
@@ -48,7 +49,8 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" dal/src/main/resources/log4j.properties'
 
-                sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/hikari.properties'
+                sh 'cat "${READER2_HIKARI_CONFIG}" > reader2/src/main/resources/hikari.properties'
+                sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/database.properties'
             }
         }
         stage('Install') {
