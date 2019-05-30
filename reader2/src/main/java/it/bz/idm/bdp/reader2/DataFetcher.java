@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -136,15 +135,12 @@ public class DataFetcher {
 		List<Object> datatypes = null;
 		List<Object> measurements = null;
 
-		Map<String, Object> rec = null;
 		Map<String, Object> station = null;
 		Map<String, Object> datatype = null;
 		Map<String, Object> measurement = null;
 
-		ListIterator<Map<String, Object>> it = queryResult.listIterator();
 		int renewLevel = 3;
-		while (it.hasNext()) {
-			rec = it.next();
+		for (Map<String, Object> rec : queryResult) {
 
 			stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
 			stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
