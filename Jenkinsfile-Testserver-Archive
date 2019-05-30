@@ -22,6 +22,7 @@ pipeline {
                 sh 'cd ws-interface && mvn -B clean test install'
                 sh 'cd reader && mvn -B clean test'
                 sh 'cd writer && mvn -B clean test'
+                sh 'cd reader2 && mvn -B clean test'
             }
         }
         stage('Build - Reader') {
@@ -34,10 +35,16 @@ pipeline {
                 sh 'cd writer && mvn -B package -DfinalName=writer'
             }
         }
+        stage('Build - Reader V2') {
+            steps {
+                sh 'cd reader2 && mvn -B clean test package -DfinalName=reader2'
+            }
+        }
         stage('Deploy') {
             steps{
                 sh 'cd writer && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=writer'
                 sh 'cd reader && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=reader'
+                sh 'cd reader2 && mvn -B tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=reader2'
             }
         }
     }
