@@ -149,7 +149,7 @@ public class SelectExpansion {
 			String alias = candidateAliases.get(curPos);
 			SelectDefinition def = getDefinition(alias, defNames);
 			if (def == null) {
-				throw new RuntimeException("Not found");
+				throw new RuntimeException("Alias '" + alias + "' within select definitions '" + defNames + "' not found!");
 			}
 
 			if (def.isColumn(alias)) {
