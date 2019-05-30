@@ -168,7 +168,7 @@ public class DataFetcher {
 					}
 					stations = (Map<String, Object>) stationTypes.get(stationTypeAct);
 					stations.put(stationCodeAct, station);
-					if (se.getUsedAliases().contains("datatype")) {
+					if (se.getUsedDefNames().contains("datatype")) {
 						station.put("sdatatypes", new ArrayList<Object>());
 					} else {
 						break;
