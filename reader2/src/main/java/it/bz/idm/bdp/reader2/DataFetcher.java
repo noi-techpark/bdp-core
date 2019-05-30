@@ -30,7 +30,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, "station", "parent")
+				.init(select == null ? "*" : select, "station", "parent")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
 				.expandSelectPrefix(", ")
 				.addSql("from station s")
@@ -76,7 +76,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select, "station", "parent", "measurement", "datatype")
+				.init(select == null ? "*" : select, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
 				.expandSelect()
 				.addSql("from measurement me",
@@ -116,6 +116,7 @@ public class DataFetcher {
 		return serialize;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se) {
 
 		if (queryResult == null || queryResult.isEmpty()) {
@@ -128,54 +129,67 @@ public class DataFetcher {
 		String stationTypeAct = "";
 		String stationCodePrev = "";
 		String stationCodeAct = "";
+		String datatypePrev = "";
+		String datatypeAct = "";
+		Map<String, Object> stationTypes = new HashMap<String, Object>();
 		Map<String, Object> stations = null;
 		List<Object> datatypes = null;
+		List<Object> measurements = null;
+
+		Map<String, Object> rec = null;
+		Map<String, Object> station = null;
+		Map<String, Object> datatype = null;
+		Map<String, Object> measurement = null;
 
 		ListIterator<Map<String, Object>> it = queryResult.listIterator();
+		int renewLevel = 3;
+		while (it.hasNext()) {
+			rec = it.next();
 
-		Map<String, Object> rec = it.hasNext() ? it.next() : null;
-		stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
-		stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-		log.debug(rec.toString());
+			stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
+			stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
+			datatypeAct = (String) rec.getOrDefault("_datatypename", "");
 
-		/* Accumulate station types */
-		Map<String, Object> stationTypes = new HashMap<String, Object>();
-		while (rec != null) {
+			if (!stationTypeAct.equals(stationTypePrev)) {
+				renewLevel = 3;
+			} else if (!stationCodeAct.equals(stationCodePrev)) {
+				renewLevel = 2;
+			} else if (!datatypeAct.equals(datatypePrev)) {
+				renewLevel = 1;
+			} else {
+				renewLevel = 0;
+			}
 
-			/* Accumulate stations */
-			stations = new HashMap<String, Object>();
-			stationTypePrev = stationTypeAct;
-			do {
-				Map<String, Object> station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
-				stations.put(stationCodeAct, station);
-				log.debug("S = " + stationCodeAct);
-
-				/* Accumulate data types */
-				datatypes = new ArrayList<Object>();
-				if (station.get("sdatatypes") != null) {
-					datatypes.add(station.get("sdatatypes"));
-				}
-				stationCodePrev = stationCodeAct;
-				do {
-					if (it.hasNext()) {
-						rec = it.next();
-						stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
-						stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-						log.debug(rec.toString());
-						Map<String, Object> dataType = makeObjectOrNull(rec, se, ignoreNull, "datatype");
-						if (dataType != null) {
-							datatypes.add(dataType);
-						}
+			switch (renewLevel) {
+				case 3:
+					stationTypes.put(stationTypeAct, new HashMap<String, Object>());
+				case 2:
+					station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
+					stations = (Map<String, Object>) stationTypes.get(stationTypeAct);
+					stations.put(stationCodeAct, station);
+					if (se.getUsedAliases().contains("datatype")) {
+						station.put("sdatatypes", new ArrayList<Object>());
 					} else {
-						rec = null;
+						break;
 					}
-				} while (rec != null && stationCodePrev.equalsIgnoreCase(stationCodeAct));
+				case 1:
+					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
+					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
+					datatypes.add(datatype);
+					if (se.getUsedDefNames().contains("measurement")) {
+						datatype.put("tlastmeasurement", new ArrayList<Object>());
+					} else {
+						break;
+					}
+				case 0:
+					measurement = makeObjectOrEmptyMap(rec, se, ignoreNull, "measurement");
+					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tlastmeasurement");
+					measurements.add(measurement);
+			}
 
-				if (!datatypes.isEmpty())
-					station.put("sdatatypes", datatypes);
-
-			} while (rec != null && stationTypePrev.equalsIgnoreCase(stationTypeAct));
-			stationTypes.put(stationTypePrev, stations);
+			stationTypePrev = stationTypeAct;
+			stationCodePrev = stationCodeAct;
+			datatypePrev = datatypeAct;
 		}
 		log.info("build result map: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return stationTypes;
@@ -186,17 +200,13 @@ public class DataFetcher {
 		return result.isEmpty() ? null : result;
 	}
 
-	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
-		return makeObjectOrNull(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
-	}
-
 	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (Entry<String, Object> e : record.entrySet()) {
 			SelectDefinition def = se.getDefinition(e.getKey(), defNames);
 			if (def != null) {
 				if (def.isColumn(e.getKey())) {
-					result.put(e.getKey(), record.get(e.getValue()));
+					result.put(e.getKey(), e.getValue());
 				} else {
 					Map<String, Object> subObject = makeObjectOrNull(record, se, ignoreNull, defNames);
 					if (subObject != null || !ignoreNull) {
