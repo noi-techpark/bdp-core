@@ -41,7 +41,6 @@ public class SelectExpansion {
 	}
 
 	public SelectDefinition get(final String name) {
-		dirty = true;
 		return schema.get(name);
 	}
 
@@ -71,26 +70,24 @@ public class SelectExpansion {
 	}
 
 	public Map<String, String> getAliasMap() {
-		if (!dirty) {
-			return aliases;
-		}
-		aliases.clear();
-		for (SelectDefinition defs : schema.values()) {
-			for (String alias : defs.getAliases()) {
-				aliases.put(alias, defs.getName());
+		if (dirty) {
+			aliases.clear();
+			for (SelectDefinition defs : schema.values()) {
+				for (String alias : defs.getAliases()) {
+					aliases.put(alias, defs.getName());
+				}
 			}
 		}
 		return aliases;
 	}
 
 	public Map<String, String> getPointerMap() {
-		if (!dirty) {
-			return pointers;
-		}
-		pointers.clear();
-		for (SelectDefinition defs : schema.values()) {
-			for (String alias : defs.getPointersOnly().keySet()) {
-				pointers.put(alias, defs.getName());
+		if (dirty) {
+			pointers.clear();
+			for (SelectDefinition defs : schema.values()) {
+				for (String alias : defs.getPointersOnly().keySet()) {
+					pointers.put(alias, defs.getName());
+				}
 			}
 		}
 		return pointers;
@@ -124,10 +121,23 @@ public class SelectExpansion {
 		return res;
 	}
 
+	private void _build() {
+		dirty = true;
+		getAliasMap();
+		getPointerMap();
+		dirty = false;
+	}
+
 	public void expand(final Set<String> aliases, final Set<String> defNames) {
 		if (aliases == null || aliases.isEmpty() || defNames == null || defNames.isEmpty()) {
 			throw new RuntimeException("EXPAND: Provide valid alias and definition sets!");
 		}
+		if (dirty) {
+			_build();
+		}
+		usedJSONAliases.clear();
+		usedJSONDefNames.clear();
+		expandedSelects.clear();
 		List<String> candidateAliases = null;
 		if (aliases.size() == 1 && aliases.contains("*")) {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
@@ -146,8 +156,8 @@ public class SelectExpansion {
 				usedJSONAliases.add(alias);
 				String defName = getAliasMap().get(alias);
 				usedJSONDefNames.add(defName);
-				String sqlSelect = expandedSelects.getOrDefault(defName, "");
-				expandedSelects.put(defName, sqlSelect + def.getColumn(alias) + " as " + alias);
+				String sqlSelect = expandedSelects.getOrDefault(defName, null);
+				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + def.getColumn(alias) + " as " + alias);
 			} else {
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
@@ -158,7 +168,6 @@ public class SelectExpansion {
 			}
 			curPos++;
 		}
-		dirty = false;
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -230,52 +239,30 @@ public class SelectExpansion {
 		se.addColumn("A", "b", "A.b");
 		se.addSubDef("A", "c", "B");
 
-//		System.out.println(se.schema);
-
-//		String select = "c";
-//		String defs = "A, B";
-//		Set<String> defNameSet = QueryBuilder.csvToSet(defs);
-//		Set<String> selectSet = QueryBuilder.csvToSet(select);
-//
-//		se.expand(selectSet, defNameSet);
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getExpansion());
-
-//		res = se._expandSelect("a", "A");
-//		System.out.println(res);
-//
-//		res = se._expandSelect("a", "B");
-//		System.out.println(res);
-//
-//		res = se._expandSelect("a, b", "B");
-//		System.out.println(res);
-
-
 //		{}
 //		[]
 //		[]
-		se.expand("y", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+//		se.expand("y", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
 
 //		{B=B.x as x}
-//		[x, y]
+//		[x]
 //		[B]
 		se.expand("x, y", "B");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 
-////		{A=A.a as a, A.b as b, B=B.x as x}
-////		[a, b, c, x, y]
-////		[A, B]
-//		se.build("x, y", RecursionType.SINGLE, "B");
-//		System.out.println(se.getExpandedSelects());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
+//		{A=A.a as a, A.b as b, B=B.x as x}
+//		[a, b, c, x]
+//		[A, B]
+		se.expand("a, b, c", "A", "B");
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+
 //		se.build("*", RecursionType.NONE, "A");
 //		System.out.println(se.getExpandedSelects());
 //		System.out.println(se.getUsedAliases());
