@@ -76,8 +76,8 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select == null ? "*" : select, "station", "parent", "measurement", "datatype")
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename, ")
-				.expandSelect()
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
+				.expandSelectPrefix(", ")
 				.addSql("from measurement me",
 						"join bdppermissions pe on (",
 								"(me.station_id = pe.station_id OR pe.station_id is null)",
@@ -136,6 +136,7 @@ public class DataFetcher {
 		List<Object> measurements = null;
 
 		Map<String, Object> station = null;
+		Map<String, Object> parent = null;
 		Map<String, Object> datatype = null;
 		Map<String, Object> measurement = null;
 
@@ -161,6 +162,10 @@ public class DataFetcher {
 					stationTypes.put(stationTypeAct, new HashMap<String, Object>());
 				case 2:
 					station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
+					parent = makeObjectOrNull(rec, se, ignoreNull, "parent");
+					if (parent != null) {
+						station.put("sparent", parent);
+					}
 					stations = (Map<String, Object>) stationTypes.get(stationTypeAct);
 					stations.put(stationCodeAct, station);
 					if (se.getUsedAliases().contains("datatype")) {
@@ -194,6 +199,10 @@ public class DataFetcher {
 	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
 		Map<String, Object> result = makeObjectOrEmptyMap(record, se, ignoreNull, defNames);
 		return result.isEmpty() ? null : result;
+	}
+
+	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
+		return makeObjectOrNull(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
 	}
 
 	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
