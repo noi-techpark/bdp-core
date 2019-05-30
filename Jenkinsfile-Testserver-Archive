@@ -5,6 +5,8 @@ pipeline {
         BDP_DATABASE_CONFIG = credentials('bdp-core-test-persistence.xml')
         BDP_READER_CONFIG = credentials('bdp-core-test-reader-application.properties')
         TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
+
+        READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-hikari.properties')
     }
 
     stages {
@@ -12,6 +14,7 @@ pipeline {
             steps {
                 sh 'cat "${BDP_DATABASE_CONFIG}" > dal/src/main/resources/META-INF/persistence.xml'
                 sh 'cat "${BDP_READER_CONFIG}" > reader/src/main/resources/META-INF/spring/application.properties'
+                sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/hikari.properties'
             }
         }
         stage('Test - Install') {
