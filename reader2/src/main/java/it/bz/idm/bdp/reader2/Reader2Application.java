@@ -1,5 +1,7 @@
 package it.bz.idm.bdp.reader2;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ public class Reader2Application implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		AppStartupDataLoader startup = new AppStartupDataLoader();
+//		AppStartupDataLoader startup = new AppStartupDataLoader();
 		DataFetcher df = new DataFetcher();
 
 		boolean ignoreNull = true;
@@ -79,8 +81,8 @@ public class Reader2Application implements CommandLineRunner {
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		String stations = df.fetchStationsTypesAndMeasurements("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull);
-		log.info(stations);
+		Map<String, Object> stations = df.fetchStationsTypesAndMeasurements("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull);
+		log.info(DataFetcher.serializeJSON(stations));
 
 		log.info("READY.");
 	}
