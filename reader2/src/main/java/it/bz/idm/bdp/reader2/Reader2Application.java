@@ -79,7 +79,7 @@ public class Reader2Application implements CommandLineRunner {
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		String stations = df.fetchStationsAndTypes("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull);
+		String stations = df.fetchStationsTypesAndMeasurements("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull);
 		log.info(stations);
 
 		log.info("READY.");

@@ -52,7 +52,7 @@ public class JsonController {
 											    @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 											    @RequestParam(value="select", required=false) String select,
 											    @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return new DataFetcher().fetchStations2(stationTypes, limit, offset, select, "GUEST", !showNull);
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
@@ -62,7 +62,7 @@ public class JsonController {
 												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 												 @RequestParam(value="select", required=false) String select,
 												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return new DataFetcher().fetchStationsAndTypes(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull);
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurements(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull));
 	}
 
 

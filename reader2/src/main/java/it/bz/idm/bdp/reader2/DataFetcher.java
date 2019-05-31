@@ -59,15 +59,14 @@ public class DataFetcher {
 		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 	}
 
-	public String fetchStations2(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
-		Map<String, Object> stationTypes = fetchStations(stationTypeList, limit, offset, select, role, ignoreNull);
+	public static String serializeJSON(Map<String, Object> resultMap) {
 		long nanoTime = System.nanoTime();
-		String serialize = JsonStream.serialize(stationTypes);
+		String serialize = JsonStream.serialize(resultMap);
 		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
 	}
 
-	public String fetchStationsAndTypes(String stationTypeList, String dataTypeList, long limit,
+	public Map<String, Object> fetchStationsTypesAndMeasurements(String stationTypeList, String dataTypeList, long limit,
 			long offset, String select, String role, boolean ignoreNull) {
 		log.info("FETCHSTATIONSANDTYPES");
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
@@ -107,12 +106,7 @@ public class DataFetcher {
 		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
-		Map<String, Object> stationTypes = buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
-
-		nanoTime = System.nanoTime();
-		String serialize = JsonStream.serialize(stationTypes);
-		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
-		return serialize;
+		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 	}
 
 	@SuppressWarnings("unchecked")
