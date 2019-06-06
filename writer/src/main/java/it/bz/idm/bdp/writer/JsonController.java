@@ -59,8 +59,8 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/provenance", method = RequestMethod.GET)
 	public @ResponseBody List<ProvenanceDto> getProvenance(
 			@RequestParam(value = "uuid", required = false) String uuid,
-			@RequestParam(value = "name", required = false) String name,
-			@RequestParam(value = "version", required = false) String version,
+			@RequestParam(value = "dataCollector", required = false) String name,
+			@RequestParam(value = "dataCollectorVersion", required = false) String version,
 			@RequestParam(value = "lineage", required = false) String lineage) {
 		return DataManager.findProvenance(uuid,name,version,lineage);
 	}

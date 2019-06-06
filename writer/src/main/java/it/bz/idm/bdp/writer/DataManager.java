@@ -23,6 +23,7 @@
 package it.bz.idm.bdp.writer;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -220,9 +221,9 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			em.getTransaction().begin();
-			Provenance.add(em,provenance);
+			String uuid = Provenance.add(em,provenance);
 			em.getTransaction().commit();
-			return ResponseEntity.created(responseLocation).build();
+			return new ResponseEntity<>(uuid, HttpStatus.OK);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -231,8 +232,14 @@ public class DataManager {
 
 	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		EntityManager em = JPAUtil.createEntityManager();
+		List<ProvenanceDto> provenances = new ArrayList<>();
 		try {
-			return Provenance.find(em,uuid,name,version,lineage);
+			List<Provenance> resultList = Provenance.find(em,uuid,name,version,lineage);
+			for (Provenance p : resultList) {
+				ProvenanceDto dto = new ProvenanceDto(p.getUuid(),p.getDataCollector(),p.getDataCollectorVersion(),p.getLineage());
+				provenances.add(dto);
+			}
+			return provenances;
 		} finally {
 			if (em.isOpen())
 				em.close();

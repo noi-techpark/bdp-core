@@ -49,6 +49,7 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 	private String name = "(default)";
 	private List<RecordDtoImpl> data = new ArrayList<RecordDtoImpl>();
 	private Map<String,DataMapDto<RecordDtoImpl>> branch = new TreeMap<String,DataMapDto<RecordDtoImpl>>();
+	private String provenance;
 
 	public String getName() {
 		return name;
@@ -151,5 +152,10 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 		}
 		this.getBranch().entrySet().removeIf(entry -> entry.getValue().getBranch().isEmpty());
 	}
-
+	public String getProvenance() {
+		return provenance;
+	}
+	public void setProvenance(String provenanceUuid) {
+		this.provenance = provenanceUuid;
+	}
 }

@@ -22,7 +22,6 @@
  */
 package it.bz.idm.bdp.dal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -127,32 +126,34 @@ public class Provenance {
 		this.dataCollectorVersion = dataCollectorVersion;
 	}
 
-	public static List<ProvenanceDto> find(EntityManager em, String uuid, String name, String version,
+	public static List<Provenance> find(EntityManager em, String uuid, String name, String version,
 			String lineage) {
-		List<ProvenanceDto> provenances = new ArrayList<ProvenanceDto>();
 		List<Provenance> resultList = QueryBuilder
 				.init(em)
-				.addSql("SELECT p FROM provenance p where true")
+				.addSql("SELECT p FROM Provenance p where 1=1")
 				.setParameterIfNotNull("uuid",uuid,"and uuid = :uuid")
 				.setParameterIfNotNull("name",name,"and dataCollector = :name")
 				.setParameterIfNotNull("version",version,"and dataCollectorVersion = :version")
 				.setParameterIfNotNull("lineage",lineage,"and lineage = :lineage")
 				.buildResultList(Provenance.class);
-		for (Provenance p : resultList) {
-			ProvenanceDto dto = new ProvenanceDto(p.getUuid(),p.getDataCollector(),p.getDataCollectorVersion(),p.getLineage());
-			provenances.add(dto);
-		}
-		return provenances;
+
+		return resultList;
 	}
 
-	public static void add(EntityManager em, ProvenanceDto provenance) {
-		List<ProvenanceDto> list = Provenance.find(em, null, provenance.getDataCollector(), provenance.getDataCollectorVersion(), provenance.getLineage());
+	public static String add(EntityManager em, ProvenanceDto provenance) {
+		List<Provenance> list = find(em, null, provenance.getDataCollector(), provenance.getDataCollectorVersion(), provenance.getLineage());
 		if (!list.isEmpty())
-			throw new IllegalStateException("Provenance already exists");
+			return list.get(0).getUuid();
 		Provenance p = new Provenance();
 		p.setDataCollector(provenance.getDataCollector());
 		p.setDataCollectorVersion(provenance.getDataCollectorVersion());
 		p.setLineage(provenance.getLineage());
 		em.persist(p);
+		return p.getUuid();
+	}
+
+	public static Provenance findByUuid(EntityManager em, String uuid) {
+		List<Provenance> list = find(em, uuid, null, null, null);
+		return list.size()==1 ? list.get(0) : null;
 	}
 }
