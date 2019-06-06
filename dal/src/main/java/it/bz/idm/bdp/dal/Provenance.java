@@ -22,8 +22,12 @@
  */
 package it.bz.idm.bdp.dal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,7 +35,11 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.annotations.ColumnDefault;
+
+import it.bz.idm.bdp.dal.util.QueryBuilder;
+import it.bz.idm.bdp.dto.ProvenanceDto;
 
 
 /**
@@ -63,6 +71,9 @@ public class Provenance {
 	@ColumnDefault(value = "nextval('provenance_seq')")
 	protected Long id;
 
+	@Column(unique=true,nullable = false)
+	protected String uuid;
+
 	@Column(nullable = false)
 	protected String lineage;
 
@@ -71,4 +82,77 @@ public class Provenance {
 
 	@Column(nullable = true)
 	protected String dataCollectorVersion;
+
+	public Provenance() {
+		this.uuid = RandomStringUtils.randomAlphanumeric(8);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getLineage() {
+		return lineage;
+	}
+
+	public void setLineage(String lineage) {
+		this.lineage = lineage;
+	}
+
+	public String getDataCollector() {
+		return dataCollector;
+	}
+
+	public void setDataCollector(String dataCollector) {
+		this.dataCollector = dataCollector;
+	}
+
+	public String getDataCollectorVersion() {
+		return dataCollectorVersion;
+	}
+
+	public void setDataCollectorVersion(String dataCollectorVersion) {
+		this.dataCollectorVersion = dataCollectorVersion;
+	}
+
+	public static List<ProvenanceDto> find(EntityManager em, String uuid, String name, String version,
+			String lineage) {
+		List<ProvenanceDto> provenances = new ArrayList<ProvenanceDto>();
+		List<Provenance> resultList = QueryBuilder
+				.init(em)
+				.addSql("SELECT p FROM provenance p where true")
+				.setParameterIfNotNull("uuid",uuid,"and uuid = :uuid")
+				.setParameterIfNotNull("name",name,"and dataCollector = :name")
+				.setParameterIfNotNull("version",version,"and dataCollectorVersion = :version")
+				.setParameterIfNotNull("lineage",lineage,"and lineage = :lineage")
+				.buildResultList(Provenance.class);
+		for (Provenance p : resultList) {
+			ProvenanceDto dto = new ProvenanceDto(p.getUuid(),p.getDataCollector(),p.getDataCollectorVersion(),p.getLineage());
+			provenances.add(dto);
+		}
+		return provenances;
+	}
+
+	public static void add(EntityManager em, ProvenanceDto provenance) {
+		List<ProvenanceDto> list = Provenance.find(em, null, provenance.getDataCollector(), provenance.getDataCollectorVersion(), provenance.getLineage());
+		if (!list.isEmpty())
+			throw new IllegalStateException("Provenance already exists");
+		Provenance p = new Provenance();
+		p.setDataCollector(provenance.getDataCollector());
+		p.setDataCollectorVersion(provenance.getDataCollectorVersion());
+		p.setLineage(provenance.getLineage());
+		em.persist(p);
+	}
 }
