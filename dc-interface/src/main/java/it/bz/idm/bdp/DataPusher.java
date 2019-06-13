@@ -26,6 +26,8 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
+import it.bz.idm.bdp.dto.ProvenanceDto;
+
 /**
  * Basic configuration for any sender providing data to the writer
  *
@@ -43,9 +45,11 @@ public abstract class DataPusher implements IntegreenPushable  {
 
 	protected Configuration config;
 	protected String integreenTypology;
+	protected ProvenanceDto provenance;
 
 	public abstract void connectToDataCenterCollector();
 	public abstract String initIntegreenTypology();
+	public abstract ProvenanceDto defineProvenance();
 
 	/**
 	 * Instantiate a new data pusher with a typology defined in implementation
@@ -54,6 +58,10 @@ public abstract class DataPusher implements IntegreenPushable  {
 		initConfig();
 		connectToDataCenterCollector();
 		this.integreenTypology = initIntegreenTypology();
+		ProvenanceDto provenance = defineProvenance();
+		if (provenance == null || !provenance.isValid())
+			throw new IllegalStateException("You need to provide a valid provenance to be able to send data");
+		this.provenance = provenance;
 	}
 	/**
 	 * set host, port and endpoint of the writer module

@@ -57,5 +57,9 @@ public class ProvenanceDto implements Serializable{
 	public void setDataCollectorVersion(String dataCollectorVersion) {
 		this.dataCollectorVersion = dataCollectorVersion;
 	}
+	public boolean isValid() {
+		return this.lineage != null && !this.lineage.trim().isEmpty() && this.dataCollector != null
+				&& !this.dataCollector.trim().isEmpty();
+	}
 
 }
