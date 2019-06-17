@@ -24,7 +24,7 @@ pipeline {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
                 sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
-                sh "echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true"
+                sh "test '${params.BRANCH}' = 'development' || { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true }"
             }
         }
         stage('Configure') {
