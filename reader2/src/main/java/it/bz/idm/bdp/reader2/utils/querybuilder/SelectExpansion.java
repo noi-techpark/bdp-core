@@ -138,6 +138,11 @@ public class SelectExpansion {
 		usedJSONAliases.clear();
 		usedJSONDefNames.clear();
 		expandedSelects.clear();
+
+		/*
+		 * We cannot use a HashSet here, because we need a get by position within the while loop.
+		 * This is, because we cannot use an iterator here, since we add elements to it while processing.
+		 */
 		List<String> candidateAliases = null;
 		if (aliases.size() == 1 && aliases.contains("*")) {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
@@ -163,7 +168,12 @@ public class SelectExpansion {
 				if (defNames.contains(pointsTo.getName())) {
 					usedJSONAliases.add(alias);
 					usedJSONDefNames.add(getAliasMap().get(alias));
-					candidateAliases.addAll(pointsTo.getAliases());
+					for (String subAlias : pointsTo.getAliases()) {
+						if (!candidateAliases.contains(subAlias)) {
+							candidateAliases.add(subAlias);
+						}
+					}
+
 				}
 			}
 			curPos++;
@@ -274,11 +284,11 @@ public class SelectExpansion {
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 
-//		se.build("*", RecursionType.NONE, "A");
-//		System.out.println(se.getExpandedSelects());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
+		se.expand("*", "A", "B", "C");
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+
 //		se.build("*", RecursionType.NONE, "A", "B");
 //		System.out.println(se.getExpandedSelects());
 //		System.out.println(se.getUsedAliases());
