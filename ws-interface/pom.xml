@@ -28,7 +28,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>ws-interface</artifactId>
-    <version>2.0.7-SNAPSHOT</version>
+    <version>2.1.1</version>
     <inceptionYear>2019</inceptionYear>
     <description>Web Service Interface for the Big Data Platform</description>
 
@@ -40,9 +40,9 @@
     </properties>
     <repositories>
         <repository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <id>maven-repo.opendatahub.bz.it-release</id>
             <name>OpenDataHub</name>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
         </repository>
     </repositories>
     <dependencies>
@@ -125,7 +125,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-            <version>2.0.7-SNAPSHOT</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
