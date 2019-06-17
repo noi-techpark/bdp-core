@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -55,7 +57,10 @@ public abstract class JSONPusher extends DataPusher {
 	protected RestTemplate restTemplate = new RestTemplate();
 
 	private String url;
-	public JSONPusher() {
+	@Override
+	@PostConstruct
+	public void init() {
+		super.init();
 		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
 	}
 	@Override

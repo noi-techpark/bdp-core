@@ -22,9 +22,12 @@
  */
 package it.bz.idm.bdp;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.springframework.stereotype.Component;
 
 import it.bz.idm.bdp.dto.ProvenanceDto;
 
@@ -33,6 +36,7 @@ import it.bz.idm.bdp.dto.ProvenanceDto;
  *
  * @author Patrick Bertolla
  */
+@Component
 public abstract class DataPusher implements IntegreenPushable  {
 	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
 	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
@@ -54,7 +58,8 @@ public abstract class DataPusher implements IntegreenPushable  {
 	/**
 	 * Instantiate a new data pusher with a typology defined in implementation
 	 */
-	public DataPusher() {
+	@PostConstruct
+	public void init() {
 		initConfig();
 		connectToDataCenterCollector();
 		this.integreenTypology = initIntegreenTypology();
