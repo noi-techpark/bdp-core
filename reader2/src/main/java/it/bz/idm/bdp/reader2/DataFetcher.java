@@ -1,5 +1,6 @@
 package it.bz.idm.bdp.reader2;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,13 +86,59 @@ public class DataFetcher {
 								"AND pe.role_id = (select id from bdprole r where r.name = '" +
 								(role == null ? role = "GUEST" : role) + "')",
 							")",
-						"join station s on me.station_id = s.id",
-						"left join metadata m on m.id = s.meta_data_id",
-						"left join station p on s.parent_id = p.id",
-						"join type t on me.type_id = t.id",
+						"join station s on me.station_id = s.id")
+				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSql("join type t on me.type_id = t.id",
 						"where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "AND t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				.addSql("order by _stationtype, _stationcode, _datatypename")
+				.addLimit(limit)
+				.addOffset(offset);
+		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+
+		nanoTime = System.nanoTime();
+		List<Map<String, Object>> queryResult = QueryExecutor
+				.init()
+				.addParameters(query.getParameters())
+				.build(query.getSql());
+
+		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
+		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
+	}
+
+	public Map<String, Object> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, long limit,
+			long offset, String select, String role, boolean ignoreNull, Date from, Date to) {
+		log.info("FETCHHISTORY");
+		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
+		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
+
+		long nanoTime = System.nanoTime();
+		QueryBuilder query = QueryBuilder
+				.init(select == null ? "*" : select, "station", "parent", "measurement", "datatype")
+				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
+				.expandSelectPrefix(", ")
+				.addSql("from measurementhistory me",
+						"join bdppermissions pe on (",
+								"(me.station_id = pe.station_id OR pe.station_id is null)",
+								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
+								"AND (me.period = pe.period OR pe.period is null)",
+								"AND pe.role_id = (select id from bdprole r where r.name = '" +
+								(role == null ? role = "GUEST" : role) + "')",
+							")",
+						"join station s on me.station_id = s.id")
+				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSql("join type t on me.type_id = t.id",
+						"where true")
+				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "AND t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				.addSql("and timestamp >= :from and timestamp < :to")
+				.setParameter("from", from)
+				.setParameter("to", to)
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);
@@ -168,7 +215,10 @@ public class DataFetcher {
 						break;
 					}
 				case 1:
-					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
+					datatype = makeObjectOrNull(rec, se, ignoreNull, "datatype");
+					if (datatype == null) {
+						break;
+					}
 					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
 					datatypes.add(datatype);
 					if (se.getUsedDefNames().contains("measurement")) {
@@ -177,7 +227,10 @@ public class DataFetcher {
 						break;
 					}
 				case 0:
-					measurement = makeObjectOrEmptyMap(rec, se, ignoreNull, "measurement");
+					measurement = makeObjectOrNull(rec, se, ignoreNull, "measurement");
+					if (measurement == null) {
+						break;
+					}
 					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tlastmeasurement");
 					measurements.add(measurement);
 			}

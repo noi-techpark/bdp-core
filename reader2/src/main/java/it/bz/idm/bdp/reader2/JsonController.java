@@ -22,6 +22,8 @@
  */
 package it.bz.idm.bdp.reader2;
 
+import java.sql.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,5 +67,15 @@ public class JsonController {
 		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurements(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull));
 	}
 
-
+	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
+	public @ResponseBody String requestHistory(@PathVariable String stationTypes,
+												 @PathVariable String dataTypes,
+												 @PathVariable Date from,
+												 @PathVariable Date to,
+												 @RequestParam(value="limit", required=false, defaultValue="100") Long limit,
+												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
+												 @RequestParam(value="select", required=false) String select,
+												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, from, to));
+	}
 }
