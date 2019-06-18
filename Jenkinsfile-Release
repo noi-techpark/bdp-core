@@ -24,7 +24,7 @@ pipeline {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
                 sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
-                sh "test '${params.BRANCH}' = 'development' || { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true }"
+                sh "test '${params.BRANCH}' = 'development' || /{ echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true /}"
             }
         }
         stage('Configure') {
@@ -62,18 +62,21 @@ pipeline {
         }
         stage('Tag') {
             steps {
-                sshagent (credentials: ['jenkins_github_ssh_key']) {
-                    sh "git config --global user.email 'info@opendatahub.bz.it'"
-                    sh "git config --global user.name 'Jenkins'"
-                    sh "git commit -a -m 'Version ${VERSION}' --allow-empty"
-                    sh "git tag -d ${VERSION} || true"
-                    sh "git tag -a ${VERSION} -m ${VERSION}"
-                    sh "mkdir -p ~/.ssh"
-                    sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
-                    sh "git push origin HEAD:${params.BRANCH} --follow-tags"
+                script{
+                    if ( '${params.BRANCH}' == 'master'){
+                        sshagent (credentials: ['jenkins_github_ssh_key']) {
+                            sh "git config --global user.email 'info@opendatahub.bz.it'"
+                            sh "git config --global user.name 'Jenkins'"
+                            sh "git commit -a -m 'Version ${VERSION}' --allow-empty"
+                            sh "git tag -d ${VERSION} || true"
+                            sh "git tag -a ${VERSION} -m ${VERSION}"
+                            sh "mkdir -p ~/.ssh"
+                            sh "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
+                            sh "git push origin HEAD:${params.BRANCH} --follow-tags"
+                        }
+                    }
                 }
             }
         }
-
     }
 }
