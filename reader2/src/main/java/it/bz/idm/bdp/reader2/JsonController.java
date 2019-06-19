@@ -61,7 +61,7 @@ public class JsonController {
 
 	@GetMapping(value = "/{stationTypes}", produces = "application/json")
 	public @ResponseBody String requestStations(@PathVariable String stationTypes,
-											    @RequestParam(value="limit", required=false, defaultValue="200") Long limit,
+											    @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
 											    @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 											    @RequestParam(value="select", required=false) String select,
 											    @RequestParam(value="where", required=false) String where,
@@ -72,7 +72,7 @@ public class JsonController {
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
 	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
 												 @PathVariable String dataTypes,
-												 @RequestParam(value="limit", required=false, defaultValue="200") Long limit,
+												 @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
 												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 												 @RequestParam(value="select", required=false) String select,
 												 @RequestParam(value="where", required=false) String where,
@@ -85,7 +85,7 @@ public class JsonController {
 											   @PathVariable String dataTypes,
 											   @PathVariable String from,
 											   @PathVariable String to,
-											   @RequestParam(value="limit", required=false, defaultValue="200") Long limit,
+											   @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
 											   @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 											   @RequestParam(value="select", required=false) String select,
 											   @RequestParam(value="where", required=false) String where,
