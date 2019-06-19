@@ -81,7 +81,7 @@ public class Reader2Application implements CommandLineRunner {
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		Map<String, Object> stations = df.fetchStationsTypesAndMeasurements("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull, "");
+		Map<String, Object> stations = df.fetchStationsTypesAndMeasurementHistory("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull, null, null, "");
 		log.info(DataFetcher.serializeJSON(stations));
 
 		log.info("READY.");
