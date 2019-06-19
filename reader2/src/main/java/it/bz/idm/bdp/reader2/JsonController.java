@@ -43,6 +43,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "api/v2/")
 public class JsonController {
 
+	private static final String DEFAULT_LIMIT = "200";
+	private static final String DEFAULT_OFFSET = "0";
+	private static final String DEFAULT_SHOWNULL = "false";
+
 	private static DateTimeFormatter DATE_FORMAT = new DateTimeFormatterBuilder()
 			.appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
 			.parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
@@ -50,6 +54,7 @@ public class JsonController {
 			.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
 			.parseDefaulting(ChronoField.MILLI_OF_SECOND, 0)
 			.toFormatter();
+
 
 	@Autowired
     NamedParameterJdbcTemplate jdbcTemplate;
@@ -61,22 +66,22 @@ public class JsonController {
 
 	@GetMapping(value = "/{stationTypes}", produces = "application/json")
 	public @ResponseBody String requestStations(@PathVariable String stationTypes,
-											    @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
-											    @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
+											    @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+											    @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 											    @RequestParam(value="select", required=false) String select,
 											    @RequestParam(value="where", required=false) String where,
-												@RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+												@RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 		return DataFetcher.serializeJSON(new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
 	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
 												 @PathVariable String dataTypes,
-												 @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
-												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
+												 @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+												 @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 												 @RequestParam(value="select", required=false) String select,
 												 @RequestParam(value="where", required=false) String where,
-												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+												 @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
 	}
 
@@ -85,11 +90,11 @@ public class JsonController {
 											   @PathVariable String dataTypes,
 											   @PathVariable String from,
 											   @PathVariable String to,
-											   @RequestParam(value="limit", required=false, defaultValue="-1") Long limit,
-											   @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
+											   @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+											   @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 											   @RequestParam(value="select", required=false) String select,
 											   @RequestParam(value="where", required=false) String where,
-											   @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+											   @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 
 		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
 		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
