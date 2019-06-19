@@ -69,6 +69,10 @@ GET /ParkingStation/occupied
 
 ## Stations, Data Types and historical Measurements
 
+The URL pattern is `/station-types/data-types/from/to`, where `from` and `to` form a half-open
+interval, i.e., `[from, to)`. This is important, if we want to have a moving window over a timeline
+without selecting certain values multiple times.
+
 ### I want to get historical occupancy values of all parking lots from a certain period
 ```
 GET /ParkingStation/occupied/2019-01-01/2019-01-02
