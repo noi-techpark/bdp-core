@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 public class SelectExpansion {
 
@@ -30,6 +31,8 @@ public class SelectExpansion {
 	private Map<String, String> expandedSelects = new HashMap<String, String>();
 	private Set<String> usedJSONAliases = new HashSet<String>();
 	private Set<String> usedJSONDefNames = new HashSet<String>();
+	private String sqlWhere = null;
+	private String whereClause = null;
 	private boolean dirty = true;
 
 	public void add(final String name, final SelectDefinition selDef) {
@@ -186,6 +189,80 @@ public class SelectExpansion {
 			}
 			curPos++;
 		}
+
+		_expandWhere(whereClause);
+	}
+
+	private void _expandWhere(String where) {
+		if (where == null || where.isEmpty()) {
+			sqlWhere = null;
+			return;
+		}
+		StringJoiner result = new StringJoiner(" and ", "and ", "");
+		for (String and : where.split("(?<!\\\\),")) {
+			String[] sqlWhereClause = and.split("\\.", 3);
+			if (sqlWhereClause.length != 3) {
+				throw new RuntimeException("Syntax Error in WHERE clause: '" + where + "'.");
+			}
+			String alias = sqlWhereClause[0];
+			String operator = sqlWhereClause[1];
+			String value = sqlWhereClause[2].replace("'", "").replaceAll("\\\\,", ",");
+			String column = getColumn(alias);
+			if (column == null) {
+				throw new RuntimeException("Syntax Error in WHERE clause: Alias '" + alias + "' does not exist.");
+			}
+
+			usedJSONAliases.add(alias);
+			usedJSONDefNames.add(getAliasMap().get(alias));
+
+			String sqlOperator = null;
+			switch (operator) {
+				case "eq":
+					if (value.equalsIgnoreCase("null")) {
+						sqlOperator = "is null";
+						value = null;
+					} else {
+						sqlOperator = "=";
+					}
+					break;
+				case "neq":
+					if (value.equalsIgnoreCase("null")) {
+						sqlOperator = "is not null";
+						value = null;
+					} else {
+						sqlOperator = "<>";
+					}
+					break;
+				case "lt":
+					sqlOperator = "<";
+					break;
+				case "gt":
+					sqlOperator = ">";
+					break;
+				case "lteq":
+					sqlOperator = "=<";
+					break;
+				case "gteq":
+					sqlOperator = ">=";
+					break;
+				case "re":
+					sqlOperator = "~";
+					break;
+				case "ire":
+					sqlOperator = "~*";
+					break;
+				case "nre":
+					sqlOperator = "!~";
+					break;
+				case "nire":
+					sqlOperator = "!~*";
+					break;
+				default:
+					throw new RuntimeException("Operator '" + operator + "' does not exist!");
+			}
+			result.add(column + " " + sqlOperator + (value == null ? "" : " '" + value + "' "));
+		}
+		sqlWhere = result.toString();
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -243,6 +320,17 @@ public class SelectExpansion {
 		return getExpansion(new HashSet<String>(Arrays.asList(defNames)));
 	}
 
+	public String getWhereSql() {
+		if (dirty) {
+			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting an expanded WHERE statement!");
+		}
+		return sqlWhere;
+	}
+
+	public void setWhereClause(String where) {
+		dirty = true;
+		whereClause = where;
+	}
 
 	@Override
 	public String toString() {

@@ -26,19 +26,23 @@ public class DataFetcher {
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
 	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull, String where) {
+
+		log.info("FETCHING FROM STATIONS");
+
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select == null ? "*" : select, "station", "parent")
+				.init(select == null ? "*" : select, where, "station", "parent")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
 				.expandSelectPrefix(", ")
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
-				.addWhere(where)
+				.expandWhere()
 				.addSql("order by _stationtype, _stationcode")
 				.addLimit(limit)
 				.addOffset(offset);
@@ -80,7 +84,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
-				.init(select == null ? "*" : select, "station", "parent", "measurement", "datatype")
+				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
 				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
 				.expandSelectPrefix(", ")
 				.addSqlIf("from measurementhistory me", from != null || to != null)
@@ -95,13 +99,14 @@ public class DataFetcher {
 						"join station s on me.station_id = s.id")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
 				.addSql("join type t on me.type_id = t.id",
 						"where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				.setParameterIfNotNull("from", from, "and timestamp >= :from")
 				.setParameterIfNotNull("to", to, "and timestamp < :to")
-				.addWhere(where)
+				.expandWhere()
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);

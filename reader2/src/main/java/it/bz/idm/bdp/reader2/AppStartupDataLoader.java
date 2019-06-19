@@ -50,6 +50,7 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		se.addColumn("parent", "pcoordinate", "p.pointprojection");
 		se.addColumn("parent", "pcode", "p.stationcode");
 		se.addColumn("parent", "porigin", "p.origin");
+		se.addColumn("parent", "pmetadata", "pm.json");
 
 		se.addColumn("station", "sname", "s.name");
 		se.addColumn("station", "stype", "s.stationtype");

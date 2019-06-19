@@ -20,13 +20,14 @@ public class QueryBuilder {
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public QueryBuilder(final String select, String... selectDefNames) {
+	public QueryBuilder(final String select, final String where, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
 		if (select == null || select.isEmpty()) {
 			throw new RuntimeException("No alias list defined. For example: \"name, age, gender\".");
 		}
+		se.setWhereClause(where);
 		se.expand(select, selectDefNames);
 	}
 
@@ -47,13 +48,13 @@ public class QueryBuilder {
 		QueryBuilder.se = selectExpansion;
 	}
 
-	public static QueryBuilder init(final String select, String... selectDefNames) {
-		return new QueryBuilder(select, selectDefNames);
+	public static QueryBuilder init(final String select, final String where, String... selectDefNames) {
+		return new QueryBuilder(select, where, selectDefNames);
 	}
 
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, String... selectDefNames)  {
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, final String where, String... selectDefNames)  {
 		QueryBuilder.setup(selectExpansion);
-		return QueryBuilder.init(select, selectDefNames);
+		return QueryBuilder.init(select, where, selectDefNames);
 	}
 
 	/**
@@ -158,7 +159,8 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfDefinition(String sqlPart, String selectDefName) {
-		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpansion().containsKey(selectDefName)) {
+//		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpansion().containsKey(selectDefName)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedDefNames().contains(selectDefName)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -256,66 +258,9 @@ public class QueryBuilder {
 		return parameters;
 	}
 
-	public QueryBuilder addWhere(String where) {
-		if (where == null || where.isEmpty()) {
-			return this;
-		}
-		String sqlWhere = "";
-		for (String and : where.split("(?<!\\\\),")) {
-			String[] sqlWhereClause = and.split("\\.", 3);
-			String alias = sqlWhereClause[0];
-			String operator = sqlWhereClause[1];
-			String value = sqlWhereClause[2].replace("'", "").replaceAll("\\\\,", ",");
-			String column = se.getColumn(alias);
-
-			String sqlOperator = null;
-			switch (operator) {
-				case "eq":
-					if (value.equalsIgnoreCase("null")) {
-						sqlOperator = "is null";
-						value = null;
-					} else {
-						sqlOperator = "=";
-					}
-					break;
-				case "lt":
-					sqlOperator = "<";
-					break;
-				case "gt":
-					sqlOperator = ">";
-					break;
-				case "lteq":
-					sqlOperator = "=<";
-					break;
-				case "gteq":
-					sqlOperator = ">=";
-					break;
-				case "not":
-					if (value.equalsIgnoreCase("null")) {
-						sqlOperator = "is not null";
-						value = null;
-					} else {
-						sqlOperator = "<>";
-					}
-					break;
-				case "re":
-					sqlOperator = "~";
-					break;
-				case "ire":
-					sqlOperator = "~*";
-					break;
-				case "notre":
-					sqlOperator = "!~";
-					break;
-				case "notire":
-					sqlOperator = "!~*";
-					break;
-				default:
-					throw new RuntimeException("Operator '" + operator + "' does not exist!");
-			}
-			sqlWhere += "and " + column + " " + sqlOperator + (value == null ? "" : " '" + value + "' ");
-		}
-		addSqlIf(sqlWhere, !sqlWhere.isEmpty());
+	public QueryBuilder expandWhere() {
+		String sqlWhere = se.getWhereSql();
+		addSqlIfNotNull(sqlWhere, sqlWhere);
 		return this;
 	}
 
