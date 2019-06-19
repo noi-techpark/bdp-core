@@ -271,7 +271,12 @@ public class QueryBuilder {
 			String sqlOperator = null;
 			switch (operator) {
 				case "eq":
-					sqlOperator = "=";
+					if (value.equalsIgnoreCase("null")) {
+						sqlOperator = "is null";
+						value = null;
+					} else {
+						sqlOperator = "=";
+					}
 					break;
 				case "lt":
 					sqlOperator = "<";
@@ -286,7 +291,12 @@ public class QueryBuilder {
 					sqlOperator = ">=";
 					break;
 				case "not":
-					sqlOperator = "<>";
+					if (value.equalsIgnoreCase("null")) {
+						sqlOperator = "is not null";
+						value = null;
+					} else {
+						sqlOperator = "<>";
+					}
 					break;
 				case "re":
 					sqlOperator = "~";
@@ -303,7 +313,7 @@ public class QueryBuilder {
 				default:
 					throw new RuntimeException("Operator '" + operator + "' does not exist!");
 			}
-			sqlWhere += "and " + column + " " + sqlOperator + " '" + value + "' ";
+			sqlWhere += "and " + column + " " + sqlOperator + (value == null ? "" : " '" + value + "' ");
 		}
 		addSqlIf(sqlWhere, !sqlWhere.isEmpty());
 		return this;
