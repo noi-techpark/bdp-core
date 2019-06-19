@@ -261,11 +261,11 @@ public class QueryBuilder {
 			return this;
 		}
 		String sqlWhere = "";
-		for (String and : where.split(",")) {
-			String[] sqlWhereClause = and.split("\\.");
+		for (String and : where.split("(?<!\\\\),")) {
+			String[] sqlWhereClause = and.split("\\.", 3);
 			String alias = sqlWhereClause[0];
 			String operator = sqlWhereClause[1];
-			String value = sqlWhereClause[2].replace("'", "");
+			String value = sqlWhereClause[2].replace("'", "").replaceAll("\\\\,", ",");
 			String column = se.getColumn(alias);
 
 			String sqlOperator = null;
