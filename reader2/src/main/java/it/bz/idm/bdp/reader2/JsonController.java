@@ -43,13 +43,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "api/v2/")
 public class JsonController {
 
-	private static DateTimeFormatter DATE_FORMAT =
-            new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
-            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-            .parseDefaulting(ChronoField.MILLI_OF_SECOND, 0)
-            .toFormatter();
+	private static DateTimeFormatter DATE_FORMAT = new DateTimeFormatterBuilder()
+			.appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
+			.parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+			.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+			.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+			.parseDefaulting(ChronoField.MILLI_OF_SECOND, 0)
+			.toFormatter();
 
 	@Autowired
     NamedParameterJdbcTemplate jdbcTemplate;
@@ -82,14 +82,14 @@ public class JsonController {
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
 	public @ResponseBody String requestHistory(@PathVariable String stationTypes,
-												 @PathVariable String dataTypes,
-												 @PathVariable String from,
-												 @PathVariable String to,
-												 @RequestParam(value="limit", required=false, defaultValue="200") Long limit,
-												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
-												 @RequestParam(value="select", required=false) String select,
-												 @RequestParam(value="where", required=false) String where,
-												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+											   @PathVariable String dataTypes,
+											   @PathVariable String from,
+											   @PathVariable String to,
+											   @RequestParam(value="limit", required=false, defaultValue="200") Long limit,
+											   @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
+											   @RequestParam(value="select", required=false) String select,
+											   @RequestParam(value="where", required=false) String where,
+											   @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
 
 		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
 		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
