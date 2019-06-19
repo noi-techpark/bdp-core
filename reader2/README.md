@@ -33,7 +33,7 @@ GET /
 
 ## Stations
 
-Please note, that the reponse limited in numbers. However, you can also [set another limit or disable it completely](#pagination).
+Please note, that the reponse is limited. However, you can [set another limit or disable it completely](#pagination).
 
 ### I want to get all e-charging stations including details
 ```
