@@ -25,7 +25,7 @@ public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
-	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull) {
+	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull, String where) {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 
 		long nanoTime = System.nanoTime();
@@ -38,6 +38,7 @@ public class DataFetcher {
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				.addWhere(where)
 				.addSql("order by _stationtype, _stationcode")
 				.addLimit(limit)
 				.addOffset(offset);
@@ -68,7 +69,7 @@ public class DataFetcher {
 	}
 
 	public Map<String, Object> fetchStationsTypesAndMeasurements(String stationTypeList, String dataTypeList, long limit,
-			long offset, String select, String role, boolean ignoreNull) {
+			long offset, String select, String role, boolean ignoreNull, String where) {
 		log.info("FETCHSTATIONSANDTYPES");
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
@@ -93,6 +94,7 @@ public class DataFetcher {
 						"where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "AND t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				.addWhere(where)
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);
@@ -111,7 +113,7 @@ public class DataFetcher {
 	}
 
 	public Map<String, Object> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, long limit,
-			long offset, String select, String role, boolean ignoreNull, Date from, Date to) {
+			long offset, String select, String role, boolean ignoreNull, Date from, Date to, String where) {
 		log.info("FETCHHISTORY");
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
@@ -134,11 +136,12 @@ public class DataFetcher {
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				.addSql("join type t on me.type_id = t.id",
 						"where true")
-				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
-				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "AND t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				.addSql("and timestamp >= :from and timestamp < :to")
 				.setParameter("from", from)
 				.setParameter("to", to)
+				.addWhere(where)
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);
@@ -215,14 +218,14 @@ public class DataFetcher {
 						break;
 					}
 				case 1:
-					datatype = makeObjectOrNull(rec, se, ignoreNull, "datatype");
-					if (datatype == null) {
+					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
+					if (datatype.isEmpty() && !se.getUsedDefNames().contains("measurement")) {
 						break;
 					}
 					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
 					datatypes.add(datatype);
 					if (se.getUsedDefNames().contains("measurement")) {
-						datatype.put("tlastmeasurement", new ArrayList<Object>());
+						datatype.put("tmeasurements", new ArrayList<Object>());
 					} else {
 						break;
 					}
@@ -231,7 +234,7 @@ public class DataFetcher {
 					if (measurement == null) {
 						break;
 					}
-					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tlastmeasurement");
+					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tmeasurements");
 					measurements.add(measurement);
 			}
 

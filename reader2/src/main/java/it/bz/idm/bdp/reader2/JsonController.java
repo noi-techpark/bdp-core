@@ -53,8 +53,9 @@ public class JsonController {
 											    @RequestParam(value="limit", required=false, defaultValue="100") Long limit,
 											    @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 											    @RequestParam(value="select", required=false) String select,
-											    @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull));
+											    @RequestParam(value="where", required=false) String where,
+												@RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
@@ -63,8 +64,9 @@ public class JsonController {
 												 @RequestParam(value="limit", required=false, defaultValue="100") Long limit,
 												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 												 @RequestParam(value="select", required=false) String select,
+												 @RequestParam(value="where", required=false) String where,
 												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurements(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull));
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurements(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
@@ -75,7 +77,8 @@ public class JsonController {
 												 @RequestParam(value="limit", required=false, defaultValue="100") Long limit,
 												 @RequestParam(value="offset", required=false, defaultValue="0") Long offset,
 												 @RequestParam(value="select", required=false) String select,
+												 @RequestParam(value="where", required=false) String where,
 												 @RequestParam(value="shownull", required=false, defaultValue="false") Boolean showNull) {
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, from, to));
+		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, from, to, where));
 	}
 }

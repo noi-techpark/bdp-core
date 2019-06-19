@@ -43,7 +43,7 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		se.addColumn("datatype", "tunit", "t.cunit");
 		se.addColumn("datatype", "ttype", "t.rtype");
 		se.addColumn("datatype", "tdescription", "t.description");
-		se.addSubDef("datatype", "tlastmeasurement", "measurement");
+		se.addSubDef("datatype", "tmeasurements", "measurement");
 
 		se.addColumn("parent", "pname", "p.name");
 		se.addColumn("parent", "ptype", "p.stationtype");

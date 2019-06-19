@@ -109,6 +109,14 @@ public class SelectExpansion {
 		return null;
 	}
 
+	public SelectDefinition getDefinition(final String alias) {
+		for (SelectDefinition def : schema.values()) {
+			if (def.getAliases().contains(alias))
+				return def;
+		}
+		return null;
+	}
+
 	public Set<SelectDefinition> getDefinition(Set<String> defNames) {
 		Set<SelectDefinition> res = new HashSet<SelectDefinition>();
 		for (String defName : defNames) {
@@ -207,6 +215,10 @@ public class SelectExpansion {
 
 	public String getExpansion(String defName) {
 		return getExpansion().get(defName);
+	}
+
+	public String getColumn(String alias) {
+		return getDefinition(alias).getColumn(alias);
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {

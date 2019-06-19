@@ -256,4 +256,57 @@ public class QueryBuilder {
 		return parameters;
 	}
 
+	public QueryBuilder addWhere(String where) {
+		if (where == null || where.isEmpty()) {
+			return this;
+		}
+		String sqlWhere = "";
+		for (String and : where.split(",")) {
+			String[] sqlWhereClause = and.split("\\.");
+			String alias = sqlWhereClause[0];
+			String operator = sqlWhereClause[1];
+			String value = sqlWhereClause[2].replace("'", "");
+			String column = se.getColumn(alias);
+
+			String sqlOperator = null;
+			switch (operator) {
+				case "eq":
+					sqlOperator = "=";
+					break;
+				case "lt":
+					sqlOperator = "<";
+					break;
+				case "gt":
+					sqlOperator = ">";
+					break;
+				case "lteq":
+					sqlOperator = "=<";
+					break;
+				case "gteq":
+					sqlOperator = ">=";
+					break;
+				case "not":
+					sqlOperator = "<>";
+					break;
+				case "re":
+					sqlOperator = "~";
+					break;
+				case "ire":
+					sqlOperator = "~*";
+					break;
+				case "notre":
+					sqlOperator = "!~";
+					break;
+				case "notire":
+					sqlOperator = "!~*";
+					break;
+				default:
+					throw new RuntimeException("Operator '" + operator + "' does not exist!");
+			}
+			sqlWhere += "and " + column + " " + sqlOperator + " '" + value + "' ";
+		}
+		addSqlIf(sqlWhere, !sqlWhere.isEmpty());
+		return this;
+	}
+
 }
