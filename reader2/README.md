@@ -33,6 +33,8 @@ GET /
 
 ## Stations
 
+Please note, that the reponse limited in numbers. However, you can also [set another limit or disable it completely](#pagination).
+
 ### I want to get all e-charging stations including details
 ```
 GET /EChargingStation
@@ -92,6 +94,8 @@ is optional and any part of it can be shortened from left-to-right to any subset
 ## Pagination
 
 You can limit your output by adding `limit` to your request, and paginate your results with an `offset`.
+If you want to disable the limit, set it to a negative number, like `limit=-1`. Per default, the limit 
+is set to a low number to prevent excessive response times.
 
 ```
 GET /ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
