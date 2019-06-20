@@ -10,52 +10,54 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 /**
- * <p>A select expansion starts from a {@link SelectDefinition} and finds out which
+ * <pre>
+ * A select expansion starts from a {@link SelectDefinition} and finds out which
  * tables or columns must be used, given a select targetlist and where clauses.
  * It is also a mapping from aliases to column names.
  *
- * <p>Example:
+ * Example:
  * Assume, that we have three select definitions with associated aliases:
+ *
  *    A(a,b,c), B(x,y) and C(h),
  *
- * <p>...where c and y are foreign keys, referring to B and C respectively. This gives the
- * following hierarchy:
- * <pre>
+ * where c and y are foreign keys, referring to B and C respectively. This
+ * gives the following hierarchy:
+ *
  *    A(a,b,c)
  *          `-B(x,y)
  *                `-C(h)
- * </pre>
  *
- *  <p>If we want to select aliases [a,b,c] from definitions [A] now, we get the following result:
- *  - used aliases    : a, b   (not c, because it would be empty, since we do not use the definition B)
+ *  If we want to select aliases [a,b,c] from definitions [A] now, we get the
+ *  following result:
+ *  - used aliases    : a, b   (not c, because it would be empty, since we do
+ *                              not use the definition B)
  *  - used definitions: A
  *
- * <p>Another example, selecting aliases [a,b,c] from defintions [A,B] gives:
+ * Another example, selecting aliases [a,b,c] from defintions [A,B] gives:
  * - used aliases     : a, b, c, x
  * - used definitions : A, B
  *
- * <p>In addition to a list of used aliases and definitions, that can be used to determine, if we should
- * join to a certain table or not, important for conditional query building, we can retrieve a select
- * expansion. This is, a SQL snippet that contains a target list of columns and aliases.
+ * In addition to a list of used aliases and definitions, that can be used to
+ * determine, if we should join to a certain table or not, important for
+ * conditional query building, we can retrieve a select expansion. This is, a
+ * SQL snippet that contains a target list of columns and aliases.
  *
- * <p>Assume a structure with columns as follows:
- * <pre>
+ * Assume a structure with columns as follows:
+ *
  *    EMPLOYEE(ename->emp.fullname,emanager)
  *                                    `-------MANAGER(mname->mgr.fullname)
- * </pre>
  *
- * <p>...and a select [ename,emanager] with definitions [EMPLOYEE,MANAGER], then the expansion to be inserted
- * into your SQL is this map:
- *
- * <pre>
+ * In addition, we have a select [ename,emanager] with definitions [EMPLOYEE,MANAGER],
+ * then the expansion to be inserted into your SQL is this map:
  *    {
  *      EMPLOYEE="emp.fullname as ename",
  *      MANAGER="mgr.fullname as mname"
  *    }
- * </pre>
  *
- * <p>NB: Do not confound definitions with tables, defintion names and aliases can be used to create a hierarchical
- * JSON structure, tables and columns are encoded within the column string itself (ex., emp.fullname).
+ * NB: Do not confound definitions with tables, defintion names and aliases can be
+ * used to create a hierarchical JSON structure, tables and columns are encoded
+ * within the column string itself (ex., emp.fullname).
+ * </pre>
  *
  * @author Peter Moser <p.moser@noi.bz.it>
  */

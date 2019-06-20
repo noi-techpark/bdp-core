@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.jsoniter.output.JsonStream;
 
@@ -21,6 +22,7 @@ import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
 
+@Component
 public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);

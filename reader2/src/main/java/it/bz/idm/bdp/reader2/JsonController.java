@@ -28,7 +28,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +56,7 @@ public class JsonController {
 
 
 	@Autowired
-    NamedParameterJdbcTemplate jdbcTemplate;
+	DataFetcher dataFetcher;
 
 	@GetMapping(value = "/", produces = "application/json")
 	public @ResponseBody String requestStationTypes() {
@@ -71,7 +70,7 @@ public class JsonController {
 											    @RequestParam(value="select", required=false) String select,
 											    @RequestParam(value="where", required=false) String where,
 												@RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
+		return DataFetcher.serializeJSON(dataFetcher.fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
@@ -82,7 +81,7 @@ public class JsonController {
 												 @RequestParam(value="select", required=false) String select,
 												 @RequestParam(value="where", required=false) String where,
 												 @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
+		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
 	}
 
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
@@ -99,6 +98,6 @@ public class JsonController {
 		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
 		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
 
-		return DataFetcher.serializeJSON(new DataFetcher().fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, dateTimeFrom, dateTimeTo, where));
+		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, dateTimeFrom, dateTimeTo, where));
 	}
 }

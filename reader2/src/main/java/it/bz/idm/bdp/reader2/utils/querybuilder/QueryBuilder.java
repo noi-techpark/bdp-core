@@ -8,9 +8,8 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 /**
- * Create an instance of TypedQuery for executing a Java Persistence query language statement.
- * This is a convenience class, that supports conditional query statements and emulates getSingleResult
- * without not-found or non-unique-result exceptions.
+ * Create a SQL string, depending on given conditions, a select list, an optional where-clause and
+ * a {@link SelectExpansion} definition.
  *
  * @author Peter Moser
  */
