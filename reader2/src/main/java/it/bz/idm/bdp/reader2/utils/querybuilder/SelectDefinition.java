@@ -5,6 +5,20 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * <p>A select definition is a hierarchy of definition names (categories), aliases and table/columns.
+ *
+ * <p>Example:
+ * <pre>
+ *    EMPLOYEE(ename->emp.fullname,emanager)
+ *                                    `-------MANAGER(mname->mgr.fullname)
+ * </pre>
+ *
+ * <p>Here definitions are EMPLOYEE and MANAGER, aliases are ename, emanager and mname
+ * and table/column binaries are emp.fullname and mgr.fullname.
+ *
+ * @author Peter Moser <p.moser@noi.bz.it>
+ */
 public class SelectDefinition {
 
 	private final String name;
