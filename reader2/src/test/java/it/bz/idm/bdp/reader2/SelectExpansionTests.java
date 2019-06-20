@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SimpleException;
 
 public class SelectExpansionTests {
 
@@ -30,12 +32,10 @@ public class SelectExpansionTests {
 		// Alias that cannot be found
 		try {
 			se.expand("a, i, x", "A", "C");
-			se.getUsedAliases();
 			fail("Exception expected");
-		} catch (Exception e) {
-			// TODO Use SimpleException
-//			assertEquals(ErrorCode.SELECT_EXPANSION_KEY_NOT_INSIDE_DEFLIST.toString(), e.getId());
-//			assertEquals("x", e.getData().get("alias"));
+		} catch (SimpleException e) {
+			assertEquals(ErrorCode.KEY_NOT_INSIDE_DEFLIST.toString(), e.getId());
+			assertEquals("x", e.getData().get("alias"));
 		}
 
 	}

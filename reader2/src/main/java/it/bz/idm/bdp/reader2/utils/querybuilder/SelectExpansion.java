@@ -11,15 +11,23 @@ import java.util.StringJoiner;
 
 public class SelectExpansion {
 
-	public static enum ErrorCode {
-		SELECT_EXPANSION_KEY_NOT_FOUND 			("Key '%s' does not exist!"),
-		SELECT_EXPANSION_KEY_NOT_INSIDE_DEFLIST ("Key '%s' is not reachable from the expanded select definition list: %s"),
-		SELECT_EXPANSION_DEFINITION_NOT_FOUND   ("Select definition contains an invalid name: %s");
+	public static enum ErrorCode implements ErrorCodeInterface {
+		KEY_NOT_FOUND 	         ("Key '%s' does not exist"),
+		KEY_NOT_INSIDE_DEFLIST   ("Key '%s' is not reachable from the expanded select definition list: %s"),
+		DEFINITION_NOT_FOUND     ("Select Definition '%s' not found! It must exist before we can point to it"),
+		ADD_INVALID_DATA         ("A schema entry must have a name and a valid definition"),
+		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: '%s' is not a triple: alias.operator.value"),
+		WHERE_ALIAS_NOT_FOUND    ("Syntax Error in WHERE clause: Alias '%s' does not exist"),
+		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s' does not exist"),
+		DIRTY_STATE              ("We are in a dirty state. Run expand() to clean up"),
+		EXPAND_INVALID_DATA      ("Provide valid alias and definition sets!");
 
 		private final String msg;
 		ErrorCode(String msg) {
 			this.msg = msg;
 		}
+
+		@Override
 		public String getMsg() {
 			return "SELECT EXPANSION ERROR: " + msg;
 		}
@@ -37,7 +45,7 @@ public class SelectExpansion {
 
 	public void add(final String name, final SelectDefinition selDef) {
 		if (name == null || name.isEmpty() || selDef == null) {
-			throw new RuntimeException("A schema entry must have a name and a valid definition!");
+			throw new SimpleException(ErrorCode.ADD_INVALID_DATA);
 		}
 		schema.put(name, selDef);
 		dirty = true;
@@ -64,7 +72,7 @@ public class SelectExpansion {
 	public void addSubDef(final String name, final String alias, final String subName) {
 		SelectDefinition subSelDef = get(subName);
 		if (subSelDef == null) {
-			throw new RuntimeException("Select Definition '" + subName + "' not found! It must exist before we can point to it!");
+			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, subName);
 		}
 		SelectDefinition selDef = getOrNew(name);
 		selDef.addPointer(alias, subSelDef);
@@ -125,7 +133,7 @@ public class SelectExpansion {
 		for (String defName : defNames) {
 			SelectDefinition def = schema.get(defName);
 			if (def == null) {
-				throw new RuntimeException("Select definition with name '" + defName + "' does not exist!");
+				throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
 			}
 			res.add(def);
 		}
@@ -141,7 +149,7 @@ public class SelectExpansion {
 
 	public void expand(final Set<String> aliases, final Set<String> defNames) {
 		if (aliases == null || aliases.isEmpty() || defNames == null || defNames.isEmpty()) {
-			throw new RuntimeException("EXPAND: Provide valid alias and definition sets!");
+			throw new SimpleException(ErrorCode.EXPAND_INVALID_DATA);
 		}
 		if (dirty) {
 			_build();
@@ -165,7 +173,9 @@ public class SelectExpansion {
 			String alias = candidateAliases.get(curPos);
 			SelectDefinition def = getDefinition(alias, defNames);
 			if (def == null) {
-				throw new RuntimeException("Alias '" + alias + "' within select definitions '" + defNames + "' not found!");
+				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, alias, defNames);
+				se.addData("alias", alias);
+				throw se;
 			}
 
 			if (def.isColumn(alias)) {
@@ -202,14 +212,14 @@ public class SelectExpansion {
 		for (String and : where.split("(?<!\\\\),")) {
 			String[] sqlWhereClause = and.split("\\.", 3);
 			if (sqlWhereClause.length != 3) {
-				throw new RuntimeException("Syntax Error in WHERE clause: '" + where + "'.");
+				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, and);
 			}
 			String alias = sqlWhereClause[0];
 			String operator = sqlWhereClause[1];
 			String value = sqlWhereClause[2].replace("'", "").replaceAll("\\\\,", ",");
 			String column = getColumn(alias);
 			if (column == null) {
-				throw new RuntimeException("Syntax Error in WHERE clause: Alias '" + alias + "' does not exist.");
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
 			}
 
 			usedJSONAliases.add(alias);
@@ -258,7 +268,7 @@ public class SelectExpansion {
 					sqlOperator = "!~*";
 					break;
 				default:
-					throw new RuntimeException("Operator '" + operator + "' does not exist!");
+					throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator);
 			}
 			result.add(column + " " + sqlOperator + (value == null ? "" : " '" + value + "' "));
 		}
@@ -271,21 +281,21 @@ public class SelectExpansion {
 
 	public List<String> getUsedAliases() {
 		if (dirty) {
-			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting used aliases!");
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return new ArrayList<String>(usedJSONAliases);
 	}
 
 	public List<String> getUsedDefNames() {
 		if (dirty) {
-			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting used definition names!");
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return new ArrayList<String>(usedJSONDefNames);
 	}
 
 	public Map<String, String> getExpansion() {
 		if (dirty) {
-			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting an expanded select statement!");
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return expandedSelects;
 	}
@@ -306,7 +316,7 @@ public class SelectExpansion {
 		for (String defName : defNames) {
 			 String exp = getExpansion(defName);
 			 if (exp == null) {
-				 throw new RuntimeException("Select definition with name '" + defName + "' does not exist!");
+				 throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
 			 }
 			 res.put(defName, exp);
 		}
@@ -322,7 +332,7 @@ public class SelectExpansion {
 
 	public String getWhereSql() {
 		if (dirty) {
-			throw new RuntimeException("We are in a dirty state. You need to run expand() before getting an expanded WHERE statement!");
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return sqlWhere;
 	}
