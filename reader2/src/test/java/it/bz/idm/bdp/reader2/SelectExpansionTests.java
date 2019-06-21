@@ -34,7 +34,7 @@ public class SelectExpansionTests {
 			se.expand("a, i, x", "A", "C");
 			fail("Exception expected");
 		} catch (SimpleException e) {
-			assertEquals(ErrorCode.KEY_NOT_INSIDE_DEFLIST.toString(), e.getId());
+			assertEquals(ErrorCode.KEY_NOT_INSIDE_DEFLIST, e.getId());
 			assertEquals("x", e.getData().get("alias"));
 		}
 
