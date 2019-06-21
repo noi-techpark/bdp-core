@@ -35,11 +35,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+
 /**
  * @author Peter Moser
  */
 @RestController
 @RequestMapping(value = "api/v2/")
+@Api(value = "Hierarchy", produces = "application/json", tags = {"Hierarchy"})
+@SwaggerDefinition(
+	tags = {
+		@Tag(
+			name = "Hierarchy",
+			description = "The response-JSON is a hierarchy of station-type -> station-name -> data-type -> measurements"
+		)
+	}
+)
 public class JsonController {
 
 	private static final String DEFAULT_LIMIT = "200";
@@ -58,11 +72,15 @@ public class JsonController {
 	@Autowired
 	DataFetcher dataFetcher;
 
+	@ApiOperation(value = "View a list of all station types (categories)")
 	@GetMapping(value = "/", produces = "application/json")
 	public @ResponseBody String requestStationTypes() {
 		return new DataFetcher().fetchStationTypes();
 	}
 
+	@ApiOperation(
+			value = "View details of all given station types",
+			notes = "You can put multiple station types as comma-seperated list.")
 	@GetMapping(value = "/{stationTypes}", produces = "application/json")
 	public @ResponseBody String requestStations(@PathVariable String stationTypes,
 											    @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
@@ -73,6 +91,9 @@ public class JsonController {
 		return DataFetcher.serializeJSON(dataFetcher.fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
+	@ApiOperation(
+			value = "View details of all given station types including data types and most-recent measurements",
+			notes = "You can put multiple station or data types as comma-seperated lists.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
 	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
 												 @PathVariable String dataTypes,
@@ -84,6 +105,9 @@ public class JsonController {
 		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
 	}
 
+	@ApiOperation(
+			value = "View details of all given station types including data types and historical measurements",
+			notes = "You can put multiple station or data types as comma-seperated lists.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
 	public @ResponseBody String requestHistory(@PathVariable String stationTypes,
 											   @PathVariable String dataTypes,
