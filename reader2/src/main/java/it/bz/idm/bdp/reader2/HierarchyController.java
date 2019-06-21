@@ -37,24 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
 
 /**
  * @author Peter Moser
  */
 @RestController
-@RequestMapping(value = "api/v2/")
-@Api(value = "Hierarchy", produces = "application/json", tags = {"Hierarchy"})
-@SwaggerDefinition(
-	tags = {
-		@Tag(
-			name = "Hierarchy",
-			description = "The response-JSON is a hierarchy of station-type -> station-name -> data-type -> measurements"
-		)
-	}
-)
-public class JsonController {
+@RequestMapping(value = "api/v2/hierarchy")
+@Api(value = "Hierarchy", produces = "application/json")
+public class HierarchyController {
 
 	private static final String DEFAULT_LIMIT = "200";
 	private static final String DEFAULT_OFFSET = "0";
@@ -80,7 +70,8 @@ public class JsonController {
 
 	@ApiOperation(
 			value = "View details of all given station types",
-			notes = "You can put multiple station types as comma-seperated list.")
+			notes = "You can put multiple station types as comma-seperated list.<br>The response is a hierarchy of <code>station-type / station-name</code>."
+			)
 	@GetMapping(value = "/{stationTypes}", produces = "application/json")
 	public @ResponseBody String requestStations(@PathVariable String stationTypes,
 											    @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
@@ -93,7 +84,7 @@ public class JsonController {
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and most-recent measurements",
-			notes = "You can put multiple station or data types as comma-seperated lists.")
+			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
 	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
 												 @PathVariable String dataTypes,
@@ -107,7 +98,7 @@ public class JsonController {
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and historical measurements",
-			notes = "You can put multiple station or data types as comma-seperated lists.")
+			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
 	public @ResponseBody String requestHistory(@PathVariable String stationTypes,
 											   @PathVariable String dataTypes,

@@ -37,7 +37,7 @@ public class Reader2Rest extends SpringBootServletInitializer {
 
 	private ApiInfo apiInfo() {
 		return new ApiInfo(
-				"API v2",
+				"Open Data Hub / Mobility - Consumer API",
 				"Documentation and examples can be found on <a href=https://github.com/noi-techpark/bdp-core/blob/readerv2/reader2/README.md>readerv2.bdp-core.git</a>",
 				"2.0",
 				"",
