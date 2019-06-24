@@ -357,7 +357,10 @@ public class SelectExpansion {
 	}
 
 	public String getColumn(String alias) {
-		return getDefinition(alias).getColumn(alias);
+		SelectDefinition definition = getDefinition(alias);
+		if (definition == null)
+			return null;
+		return definition.getColumn(alias);
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {
