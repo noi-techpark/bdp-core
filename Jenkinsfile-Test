@@ -19,9 +19,6 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
-
-        READER2_HIKARI_CONFIG = credentials('bdp-core-test-reader2-hikari.properties')
-        READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
     }
 
     stages {
@@ -48,9 +45,6 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" dal/src/main/resources/log4j.properties'
-
-                sh 'cat "${READER2_HIKARI_CONFIG}" > reader2/src/main/resources/hikari.properties'
-                sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/database.properties'
             }
         }
         stage('Install') {
@@ -63,11 +57,6 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
-        stage('Build - Reader v2') {
-            steps {
-                sh 'cd reader2 && mvn -B -U clean test package -DfinalName=reader2'
-            }
-        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -76,11 +65,6 @@ pipeline {
         stage('Deploy - Reader') {
             steps {
                 sh 'cd reader && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
-            }
-        }
-        stage('Deploy - Reader v2') {
-            steps {
-                sh 'cd reader2 && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -DfinalName=reader2'
             }
         }
         stage('Deploy - Writer') {
