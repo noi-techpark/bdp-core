@@ -6,8 +6,6 @@ import java.util.Map;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import com.jsoniter.output.JsonStream;
-
 import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
 
 public class QueryExecutor {
@@ -60,20 +58,6 @@ public class QueryExecutor {
 
 	public <T> List<T> build(final String sql, Class<T> resultClass) {
 		return npjt.queryForList(sql, parameters, resultClass);
-	}
-
-	/**
-	 * Build the current query and execute it via {@link NamedParameterJdbcTemplate#query},
-	 * finally serialize it into a JSON string
-	 *
-	 * @return List of <code>resultClass</code> objects
-	 */
-	public String buildJson(final String sql) {
-		return JsonStream.serialize(build(sql));
-	}
-
-	public <T> String buildJson(final String sql, Class<T> resultClass) {
-		return JsonStream.serialize(build(sql, resultClass));
 	}
 
 	/**

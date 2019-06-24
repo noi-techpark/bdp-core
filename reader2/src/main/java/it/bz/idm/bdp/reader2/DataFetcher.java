@@ -245,9 +245,9 @@ public class DataFetcher {
 	}
 
 	public String fetchStationTypes() {
-		return QueryExecutor
+		return JsonStream.serialize(QueryExecutor
 				.init()
-				.buildJson("select stationtype from station group by stationtype", String.class);
+				.build("select stationtype from station group by stationtype", String.class));
 	}
 
 
