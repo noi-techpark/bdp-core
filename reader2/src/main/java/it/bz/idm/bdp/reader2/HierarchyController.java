@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author Peter Moser
@@ -45,6 +46,26 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "api/v2/hierarchy")
 @Api(value = "Hierarchy", produces = "application/json")
 public class HierarchyController {
+
+	private static final String DOC_STATIONTYPES = "Station types or categories. Multiple types possible as comma-separated-values.";
+	private static final String DOC_DATATYPES = "Data types. Multiple types possible as comma-separated-values.";
+	private static final String DOC_LIMIT = "The limit of the response. Set it to -1 to disable it.";
+	private static final String DOC_OFFSET = "The offset of the response list. To simulate pagination, together with limit.";
+	private static final String DOC_SELECT = "Select JSON keys (a.k.a. column-aliases), which will be used to build the response. Multiple aliases possible as comma-separated-values.";
+	private static final String DOC_WHERE = "Filter the result with filter-triples, like <code>alias.operator.value</code>\nOperators can be \n" +
+			" -   eq: Equal\n" +
+			" -   neq: Not Equal\n" +
+			" -   lt: Less Than\n" +
+			" -   gt: Greater Than\n" +
+			" -   lteq: Less Than Or Equal\n" +
+			" -   gteq: Greater Than Or Equal\n" +
+			" -   re: Regular Expression\n" +
+			" -   ire: Insensitive Regular Expression\n" +
+			" -   nre: Negated Regular Expression\n" +
+			" -   nire: Negated Insensitive Regular Expression\n\n" +
+			"Multiple conditions possible as comma-separated-values.";
+	private static final String DOC_SHOWNULL = "Should JSON keys with null-values be returned, or removed from the response-JSON.";
+	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]</code>, where [] denotes optionality.";
 
 	private static final String DEFAULT_LIMIT = "200";
 	private static final String DEFAULT_OFFSET = "0";
@@ -73,12 +94,12 @@ public class HierarchyController {
 			notes = "You can put multiple station types as comma-seperated list.<br>The response is a hierarchy of <code>station-type / station-name</code>."
 			)
 	@GetMapping(value = "/{stationTypes}", produces = "application/json")
-	public @ResponseBody String requestStations(@PathVariable String stationTypes,
-											    @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
-											    @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
-											    @RequestParam(value="select", required=false) String select,
-											    @RequestParam(value="where", required=false) String where,
-												@RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+	public @ResponseBody String requestStations(@ApiParam(value=DOC_STATIONTYPES) @PathVariable String stationTypes,
+											    @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+											    @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
+											    @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
+											    @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
+											    @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 		return DataFetcher.serializeJSON(dataFetcher.fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
 	}
 
@@ -86,13 +107,13 @@ public class HierarchyController {
 			value = "View details of all given station types including data types and most-recent measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
-	public @ResponseBody String requestDataTypes(@PathVariable String stationTypes,
-												 @PathVariable String dataTypes,
-												 @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
-												 @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
-												 @RequestParam(value="select", required=false) String select,
-												 @RequestParam(value="where", required=false) String where,
-												 @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_STATIONTYPES) @PathVariable String stationTypes,
+												 @ApiParam(value=DOC_DATATYPES) @PathVariable String dataTypes,
+												 @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+												 @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
+												 @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
+												 @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
+												 @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
 	}
 
@@ -100,15 +121,15 @@ public class HierarchyController {
 			value = "View details of all given station types including data types and historical measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
-	public @ResponseBody String requestHistory(@PathVariable String stationTypes,
-											   @PathVariable String dataTypes,
-											   @PathVariable String from,
-											   @PathVariable String to,
-											   @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
-											   @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
-											   @RequestParam(value="select", required=false) String select,
-											   @RequestParam(value="where", required=false) String where,
-											   @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+	public @ResponseBody String requestHistory(@ApiParam(value=DOC_STATIONTYPES) @PathVariable String stationTypes,
+											   @ApiParam(value=DOC_DATATYPES) @PathVariable String dataTypes,
+											   @ApiParam(value=DOC_TIME) @PathVariable String from,
+											   @ApiParam(value=DOC_TIME) @PathVariable String to,
+											   @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
+											   @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
+											   @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
+											   @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
+											   @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 
 		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
 		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
