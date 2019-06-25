@@ -110,6 +110,8 @@ public abstract class JSONPusher extends DataPusher {
 	}
 	@Override
 	public List<StationDto> fetchStations(String datasourceName, String origin) {
+		if (datasourceName==null)
+			datasourceName = this.integreenTypology;
 		StationDto[] object = restTemplate.getForObject(url + STATIONS +"{datasourceName}/?origin={origin}",StationDto[].class,datasourceName, origin);
 		return Arrays.asList(object);
 	}

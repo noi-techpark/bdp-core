@@ -63,6 +63,8 @@ public abstract class DataPusher implements IntegreenPushable  {
 		initConfig();
 		connectToDataCenterCollector();
 		this.integreenTypology = initIntegreenTypology();
+		if (this.integreenTypology == null)
+			throw new IllegalStateException("You need to provide a valid data source type to continue");
 		ProvenanceDto provenance = defineProvenance();
 		if (provenance == null || !provenance.isValid())
 			throw new IllegalStateException("You need to provide a valid provenance to be able to send data");
