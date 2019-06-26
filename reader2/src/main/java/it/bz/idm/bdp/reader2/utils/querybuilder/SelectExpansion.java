@@ -1,13 +1,18 @@
 package it.bz.idm.bdp.reader2.utils.querybuilder;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+
+import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
+import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 
 /**
  * <pre>
@@ -255,76 +260,183 @@ public class SelectExpansion {
 		_expandWhere(whereClause);
 	}
 
+	private class Context {
+		int clauseCnt;
+		String logicalOp;
+
+		public Context(int clauseCnt, String logicalOp) {
+			super();
+			this.clauseCnt = clauseCnt;
+			this.logicalOp = logicalOp;
+		}
+
+		@Override
+		public String toString() {
+			return "Context [clauseCnt=" + clauseCnt + ", logicalOp=" + logicalOp + "]";
+		}
+
+	}
+
 	private void _expandWhere(String where) {
 		if (where == null || where.isEmpty()) {
 			sqlWhere = null;
 			return;
 		}
-		StringJoiner result = new StringJoiner(" and ", "and ", "");
-		for (String and : where.split("(?<!\\\\),")) {
-			String[] sqlWhereClause = and.split("\\.", 3);
-			if (sqlWhereClause.length != 3) {
-				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, and);
-			}
-			String alias = sqlWhereClause[0];
-			String operator = sqlWhereClause[1];
-			String value = sqlWhereClause[2].replace("'", "").replaceAll("\\\\,", ",");
-			String column = getColumn(alias);
-			if (column == null) {
-				throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
+
+		WhereClauseParser whereParser = new WhereClauseParser(where);
+		Token whereAST = whereParser.parse();
+
+		StringBuilder sb = new StringBuilder();
+
+		whereAST.walker(new Consumer() {
+
+			/* A stack implementation */
+			Deque<Context> context = new ArrayDeque<Context>();
+			Context ctx;
+
+			@Override
+			public boolean middle(Token t) {
+				return true;
 			}
 
-			usedJSONAliases.add(alias);
-			usedJSONDefNames.add(getAliasMap().get(alias));
+			@Override
+			public boolean before(Token t) {
+				switch(t.getName()) {
+					case "logical_op_and":
+						context.push(new Context(0, "and"));
+						System.out.println("AND" + context.getFirst());
+					break;
+					case "logical_op_or":
+						context.push(new Context(0, "or"));
+						System.out.println("OR" + context.getFirst());
+					break;
+					case "clause_or_logical_op":
+						ctx = context.peekFirst();
+						if (ctx == null) {
+							ctx = new Context(0, "and");
+							context.push(ctx);
+						}
+						ctx.clauseCnt = t.getChildren().size();
+						sb.append("(");
+						System.out.println("OP" + ctx);
+					break;
+					case "clause": {
+						System.out.println("CLAUSE");
+						String alias = t.getChild("alias").getValue();
+						String column = getColumn(alias);
+						if (column == null) {
+							throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
+						}
+						String operator = t.getChild("operator").getValue();
+						String value = null;
+						Token list = t.getChild("list_or_value").getChild("list");
+						if (list != null) {
+							StringJoiner sj = new StringJoiner(",");
+							for (Token child : list.getChildren()) {
+								sj.add(child.getValue());
+							}
+							value = sj.toString();
+						} else {
+							value = t.getChild("list_or_value").getChild("value").getValue();
+						}
 
-			String sqlOperator = null;
-			switch (operator) {
-				case "eq":
-					if (value.equalsIgnoreCase("null")) {
-						sqlOperator = "is null";
-						value = null;
-					} else {
-						sqlOperator = "=";
+						usedJSONAliases.add(alias);
+						usedJSONDefNames.add(getAliasMap().get(alias));
+
+						String sqlOperator = null;
+						switch (operator) {
+							case "eq":
+								if (value.equalsIgnoreCase("null")) {
+									sqlOperator = "is null";
+									value = null;
+								} else {
+									sqlOperator = "=";
+								}
+								break;
+							case "neq":
+								if (value.equalsIgnoreCase("null")) {
+									sqlOperator = "is not null";
+									value = null;
+								} else {
+									sqlOperator = "<>";
+								}
+								break;
+							case "lt":
+								sqlOperator = "<";
+								break;
+							case "gt":
+								sqlOperator = ">";
+								break;
+							case "lteq":
+								sqlOperator = "=<";
+								break;
+							case "gteq":
+								sqlOperator = ">=";
+								break;
+							case "re":
+								sqlOperator = "~";
+								break;
+							case "ire":
+								sqlOperator = "~*";
+								break;
+							case "nre":
+								sqlOperator = "!~";
+								break;
+							case "nire":
+								sqlOperator = "!~*";
+								break;
+							case "in":
+								if (list.getChildren().isEmpty()) {
+									throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+								}
+								sqlOperator = "in (" + value + ")";
+								value = null;
+								break;
+							case "bbi":
+							case "bbc":
+								if (list.getChildren().size() != 4 && list.getChildren().size() != 5) {
+									throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+								}
+								sqlOperator = "bbi".equalsIgnoreCase(operator) ? "&&" : "@";
+								sqlOperator += " ST_MakeEnvelope(" + value + ")";
+								value = null;
+								break;
+							default:
+								throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator);
+						}
+
+						sb.append(column + " " + sqlOperator + (value == null ? "" : " '" + value + "'"));
+						ctx = context.getFirst();
+						ctx.clauseCnt--;
+						if (ctx.clauseCnt > 0)
+							sb.append(" " + ctx.logicalOp + " ");
+
 					}
 					break;
-				case "neq":
-					if (value.equalsIgnoreCase("null")) {
-						sqlOperator = "is not null";
-						value = null;
-					} else {
-						sqlOperator = "<>";
-					}
-					break;
-				case "lt":
-					sqlOperator = "<";
-					break;
-				case "gt":
-					sqlOperator = ">";
-					break;
-				case "lteq":
-					sqlOperator = "=<";
-					break;
-				case "gteq":
-					sqlOperator = ">=";
-					break;
-				case "re":
-					sqlOperator = "~";
-					break;
-				case "ire":
-					sqlOperator = "~*";
-					break;
-				case "nre":
-					sqlOperator = "!~";
-					break;
-				case "nire":
-					sqlOperator = "!~*";
-					break;
-				default:
-					throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator);
+				}
+				return true;
 			}
-			result.add(column + " " + sqlOperator + (value == null ? "" : " '" + value + "' "));
-		}
-		sqlWhere = result.toString();
+
+			@Override
+			public boolean after(Token t) {
+				switch(t.getName()) {
+					case "clause_or_logical_op":
+						sb.append(")");
+						context.pop();
+						ctx = context.peekFirst();
+						if (ctx == null)
+							break;
+						ctx.clauseCnt--;
+						if (ctx.clauseCnt > 0)
+							sb.append(" " + ctx.logicalOp + " ");
+					break;
+				}
+				return true;
+			}
+
+		});
+
+		sqlWhere = sb.toString();
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -449,10 +561,12 @@ public class SelectExpansion {
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 
+		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
 		se.expand("*", "A", "B", "C");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
 
 //		se.build("*", RecursionType.NONE, "A", "B");
 //		System.out.println(se.getExpandedSelects());
