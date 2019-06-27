@@ -15,7 +15,7 @@ public class Reader2Config {
 
 	@Bean
 	DataSource dataSource() {
-		HikariConfig config = new HikariConfig("/hikari.properties");
+		HikariConfig config = new HikariConfig("/database.properties");
         HikariDataSource dataSource = new HikariDataSource(config);
 		return dataSource;
 	}
