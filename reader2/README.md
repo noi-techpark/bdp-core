@@ -131,7 +131,17 @@ It is possible to filter against JSON fields (columns in a database) with
 conjunction (`and`) of all clauses. Also complex logic is possible, with nested
 `or(...)` and `and(...)` clauses.
 
-Filter operators for the `where` clause are as follows:
+A `where` clause is a list of filter-triples, like `alias.operator.value_or_list`.
+
+**values_or_list**
+- `value`: Whatever you want, also a regular expression. However, you need to
+  escape `,` and `'` with a `\`. Use url-encoding, if your tool does not support
+  certain characters. Special values are `null` or an omitted value. Examples:
+  - `description.eq.null`, checks if a description is not set
+  - `description.eq.`, checks if a description is set, but the string has length 0
+- `list`: `(value,value,value)`
+
+**operator**
 - `eq`: Equal
 - `neq`: Not Equal
 - `lt`: Less Than
@@ -163,7 +173,7 @@ the ordering inside the list is left-x, left-y, right-x, right-y and SRID
 GET /ParkingStation/occupied/2019-01-01/2019-01-02?select=sname,tname,mvalue
 ```
 
-### I want to see only parking stations and their coordinates within a bounding box of a map
+### I want to see only parking stations within a bounding box of a map
 ```
 GET /ParkingStation/*?where=scoordinate.bbi.(11.63,46.0,11.65,47.0,4326)
 ```
@@ -174,9 +184,6 @@ need regardless, if they are within the bounding box or not.
 ```
 GET /ParkingStation/*?where=or(scoordinate.bbi.(11.63,46.0,11.65,47.0,4326),scode.in.(69440GW,AB3))
 ```
-
-### I want to see only parking stations and their coordinates within a bounding box of a map
-
 
 ### I want to see all information where the measured value is greater than 100 and the station origin is FAMAS
 ```
