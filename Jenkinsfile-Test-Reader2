@@ -10,7 +10,6 @@ pipeline {
         TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
         TESTSERVER_TOMCAT_CREDENTIALS=credentials('testserver-tomcat8-credentials')
 
-        READER2_HIKARI_CONFIG = credentials('bdp-core-test-reader2-hikari.properties')
         READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
     }
 
@@ -25,7 +24,6 @@ pipeline {
 
                 sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" reader2/src/main/resources/application.properties'
 
-                sh 'cat "${READER2_HIKARI_CONFIG}" > reader2/src/main/resources/hikari.properties'
                 sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/database.properties'
             }
         }
