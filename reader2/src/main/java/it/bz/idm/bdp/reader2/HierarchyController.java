@@ -62,8 +62,14 @@ public class HierarchyController {
 			" -   re: Regular Expression\n" +
 			" -   ire: Insensitive Regular Expression\n" +
 			" -   nre: Negated Regular Expression\n" +
-			" -   nire: Negated Insensitive Regular Expression\n\n" +
-			"Multiple conditions possible as comma-separated-values.";
+			" -   nire: Negated Insensitive Regular Expression\n" +
+			" -   bbi: Bounding box intersecting objects (ex., a street that is only partially covered by the box). Syntax? See below.\n" +
+			" -   bbc: Bounding box containing objects (ex., a station or street, that is completely covered by the box). Syntax? See below.\n" +
+			" -   in: True, if the value of the alias can be found within the given list. Example: name.in.(Peter,Patrick,Rudi)\n" +
+			" -   and(alias.operator.value,...): Conjunction of filters (can be nested)\n" +
+			" -   or(alias.operator.value,...): Disjunction of filters (can be nested)\n" +
+			"\nMultiple conditions possible as comma-separated-values.\n\n" +
+			" Example-syntax for bbi/bbc could be <code>coordinate.bbi.(11,46,12,47,4326)</code>, where the ordering inside the list is left-x, left-y, right-x, right-y and SRID (optional).";
 	private static final String DOC_SHOWNULL = "Should JSON keys with null-values be returned, or removed from the response-JSON.";
 	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]</code>, where [] denotes optionality.";
 
