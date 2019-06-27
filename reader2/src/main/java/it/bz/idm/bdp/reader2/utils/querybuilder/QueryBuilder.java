@@ -259,7 +259,7 @@ public class QueryBuilder {
 
 	public QueryBuilder expandWhere() {
 		String sqlWhere = se.getWhereSql();
-		addSqlIfNotNull(sqlWhere, sqlWhere);
+		addSqlIfNotNull(" and " + sqlWhere, sqlWhere);
 		return this;
 	}
 
