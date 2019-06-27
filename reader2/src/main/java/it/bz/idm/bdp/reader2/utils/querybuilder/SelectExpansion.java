@@ -336,10 +336,6 @@ public class SelectExpansion {
 							value = t.getChild("list_or_value").getChild("value").getValue();
 						}
 
-						if (value == null) {
-							value = "";
-						}
-
 						usedJSONAliases.add(alias);
 						usedJSONDefNames.add(getAliasMap().get(alias));
 

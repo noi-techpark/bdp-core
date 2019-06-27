@@ -29,7 +29,7 @@ public class Token {
 		children.addAll(child.children);
 	}
 
-	public String prettyPrint() {
+	public String prettyFormat() {
 		final StringBuilder res = new StringBuilder();
 		walker(new Consumer() {
 			int indent = 0;
@@ -49,6 +49,31 @@ public class Token {
 			@Override
 			public boolean after(Token t) {
 				res.append(_indent(--indent) + "] //" + t.name + "\n");
+				return true;
+			}
+		});
+		return res.toString();
+	}
+
+	public String format() {
+		final StringBuilder res = new StringBuilder();
+		walker(new Consumer() {
+
+			@Override
+			public boolean middle(Token t) {
+				res.append("{" + t.name + "=" + t.value + "}");
+				return true;
+			}
+
+			@Override
+			public boolean before(Token t) {
+				res.append(t.name + "{");
+				return true;
+			}
+
+			@Override
+			public boolean after(Token t) {
+				res.append("}");
 				return true;
 			}
 		});

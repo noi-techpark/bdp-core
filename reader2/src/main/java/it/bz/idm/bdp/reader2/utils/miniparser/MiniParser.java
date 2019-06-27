@@ -9,14 +9,10 @@ public class MiniParser {
 	private int i;
 	private String input;
 
+	protected Token ast = null;
+
 	protected MiniParser(String input) {
-		if (input == null || input.isEmpty()) {
-			throw new RuntimeException("No input to parse");
-		}
-		this.input = input + '\0';
-		i = 0;
-		c = input.charAt(0);
-		la = c;
+		setInput(input);
 	}
 
 	private boolean get(int i) {
@@ -147,6 +143,30 @@ public class MiniParser {
 		if (DEBUG)
 			System.out.println("T=" + tokenName);
 		return t;
+	}
+
+	public String getInput() {
+		return input;
+	}
+
+	public void setInput(String input) {
+		if (input == null || input.isEmpty()) {
+			throw new RuntimeException("No input to parse");
+		}
+
+		if (input.equals(this.input)) {
+			return;
+		}
+
+		this.input = input + '\0';
+		i = 0;
+		c = input.charAt(0);
+		la = c;
+		ast = null;
+	}
+
+	public Token getAst() {
+		return ast;
 	}
 
 //	public static void main(String[] args) {

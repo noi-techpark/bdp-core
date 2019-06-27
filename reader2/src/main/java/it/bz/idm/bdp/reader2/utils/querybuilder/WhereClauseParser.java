@@ -80,7 +80,7 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	private Token value() {
-		return doWhile("value", t -> {
+		Token res = doWhile("value", t -> {
 			if ((match(')') || match(',') || match('\'')) && clash('\\', -1)) {
 				return false;
 			}
@@ -88,6 +88,9 @@ public class WhereClauseParser extends MiniParser {
 			t.appendValue(c());
 			return true;
 		});
+		if (res.getValue() == null)
+			res.setValue("");
+		return res;
 	}
 
 	private Token logicalOpAnd() {
@@ -115,10 +118,13 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	public Token parse() {
-		return doWhile("logical_op_and", t -> {
+		if (ast != null)
+			return ast;
+		ast = doWhile("logical_op_and", t -> {
 			t.add(clauseOrLogicalOp());
 			return true;
 		});
+		return ast;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -129,7 +135,9 @@ public class WhereClauseParser extends MiniParser {
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5)";
 		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4)";
 		WhereClauseParser we = new WhereClauseParser(input);
-		System.out.println(we.parse().prettyPrint());
+		Token ast = we.parse();
+		System.out.println(ast.prettyFormat());
+		System.out.println(ast.format());
 
 	}
 }
