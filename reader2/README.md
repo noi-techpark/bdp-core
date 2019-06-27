@@ -26,6 +26,17 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## I want to run the reader2 web-service
+
+Go to `src/main/resources/` and copy `database.properties.dist` to
+`database.properties` and configure it accordingly. Mostly `jdbcUrl`, `username`
+and `password` are necessary, the rest can be kept as is.
+
+Within the same directory, open `application.properties` and set the server port
+and log levels.
+
+Run `mvn spring-boot:run`.
+
 ## Station Types / Categories
 
 ### I want to get all station types as a list
