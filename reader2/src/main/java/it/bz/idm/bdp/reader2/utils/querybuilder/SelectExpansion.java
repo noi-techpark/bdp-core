@@ -312,10 +312,6 @@ public class SelectExpansion {
 					break;
 					case "clause_or_logical_op":
 						ctx = context.peekFirst();
-						if (ctx == null) {
-							ctx = new Context(0, "and");
-							context.push(ctx);
-						}
 						ctx.clauseCnt = t.getChildren().size();
 						sb.append("(");
 						System.out.println("OP" + ctx);

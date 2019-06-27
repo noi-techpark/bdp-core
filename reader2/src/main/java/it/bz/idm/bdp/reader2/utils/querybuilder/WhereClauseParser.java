@@ -115,7 +115,7 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	public Token parse() {
-		return doWhile("where", t -> {
+		return doWhile("logical_op_and", t -> {
 			t.add(clauseOrLogicalOp());
 			return true;
 		});
