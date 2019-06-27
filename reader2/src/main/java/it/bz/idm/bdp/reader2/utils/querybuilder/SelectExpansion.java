@@ -333,7 +333,7 @@ public class SelectExpansion {
 						if (list != null) {
 							StringJoiner sj = new StringJoiner(",");
 							for (Token child : list.getChildren()) {
-								sj.add(child.getValue());
+								sj.add("'" + child.getValue() + "'");
 							}
 							value = sj.toString();
 						} else {

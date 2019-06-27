@@ -81,7 +81,7 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token value() {
 		return doWhile("value", t -> {
-			if ((match(')') || match(',')) && clash('\\', -1)) {
+			if ((match(')') || match(',') || match('\'')) && clash('\\', -1)) {
 				return false;
 			}
 			matchConsume('\\');
