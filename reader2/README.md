@@ -4,6 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 #### Table of Contents
 
+- [I want to run the reader2 web-service](#i-want-to-run-the-reader2-web-service)
 - [Station Types / Categories](#station-types--categories)
   - [I want to get all station types as a list](#i-want-to-get-all-station-types-as-a-list)
 - [Stations](#stations)
