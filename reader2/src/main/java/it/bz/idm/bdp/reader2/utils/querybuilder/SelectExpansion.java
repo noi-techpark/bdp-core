@@ -73,7 +73,7 @@ public class SelectExpansion {
 		KEY_NOT_INSIDE_DEFLIST   ("Key '%s' is not reachable from the expanded select definition list: %s"),
 		DEFINITION_NOT_FOUND     ("Select Definition '%s' not found! It must exist before we can point to it"),
 		ADD_INVALID_DATA         ("A schema entry must have a name and a valid definition"),
-		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: '%s' is not a triple: alias.operator.value"),
+		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: '%s.<%s>' with value %s is not valid (checks failed)"),
 		WHERE_ALIAS_NOT_FOUND    ("Syntax Error in WHERE clause: Alias '%s' does not exist"),
 		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
 		DIRTY_STATE              ("We are in a dirty state. Run expand() to clean up"),
@@ -394,7 +394,7 @@ public class SelectExpansion {
 		SimpleConsumer checker = whereClauseOperatorCheckMap.get(child.getName() + "_" + operator);
 		if (checker != null) {
 			if (! checker.middle(child)) {
-				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator, child.getName(), value);
 			}
 		}
 
