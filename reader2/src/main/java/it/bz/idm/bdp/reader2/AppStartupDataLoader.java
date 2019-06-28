@@ -68,26 +68,26 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		 * checks of their values or list items. These can be defined with Lambda
 		 * functions.
 		 */
-		se.addOperator("value", "eq", "= %s");
-		se.addOperator("value", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("value", "lt", "< %s");
-		se.addOperator("value", "gt", "> %s");
-		se.addOperator("value", "lteq", "=< %s");
-		se.addOperator("value", "gteq", ">= %s");
-		se.addOperator("value", "re", "~ %s");
-		se.addOperator("value", "ire", "~* %s");
-		se.addOperator("value", "nre", "!~ %s");
-		se.addOperator("value", "nire", "!~* %s");
-		se.addOperator("list", "in", "in (%s)", t -> {
-			return !(t.getChildren().size() == 1 && t.getChild("value").getValue() == null);
+		se.addOperator("VALUE", "eq", "= %s");
+		se.addOperator("VALUE", "neq", "<> %s");
+		se.addOperator("NULL", "eq", "is null");
+		se.addOperator("NULL", "neq", "is not null");
+		se.addOperator("VALUE", "lt", "< %s");
+		se.addOperator("VALUE", "gt", "> %s");
+		se.addOperator("VALUE", "lteq", "=< %s");
+		se.addOperator("VALUE", "gteq", ">= %s");
+		se.addOperator("VALUE", "re", "~ %s");
+		se.addOperator("VALUE", "ire", "~* %s");
+		se.addOperator("VALUE", "nre", "!~ %s");
+		se.addOperator("VALUE", "nire", "!~* %s");
+		se.addOperator("LIST", "in", "in (%s)", t -> {
+			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
-		se.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
-			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		se.addOperator("LIST", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
-		se.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
-			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		se.addOperator("LIST", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */

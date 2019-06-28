@@ -26,7 +26,13 @@ public class Token {
 	public boolean is(String name) {
 		if (name == null || name.isEmpty())
 			return false;
-		return name.equals(this.name);
+		return name.equalsIgnoreCase(this.name);
+	}
+
+	public boolean valueIs(String value) {
+		if (value == null || value.isEmpty())
+			return false;
+		return value.equals(this.value);
 	}
 
 	public String getChildrenValues(String separator, String elementPrefix, String elementSuffix, String prefix, String suffix) {
@@ -36,7 +42,7 @@ public class Token {
 		suffix = suffix == null ? "" : suffix;
 
 		StringJoiner sj = new StringJoiner(separator, prefix, suffix);
-		for (Token listItem : getChildren()) {
+		for (Token listItem : children) {
 			sj.add(elementPrefix + listItem.getValue() + elementSuffix);
 		}
 		return sj.toString();
@@ -54,6 +60,10 @@ public class Token {
 		if (! child.name.equalsIgnoreCase(name)) {
 			throw new RuntimeException("Cannot combine two different tokens: " + child.name + " and " + name);
 		}
+		combineForce(child);
+	}
+
+	public void combineForce(Token child) {
 		children.addAll(child.children);
 	}
 
@@ -172,11 +182,14 @@ public class Token {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if (name == null || name.isEmpty()) {
+			throw new RuntimeException("Invalid Token name!");
+		}
+		this.name = name.toUpperCase();
 	}
 
-	public List<Token> getChildren() {
-		return children;
+	public Token getChild(int idx) {
+		return children.get(idx);
 	}
 
 	public Token getChild(String childName) {
@@ -188,5 +201,11 @@ public class Token {
 		return null;
 	}
 
+	public int getChildCount() {
+		return children.size();
+	}
 
+	public boolean equals(Token o) {
+		return name.equalsIgnoreCase(o.getName());
+	}
 }

@@ -107,7 +107,7 @@ public class SelectExpansion {
 	}
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
-		whereClauseOperatorMap.put(tokenType + "_" + operator, sqlSnippet);
+		whereClauseOperatorMap.put(tokenType.toUpperCase() + "_" + operator, sqlSnippet);
 		if (check != null)
 			whereClauseOperatorCheckMap.put(tokenType + "_" + operator, check);
 	}
@@ -314,33 +314,25 @@ public class SelectExpansion {
 			@Override
 			public boolean before(Token t) {
 				switch(t.getName()) {
-					case "logical_op_and":
-						context.push(new Context(0, "and"));
+					case "AND":
+					case "OR":
+						sb.append("(");
+						context.push(new Context(t.getChildCount(), t.getName()));
 						System.out.println("AND" + context.getFirst());
 					break;
-					case "logical_op_or":
-						context.push(new Context(0, "or"));
-						System.out.println("OR" + context.getFirst());
-					break;
-					case "clause_or_logical_op":
-						ctx = context.peekFirst();
-						ctx.clauseCnt = t.getChildren().size();
-						sb.append("(");
-						System.out.println("OP" + ctx);
-					break;
-					case "clause": {
+					case "CLAUSE": {
 						System.out.println("CLAUSE");
-						String alias = t.getChild("alias").getValue();
+						String alias = t.getChild("ALIAS").getValue();
 						String column = getColumn(alias);
 						if (column == null) {
 							throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
 						}
-						String operator = t.getChild("operator").getValue();
+						String operator = t.getChild("OP").getValue();
 
 						usedJSONAliases.add(alias);
 						usedJSONDefNames.add(getAliasMap().get(alias));
 
-						sb.append(column + " " + whereClauseItem(operator, t.getChild("list_or_value")));
+						sb.append(column + " " + whereClauseItem(operator, t.getChild(2)));
 						ctx = context.getFirst();
 						ctx.clauseCnt--;
 						if (ctx.clauseCnt > 0)
@@ -354,7 +346,8 @@ public class SelectExpansion {
 			@Override
 			public boolean after(Token t) {
 				switch(t.getName()) {
-					case "clause_or_logical_op":
+					case "AND":
+					case "OR":
 						sb.append(")");
 						context.pop();
 						ctx = context.peekFirst();
@@ -373,30 +366,39 @@ public class SelectExpansion {
 		sqlWhere = sb.toString();
 	}
 
-	private String whereClauseItem(String operator, Token token) {
-		if (! "list_or_value".equals(token.getName())) {
-			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator); // FIXME give the whole where-clause from user input
+	private String whereClauseItem(String operator, Token clauseValueToken) {
+		/* Search for a definition of this operator for a the given value input type (list, null or value) */
+		String sqlOp = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
+		if (sqlOp == null) {
+			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
 		}
 
+		/* Build the value, or error out if the value type does not exist */
 		String value = null;
-		Token child = token.getChildren().get(0);
-
-		if (child.is("list")) {
-			value = child.getChildrenValues(",", "'", "'");
-		} else if (child.is("null")) {
-			value = null;
-		} else {
-			value = child.getValue();
+		switch (clauseValueToken.getName()) {
+			case "LIST":
+				value = clauseValueToken.getChildrenValues(",", "'", "'");
+			break;
+			case "NULL":
+				value = null;
+			break;
+			case "VALUE":
+				value = clauseValueToken.getValue();
+			break;
+			default:
+				// FIXME give the whole where-clause from user input to generate a better error response
+				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
 		}
 
-		String sqlOp = whereClauseOperatorMap.get(child.getName() + "_" + operator);
-		if (sqlOp == null)
-			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, child.getName());
-
-		Consumer checker = whereClauseOperatorCheckMap.get(child.getName() + "_" + operator);
+		/*
+		 * Search for a check-function for this operator/value-type combination. Execute it, if present
+		 * and error-out on failure. For instance, check if a list has exactly 3 elements. This cannot
+		 * be done during parsing.
+		 */
+		Consumer checker = whereClauseOperatorCheckMap.get(clauseValueToken.getName() + "_" + operator);
 		if (checker != null) {
-			if (! checker.middle(child)) {
-				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator, child.getName(), value);
+			if (! checker.middle(clauseValueToken)) {
+				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator, clauseValueToken.getName(), value);
 			}
 		}
 

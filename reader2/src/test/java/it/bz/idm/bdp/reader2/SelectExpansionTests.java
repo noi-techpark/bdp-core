@@ -147,13 +147,13 @@ public class SelectExpansionTests {
 		se.addOperator("value", "nre", "!~ %s");
 		se.addOperator("value", "nire", "!~* %s");
 		se.addOperator("list", "in", "in (%s)", t -> {
-			return !(t.getChildren().size() == 1 && t.getChild("value").getValue() == null);
+			return !(t.getChildCount() == 1 && t.getChild("value").getValue() == null);
 		});
 		se.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
-			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 		se.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
-			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 
 		se.setWhereClause("a.bbi.(1,2,3,4,5,6)");
