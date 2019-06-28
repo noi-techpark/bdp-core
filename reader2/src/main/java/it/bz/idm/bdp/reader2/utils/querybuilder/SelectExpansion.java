@@ -75,7 +75,7 @@ public class SelectExpansion {
 		ADD_INVALID_DATA         ("A schema entry must have a name and a valid definition"),
 		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: '%s' is not a triple: alias.operator.value"),
 		WHERE_ALIAS_NOT_FOUND    ("Syntax Error in WHERE clause: Alias '%s' does not exist"),
-		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s' does not exist"),
+		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
 		DIRTY_STATE              ("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA      ("Provide valid alias and definition sets!");
 
@@ -89,6 +89,28 @@ public class SelectExpansion {
 			return "SELECT EXPANSION ERROR: " + msg;
 		}
 	}
+
+	// FIXME Make this configurable from outside, remove it from here, too specific for a generic select expansion class
+	private static final Map<String, String> WHERE_CLAUSE_OPERATOR_MAP = new HashMap<String, String>() {
+		private static final long serialVersionUID = -5341630275473756739L;
+		{
+			put("value_eq", "= %s");
+			put("value_neq", "<> %s");
+			put("null_eq", "is null");
+			put("null_neq", "is not null");
+			put("value_lt", "< %s");
+			put("value_gt", "> %s");
+			put("value_lteq", "=< %s");
+			put("value_gteq", ">= %s");
+			put("value_re", "~ %s");
+			put("value_ire", "~* %s");
+			put("value_nre", "!~ %s");
+			put("value_nire", "!~* %s");
+			put("list_in", "in (%s)");
+			put("list_bbi", "&& ST_MakeEnvelope(%s)");
+			put("list_bbc", "@ ST_MakeEnvelope(%s)");
+		}
+	};
 
 	private Map<String, SelectDefinition> schema = new HashMap<String, SelectDefinition>();
 	private Map<String, String> aliases = new HashMap<String, String>();
@@ -324,89 +346,15 @@ public class SelectExpansion {
 							throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
 						}
 						String operator = t.getChild("operator").getValue();
-						String value = null;
-						Token list = t.getChild("list_or_value").getChild("list");
-						if (list != null) {
-							StringJoiner sj = new StringJoiner(",");
-							for (Token child : list.getChildren()) {
-								sj.add("'" + child.getValue() + "'");
-							}
-							value = sj.toString();
-						} else {
-							value = t.getChild("list_or_value").getChild("value").getValue();
-						}
 
 						usedJSONAliases.add(alias);
 						usedJSONDefNames.add(getAliasMap().get(alias));
 
-						String sqlOperator = null;
-						switch (operator) {
-							case "eq":
-								if (value.equalsIgnoreCase("null")) {
-									sqlOperator = "is null";
-									value = null;
-								} else {
-									sqlOperator = "=";
-								}
-								break;
-							case "neq":
-								if (value.equalsIgnoreCase("null")) {
-									sqlOperator = "is not null";
-									value = null;
-								} else {
-									sqlOperator = "<>";
-								}
-								break;
-							case "lt":
-								sqlOperator = "<";
-								break;
-							case "gt":
-								sqlOperator = ">";
-								break;
-							case "lteq":
-								sqlOperator = "=<";
-								break;
-							case "gteq":
-								sqlOperator = ">=";
-								break;
-							case "re":
-								sqlOperator = "~";
-								break;
-							case "ire":
-								sqlOperator = "~*";
-								break;
-							case "nre":
-								sqlOperator = "!~";
-								break;
-							case "nire":
-								sqlOperator = "!~*";
-								break;
-							case "in":
-								if (list.getChildren().isEmpty()) {
-									throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
-								}
-								sqlOperator = "in (" + value + ")";
-								value = null;
-								break;
-							case "bbi":
-							case "bbc":
-								if (list.getChildren().size() != 4 && list.getChildren().size() != 5) {
-									throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
-								}
-								sqlOperator = "bbi".equalsIgnoreCase(operator) ? "&&" : "@";
-								sqlOperator += " ST_MakeEnvelope(" + value + ")";
-								value = null;
-								break;
-							default:
-								throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator);
-						}
-
-						sb.append(column + " " + sqlOperator + (value == null ? "" : " '" + value + "'"));
+						sb.append(column + " " + whereClauseItem(operator, t.getChild("list_or_value")));
 						ctx = context.getFirst();
 						ctx.clauseCnt--;
 						if (ctx.clauseCnt > 0)
 							sb.append(" " + ctx.logicalOp + " ");
-
 					}
 					break;
 				}
@@ -433,6 +381,51 @@ public class SelectExpansion {
 		});
 
 		sqlWhere = sb.toString();
+	}
+
+	private String whereClauseItem(String operator, Token listOrValue) {
+		if (! "list_or_value".equals(listOrValue.getName())) {
+			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator); // FIXME give the whole where-clause from user input
+		}
+
+		String value = null;
+		String valueType = "";
+		Token list = listOrValue.getChild("list");
+		if (list != null) {
+			StringJoiner sj = new StringJoiner(",");
+			for (Token child : list.getChildren()) {
+				sj.add("'" + child.getValue() + "'");
+			}
+			value = sj.toString();
+			valueType = "list";
+		} else {
+			value = listOrValue.getChild("value").getValue();
+			if ("null".equalsIgnoreCase(value)) {
+				valueType = "null";
+			} else {
+				valueType = "value";
+			}
+		}
+
+		String sqlOp = WHERE_CLAUSE_OPERATOR_MAP.get(valueType + "_" + operator);
+		if (sqlOp == null)
+			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, valueType);
+
+		switch (operator) {
+			case "in":
+				if (list.getChildren().isEmpty()) {
+					throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+				}
+			break;
+			case "bbi":
+			case "bbc":
+				if (list.getChildren().size() != 4 && list.getChildren().size() != 5) {
+					throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+				}
+			break;
+		}
+
+		return String.format(sqlOp, value);
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -557,7 +550,7 @@ public class SelectExpansion {
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 
-		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
 		se.expand("*", "A", "B", "C");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
