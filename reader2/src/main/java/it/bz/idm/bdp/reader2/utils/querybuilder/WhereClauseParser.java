@@ -139,7 +139,7 @@ public class WhereClauseParser extends MiniParser {
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
 //		input = "f.eq.(null,null,null)";
-		input = "f.eq.,or(a.eq.7,and(b.eq.9))";
+		input = "f.eq.";//,or(a.eq.7,and(b.eq.9))";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
 		System.out.println(ast.prettyFormat());

@@ -14,19 +14,19 @@ public class WhereClauseParserTests {
 		String input = "a.eq.";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=eq}list_or_value{{value=}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=}}}", ast.format());
 
 		we.setInput("a.eq.null");
 		ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=eq}list_or_value{{value=null}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{NULL}}}", ast.format());
 
 		we.setInput("a.bbi.(1,2.3,7.0000)");
 		ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=bbi}list_or_value{list{{value=1}{value=2.3}{value=7.0000}}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2.3}{VALUE=7.0000}}}}", ast.format());
 
 		we.setInput("a.ire..*\\,3");
 		ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=ire}list_or_value{{value=.*,3}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=ire}{VALUE=.*,3}}}", ast.format());
 	}
 
 	@Test
@@ -34,15 +34,15 @@ public class WhereClauseParserTests {
 		String input = "a.in.()";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=in}list_or_value{list{{value=}}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=in}LIST{{VALUE=}}}}", ast.format());
 
 		we.setInput("a.in.(null)");
 		ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=in}list_or_value{list{{null}}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=in}LIST{{NULL}}}}", ast.format());
 
 		we.setInput("a.bbi.(1,2,3,4,5)");
 		ast = we.parse();
-		assertEquals("logical_op_and{clause_or_logical_op{clause{{alias=a}{operator=bbi}list_or_value{list{{value=1}{value=2}{value=3}{value=4}{value=5}}}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2}{VALUE=3}{VALUE=4}{VALUE=5}}}}", ast.format());
 	}
 
 

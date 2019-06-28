@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
 import it.bz.idm.bdp.reader2.utils.miniparser.ConsumerExtended;
@@ -109,7 +110,7 @@ public class SelectExpansion {
 	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
 		whereClauseOperatorMap.put(tokenType.toUpperCase() + "_" + operator, sqlSnippet);
 		if (check != null)
-			whereClauseOperatorCheckMap.put(tokenType + "_" + operator, check);
+			whereClauseOperatorCheckMap.put(tokenType.toUpperCase() + "_" + operator, check);
 	}
 
 	public void add(final String name, final SelectDefinition selDef) {
@@ -377,7 +378,15 @@ public class SelectExpansion {
 		String value = null;
 		switch (clauseValueToken.getName()) {
 			case "LIST":
-				value = clauseValueToken.getChildrenValues(",", "'", "'");
+				StringJoiner sj = new StringJoiner(",");
+				for (Token listItem : clauseValueToken.getChildren()) {
+					if (listItem.is("NULL")) {
+						sj.add("null");
+					} else {
+						sj.add("'" + listItem.getValue() + "'");
+					}
+				}
+				value = sj.toString();
 			break;
 			case "NULL":
 				value = null;

@@ -2,7 +2,6 @@ package it.bz.idm.bdp.reader2.utils.miniparser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 public class Token {
 	String name;
@@ -30,30 +29,14 @@ public class Token {
 	}
 
 	public boolean valueIs(String value) {
-		if (value == null || value.isEmpty())
-			return false;
-		return value.equals(this.value);
-	}
-
-	public String getChildrenValues(String separator, String elementPrefix, String elementSuffix, String prefix, String suffix) {
-		elementPrefix = elementPrefix == null ? "" : elementPrefix;
-		elementSuffix = elementSuffix == null ? "" : elementSuffix;
-		prefix = prefix == null ? "" : prefix;
-		suffix = suffix == null ? "" : suffix;
-
-		StringJoiner sj = new StringJoiner(separator, prefix, suffix);
-		for (Token listItem : children) {
-			sj.add(elementPrefix + listItem.getValue() + elementSuffix);
+		if (value == null) {
+			if (this.value == null) {
+				return true;
+			} else {
+				return false;
+			}
 		}
-		return sj.toString();
-	}
-
-	public String getChildrenValues(String separator, String elementPrefix, String elementSuffix) {
-		return getChildrenValues(separator, elementPrefix, elementSuffix, null, null);
-	}
-
-	public String getChildrenValues(String separator) {
-		return getChildrenValues(separator, null, null, null, null);
+		return value.equals(this.value);
 	}
 
 	public void combine(Token child) {
@@ -194,7 +177,7 @@ public class Token {
 
 	public Token getChild(String childName) {
 		for (Token child : children) {
-			if (childName.equals(child.getName())) {
+			if (childName.equalsIgnoreCase(child.getName())) {
 				return child;
 			}
 		}
@@ -207,5 +190,9 @@ public class Token {
 
 	public boolean equals(Token o) {
 		return name.equalsIgnoreCase(o.getName());
+	}
+
+	public List<Token> getChildren() {
+		return children;
 	}
 }
