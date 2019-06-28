@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
-import it.bz.idm.bdp.reader2.utils.miniparser.SimpleConsumer;
+import it.bz.idm.bdp.reader2.utils.miniparser.ConsumerExtended;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 
 /**
@@ -97,7 +97,7 @@ public class SelectExpansion {
 	private Set<String> usedJSONAliases = new HashSet<String>();
 	private Set<String> usedJSONDefNames = new HashSet<String>();
 	private Map<String, String> whereClauseOperatorMap = new HashMap<String, String>();
-	private Map<String, SimpleConsumer> whereClauseOperatorCheckMap = new HashMap<String, SimpleConsumer>();
+	private Map<String, Consumer> whereClauseOperatorCheckMap = new HashMap<String, Consumer>();
 	private String sqlWhere = null;
 	private String whereClause = null;
 	private boolean dirty = true;
@@ -106,7 +106,7 @@ public class SelectExpansion {
 		addOperator(tokenType, operator, sqlSnippet, null);
 	}
 
-	public void addOperator(String tokenType, String operator, String sqlSnippet, SimpleConsumer check) {
+	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
 		whereClauseOperatorMap.put(tokenType + "_" + operator, sqlSnippet);
 		if (check != null)
 			whereClauseOperatorCheckMap.put(tokenType + "_" + operator, check);
@@ -300,7 +300,7 @@ public class SelectExpansion {
 
 		StringBuilder sb = new StringBuilder();
 
-		whereAST.walker(new Consumer() {
+		whereAST.walker(new ConsumerExtended() {
 
 			/* A stack implementation */
 			Deque<Context> context = new ArrayDeque<Context>();
@@ -393,7 +393,7 @@ public class SelectExpansion {
 		if (sqlOp == null)
 			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, child.getName());
 
-		SimpleConsumer checker = whereClauseOperatorCheckMap.get(child.getName() + "_" + operator);
+		Consumer checker = whereClauseOperatorCheckMap.get(child.getName() + "_" + operator);
 		if (checker != null) {
 			if (! checker.middle(child)) {
 				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator, child.getName(), value);

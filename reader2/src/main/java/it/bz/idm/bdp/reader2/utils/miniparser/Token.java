@@ -59,7 +59,7 @@ public class Token {
 
 	public String prettyFormat() {
 		final StringBuilder res = new StringBuilder();
-		walker(new Consumer() {
+		walker(new ConsumerExtended() {
 			int indent = 0;
 
 			@Override
@@ -85,7 +85,7 @@ public class Token {
 
 	public String format() {
 		final StringBuilder res = new StringBuilder();
-		walker(new Consumer() {
+		walker(new ConsumerExtended() {
 
 			@Override
 			public boolean middle(Token t) {
@@ -118,11 +118,11 @@ public class Token {
         return sb.toString();
 	}
 
-	public void walker(Consumer c) {
+	public void walker(ConsumerExtended c) {
 		_walker(this, c);
 	}
 
-	private boolean _walker(Token token, Consumer c) {
+	private boolean _walker(Token token, ConsumerExtended c) {
 		if (token.children.isEmpty()) {
 			return c.middle(token);
 		}

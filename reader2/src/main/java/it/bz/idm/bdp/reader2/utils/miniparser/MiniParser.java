@@ -125,7 +125,7 @@ public class MiniParser {
 		return condition;
 	}
 
-	protected Token doSingle(String tokenName, SimpleConsumer c) {
+	protected Token doSingle(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
 		c.middle(t);
 		if (DEBUG)
@@ -133,7 +133,7 @@ public class MiniParser {
 		return t;
 	}
 
-	protected Token doWhile(String tokenName, SimpleConsumer c) {
+	protected Token doWhile(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
 		do {
 			if(!c.middle(t)) {
