@@ -130,4 +130,40 @@ public class SelectExpansionTests {
 
 	}
 
+	@Test
+	public void testWhereClauseExpansion() {
+		SelectExpansion se = new SelectExpansion();
+		se.addColumn("A", "a", "A.a");
+		se.addOperator("value", "eq", "= %s");
+		se.addOperator("value", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("value", "lt", "< %s");
+		se.addOperator("value", "gt", "> %s");
+		se.addOperator("value", "lteq", "=< %s");
+		se.addOperator("value", "gteq", ">= %s");
+		se.addOperator("value", "re", "~ %s");
+		se.addOperator("value", "ire", "~* %s");
+		se.addOperator("value", "nre", "!~ %s");
+		se.addOperator("value", "nire", "!~* %s");
+		se.addOperator("list", "in", "in (%s)", t -> {
+			return !(t.getChildren().size() == 1 && t.getChild("value").getValue() == null);
+		});
+		se.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		});
+		se.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		});
+
+		se.setWhereClause("a.bbi.(1,2,3,4,5,6)");
+		try {
+			se.expand("a", "A");
+			fail("Exception expected");
+		} catch (SimpleException e) {
+			// nothing to do
+		}
+
+	}
+
 }
