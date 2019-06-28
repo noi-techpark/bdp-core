@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringJoiner;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
+import it.bz.idm.bdp.reader2.utils.miniparser.SimpleConsumer;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 
 /**
@@ -90,37 +90,26 @@ public class SelectExpansion {
 		}
 	}
 
-	// FIXME Make this configurable from outside, remove it from here, too specific for a generic select expansion class
-	private static final Map<String, String> WHERE_CLAUSE_OPERATOR_MAP = new HashMap<String, String>() {
-		private static final long serialVersionUID = -5341630275473756739L;
-		{
-			put("value_eq", "= %s");
-			put("value_neq", "<> %s");
-			put("null_eq", "is null");
-			put("null_neq", "is not null");
-			put("value_lt", "< %s");
-			put("value_gt", "> %s");
-			put("value_lteq", "=< %s");
-			put("value_gteq", ">= %s");
-			put("value_re", "~ %s");
-			put("value_ire", "~* %s");
-			put("value_nre", "!~ %s");
-			put("value_nire", "!~* %s");
-			put("list_in", "in (%s)");
-			put("list_bbi", "&& ST_MakeEnvelope(%s)");
-			put("list_bbc", "@ ST_MakeEnvelope(%s)");
-		}
-	};
-
 	private Map<String, SelectDefinition> schema = new HashMap<String, SelectDefinition>();
 	private Map<String, String> aliases = new HashMap<String, String>();
 	private Map<String, String> pointers = new HashMap<String, String>();
 	private Map<String, String> expandedSelects = new HashMap<String, String>();
 	private Set<String> usedJSONAliases = new HashSet<String>();
 	private Set<String> usedJSONDefNames = new HashSet<String>();
+	private Map<String, String> whereClauseOperatorMap = new HashMap<String, String>();
+	private Map<String, SimpleConsumer> whereClauseOperatorCheckMap = new HashMap<String, SimpleConsumer>();
 	private String sqlWhere = null;
 	private String whereClause = null;
 	private boolean dirty = true;
+
+	public void addOperator(String type, String operator, String sqlSnippet) {
+		whereClauseOperatorMap.put(type + "_" + operator, sqlSnippet);
+	}
+
+	public void addOperator(String type, String operator, String sqlSnippet, SimpleConsumer check) {
+		whereClauseOperatorMap.put(type + "_" + operator, sqlSnippet);
+		whereClauseOperatorCheckMap.put(type + "_" + operator, check);
+	}
 
 	public void add(final String name, final SelectDefinition selDef) {
 		if (name == null || name.isEmpty() || selDef == null) {
@@ -383,46 +372,29 @@ public class SelectExpansion {
 		sqlWhere = sb.toString();
 	}
 
-	private String whereClauseItem(String operator, Token listOrValue) {
-		if (! "list_or_value".equals(listOrValue.getName())) {
+	private String whereClauseItem(String operator, Token token) {
+		if (! "list_or_value".equals(token.getName())) {
 			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator); // FIXME give the whole where-clause from user input
 		}
 
 		String value = null;
-		String valueType = "";
-		Token list = listOrValue.getChild("list");
-		if (list != null) {
-			StringJoiner sj = new StringJoiner(",");
-			for (Token child : list.getChildren()) {
-				sj.add("'" + child.getValue() + "'");
-			}
-			value = sj.toString();
-			valueType = "list";
+		Token child = token.getChildren().get(0);
+
+		if (child.is("list")) {
+			value = child.getChildrenValues(",", "'", "'");
 		} else {
-			value = listOrValue.getChild("value").getValue();
-			if ("null".equalsIgnoreCase(value)) {
-				valueType = "null";
-			} else {
-				valueType = "value";
-			}
+			value = child.getValue();
 		}
 
-		String sqlOp = WHERE_CLAUSE_OPERATOR_MAP.get(valueType + "_" + operator);
+		String sqlOp = whereClauseOperatorMap.get(child.getName() + "_" + operator);
 		if (sqlOp == null)
-			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, valueType);
+			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, child.getName());
 
-		switch (operator) {
-			case "in":
-				if (list.getChildren().isEmpty()) {
-					throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
-				}
-			break;
-			case "bbi":
-			case "bbc":
-				if (list.getChildren().size() != 4 && list.getChildren().size() != 5) {
-					throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
-				}
-			break;
+		SimpleConsumer checker = whereClauseOperatorCheckMap.get(child.getName() + "_" + operator);
+		if (checker != null) {
+			if (! checker.middle(child)) {
+				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+			}
 		}
 
 		return String.format(sqlOp, value);
@@ -549,6 +521,13 @@ public class SelectExpansion {
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
+
+		se.addOperator("value", "eq", "= %s");
+		se.addOperator("value", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("list", "in", "in (%s)");
+		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
 		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
 		se.expand("*", "A", "B", "C");

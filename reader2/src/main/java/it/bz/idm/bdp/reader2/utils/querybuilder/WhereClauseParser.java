@@ -62,7 +62,7 @@ public class WhereClauseParser extends MiniParser {
 			if (matchConsume('(')) {
 				t.add(list());
 				expectConsume(')');
-			} else {
+			} else  {
 				t.add(value());
 			}
 			return true;
@@ -88,8 +88,12 @@ public class WhereClauseParser extends MiniParser {
 			t.appendValue(c());
 			return true;
 		});
-		if (res.getValue() == null)
+		if (res.getValue() == null) {
 			res.setValue("");
+		} else if ("null".equals(res.getValue())) {
+			res.setName("null");
+			res.setValue(null);
+		}
 		return res;
 	}
 
@@ -133,7 +137,8 @@ public class WhereClauseParser extends MiniParser {
 //		input = "and(x.eq.3,y.bbi.(1,2,3,4,5),or(z.neq.null,abc.in.(ciao,ha\\,llo),t.ire..*77|e3))";
 //		input = "xy.in.(1,2)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5)";
-		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4)";
+		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
+		input = "f.eq.(null,null,null)";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
 		System.out.println(ast.prettyFormat());

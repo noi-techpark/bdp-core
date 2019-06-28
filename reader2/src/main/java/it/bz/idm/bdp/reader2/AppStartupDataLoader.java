@@ -63,6 +63,29 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		se.addSubDef("station", "sparent", "parent");
 		se.addSubDef("station", "sdatatypes", "datatype");
 
+		/* Define where-clause items and their mappings to SQL */
+		se.addOperator("value", "eq", "= %s");
+		se.addOperator("value", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("value", "lt", "< %s");
+		se.addOperator("value", "gt", "> %s");
+		se.addOperator("value", "lteq", "=< %s");
+		se.addOperator("value", "gteq", ">= %s");
+		se.addOperator("value", "re", "~ %s");
+		se.addOperator("value", "ire", "~* %s");
+		se.addOperator("value", "nre", "!~ %s");
+		se.addOperator("value", "nire", "!~* %s");
+		se.addOperator("list", "in", "in (%s)", t -> {
+			return !(t.getChildren().size() == 1 && t.getChild("value").getValue() == null);
+		});
+		se.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		});
+		se.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+			return t.getChildren().size() == 4 || t.getChildren().size() == 5;
+		});
+
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(se);
 		QueryExecutor.setup(jdbcTemplate);

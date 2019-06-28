@@ -2,6 +2,7 @@ package it.bz.idm.bdp.reader2.utils.miniparser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class Token {
 	String name;
@@ -20,6 +21,33 @@ public class Token {
 
 	public void add(Token child) {
 		children.add(child);
+	}
+
+	public boolean is(String name) {
+		if (name == null || name.isEmpty())
+			return false;
+		return name.equals(this.name);
+	}
+
+	public String getChildrenValues(String separator, String elementPrefix, String elementSuffix, String prefix, String suffix) {
+		elementPrefix = elementPrefix == null ? "" : elementPrefix;
+		elementSuffix = elementSuffix == null ? "" : elementSuffix;
+		prefix = prefix == null ? "" : prefix;
+		suffix = suffix == null ? "" : suffix;
+
+		StringJoiner sj = new StringJoiner(separator, prefix, suffix);
+		for (Token listItem : getChildren()) {
+			sj.add(elementPrefix + listItem.getValue() + elementSuffix);
+		}
+		return sj.toString();
+	}
+
+	public String getChildrenValues(String separator, String elementPrefix, String elementSuffix) {
+		return getChildrenValues(separator, elementPrefix, elementSuffix, null, null);
+	}
+
+	public String getChildrenValues(String separator) {
+		return getChildrenValues(separator, null, null, null, null);
 	}
 
 	public void combine(Token child) {
@@ -61,7 +89,7 @@ public class Token {
 
 			@Override
 			public boolean middle(Token t) {
-				res.append("{" + t.name + "=" + t.value + "}");
+				res.append("{" + t.name + (t.value == null ? "" : "=" + t.value) + "}");
 				return true;
 			}
 
@@ -141,6 +169,10 @@ public class Token {
 
 	public String getName() {
 		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public List<Token> getChildren() {
