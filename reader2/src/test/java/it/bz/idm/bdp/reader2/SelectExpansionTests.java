@@ -159,11 +159,22 @@ public class SelectExpansionTests {
 		se.setWhereClause("a.bbi.(1,2,3,4,5,6)");
 		try {
 			se.expand("a", "A");
-			fail("Exception expected");
+			fail("Exception expected; where clause bbi.<list> must have 4 or 5 elements");
 		} catch (SimpleException e) {
 			// nothing to do
 		}
 
-	}
+		se.setWhereClause("a.bbi.(1,2,3,4)");
+		se.expand("a", "A");
+		assertEquals("(A.a && ST_MakeEnvelope('1','2','3','4'))", se.getWhereSql());
+
+		se.setWhereClause("a.in.()");
+		se.expand("a", "A");
+		assertEquals("(A.a in (''))", se.getWhereSql());
+
+		se.setWhereClause("a.in.(null,null)");
+		se.expand("a", "A");
+		assertEquals("(A.a in (null,null))", se.getWhereSql());
+}
 
 }

@@ -383,6 +383,8 @@ public class SelectExpansion {
 
 		if (child.is("list")) {
 			value = child.getChildrenValues(",", "'", "'");
+		} else if (child.is("null")) {
+			value = null;
 		} else {
 			value = child.getValue();
 		}
