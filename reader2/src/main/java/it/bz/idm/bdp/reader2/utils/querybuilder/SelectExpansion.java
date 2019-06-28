@@ -102,13 +102,14 @@ public class SelectExpansion {
 	private String whereClause = null;
 	private boolean dirty = true;
 
-	public void addOperator(String type, String operator, String sqlSnippet) {
-		whereClauseOperatorMap.put(type + "_" + operator, sqlSnippet);
+	public void addOperator(String tokenType, String operator, String sqlSnippet) {
+		addOperator(tokenType, operator, sqlSnippet, null);
 	}
 
-	public void addOperator(String type, String operator, String sqlSnippet, SimpleConsumer check) {
-		whereClauseOperatorMap.put(type + "_" + operator, sqlSnippet);
-		whereClauseOperatorCheckMap.put(type + "_" + operator, check);
+	public void addOperator(String tokenType, String operator, String sqlSnippet, SimpleConsumer check) {
+		whereClauseOperatorMap.put(tokenType + "_" + operator, sqlSnippet);
+		if (check != null)
+			whereClauseOperatorCheckMap.put(tokenType + "_" + operator, check);
 	}
 
 	public void add(final String name, final SelectDefinition selDef) {

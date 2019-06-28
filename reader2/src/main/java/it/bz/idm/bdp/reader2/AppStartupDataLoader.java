@@ -30,7 +30,7 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
             return;
         }
 
-		boolean ignoreNull = false;
+		boolean ignoreNull = true;
 
 		SelectExpansion se = new SelectExpansion();
 
@@ -63,7 +63,11 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		se.addSubDef("station", "sparent", "parent");
 		se.addSubDef("station", "sdatatypes", "datatype");
 
-		/* Define where-clause items and their mappings to SQL */
+		/*
+		 * Define where-clause items and their mappings to SQL. Some operators need
+		 * checks of their values or list items. These can be defined with Lambda
+		 * functions.
+		 */
 		se.addOperator("value", "eq", "= %s");
 		se.addOperator("value", "neq", "<> %s");
 		se.addOperator("null", "eq", "is null");
