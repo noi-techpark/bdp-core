@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -176,14 +177,14 @@ public class SelectExpansion {
 
 	public Set<String> getAliases(Set<String> defNames) {
 		Set<String> res = new HashSet<String>();
-		for (SelectDefinition def : getDefinition(defNames)) {
+		for (SelectDefinition def : getDefinitions(defNames)) {
 			 res.addAll(def.getAliases());
 		}
 		return res;
 	}
 
 	public SelectDefinition getDefinition(final String alias, Set<String> defNames) {
-		for (SelectDefinition def : getDefinition(defNames)) {
+		for (SelectDefinition def : getDefinitions(defNames)) {
 			if (def.getAliases().contains(alias))
 				return def;
 		}
@@ -198,7 +199,45 @@ public class SelectExpansion {
 		return null;
 	}
 
-	public Set<SelectDefinition> getDefinition(Set<String> defNames) {
+	public SelectDefinition getParentDefinition(final String defName, Set<String> defNames) {
+		for (SelectDefinition def : getDefinitions(defNames)) {
+			for (SelectDefinition child : def.getPointersOnly().values()) {
+				if (child.getName().equals(defName))
+					return def;
+			}
+		}
+		return null;
+	}
+
+	public SelectDefinition getParentDefinition(final String defName) {
+		return getParentDefinition(defName, null);
+	}
+
+	public String getParentAlias(final String defName) {
+		return getParentAlias(defName, null);
+	}
+
+	public String getParentAlias(final String defName, Set<String> defNames) {
+		SelectDefinition parent = getParentDefinition(defName, defNames);
+		if (parent == null) {
+			return null;
+		}
+		for (Entry<String, SelectDefinition> child : parent.getPointersOnly().entrySet()) {
+			if (child.getValue().getName().equals(defName)) {
+				return child.getKey();
+			}
+		}
+		return null;
+	}
+
+	public Set<SelectDefinition> getDefinitions() {
+		return new HashSet<SelectDefinition>(schema.values());
+	}
+
+	public Set<SelectDefinition> getDefinitions(Set<String> defNames) {
+		if (defNames == null) {
+			return getDefinitions();
+		}
 		Set<SelectDefinition> res = new HashSet<SelectDefinition>();
 		for (String defName : defNames) {
 			SelectDefinition def = schema.get(defName);
@@ -503,6 +542,60 @@ public class SelectExpansion {
 		return resultSet;
 	}
 
+	public Map<String, Object> makeObjectOrNull(Map<String, Object> record, boolean ignoreNull, Set<String> defNames) {
+		Map<String, Object> result = makeObjectOrEmptyMap(record, ignoreNull, defNames);
+		return result.isEmpty() ? null : result;
+	}
+
+	public Map<String, Object> makeObjectOrNull(Map<String, Object> record, boolean ignoreNull, String... defNames) {
+		return makeObjectOrNull(record, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
+	}
+
+	public Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, boolean ignoreNull, Set<String> defNames) {
+		Map<String, Map<String, Object>> result = new HashMap<String, Map<String, Object>>();
+		List<String> usedAliases = getUsedAliases();
+
+		List<String> rootDefinition = new ArrayList<String>();
+		for (String defName : getUsedDefNames()) {
+			result.put(defName, new HashMap<String, Object>());
+			rootDefinition.add(defName);
+		}
+
+		for (String alias : usedAliases) {
+			System.out.println("alias = " + alias);
+			SelectDefinition def = getDefinition(alias);
+			Map<String, Object> curMap = result.get(def.getName());
+			if (def.isColumn(alias)) {
+				/*
+				 * record.get cannot distinguish between "not-found" and "found-but-null", therefore
+				 * we need to use containsKey here
+				 */
+				if (! record.containsKey(alias)) {
+					continue;
+				}
+				Object value = record.get(alias);
+				if (value == null && ignoreNull) {
+					continue;
+				}
+				curMap.put(alias, value);
+			}  else {
+				String pointingTo = def.getPointersOnly().get(alias).getName();
+				rootDefinition.remove(pointingTo);
+				curMap.put(alias, result.get(pointingTo));
+			}
+		}
+
+		if (rootDefinition.size() != 1) {
+			throw new RuntimeException("Result Object is not unique");
+		}
+
+		return result.get(rootDefinition.get(0));
+	}
+
+	public Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, boolean ignoreNull, String... defNames) {
+		return makeObjectOrEmptyMap(record, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
+	}
+
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
 		se.addColumn("C", "h", "C.h");
@@ -511,51 +604,79 @@ public class SelectExpansion {
 		se.addColumn("A", "a", "A.a");
 		se.addColumn("A", "b", "A.b");
 		se.addSubDef("A", "c", "B");
+		se.addSubDef("main", "0", "A");
 
-//		{}
-//		[]
-//		[]
-		se.expand("y", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
+////		{}
+////		[]
+////		[]
+//		se.expand("y", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//
+////		{B=B.x as x}
+////		[x]
+////		[B]
+//		se.expand("x, y", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//
+////		{A=A.a as a, A.b as b, B=B.x as x}
+////		[a, b, c, x]
+////		[A, B]
+//		se.expand("a, b, c", "A", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//
+//		se.addOperator("value", "eq", "= %s");
+//		se.addOperator("value", "neq", "<> %s");
+//		se.addOperator("null", "eq", "is null");
+//		se.addOperator("null", "neq", "is not null");
+//		se.addOperator("list", "in", "in (%s)");
+//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+//
+//		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+//		se.expand("*", "A", "B", "C");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//		System.out.println(se.getWhereSql());
 
-//		{B=B.x as x}
-//		[x]
-//		[B]
-		se.expand("x, y", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
-
-//		{A=A.a as a, A.b as b, B=B.x as x}
-//		[a, b, c, x]
-//		[A, B]
-		se.expand("a, b, c", "A", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
-
-		se.addOperator("value", "eq", "= %s");
-		se.addOperator("value", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("list", "in", "in (%s)");
-		se.addOperator("list", "bbi", "&& st_envelope(%s)");
-
-		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-		se.expand("*", "A", "B", "C");
+//		se.expand("*", "A", "B");
+		se.expand("*", "main", "A", "B", "C");
+		Map<String, Object> rec = new HashMap<String, Object>();
+//		rec.put("a", "3");
+//		rec.put("b", "7");
+//		rec.put("x", "0");
+		rec.put("h", "v");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
+//		System.out.println();
+//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A").toString());
+//		System.out.println();
+//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "B").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "B").toString());
+//		System.out.println();
+//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "C").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "C").toString());
+//		System.out.println();
+		System.out.println(se.makeObjectOrEmptyMap(rec, false, "main", "A", "C").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "C").toString());
+//		System.out.println();
+////		System.out.println(se.makeObjectOrEmptyMap(rec, false, "B", "C").toString());
+////		System.out.println(se.makeObjectOrEmptyMap(rec, true, "B", "C").toString());
+////		System.out.println();
+////		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B").toString());
+////		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B").toString());
+//		System.out.println();
+//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B", "C").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B", "C").toString());
 
-//		se.build("*", RecursionType.NONE, "A", "B");
-//		System.out.println(se.getExpandedSelects());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
-//
 ////		{A=A.a as a, A.b as b, B=B.x as x, X=X.h as h}
 ////		[a, b, c, x, h, y]
 ////		[A, B, X]

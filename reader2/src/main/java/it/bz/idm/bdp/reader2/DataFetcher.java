@@ -2,12 +2,9 @@ package it.bz.idm.bdp.reader2;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
-import it.bz.idm.bdp.reader2.utils.querybuilder.SelectDefinition;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
@@ -52,6 +48,7 @@ public class DataFetcher {
 		log.info(query.getSql());
 
 		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 
 		nanoTime = System.nanoTime();
 		List<Map<String, Object>> queryResult = QueryExecutor
@@ -63,8 +60,11 @@ public class DataFetcher {
 
 		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
-		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
-		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
+		List<String> hierarchy = new ArrayList<String>();
+		hierarchy.add("_stationtype");
+		hierarchy.add("_stationcode");
+
+		return buildResultMaps2(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy, new ArrayList<String>());
 	}
 
 	public static String serializeJSON(Map<String, Object> resultMap) {
@@ -113,6 +113,7 @@ public class DataFetcher {
 				.addLimit(limit)
 				.addOffset(offset);
 		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 
 		nanoTime = System.nanoTime();
 		List<Map<String, Object>> queryResult = QueryExecutor
@@ -122,7 +123,6 @@ public class DataFetcher {
 
 		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
-		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
 	}
 
@@ -172,8 +172,8 @@ public class DataFetcher {
 				case 3:
 					stationTypes.put(stationTypeAct, new HashMap<String, Object>());
 				case 2:
-					station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
-					parent = makeObjectOrNull(rec, se, ignoreNull, "parent");
+					station = se.makeObjectOrEmptyMap(rec, ignoreNull, "station");
+					parent = se.makeObjectOrNull(rec, ignoreNull, "parent");
 					if (parent != null) {
 						station.put("sparent", parent);
 					}
@@ -185,7 +185,7 @@ public class DataFetcher {
 						break;
 					}
 				case 1:
-					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
+					datatype = se.makeObjectOrEmptyMap(rec, ignoreNull, "datatype");
 					if (datatype.isEmpty() && !se.getUsedDefNames().contains("measurement")) {
 						break;
 					}
@@ -197,7 +197,7 @@ public class DataFetcher {
 						break;
 					}
 				case 0:
-					measurement = makeObjectOrNull(rec, se, ignoreNull, "measurement");
+					measurement = se.makeObjectOrNull(rec, ignoreNull, "measurement");
 					if (measurement == null) {
 						break;
 					}
@@ -213,35 +213,95 @@ public class DataFetcher {
 		return stationTypes;
 	}
 
-	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
-		Map<String, Object> result = makeObjectOrEmptyMap(record, se, ignoreNull, defNames);
-		return result.isEmpty() ? null : result;
+	private static Object addOrNew(int level, List<String> hierarchyTypes, Object results) {
+		String type = hierarchyTypes.get(level - 1);
+		if (type.equals("map"))
+			return new HashMap<String, Object>();
+		return new ArrayList<Object>();
 	}
 
-	private static Map<String, Object> makeObjectOrNull(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
-		return makeObjectOrNull(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
-	}
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> buildResultMaps2(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy, List<String> hierarchyTypes) {
 
-	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, Set<String> defNames) {
-		Map<String, Object> result = new HashMap<String, Object>();
-		for (Entry<String, Object> e : record.entrySet()) {
-			SelectDefinition def = se.getDefinition(e.getKey(), defNames);
-			if (def != null) {
-				if (def.isColumn(e.getKey())) {
-					result.put(e.getKey(), e.getValue());
-				} else {
-					Map<String, Object> subObject = makeObjectOrNull(record, se, ignoreNull, defNames);
-					if (subObject != null || !ignoreNull) {
-						result.put(e.getKey(), subObject);
-					}
-				}
-			}
+		if (queryResult == null || queryResult.isEmpty()) {
+			return new HashMap<String, Object>();
 		}
-		return result;
-	}
 
-	private static Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, SelectExpansion se, boolean ignoreNull, String... defNames) {
-		return makeObjectOrEmptyMap(record, se, ignoreNull, new HashSet<String>(Arrays.asList(defNames)));
+		List<String> currValues = new ArrayList<String>();
+		List<String> prevValues = new ArrayList<String>();
+
+		for (String h : hierarchy) {
+			prevValues.add("");
+		}
+
+		Map<String, Object> stationTypes = new HashMap<String, Object>();
+		Map<String, Object> stations = null;
+		List<Object> datatypes = null;
+		List<Object> measurements = null;
+
+		Map<String, Object> station = null;
+		Map<String, Object> parent = null;
+		Map<String, Object> datatype = null;
+		Map<String, Object> measurement = null;
+
+		int renewLevel = hierarchy.size();
+		for (Map<String, Object> rec : queryResult) {
+
+			currValues.clear();
+			int i = hierarchy.size();
+			for (String value : hierarchy) {
+				currValues.add((String) rec.getOrDefault(value, ""));
+				if (! value.equals(prevValues.get(i - 1))) {
+					renewLevel = i;
+				}
+				i--;
+			}
+
+			station = se.makeObjectOrEmptyMap(rec, ignoreNull, "station", "parent");
+
+			System.out.println(station);
+
+//			switch (renewLevel) {
+//				case 3:
+//					stationTypes.put(currValues.get(renewLevel - 1), new HashMap<String, Object>());
+//				case 2:
+//					station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
+//					parent = makeObjectOrNull(rec, se, ignoreNull, "parent");
+//					if (parent != null) {
+//						station.put("sparent", parent);
+//					}
+//					stations = (Map<String, Object>) stationTypes.get(currValues.get(renewLevel - 1));
+//					stations.put(stationCodeAct, station);
+//					if (se.getUsedDefNames().contains("datatype") || se.getUsedDefNames().contains("measurement")) {
+//						station.put("sdatatypes", new ArrayList<Object>());
+//					} else {
+//						break;
+//					}
+//				case 1:
+//					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
+//					if (datatype.isEmpty() && !se.getUsedDefNames().contains("measurement")) {
+//						break;
+//					}
+//					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
+//					datatypes.add(datatype);
+//					if (se.getUsedDefNames().contains("measurement")) {
+//						datatype.put("tmeasurements", new ArrayList<Object>());
+//					} else {
+//						break;
+//					}
+//				case 0:
+//					measurement = makeObjectOrNull(rec, se, ignoreNull, "measurement");
+//					if (measurement == null) {
+//						break;
+//					}
+//					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tmeasurements");
+//					measurements.add(measurement);
+//			}
+
+			prevValues.clear();
+			prevValues.addAll(currValues);
+		}
+		return stationTypes;
 	}
 
 	public String fetchStationTypes() {
@@ -249,7 +309,6 @@ public class DataFetcher {
 				.init()
 				.build("select stationtype from station group by stationtype", String.class));
 	}
-
 
 
 }
