@@ -75,9 +75,10 @@ public class SelectExpansion {
 		KEY_NOT_INSIDE_DEFLIST   ("Key '%s' is not reachable from the expanded select definition list: %s"),
 		DEFINITION_NOT_FOUND     ("Select Definition '%s' not found! It must exist before we can point to it"),
 		ADD_INVALID_DATA         ("A schema entry must have a name and a valid definition"),
-		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: '%s.<%s>' with value %s is not valid (checks failed)"),
+		WHERE_ALIAS_VALUE_ERROR  ("Syntax Error in WHERE clause: '%s.<%s>' with value %s is not valid (checks failed)"),
 		WHERE_ALIAS_NOT_FOUND    ("Syntax Error in WHERE clause: Alias '%s' does not exist"),
 		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
+		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE              ("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA      ("Provide valid alias and definition sets!");
 
@@ -336,7 +337,12 @@ public class SelectExpansion {
 		}
 
 		WhereClauseParser whereParser = new WhereClauseParser(where);
-		Token whereAST = whereParser.parse();
+		Token whereAST;
+		try {
+			whereAST = whereParser.parse();
+		} catch (RuntimeException e) {
+			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, e.getMessage());
+		}
 
 		StringBuilder sb = new StringBuilder();
 
@@ -435,7 +441,7 @@ public class SelectExpansion {
 			break;
 			default:
 				// FIXME give the whole where-clause from user input to generate a better error response
-				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator);
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
 		}
 
 		/*
@@ -446,7 +452,7 @@ public class SelectExpansion {
 		Consumer checker = whereClauseOperatorCheckMap.get(clauseValueToken.getName() + "_" + operator);
 		if (checker != null) {
 			if (! checker.middle(clauseValueToken)) {
-				throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, operator, clauseValueToken.getName(), value);
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(), value);
 			}
 		}
 
