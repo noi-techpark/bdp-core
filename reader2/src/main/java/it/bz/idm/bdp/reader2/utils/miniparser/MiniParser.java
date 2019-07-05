@@ -2,7 +2,9 @@ package it.bz.idm.bdp.reader2.utils.miniparser;
 
 public class MiniParser {
 
-	private static final boolean DEBUG = false;
+	protected static final char EOL = '\0';
+
+	private static final boolean DEBUG = true;
 
 	private char c;
 	private char la;
@@ -50,17 +52,28 @@ public class MiniParser {
 		return la;
 	}
 
+	protected int getPos() {
+		return i;
+	}
+
 	protected char c() {
 		return la(0);
 	}
 
+	protected String encode(char c) {
+		switch (c) {
+			case EOL: return "<EOL>";
+		}
+		return "" + c;
+	}
+
 	private void error(String msg) {
-		throw new RuntimeException("Syntax error at position " + i + " with character '" + c + "': " + msg);
+		throw new RuntimeException("Syntax error at position " + i + " with character '" + encode(c) + "': " + msg);
 	}
 
 	protected void expect(char exp) {
 		if (c != exp)
-			error("'" + exp + "' expected");
+			error("'" + encode(exp) + "' expected");
 	}
 
 	protected boolean match(char exp, int pos) {
@@ -127,21 +140,25 @@ public class MiniParser {
 
 	protected Token doSingle(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
+		if (DEBUG)
+			System.out.println("S=" + tokenName);
 		c.middle(t);
 		if (DEBUG)
-			System.out.println("T=" + tokenName);
+			System.out.println("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
 	protected Token doWhile(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
+		if (DEBUG)
+			System.out.println("S=" + tokenName);
 		do {
 			if(!c.middle(t)) {
 				break;
 			}
 		} while (consume());
 		if (DEBUG)
-			System.out.println("T=" + tokenName);
+			System.out.println("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
@@ -158,7 +175,7 @@ public class MiniParser {
 			return;
 		}
 
-		this.input = input + '\0';
+		this.input = input + EOL;
 		i = 0;
 		c = input.charAt(0);
 		la = c;
