@@ -2,6 +2,7 @@ package it.bz.idm.bdp.reader2.utils.querybuilder;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.MiniParser;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
+import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
 
 public class WhereClauseParser extends MiniParser {
 
@@ -10,41 +11,49 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	private Token clauseOrLogicalOp() {
-		Token clauseOrLogicalOp = new Token("CLAUSE_OR_LOGICAL_OP");
-		if (matchConsume("and(")) {
-			clauseOrLogicalOp.add(logicalOpAnd());
-		} else if (matchConsume("or(")) {
-			clauseOrLogicalOp.add(logicalOpOr());
-		} else {
-			clauseOrLogicalOp.add(clause());
-		}
-		if (matchConsume(',')) {
-			clauseOrLogicalOp.combine(clauseOrLogicalOp());
-		}
-		return clauseOrLogicalOp;
+		return doSingle("CLAUSE_OR_LOGICAL_OP", t -> {
+			if (matchConsume("and(")) {
+				t.add(logicalOpAnd());
+			} else if (matchConsume("or(")) {
+				t.add(logicalOpOr());
+			} else {
+				t.add(clause());
+			}
+			if (matchConsume(',')) {
+				t.combine(clauseOrLogicalOp());
+			}
+			return true;
+		});
 	}
 
 	private Token alias() {
-		return doWhile("ALIAS", t -> {
+		Token res = doWhile("ALIAS", t -> {
 			if (!Character.isLetter(c())) {
+				System.out.println("AAA = " + c());
 				return false;
 			}
 			t.appendValue(c());
 			return true;
 		});
+		if (res.getValue() == null || res.getValue().isEmpty()) {
+			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, "Found character '" + encode(la(-1)) + "', but an ALIAS was expected");
+		}
+		System.out.println("ALIAS = " + res.getValue());
+		return res;
 	}
 
 	private Token clause() {
-		Token alias = alias();
-		expectConsume('.');
-		Token operator = operator();
-		expectConsume('.');
-		Token listOrValue = listOrValue();
-		Token clause = new Token("CLAUSE");
-		clause.add(alias);
-		clause.add(operator);
-		clause.combineForce(listOrValue);
-		return clause;
+		return doSingle("CLAUSE", t -> {
+			Token alias = alias();
+			expectConsume('.');
+			Token operator = operator();
+			expectConsume('.');
+			Token listOrValue = listOrValue();
+			t.add(alias);
+			t.add(operator);
+			t.combineForce(listOrValue);
+			return true;
+		});
 	}
 
 	private Token operator() {
@@ -81,7 +90,7 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token value() {
 		Token res = doWhile("VALUE", t -> {
-			if ((match(')') || match(',') || match('\'')) && clash('\\', -1)) {
+			if ((match(')') || match(',') || match('\'') || match('.')) && clash('\\', -1)) {
 				return false;
 			}
 			matchConsume('\\');
@@ -126,8 +135,11 @@ public class WhereClauseParser extends MiniParser {
 			return ast;
 		ast = doWhile("AND", t -> {
 			t.combineForce(clauseOrLogicalOp());
-			return true;
+			return matchConsume(',');
+//			return true;
 		});
+		expect(EOL);
+		System.out.println(c());
 		return ast;
 	}
 
@@ -140,6 +152,7 @@ public class WhereClauseParser extends MiniParser {
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
 //		input = "f.eq.(null,null,null)";
 		input = "f.eq.";//,or(a.eq.7,and(b.eq.9))";
+		input = "a.eq.1,and(a.eq.0)";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
 		System.out.println(ast.prettyFormat());
