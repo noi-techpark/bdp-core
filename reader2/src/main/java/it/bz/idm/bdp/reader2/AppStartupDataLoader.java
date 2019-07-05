@@ -63,6 +63,8 @@ public class AppStartupDataLoader implements ApplicationListener<ContextRefreshe
 		se.addSubDef("station", "sparent", "parent");
 		se.addSubDef("station", "sdatatypes", "datatype");
 
+		se.addSubDef("stationtype", "stations", "station");
+
 		/*
 		 * Define where-clause items and their mappings to SQL. Some operators need
 		 * checks of their values or list items. These can be defined with Lambda
