@@ -20,6 +20,14 @@ public class WhereClauseParserTests {
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{NULL}}}", ast.format());
 
+		we.setInput("a.eq.1.and\\(33\\)");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=1.and(33)}}}", ast.format());
+
+		we.setInput("a.eq.1.2");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=1.2}}}", ast.format());
+
 		we.setInput("a.bbi.(1,2.3,7.0000)");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2.3}{VALUE=7.0000}}}}", ast.format());
