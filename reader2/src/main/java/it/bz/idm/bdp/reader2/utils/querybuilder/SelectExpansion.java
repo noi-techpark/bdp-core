@@ -184,7 +184,7 @@ public class SelectExpansion {
 		return res;
 	}
 
-	public SelectDefinition getDefinition(final String alias, Set<String> defNames) {
+	public SelectDefinition getDefinitionByAlias(final String alias, Set<String> defNames) {
 		for (SelectDefinition def : getDefinitions(defNames)) {
 			if (def.getAliases().contains(alias))
 				return def;
@@ -192,12 +192,20 @@ public class SelectExpansion {
 		return null;
 	}
 
-	public SelectDefinition getDefinition(final String alias) {
+	public SelectDefinition getDefinitionByAlias(final String alias) {
 		for (SelectDefinition def : schema.values()) {
 			if (def.getAliases().contains(alias))
 				return def;
 		}
 		return null;
+	}
+
+	public SelectDefinition getDefinition(final String defName) {
+		SelectDefinition def = schema.get(defName);
+		if (def == null) {
+			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
+		}
+		return def;
 	}
 
 	public SelectDefinition getParentDefinition(final String defName, Set<String> defNames) {
@@ -281,7 +289,7 @@ public class SelectExpansion {
 		int curPos = 0;
 		while (curPos < candidateAliases.size()) {
 			String alias = candidateAliases.get(curPos);
-			SelectDefinition def = getDefinition(alias, defNames);
+			SelectDefinition def = getDefinitionByAlias(alias, defNames);
 			if (def == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, alias, defNames);
 				se.addData("alias", alias);
@@ -489,7 +497,7 @@ public class SelectExpansion {
 	}
 
 	public String getColumn(String alias) {
-		SelectDefinition definition = getDefinition(alias);
+		SelectDefinition definition = getDefinitionByAlias(alias);
 		if (definition == null)
 			return null;
 		return definition.getColumn(alias);
@@ -548,6 +556,18 @@ public class SelectExpansion {
 		return resultSet;
 	}
 
+	public Map<String, Object> makeObj(Map<String, Object> record, String defName, boolean ignoreNull) {
+		SelectDefinition def = getDefinition(defName);
+		Map<String, Object> result = new HashMap<String, Object>();
+		for (String alias : def.getAliases()) {
+			Object value = record.get(alias);
+			if (ignoreNull && value == null)
+				continue;
+			result.put(alias, value);
+		}
+		return result;
+	}
+
 	public Map<String, Object> makeObjectOrNull(Map<String, Object> record, boolean ignoreNull, Set<String> defNames) {
 		Map<String, Object> result = makeObjectOrEmptyMap(record, ignoreNull, defNames);
 		return result.isEmpty() ? null : result;
@@ -568,8 +588,7 @@ public class SelectExpansion {
 		}
 
 		for (String alias : usedAliases) {
-			System.out.println("alias = " + alias);
-			SelectDefinition def = getDefinition(alias);
+			SelectDefinition def = getDefinitionByAlias(alias);
 			Map<String, Object> curMap = result.get(def.getName());
 			if (def.isColumn(alias)) {
 				/*
@@ -610,7 +629,7 @@ public class SelectExpansion {
 		se.addColumn("A", "a", "A.a");
 		se.addColumn("A", "b", "A.b");
 		se.addSubDef("A", "c", "B");
-		se.addSubDef("main", "0", "A");
+		se.addSubDef("main", "t", "A");
 
 ////		{}
 ////		[]
@@ -653,9 +672,9 @@ public class SelectExpansion {
 //		se.expand("*", "A", "B");
 		se.expand("*", "main", "A", "B", "C");
 		Map<String, Object> rec = new HashMap<String, Object>();
-//		rec.put("a", "3");
-//		rec.put("b", "7");
-//		rec.put("x", "0");
+		rec.put("a", "3");
+		rec.put("b", "7");
+		rec.put("x", "0");
 		rec.put("h", "v");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());

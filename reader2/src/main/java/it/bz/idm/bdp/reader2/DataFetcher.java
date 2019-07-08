@@ -64,7 +64,7 @@ public class DataFetcher {
 		hierarchy.add("_stationtype");
 		hierarchy.add("_stationcode");
 
-		return buildResultMaps2(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy, new ArrayList<String>());
+		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	public static String serializeJSON(Map<String, Object> resultMap) {
@@ -123,105 +123,16 @@ public class DataFetcher {
 
 		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
-		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion());
+		List<String> hierarchy = new ArrayList<String>();
+		hierarchy.add("_stationtype");
+		hierarchy.add("_stationcode");
+		hierarchy.add("_datatypename");
+
+		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se) {
-
-		if (queryResult == null || queryResult.isEmpty()) {
-			return new HashMap<String, Object>();
-		}
-
-		long nanoTime;
-		nanoTime = System.nanoTime();
-		String stationTypePrev = "";
-		String stationTypeAct = "";
-		String stationCodePrev = "";
-		String stationCodeAct = "";
-		String datatypePrev = "";
-		String datatypeAct = "";
-		Map<String, Object> stationTypes = new HashMap<String, Object>();
-		Map<String, Object> stations = null;
-		List<Object> datatypes = null;
-		List<Object> measurements = null;
-
-		Map<String, Object> station = null;
-		Map<String, Object> parent = null;
-		Map<String, Object> datatype = null;
-		Map<String, Object> measurement = null;
-
-		int renewLevel = 3;
-		for (Map<String, Object> rec : queryResult) {
-
-			stationTypeAct = (String) rec.getOrDefault("_stationtype", "");
-			stationCodeAct = (String) rec.getOrDefault("_stationcode", "");
-			datatypeAct = (String) rec.getOrDefault("_datatypename", "");
-
-			if (!stationTypeAct.equals(stationTypePrev)) {
-				renewLevel = 3;
-			} else if (!stationCodeAct.equals(stationCodePrev)) {
-				renewLevel = 2;
-			} else if (!datatypeAct.equals(datatypePrev)) {
-				renewLevel = 1;
-			} else {
-				renewLevel = 0;
-			}
-
-			switch (renewLevel) {
-				case 3:
-					stationTypes.put(stationTypeAct, new HashMap<String, Object>());
-				case 2:
-					station = se.makeObjectOrEmptyMap(rec, ignoreNull, "station");
-					parent = se.makeObjectOrNull(rec, ignoreNull, "parent");
-					if (parent != null) {
-						station.put("sparent", parent);
-					}
-					stations = (Map<String, Object>) stationTypes.get(stationTypeAct);
-					stations.put(stationCodeAct, station);
-					if (se.getUsedDefNames().contains("datatype") || se.getUsedDefNames().contains("measurement")) {
-						station.put("sdatatypes", new ArrayList<Object>());
-					} else {
-						break;
-					}
-				case 1:
-					datatype = se.makeObjectOrEmptyMap(rec, ignoreNull, "datatype");
-					if (datatype.isEmpty() && !se.getUsedDefNames().contains("measurement")) {
-						break;
-					}
-					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
-					datatypes.add(datatype);
-					if (se.getUsedDefNames().contains("measurement")) {
-						datatype.put("tmeasurements", new ArrayList<Object>());
-					} else {
-						break;
-					}
-				case 0:
-					measurement = se.makeObjectOrNull(rec, ignoreNull, "measurement");
-					if (measurement == null) {
-						break;
-					}
-					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tmeasurements");
-					measurements.add(measurement);
-			}
-
-			stationTypePrev = stationTypeAct;
-			stationCodePrev = stationCodeAct;
-			datatypePrev = datatypeAct;
-		}
-		log.info("build result map: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
-		return stationTypes;
-	}
-
-	private static Object addOrNew(int level, List<String> hierarchyTypes, Object results) {
-		String type = hierarchyTypes.get(level - 1);
-		if (type.equals("map"))
-			return new HashMap<String, Object>();
-		return new ArrayList<Object>();
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Map<String, Object> buildResultMaps2(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy, List<String> hierarchyTypes) {
+	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy) {
 
 		if (queryResult == null || queryResult.isEmpty()) {
 			return new HashMap<String, Object>();
@@ -230,7 +141,7 @@ public class DataFetcher {
 		List<String> currValues = new ArrayList<String>();
 		List<String> prevValues = new ArrayList<String>();
 
-		for (String h : hierarchy) {
+		for (int i = 0; i < hierarchy.size(); i++) {
 			prevValues.add("");
 		}
 
@@ -239,6 +150,7 @@ public class DataFetcher {
 		List<Object> datatypes = null;
 		List<Object> measurements = null;
 
+		Map<String, Object> stationType = null;
 		Map<String, Object> station = null;
 		Map<String, Object> parent = null;
 		Map<String, Object> datatype = null;
@@ -248,55 +160,63 @@ public class DataFetcher {
 		for (Map<String, Object> rec : queryResult) {
 
 			currValues.clear();
-			int i = hierarchy.size();
-			for (String value : hierarchy) {
-				currValues.add((String) rec.getOrDefault(value, ""));
-				if (! value.equals(prevValues.get(i - 1))) {
-					renewLevel = i;
+			int i = 0;
+			boolean levelSet = false;
+			for (String alias : hierarchy) {
+				String value = (String) rec.get(alias);
+				if (value == null) {
+					throw new RuntimeException(alias + " not found in select. Unable to build hierarchy.");
 				}
-				i--;
+				currValues.add(value);
+				if (!levelSet && !value.equals(prevValues.get(i))) {
+					renewLevel = i;
+					levelSet = true;
+				}
+				i++;
 			}
 
-			station = se.makeObjectOrEmptyMap(rec, ignoreNull, "station", "parent");
+			switch (renewLevel) {
+				case 0:
+					stationType = se.makeObj(rec, "stationtype", false);
+					if (!stationType.isEmpty()) {
+						stationTypes.put(currValues.get(0), stationType);
+					}
+				case 1:
+					station = se.makeObj(rec, "station", ignoreNull);
+					parent = se.makeObj(rec, "parent", ignoreNull);
+					if (!parent.isEmpty()) {
+						station.put("sparent", parent);
+					}
 
-			System.out.println(station);
-
-//			switch (renewLevel) {
-//				case 3:
-//					stationTypes.put(currValues.get(renewLevel - 1), new HashMap<String, Object>());
-//				case 2:
-//					station = makeObjectOrEmptyMap(rec, se, ignoreNull, "station");
-//					parent = makeObjectOrNull(rec, se, ignoreNull, "parent");
-//					if (parent != null) {
-//						station.put("sparent", parent);
-//					}
-//					stations = (Map<String, Object>) stationTypes.get(currValues.get(renewLevel - 1));
-//					stations.put(stationCodeAct, station);
-//					if (se.getUsedDefNames().contains("datatype") || se.getUsedDefNames().contains("measurement")) {
-//						station.put("sdatatypes", new ArrayList<Object>());
-//					} else {
-//						break;
-//					}
-//				case 1:
-//					datatype = makeObjectOrEmptyMap(rec, se, ignoreNull, "datatype");
-//					if (datatype.isEmpty() && !se.getUsedDefNames().contains("measurement")) {
-//						break;
-//					}
-//					datatypes = (List<Object>) ((Map<String, Object>) stations.get(stationCodeAct)).get("sdatatypes");
-//					datatypes.add(datatype);
-//					if (se.getUsedDefNames().contains("measurement")) {
-//						datatype.put("tmeasurements", new ArrayList<Object>());
-//					} else {
-//						break;
-//					}
-//				case 0:
-//					measurement = makeObjectOrNull(rec, se, ignoreNull, "measurement");
-//					if (measurement == null) {
-//						break;
-//					}
-//					measurements = (List<Object>) ((Map<String, Object>) datatypes.get(datatypes.size() - 1)).get("tmeasurements");
-//					measurements.add(measurement);
-//			}
+					if (!station.isEmpty()) {
+						stations = (Map<String, Object>) stationType.get("stations");
+						if (stations == null) {
+							stations = new HashMap<String, Object>();
+							stationType.put("stations", stations);
+						}
+						stations.put(currValues.get(1), station);
+					}
+				case 2:
+					datatype = se.makeObj(rec, "datatype", ignoreNull);
+					if (!datatype.isEmpty()) {
+						datatypes = (List<Object>) station.get("sdatatypes");
+						if (datatypes == null) {
+							datatypes = new ArrayList<Object>();
+							station.put("sdatatypes", datatypes);
+						}
+						datatypes.add(datatype);
+					}
+				default:
+					measurement = se.makeObj(rec, "measurement", ignoreNull);
+					if (!measurement.isEmpty()) {
+						measurements = (List<Object>) datatype.get("tmeasurements");
+						if (measurements == null) {
+							measurements = new ArrayList<Object>();
+							datatype.put("tmeasurements", measurements);
+						}
+						measurements.add(measurement);
+					}
+			}
 
 			prevValues.clear();
 			prevValues.addAll(currValues);
@@ -308,6 +228,78 @@ public class DataFetcher {
 		return JsonStream.serialize(QueryExecutor
 				.init()
 				.build("select stationtype from station group by stationtype", String.class));
+	}
+
+	public static void main(String[] args) throws Exception {
+		SelectExpansion se = new SelectExpansion();
+		se.addColumn("measurement", "mvalidtime", "me.timestamp");
+		se.addColumn("measurement", "mtransactiontime", "me.created_on");
+		se.addColumn("measurement", "mperiod", "me.period");
+		se.addColumn("measurement", "mvalue", "me.double_value");
+
+		se.addColumn("datatype", "tname", "t.cname");
+		se.addColumn("datatype", "tunit", "t.cunit");
+		se.addColumn("datatype", "ttype", "t.rtype");
+		se.addColumn("datatype", "tdescription", "t.description");
+		se.addSubDef("datatype", "tmeasurements", "measurement");
+
+		se.addColumn("parent", "pname", "p.name");
+		se.addColumn("parent", "ptype", "p.stationtype");
+		se.addColumn("parent", "pcoordinate", "p.pointprojection");
+		se.addColumn("parent", "pcode", "p.stationcode");
+		se.addColumn("parent", "porigin", "p.origin");
+		se.addColumn("parent", "pmetadata", "pm.json");
+
+		se.addColumn("station", "sname", "s.name");
+		se.addColumn("station", "stype", "s.stationtype");
+		se.addColumn("station", "scode", "s.stationcode");
+		se.addColumn("station", "sorigin", "s.origin");
+		se.addColumn("station", "sactive", "s.active");
+		se.addColumn("station", "savailable", "s.available");
+		se.addColumn("station", "scoordinate", "s.pointprojection");
+		se.addColumn("station", "smetadata", "m.json");
+		se.addSubDef("station", "sparent", "parent");
+		se.addSubDef("station", "sdatatypes", "datatype");
+
+		se.addSubDef("stationtype", "stations", "station");
+
+		se.expand("*", "stationtype", "station", "parent", "datatype", "measurement");
+
+		List<Map<String, Object>> queryResult = new ArrayList<>();
+		Map<String, Object> rec1 = new HashMap<String, Object>();
+		rec1.put("_stationtype", "parking");
+		rec1.put("_stationcode", "walther-code");
+		rec1.put("_datatypename", "occ1");
+		rec1.put("stype", "parking");
+		rec1.put("sname", "walther");
+		rec1.put("pname", "bolzano1");
+		queryResult.add(rec1);
+
+		Map<String, Object> rec2 = new HashMap<String, Object>();
+		rec2.put("_stationtype", "parking");
+		rec2.put("_stationcode", "walther-code");
+		rec2.put("_datatypename", "occ2");
+		rec2.put("stype", "parking");
+		rec2.put("sname", "walther");
+		rec2.put("pname", "bolzano2");
+		queryResult.add(rec2);
+
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
+
+		System.out.println(se.makeObjectOrEmptyMap(rec1, false, "stationtype").toString());
+
+
+		List<String> hierarchy = new ArrayList<String>();
+		hierarchy.add("_stationtype");
+		hierarchy.add("_stationcode");
+		hierarchy.add("_datatypename");
+
+		System.out.println( JsonStream.serialize(buildResultMaps(true, queryResult, se, hierarchy)));
+
+
 	}
 
 
