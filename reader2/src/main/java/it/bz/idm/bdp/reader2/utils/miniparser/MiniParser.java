@@ -1,6 +1,23 @@
 package it.bz.idm.bdp.reader2.utils.miniparser;
 
+import it.bz.idm.bdp.reader2.utils.simpleexception.ErrorCodeInterface;
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
+
 public class MiniParser {
+
+	public static enum ErrorCode implements ErrorCodeInterface {
+		SYNTAX_ERROR 	         ("Syntax error at position %d with character '%c': %s");
+
+		private final String msg;
+		ErrorCode(String msg) {
+			this.msg = msg;
+		}
+
+		@Override
+		public String getMsg() {
+			return "PARSING ERROR: " + msg;
+		}
+	}
 
 	protected static final char EOL = '\0';
 
@@ -67,13 +84,9 @@ public class MiniParser {
 		return "" + c;
 	}
 
-	private void error(String msg) {
-		throw new RuntimeException("Syntax error at position " + i + " with character '" + encode(c) + "': " + msg);
-	}
-
 	protected void expect(char exp) {
 		if (c != exp)
-			error("'" + encode(exp) + "' expected");
+			throw new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), "'" + encode(exp) + "' expected");
 	}
 
 	protected boolean match(char exp, int pos) {
@@ -167,8 +180,8 @@ public class MiniParser {
 	}
 
 	public void setInput(String input) {
-		if (input == null || input.isEmpty()) {
-			throw new RuntimeException("No input to parse");
+		if (input == null) {
+			input = "";
 		}
 
 		if (input.equals(this.input)) {

@@ -3,6 +3,7 @@ package it.bz.idm.bdp.reader2.utils.querybuilder;
 import it.bz.idm.bdp.reader2.utils.miniparser.MiniParser;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class WhereClauseParser extends MiniParser {
 
@@ -136,7 +137,6 @@ public class WhereClauseParser extends MiniParser {
 		ast = doWhile("AND", t -> {
 			t.combineForce(clauseOrLogicalOp());
 			return matchConsume(',');
-//			return true;
 		});
 		expect(EOL);
 		System.out.println(c());

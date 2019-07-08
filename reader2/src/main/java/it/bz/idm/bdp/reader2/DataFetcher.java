@@ -156,12 +156,12 @@ public class DataFetcher {
 		Map<String, Object> datatype = null;
 		Map<String, Object> measurement = null;
 
-		int renewLevel = hierarchy.size();
 		for (Map<String, Object> rec : queryResult) {
 
 			currValues.clear();
 			int i = 0;
 			boolean levelSet = false;
+			int renewLevel = hierarchy.size();
 			for (String alias : hierarchy) {
 				String value = (String) rec.get(alias);
 				if (value == null) {
@@ -273,24 +273,27 @@ public class DataFetcher {
 		rec1.put("stype", "parking");
 		rec1.put("sname", "walther");
 		rec1.put("pname", "bolzano1");
+		rec1.put("tname", "o");
+		rec1.put("mvalue", 1);
 		queryResult.add(rec1);
 
 		Map<String, Object> rec2 = new HashMap<String, Object>();
 		rec2.put("_stationtype", "parking");
 		rec2.put("_stationcode", "walther-code");
-		rec2.put("_datatypename", "occ2");
+		rec2.put("_datatypename", "occ1");
 		rec2.put("stype", "parking");
 		rec2.put("sname", "walther");
 		rec2.put("pname", "bolzano2");
+		rec2.put("tname", "o");
+		rec2.put("mvalue", 2);
 		queryResult.add(rec2);
 
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
-		System.out.println(se.getWhereSql());
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//		System.out.println(se.getWhereSql());
 
-		System.out.println(se.makeObjectOrEmptyMap(rec1, false, "stationtype").toString());
-
+//		System.out.println(se.makeObjectOrEmptyMap(rec1, false, "stationtype").toString());
 
 		List<String> hierarchy = new ArrayList<String>();
 		hierarchy.add("_stationtype");
@@ -298,8 +301,6 @@ public class DataFetcher {
 		hierarchy.add("_datatypename");
 
 		System.out.println( JsonStream.serialize(buildResultMaps(true, queryResult, se, hierarchy)));
-
-
 	}
 
 

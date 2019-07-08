@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
-import it.bz.idm.bdp.reader2.utils.querybuilder.SimpleException;
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class SelectExpansionTests {
 

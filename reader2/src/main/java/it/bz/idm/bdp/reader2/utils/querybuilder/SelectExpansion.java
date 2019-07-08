@@ -15,6 +15,8 @@ import java.util.StringJoiner;
 import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
 import it.bz.idm.bdp.reader2.utils.miniparser.ConsumerExtended;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
+import it.bz.idm.bdp.reader2.utils.simpleexception.ErrorCodeInterface;
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 /**
  * <pre>
