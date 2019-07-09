@@ -11,7 +11,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @ComponentScan("it.bz.opendatahub")
-public class Reader2Config {
+public class DatabaseConfig {
 
 	@Bean
 	DataSource dataSource() {

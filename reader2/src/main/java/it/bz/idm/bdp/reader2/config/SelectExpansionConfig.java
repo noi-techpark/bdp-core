@@ -17,7 +17,7 @@ import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
 
 
 @Component
-public class AppStartupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
+public class SelectExpansionConfig implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
     NamedParameterJdbcTemplate jdbcTemplate;
