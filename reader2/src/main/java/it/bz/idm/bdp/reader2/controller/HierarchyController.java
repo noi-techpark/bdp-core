@@ -20,7 +20,7 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp.reader2;
+package it.bz.idm.bdp.reader2.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.bz.idm.bdp.reader2.DataFetcher;
 
 /**
  * @author Peter Moser

@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2;
+package it.bz.idm.bdp.reader2.config;
 
 import javax.sql.DataSource;
 

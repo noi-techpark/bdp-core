@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2;
+package it.bz.idm.bdp.reader2.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

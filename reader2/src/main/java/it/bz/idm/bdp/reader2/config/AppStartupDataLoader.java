@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.reader2;
+package it.bz.idm.bdp.reader2.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;

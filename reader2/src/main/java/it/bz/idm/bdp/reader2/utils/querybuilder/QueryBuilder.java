@@ -158,7 +158,6 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfDefinition(String sqlPart, String selectDefName) {
-//		if (sqlPart != null && !sqlPart.isEmpty() && se.getExpansion().containsKey(selectDefName)) {
 		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedDefNames().contains(selectDefName)) {
 			sql.append(" ");
 			sql.append(sqlPart);
