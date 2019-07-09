@@ -447,7 +447,7 @@ public class SelectExpansion {
 				value = null;
 			break;
 			case "VALUE":
-				value = clauseValueToken.getValue();
+				value = "'" + clauseValueToken.getValue() + "'";
 			break;
 			default:
 				// FIXME give the whole where-clause from user input to generate a better error response
