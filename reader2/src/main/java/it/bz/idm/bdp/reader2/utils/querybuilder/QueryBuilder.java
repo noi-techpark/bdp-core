@@ -51,7 +51,7 @@ public class QueryBuilder {
 		return new QueryBuilder(select, where, selectDefNames);
 	}
 
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, final String where, String... selectDefNames)  {
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, final String where, String... selectDefNames) {
 		QueryBuilder.setup(selectExpansion);
 		return QueryBuilder.init(select, where, selectDefNames);
 	}
