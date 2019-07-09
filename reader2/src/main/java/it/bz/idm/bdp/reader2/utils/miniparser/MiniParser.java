@@ -1,9 +1,20 @@
 package it.bz.idm.bdp.reader2.utils.miniparser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.bz.idm.bdp.reader2.utils.simpleexception.ErrorCodeInterface;
 import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class MiniParser {
+
+	private static final Logger log = LoggerFactory.getLogger(MiniParser.class);
+	protected static final char EOL = '\0';
+	private char c;
+	private char la;
+	private int i;
+	private String input;
+	protected Token ast = null;
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		SYNTAX_ERROR 	         ("Syntax error at position %d with character '%s': %s");
@@ -18,17 +29,6 @@ public class MiniParser {
 			return "PARSING ERROR: " + msg;
 		}
 	}
-
-	protected static final char EOL = '\0';
-
-	private static final boolean DEBUG = true;
-
-	private char c;
-	private char la;
-	private int i;
-	private String input;
-
-	protected Token ast = null;
 
 	protected MiniParser(String input) {
 		setInput(input);
@@ -47,8 +47,7 @@ public class MiniParser {
 	protected boolean consume() {
 		boolean laExists = get(i + 1);
 		if (laExists) {
-			if (DEBUG)
-				System.out.println("C=" + c);
+			log.debug("C=" + c);
 			c = la;
 			i++;
 		}
@@ -153,25 +152,21 @@ public class MiniParser {
 
 	protected Token doSingle(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
-		if (DEBUG)
-			System.out.println("S=" + tokenName);
+		log.debug("S=" + tokenName);
 		c.middle(t);
-		if (DEBUG)
-			System.out.println("E=" + tokenName + "; value = " + t.getValue());
+		log.debug("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
 	protected Token doWhile(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
-		if (DEBUG)
-			System.out.println("S=" + tokenName);
+		log.debug("S=" + tokenName);
 		do {
 			if(!c.middle(t)) {
 				break;
 			}
 		} while (consume());
-		if (DEBUG)
-			System.out.println("E=" + tokenName + "; value = " + t.getValue());
+		log.debug("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
