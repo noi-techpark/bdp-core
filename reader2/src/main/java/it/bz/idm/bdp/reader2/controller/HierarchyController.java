@@ -71,6 +71,7 @@ public class HierarchyController {
 			" -   bbi: Bounding box intersecting objects (ex., a street that is only partially covered by the box). Syntax? See below.\n" +
 			" -   bbc: Bounding box containing objects (ex., a station or street, that is completely covered by the box). Syntax? See below.\n" +
 			" -   in: True, if the value of the alias can be found within the given list. Example: name.in.(Peter,Patrick,Rudi)\n" +
+			"\n\n<code>logical operations</code>\n" +
 			" -   and(alias.operator.value_or_list,...): Conjunction of filters (can be nested)\n" +
 			" -   or(alias.operator.value_or_list,...): Disjunction of filters (can be nested)\n" +
 			"\nMultiple conditions possible as comma-separated-values.\n\n" +
