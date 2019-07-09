@@ -1,6 +1,7 @@
 package it.bz.idm.bdp.reader2;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 
@@ -8,7 +9,6 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 import it.bz.idm.bdp.reader2.utils.querybuilder.WhereClauseParser;
-import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class WhereClauseParserTests {
 
@@ -62,12 +62,11 @@ public class WhereClauseParserTests {
 		we.setInput("scode.ire.(TRENTO|rovereto).*,mvalue.neq.0");
 		try {
 			ast = we.parse();
-		} catch (SimpleException e) {
-
+			fail("Exception expected; ire.<LIST> does not exist, this is a wrong regular expression");
+		} catch (Exception e) {
+			e.printStackTrace();
+			// nothing to do
 		}
-		System.out.println(ast.prettyFormat());
-		System.out.println(ast.format());
-		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{VALUE=(TRENTO|rovereto).*}}CLAUSE{{ALIAS=mvalue}{OP=neq}{VALUE=0}}}", ast.format());
 	}
 
 
