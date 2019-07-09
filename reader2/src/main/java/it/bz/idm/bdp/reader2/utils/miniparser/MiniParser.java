@@ -6,7 +6,7 @@ import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 public class MiniParser {
 
 	public static enum ErrorCode implements ErrorCodeInterface {
-		SYNTAX_ERROR 	         ("Syntax error at position %d with character '%c': %s");
+		SYNTAX_ERROR 	         ("Syntax error at position %d with character '%s': %s");
 
 		private final String msg;
 		ErrorCode(String msg) {

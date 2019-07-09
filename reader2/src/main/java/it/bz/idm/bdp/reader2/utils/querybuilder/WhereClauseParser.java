@@ -2,7 +2,6 @@ package it.bz.idm.bdp.reader2.utils.querybuilder;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.MiniParser;
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
-import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion.ErrorCode;
 import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class WhereClauseParser extends MiniParser {
@@ -37,7 +36,7 @@ public class WhereClauseParser extends MiniParser {
 			return true;
 		});
 		if (res.getValue() == null || res.getValue().isEmpty()) {
-			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, "Found character '" + encode(la(-1)) + "', but an ALIAS was expected");
+			throw new SimpleException(ErrorCode.SYNTAX_ERROR, getPos() - 1, encode(la(-1)), "ALIAS expected");
 		}
 		System.out.println("ALIAS = " + res.getValue());
 		return res;
