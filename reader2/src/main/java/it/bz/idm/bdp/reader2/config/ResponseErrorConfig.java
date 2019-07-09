@@ -1,0 +1,84 @@
+/**
+ * reader - Data Reader for the Big Data Platform, that queries the database for web-services
+ *
+ * Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
+ * Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (see LICENSES/GPL-3.0.txt). If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ */
+package it.bz.idm.bdp.reader2.config;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
+
+/**
+ * API exception handler mapping every exception to a serializable object
+ *
+ * @author Patrick Bertolla
+ * @author Peter Moser
+ */
+@ControllerAdvice
+public class ResponseErrorConfig extends ResponseEntityExceptionHandler {
+
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<Object> hanldeException(Exception ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex, ex.getMessage());
+	}
+
+	private ResponseEntity<Object> buildResponse(final HttpStatus httpStatus, final Exception exception, final String logRef) {
+		final String message = Optional.of(exception.getMessage()).orElse(exception.getClass().getSimpleName());
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("message", message);
+		map.put("timestamp", new Date());
+		map.put("code", httpStatus.ordinal());
+		map.put("error", httpStatus.getReasonPhrase());
+		if (exception instanceof SimpleException) {
+			SimpleException se = (SimpleException) exception;
+			if (se.getData() != null && !se.getData().isEmpty()) {
+				map.put("info", se.getData());
+			}
+		}
+
+		return new ResponseEntity<Object>(map, httpStatus);
+	}
+
+
+//	/**
+//	 * @param ex a thrown exception which ResponseEntityExceptionHandler did not handle
+//	 * @param request
+//	 * @return serializable response object
+//	 */
+//	@ExceptionHandler({ Exception.class })
+//	public ResponseEntity<Object> handleAll(final Exception ex, final WebRequest request) {
+//		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+//		if (ex instanceof BadCredentialsException)
+//			status = HttpStatus.UNAUTHORIZED;
+//		return buildResponse(status, ex);
+//	}
+}
