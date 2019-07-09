@@ -29,7 +29,6 @@ public class WhereClauseParser extends MiniParser {
 	private Token alias() {
 		Token res = doWhile("ALIAS", t -> {
 			if (!Character.isLetter(c())) {
-				System.out.println("AAA = " + c());
 				return false;
 			}
 			t.appendValue(c());
@@ -38,7 +37,6 @@ public class WhereClauseParser extends MiniParser {
 		if (res.getValue() == null || res.getValue().isEmpty()) {
 			throw new SimpleException(ErrorCode.SYNTAX_ERROR, getPos() - 1, encode(la(-1)), "ALIAS expected");
 		}
-		System.out.println("ALIAS = " + res.getValue());
 		return res;
 	}
 
@@ -138,7 +136,6 @@ public class WhereClauseParser extends MiniParser {
 			return matchConsume(',');
 		});
 		expect(EOL);
-		System.out.println(c());
 		return ast;
 	}
 

@@ -17,7 +17,7 @@ public class MiniParser {
 	protected Token ast = null;
 
 	public static enum ErrorCode implements ErrorCodeInterface {
-		SYNTAX_ERROR 	         ("Syntax error at position %d with character '%s': %s");
+		SYNTAX_ERROR 	         ("Syntax error at position %d with character %s: %s");
 
 		private final String msg;
 		ErrorCode(String msg) {
@@ -85,7 +85,7 @@ public class MiniParser {
 
 	protected void expect(char exp) {
 		if (c != exp)
-			throw new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), "'" + encode(exp) + "' expected");
+			throw new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), encode(exp) + " expected");
 	}
 
 	protected boolean match(char exp, int pos) {
