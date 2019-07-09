@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Token;
 import it.bz.idm.bdp.reader2.utils.querybuilder.WhereClauseParser;
+import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 
 public class WhereClauseParserTests {
 
@@ -59,14 +60,43 @@ public class WhereClauseParserTests {
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2}{VALUE=3}{VALUE=4}{VALUE=5}}}}", ast.format());
 
+		we.setInput("scode.ire.(TRENTO|rovereto)");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}LIST{{VALUE=TRENTO|rovereto}}}}", ast.format());
+
 		we.setInput("scode.ire.(TRENTO|rovereto).*,mvalue.neq.0");
 		try {
 			ast = we.parse();
-			fail("Exception expected; ire.<LIST> does not exist, this is a wrong regular expression");
-		} catch (Exception e) {
-			e.printStackTrace();
-			// nothing to do
+			fail("Exception expected; Syntax error at . after rovereto).... ire.<LIST> will be checked later, not during parser stage.");
+		} catch (SimpleException e) {
+			assertEquals("PARSING ERROR: Syntax error at position 27 with character .: , expected", e.getMessage());
 		}
+
+		we.setInput("scode.ire.(TRENTO|rovereto).*,mvalue.neq.0");
+		try {
+			ast = we.parse();
+			fail("Exception expected; Syntax error at . after rovereto).... ire.<LIST> will be checked later, not during parser stage.");
+		} catch (SimpleException e) {
+			assertEquals("PARSING ERROR: Syntax error at position 27 with character .: , expected", e.getMessage());
+		}
+
+		we.setInput("a.eq.1.and(a.eq.0)");
+		try {
+			ast = we.parse();
+			fail("Exception expected; Syntax error at ( after and");
+		} catch (SimpleException e) {
+			assertEquals("PARSING ERROR: Syntax error at position 10 with character (: , expected", e.getMessage());
+		}
+
+		we.setInput("or(scode.ire.TRENTO|rovere'to.*,mvalue.eq.0)");
+		try {
+			ast = we.parse();
+			fail("Exception expected; Syntax error at ' after rovere");
+		} catch (SimpleException e) {
+			assertEquals("PARSING ERROR: Syntax error at position 26 with character ': , expected", e.getMessage());
+		}
+
+
 	}
 
 

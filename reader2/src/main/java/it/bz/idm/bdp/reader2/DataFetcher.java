@@ -25,7 +25,7 @@ public class DataFetcher {
 
 	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull, String where) {
 
-		log.info("FETCHING FROM STATIONS");
+		log.debug("FETCHING FROM STATIONS");
 
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 
@@ -45,9 +45,9 @@ public class DataFetcher {
 				.addLimit(limit)
 				.addOffset(offset);
 
-		log.info(query.getSql());
+		log.debug(query.getSql());
 
-		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		log.debug("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 
 		nanoTime = System.nanoTime();
@@ -58,7 +58,7 @@ public class DataFetcher {
 
 		log.debug(queryResult.toString());
 
-		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		log.debug("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		List<String> hierarchy = new ArrayList<String>();
 		hierarchy.add("_stationtype");
@@ -70,16 +70,16 @@ public class DataFetcher {
 	public static String serializeJSON(Map<String, Object> resultMap) {
 		long nanoTime = System.nanoTime();
 		String serialize = JsonStream.serialize(resultMap);
-		log.info("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		log.debug("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
 	}
 
 	public Map<String, Object> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, long limit,
 			long offset, String select, String role, boolean ignoreNull, LocalDateTime from, LocalDateTime to, String where) {
 		if (from == null && to == null) {
-			log.info("FETCHING FROM MEASUREMENT");
+			log.debug("FETCHING FROM MEASUREMENT");
 		} else {
-			log.info("FETCHING FROM MEASUREMENTHISTORY");
+			log.debug("FETCHING FROM MEASUREMENTHISTORY");
 		}
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
@@ -112,7 +112,7 @@ public class DataFetcher {
 				.addSql("order by _stationtype, _stationcode, _datatypename")
 				.addLimit(limit)
 				.addOffset(offset);
-		log.info("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		log.debug("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 
 		nanoTime = System.nanoTime();
@@ -121,7 +121,7 @@ public class DataFetcher {
 				.addParameters(query.getParameters())
 				.build(query.getSql());
 
-		log.info("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		log.debug("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
 		List<String> hierarchy = new ArrayList<String>();
 		hierarchy.add("_stationtype");

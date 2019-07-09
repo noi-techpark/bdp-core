@@ -350,8 +350,10 @@ public class SelectExpansion {
 		Token whereAST;
 		try {
 			whereAST = whereParser.parse();
-		} catch (RuntimeException e) {
-			throw new SimpleException(ErrorCode.WHERE_SYNTAX_ERROR, e.getMessage());
+		} catch (SimpleException e) {
+			e.setDescription("Syntax error in WHERE-clause");
+			e.addData("hint", "You need to escape the following characters ()', within the value part of your filters");
+			throw e;
 		}
 
 		StringBuilder sb = new StringBuilder();

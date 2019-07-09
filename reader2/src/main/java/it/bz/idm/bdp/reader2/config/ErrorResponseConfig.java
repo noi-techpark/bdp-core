@@ -27,11 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.postgresql.util.PSQLException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
@@ -39,16 +40,28 @@ import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
 /**
  * API exception handler mapping every exception to a serializable object
  *
- * @author Patrick Bertolla
  * @author Peter Moser
  */
 @ControllerAdvice
-public class ResponseErrorConfig extends ResponseEntityExceptionHandler {
+public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> hanldeException(Exception ex) {
+	public ResponseEntity<Object> handleException(Exception ex) {
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, ex.getMessage());
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<Object> handleException(SimpleException ex) {
 		return buildResponse(HttpStatus.BAD_REQUEST, ex, ex.getMessage());
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<Object> handleException(DataAccessException ex) {
+		Throwable cause = ex.getCause();
+		if (cause instanceof PSQLException) {
+			return buildResponse(HttpStatus.BAD_REQUEST, (PSQLException) cause, ((PSQLException) cause).getMessage());
+		}
+		return buildResponse(HttpStatus.BAD_REQUEST, ex, ex.getCause().getMessage());
 	}
 
 	private ResponseEntity<Object> buildResponse(final HttpStatus httpStatus, final Exception exception, final String logRef) {
@@ -56,10 +69,12 @@ public class ResponseErrorConfig extends ResponseEntityExceptionHandler {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("message", message);
 		map.put("timestamp", new Date());
-		map.put("code", httpStatus.ordinal());
+		map.put("code", httpStatus.value());
 		map.put("error", httpStatus.getReasonPhrase());
 		if (exception instanceof SimpleException) {
 			SimpleException se = (SimpleException) exception;
+			if (se.getDescription() != null)
+				map.put("description", se.getDescription());
 			if (se.getData() != null && !se.getData().isEmpty()) {
 				map.put("info", se.getData());
 			}
@@ -67,18 +82,4 @@ public class ResponseErrorConfig extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(map, httpStatus);
 	}
-
-
-//	/**
-//	 * @param ex a thrown exception which ResponseEntityExceptionHandler did not handle
-//	 * @param request
-//	 * @return serializable response object
-//	 */
-//	@ExceptionHandler({ Exception.class })
-//	public ResponseEntity<Object> handleAll(final Exception ex, final WebRequest request) {
-//		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-//		if (ex instanceof BadCredentialsException)
-//			status = HttpStatus.UNAUTHORIZED;
-//		return buildResponse(status, ex);
-//	}
 }

@@ -21,6 +21,8 @@ public class WhereClauseParser extends MiniParser {
 			}
 			if (matchConsume(',')) {
 				t.combine(clauseOrLogicalOp());
+			} else if (! match(EOL)) {
+				expect(',');
 			}
 			return true;
 		});
@@ -77,13 +79,15 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	private Token list() {
-		return doSingle("LIST", t -> {
+		Token res = doSingle("LIST", t -> {
 			t.add(value());
 			if (matchConsume(',')) {
 				t.combine(list());
 			}
 			return true;
 		});
+		expect(')');
+		return res;
 	}
 
 	private Token value() {
@@ -148,7 +152,8 @@ public class WhereClauseParser extends MiniParser {
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
 //		input = "f.eq.(null,null,null)";
 		input = "f.eq.";//,or(a.eq.7,and(b.eq.9))";
-		input = "a.eq.1.and(a.eq.0)";
+//		input = "a.eq.1.and(a.eq.0)";
+//		input = "or(scode.ire.TRENTO|rovere'to.*,mvalue.eq.0)";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
 		System.out.println(ast.prettyFormat());
