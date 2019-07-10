@@ -17,6 +17,7 @@ import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
+import it.bz.idm.bdp.reader2.utils.resultbuilder.ObjectBuilder;
 
 @Component
 public class DataFetcher {
@@ -32,7 +33,7 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent")
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode")
+				.addSql("select distinct s.stationtype as _stationtype, s.stationcode as _stationcode")
 				.expandSelectPrefix(", ")
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
@@ -64,7 +65,7 @@ public class DataFetcher {
 		hierarchy.add("_stationtype");
 		hierarchy.add("_stationcode");
 
-		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
+		return ObjectBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	public static String serializeJSON(Map<String, Object> resultMap) {
@@ -87,7 +88,7 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
-				.addSql("select s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
+				.addSql("select distinct s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
 				.expandSelectPrefix(", ")
 				.addSqlIf("from measurementhistory me", from != null || to != null)
 				.addSqlIf("from measurement me", from == null && to == null)
@@ -128,106 +129,13 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		return buildResultMaps(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Map<String, Object> buildResultMaps(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy) {
-
-		if (queryResult == null || queryResult.isEmpty()) {
-			return new HashMap<String, Object>();
-		}
-
-		List<String> currValues = new ArrayList<String>();
-		List<String> prevValues = new ArrayList<String>();
-
-		for (int i = 0; i < hierarchy.size(); i++) {
-			prevValues.add("");
-		}
-
-		Map<String, Object> stationTypes = new HashMap<String, Object>();
-		Map<String, Object> stations = null;
-		List<Object> datatypes = null;
-		List<Object> measurements = null;
-
-		Map<String, Object> stationType = null;
-		Map<String, Object> station = null;
-		Map<String, Object> parent = null;
-		Map<String, Object> datatype = null;
-		Map<String, Object> measurement = null;
-
-		for (Map<String, Object> rec : queryResult) {
-
-			currValues.clear();
-			int i = 0;
-			boolean levelSet = false;
-			int renewLevel = hierarchy.size();
-			for (String alias : hierarchy) {
-				String value = (String) rec.get(alias);
-				if (value == null) {
-					throw new RuntimeException(alias + " not found in select. Unable to build hierarchy.");
-				}
-				currValues.add(value);
-				if (!levelSet && !value.equals(prevValues.get(i))) {
-					renewLevel = i;
-					levelSet = true;
-				}
-				i++;
-			}
-
-			switch (renewLevel) {
-				case 0:
-					stationType = se.makeObj(rec, "stationtype", false);
-					if (!stationType.isEmpty()) {
-						stationTypes.put(currValues.get(0), stationType);
-					}
-				case 1:
-					station = se.makeObj(rec, "station", ignoreNull);
-					parent = se.makeObj(rec, "parent", ignoreNull);
-					if (!parent.isEmpty()) {
-						station.put("sparent", parent);
-					}
-
-					if (!station.isEmpty()) {
-						stations = (Map<String, Object>) stationType.get("stations");
-						if (stations == null) {
-							stations = new HashMap<String, Object>();
-							stationType.put("stations", stations);
-						}
-						stations.put(currValues.get(1), station);
-					}
-				case 2:
-					datatype = se.makeObj(rec, "datatype", ignoreNull);
-					if (!datatype.isEmpty()) {
-						datatypes = (List<Object>) station.get("sdatatypes");
-						if (datatypes == null) {
-							datatypes = new ArrayList<Object>();
-							station.put("sdatatypes", datatypes);
-						}
-						datatypes.add(datatype);
-					}
-				default:
-					measurement = se.makeObj(rec, "measurement", ignoreNull);
-					if (!measurement.isEmpty()) {
-						measurements = (List<Object>) datatype.get("tmeasurements");
-						if (measurements == null) {
-							measurements = new ArrayList<Object>();
-							datatype.put("tmeasurements", measurements);
-						}
-						measurements.add(measurement);
-					}
-			}
-
-			prevValues.clear();
-			prevValues.addAll(currValues);
-		}
-		return stationTypes;
+		return ObjectBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	public String fetchStationTypes() {
 		return JsonStream.serialize(QueryExecutor
 				.init()
-				.build("select stationtype from station group by stationtype", String.class));
+				.build("select stationtype from station group by stationtype order by 1", String.class));
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -300,7 +208,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		System.out.println( JsonStream.serialize(buildResultMaps(true, queryResult, se, hierarchy)));
+		System.out.println( JsonStream.serialize(ObjectBuilder.build(true, queryResult, se, hierarchy)));
 	}
 
 

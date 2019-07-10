@@ -96,7 +96,7 @@ public class HierarchyController {
 	DataFetcher dataFetcher;
 
 	@ApiOperation(value = "View a list of all station types (categories)")
-	@GetMapping(value = "/", produces = "application/json")
+	@GetMapping(value = "", produces = "application/json")
 	public @ResponseBody String requestStationTypes() {
 		return new DataFetcher().fetchStationTypes();
 	}
