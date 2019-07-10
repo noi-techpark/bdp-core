@@ -25,7 +25,7 @@ public class ObjectBuilder {
 
 		Map<String, Object> stationTypes = new HashMap<String, Object>();
 		Map<String, Object> stations = null;
-		List<Object> datatypes = null;
+		Map<String, Object> datatypes = null;
 		List<Object> measurements = null;
 
 		Map<String, Object> stationType = null;
@@ -74,12 +74,12 @@ public class ObjectBuilder {
 				measurements.add(measurement);
 			}
 			if (!datatype.isEmpty()) {
-				datatypes = (List<Object>) station.get("sdatatypes");
+				datatypes = (Map<String, Object>) station.get("sdatatypes");
 				if (datatypes == null) {
-					datatypes = new ArrayList<Object>();
+					datatypes = new HashMap<String, Object>();
 					station.put("sdatatypes", datatypes);
 				}
-				datatypes.add(datatype);
+				datatypes.put(currValues.get(2), datatype);
 			}
 			if (!parent.isEmpty()) {
 				station.put("sparent", parent);
