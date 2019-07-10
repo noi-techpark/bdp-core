@@ -72,7 +72,7 @@ public class ResultBuilderTests {
 			put("tname", "o");
 		}});
 
-		assertEquals("{parking={stations={walther={sdatatypes=[{tname=o}]}}}}",
+		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
 				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
 
 		queryResult.add(new HashMap<String, Object>() {{
@@ -82,8 +82,17 @@ public class ResultBuilderTests {
 			put("tname", "o");
 		}});
 
-		/* We do not eliminate duplicates, if you want this you must write a corresponding query */
-		assertEquals("{parking={stations={walther={sdatatypes=[{tname=o}, {tname=o}]}}}}",
+		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
+				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
+
+		queryResult.add(new HashMap<String, Object>() {{
+			put("_stationtype", "parking");
+			put("_stationcode", "walther");
+			put("_datatypename", "occ2");
+			put("tname", "x");
+		}});
+
+		assertEquals("{parking={stations={walther={sdatatypes={occ2={tname=x}, occ1={tname=o}}}}}}",
 				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
 
 	}
