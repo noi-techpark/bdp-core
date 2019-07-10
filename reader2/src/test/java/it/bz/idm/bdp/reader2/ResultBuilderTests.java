@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.reader2.utils.resultbuilder.ObjectBuilder;
+import it.bz.idm.bdp.reader2.utils.resultbuilder.ResultBuilder;
 
 @SuppressWarnings("serial")
 public class ResultBuilderTests {
@@ -73,7 +73,7 @@ public class ResultBuilderTests {
 		}});
 
 		assertEquals("{parking={stations={walther={sdatatypes=[{tname=o}]}}}}",
-				ObjectBuilder.build(true, queryResult, se, hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
 
 		queryResult.add(new HashMap<String, Object>() {{
 			put("_stationtype", "parking");
@@ -84,7 +84,7 @@ public class ResultBuilderTests {
 
 		/* We do not eliminate duplicates, if you want this you must write a corresponding query */
 		assertEquals("{parking={stations={walther={sdatatypes=[{tname=o}, {tname=o}]}}}}",
-				ObjectBuilder.build(true, queryResult, se, hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
 
 	}
 

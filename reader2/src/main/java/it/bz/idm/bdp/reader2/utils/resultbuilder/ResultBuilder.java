@@ -7,7 +7,7 @@ import java.util.Map;
 
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 
-public class ObjectBuilder {
+public class ResultBuilder {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> build(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy) {

@@ -17,7 +17,7 @@ import it.bz.idm.bdp.reader2.utils.querybuilder.QueryBuilder;
 import it.bz.idm.bdp.reader2.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.reader2.utils.queryexecutor.QueryExecutor;
-import it.bz.idm.bdp.reader2.utils.resultbuilder.ObjectBuilder;
+import it.bz.idm.bdp.reader2.utils.resultbuilder.ResultBuilder;
 
 @Component
 public class DataFetcher {
@@ -65,7 +65,7 @@ public class DataFetcher {
 		hierarchy.add("_stationtype");
 		hierarchy.add("_stationcode");
 
-		return ObjectBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
+		return ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	public static String serializeJSON(Map<String, Object> resultMap) {
@@ -129,7 +129,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		return ObjectBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
+		return ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
 	}
 
 	public String fetchStationTypes() {
@@ -208,7 +208,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		System.out.println( JsonStream.serialize(ObjectBuilder.build(true, queryResult, se, hierarchy)));
+		System.out.println( JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
 	}
 
 
