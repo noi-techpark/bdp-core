@@ -65,7 +65,12 @@ public class DataFetcher {
 		hierarchy.add("_stationtype");
 		hierarchy.add("_stationcode");
 
-		return ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+		result.put("data", ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy));
+
+		return result;
 	}
 
 	public static String serializeJSON(Map<String, Object> resultMap) {
@@ -129,7 +134,12 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		return ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+		result.put("data", ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy));
+
+		return result;
 	}
 
 	public String fetchStationTypes() {

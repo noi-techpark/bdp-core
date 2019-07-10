@@ -47,6 +47,7 @@ public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler
 	public ResponseEntity<Object> handleException(Exception ex) {
+		ex.printStackTrace(System.err);
 		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, ex.getMessage());
 	}
 
