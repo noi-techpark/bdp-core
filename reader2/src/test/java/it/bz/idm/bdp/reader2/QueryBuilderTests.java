@@ -17,35 +17,35 @@ public class QueryBuilderTests {
 				.expandSelect()
 				.getSql();
 
-		assertEquals("A.a as a, B.x as x", res);
+		assertEquals("A.a as a, B.x as x", res.trim());
 
 		res = QueryBuilder
 				.init("y", null, "B", "C")
 				.expandSelect()
 				.getSql();
 
-		assertEquals("C.d as d", res);
+		assertEquals("C.d as d", res.trim());
 
 		res = QueryBuilder
 				.init("d", null, "C")
 				.expandSelect()
 				.getSql();
 
-		assertEquals("C.d as d", res);
+		assertEquals("C.d as d", res.trim());
 
 		res = QueryBuilder
 				.init("x, y", null, "A", "B")
 				.expandSelect()
 				.getSql();
 
-		assertEquals("B.x as x", res);
+		assertEquals("B.x as x", res.trim());
 
 		res = QueryBuilder
 				.init("a,b,c", null, "A", "B")
 				.expandSelect("B")
 				.getSql();
 
-		assertEquals("B.x as x", res);
+		assertEquals("B.x as x", res.trim());
 	}
 
 	@Before
