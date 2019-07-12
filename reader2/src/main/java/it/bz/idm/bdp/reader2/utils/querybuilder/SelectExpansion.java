@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringJoiner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import it.bz.idm.bdp.reader2.utils.miniparser.Consumer;
 import it.bz.idm.bdp.reader2.utils.miniparser.ConsumerExtended;
@@ -72,6 +74,8 @@ import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
  */
 public class SelectExpansion {
 
+	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
+
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND 	         ("Key '%s' does not exist"),
 		KEY_NOT_INSIDE_DEFLIST   ("Key '%s' is not reachable from the expanded select definition list: %s"),
@@ -103,7 +107,9 @@ public class SelectExpansion {
 	private Set<String> usedJSONDefNames = new HashSet<String>();
 	private Map<String, String> whereClauseOperatorMap = new HashMap<String, String>();
 	private Map<String, Consumer> whereClauseOperatorCheckMap = new HashMap<String, Consumer>();
-	private String sqlWhere = null;
+
+	private Map<String, Object> whereParameters = null;
+	private String whereSQL = null;
 	private String whereClause = null;
 	private boolean dirty = true;
 
@@ -342,7 +348,8 @@ public class SelectExpansion {
 
 	private void _expandWhere(String where) {
 		if (where == null || where.isEmpty()) {
-			sqlWhere = null;
+			whereSQL = null;
+			whereParameters = null;
 			return;
 		}
 
@@ -357,6 +364,7 @@ public class SelectExpansion {
 		}
 
 		StringBuilder sb = new StringBuilder();
+		whereParameters = new HashMap<String, Object>();
 
 		whereAST.walker(new ConsumerExtended() {
 
@@ -376,10 +384,10 @@ public class SelectExpansion {
 					case "OR":
 						sb.append("(");
 						context.push(new Context(t.getChildCount(), t.getName()));
-						System.out.println("AND" + context.getFirst());
+						log.debug("AND/OR" + context.getFirst());
 					break;
 					case "CLAUSE": {
-						System.out.println("CLAUSE");
+						log.debug("CLAUSE");
 						String alias = t.getChild("ALIAS").getValue();
 						String column = getColumn(alias);
 						if (column == null) {
@@ -421,7 +429,7 @@ public class SelectExpansion {
 
 		});
 
-		sqlWhere = sb.toString();
+		whereSQL = sb.toString();
 	}
 
 	private String whereClauseItem(String operator, Token clauseValueToken) {
@@ -432,29 +440,27 @@ public class SelectExpansion {
 		}
 
 		/* Build the value, or error out if the value type does not exist */
-		String value = null;
+		String paramName = null;
+		Object value = null;
 		switch (clauseValueToken.getName()) {
 			case "LIST":
-				StringJoiner sj = new StringJoiner(",");
+				List<String> listItems = new ArrayList<String>();
 				for (Token listItem : clauseValueToken.getChildren()) {
-					if (listItem.is("NULL")) {
-						sj.add("null");
-					} else {
-						sj.add("'" + listItem.getValue() + "'");
-					}
+					listItems.add(listItem.getValue());
 				}
-				value = sj.toString();
+				value = listItems;
 			break;
 			case "NULL":
-				value = null;
-			break;
 			case "VALUE":
-				value = "'" + clauseValueToken.getValue() + "'";
+				value = clauseValueToken.getValue();
 			break;
 			default:
 				// FIXME give the whole where-clause from user input to generate a better error response
 				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
 		}
+
+		paramName = "pwhere_" + whereParameters.size();
+		whereParameters.put(paramName, value);
 
 		/*
 		 * Search for a check-function for this operator/value-type combination. Execute it, if present
@@ -468,7 +474,7 @@ public class SelectExpansion {
 			}
 		}
 
-		return String.format(sqlOp, value);
+		return String.format(sqlOp, ":" + paramName);
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -533,7 +539,14 @@ public class SelectExpansion {
 		if (dirty) {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
-		return sqlWhere;
+		return whereSQL;
+	}
+
+	public Map<String, Object> getWhereParameters() {
+		if (dirty) {
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
+		}
+		return whereParameters;
 	}
 
 	public void setWhereClause(String where) {
@@ -659,31 +672,32 @@ public class SelectExpansion {
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
 //
-//		se.addOperator("value", "eq", "= %s");
-//		se.addOperator("value", "neq", "<> %s");
-//		se.addOperator("null", "eq", "is null");
-//		se.addOperator("null", "neq", "is not null");
-//		se.addOperator("list", "in", "in (%s)");
-//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
-//
-//		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-//		se.expand("*", "A", "B", "C");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getWhereSql());
+		se.addOperator("value", "eq", "= %s");
+		se.addOperator("value", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("list", "in", "in (%s)");
+		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
-//		se.expand("*", "A", "B");
-		se.expand("*", "main", "A", "B", "C");
-		Map<String, Object> rec = new HashMap<String, Object>();
-		rec.put("a", "3");
-		rec.put("b", "7");
-		rec.put("x", "0");
-		rec.put("h", "v");
+		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+		se.expand("*", "A", "B", "C");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
+		System.out.println(se.getWhereParameters());
+
+//		se.expand("*", "A", "B");
+//		se.expand("*", "main", "A", "B", "C");
+//		Map<String, Object> rec = new HashMap<String, Object>();
+//		rec.put("a", "3");
+//		rec.put("b", "7");
+//		rec.put("x", "0");
+//		rec.put("h", "v");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//		System.out.println(se.getWhereSql());
 //		System.out.println();
 //		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A").toString());
 //		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A").toString());
@@ -694,7 +708,7 @@ public class SelectExpansion {
 //		System.out.println(se.makeObjectOrEmptyMap(rec, false, "C").toString());
 //		System.out.println(se.makeObjectOrEmptyMap(rec, true, "C").toString());
 //		System.out.println();
-		System.out.println(se.makeObjectOrEmptyMap(rec, false, "main", "A", "C").toString());
+//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "main", "A", "C").toString());
 //		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "C").toString());
 //		System.out.println();
 ////		System.out.println(se.makeObjectOrEmptyMap(rec, false, "B", "C").toString());

@@ -72,8 +72,8 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		 */
 		se.addOperator("VALUE", "eq", "= %s");
 		se.addOperator("VALUE", "neq", "<> %s");
-		se.addOperator("NULL", "eq", "is null");
-		se.addOperator("NULL", "neq", "is not null");
+		se.addOperator("NULL", "eq", "is %s");
+		se.addOperator("NULL", "neq", "is not %s");
 		se.addOperator("VALUE", "lt", "< %s");
 		se.addOperator("VALUE", "gt", "> %s");
 		se.addOperator("VALUE", "lteq", "=< %s");

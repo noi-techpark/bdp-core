@@ -48,6 +48,39 @@ public class SelectExpansionTests {
 
 		seMinimal = new SelectExpansion();
 		seMinimal.addColumn("A", "a", "A.a");
+
+		seMinimal.addOperator("value", "eq", "= %s");
+		seMinimal.addOperator("value", "neq", "<> %s");
+		seMinimal.addOperator("null", "eq", "is %s");
+		seMinimal.addOperator("null", "neq", "is not %s");
+		seMinimal.addOperator("value", "lt", "< %s");
+		seMinimal.addOperator("value", "gt", "> %s");
+		seMinimal.addOperator("value", "lteq", "=< %s");
+		seMinimal.addOperator("value", "gteq", ">= %s");
+		seMinimal.addOperator("value", "re", "~ %s");
+		seMinimal.addOperator("value", "ire", "~* %s");
+		seMinimal.addOperator("value", "nre", "!~ %s");
+		seMinimal.addOperator("value", "nire", "!~* %s");
+		seMinimal.addOperator("list", "in", "in (%s)", t -> {
+			return !(t.getChildCount() == 1 && t.getChild("value").getValue() == null);
+		});
+		seMinimal.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
+		});
+		seMinimal.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+			return t.getChildCount() == 4 || t.getChildCount() == 5;
+		});
+
+		seMinimal.setWhereClause("a.bbi.(1,2,3,4,5,6)");
+		try {
+			seMinimal.expand("a", "A");
+			fail("Exception expected; where clause bbi.<list> must have 4 or 5 elements");
+		} catch (SimpleException e) {
+			// nothing to do
+		}
+
+		seFlat.addOperator("null", "eq", "is %s");
+		seFlat.addOperator("value", "eq", "= %s");
 	}
 
 	@Test
@@ -135,28 +168,6 @@ public class SelectExpansionTests {
 
 	@Test
 	public void testWhereClauseExpansion() {
-		seMinimal.addOperator("value", "eq", "= %s");
-		seMinimal.addOperator("value", "neq", "<> %s");
-		seMinimal.addOperator("null", "eq", "is null");
-		seMinimal.addOperator("null", "neq", "is not null");
-		seMinimal.addOperator("value", "lt", "< %s");
-		seMinimal.addOperator("value", "gt", "> %s");
-		seMinimal.addOperator("value", "lteq", "=< %s");
-		seMinimal.addOperator("value", "gteq", ">= %s");
-		seMinimal.addOperator("value", "re", "~ %s");
-		seMinimal.addOperator("value", "ire", "~* %s");
-		seMinimal.addOperator("value", "nre", "!~ %s");
-		seMinimal.addOperator("value", "nire", "!~* %s");
-		seMinimal.addOperator("list", "in", "in (%s)", t -> {
-			return !(t.getChildCount() == 1 && t.getChild("value").getValue() == null);
-		});
-		seMinimal.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
-			return t.getChildCount() == 4 || t.getChildCount() == 5;
-		});
-		seMinimal.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
-			return t.getChildCount() == 4 || t.getChildCount() == 5;
-		});
-
 		seMinimal.setWhereClause("a.bbi.(1,2,3,4,5,6)");
 		try {
 			seMinimal.expand("a", "A");
@@ -167,15 +178,19 @@ public class SelectExpansionTests {
 
 		seMinimal.setWhereClause("a.bbi.(1,2,3,4)");
 		seMinimal.expand("a", "A");
-		assertEquals("(A.a && ST_MakeEnvelope('1','2','3','4'))", seMinimal.getWhereSql());
+		assertEquals("(A.a && ST_MakeEnvelope(:pwhere_0))", seMinimal.getWhereSql());
+		assertEquals("{pwhere_0=[1, 2, 3, 4]}", seMinimal.getWhereParameters().toString());
+
 
 		seMinimal.setWhereClause("a.in.()");
 		seMinimal.expand("a", "A");
-		assertEquals("(A.a in (''))", seMinimal.getWhereSql());
+		assertEquals("(A.a in (:pwhere_0))", seMinimal.getWhereSql());
+		assertEquals("{pwhere_0=[]}", seMinimal.getWhereParameters().toString());
 
 		seMinimal.setWhereClause("a.in.(null,null)");
 		seMinimal.expand("a", "A");
-		assertEquals("(A.a in (null,null))", seMinimal.getWhereSql());
+		assertEquals("(A.a in (:pwhere_0))", seMinimal.getWhereSql());
+		assertEquals("{pwhere_0=[null, null]}", seMinimal.getWhereParameters().toString());
 
 		seMinimal.setWhereClause("a.eq.1.and(a.eq.0)");
 		try {
@@ -192,8 +207,13 @@ public class SelectExpansionTests {
 			fail("Exception expected; syntax error after a.bbi.(1,2,3,4,5,6)");
 		} catch (SimpleException e) {
 			// nothing to do
-			e.printStackTrace();
 		}
+
+		seFlat.setWhereClause("and(or(a.eq.null,b.eq.5))");
+		seFlat.expand("a", "A");
+		assertEquals("(((A.a is :pwhere_0 OR A.b = :pwhere_1)))", seFlat.getWhereSql());
+		assertEquals(null, seFlat.getWhereParameters().get("pwhere_0"));
+		assertEquals("5", seFlat.getWhereParameters().get("pwhere_1"));
 	}
 
 	@Test

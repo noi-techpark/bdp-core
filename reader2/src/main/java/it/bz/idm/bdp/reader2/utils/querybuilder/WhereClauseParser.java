@@ -18,11 +18,12 @@ public class WhereClauseParser extends MiniParser {
 				t.add(logicalOpOr());
 			} else {
 				t.add(clause());
+				if (!match(EOL) && !match(',') && !match(')')) {
+					expect(",)" + EOL);
+				}
 			}
 			if (matchConsume(',')) {
 				t.combine(clauseOrLogicalOp());
-			} else if (! match(EOL)) {
-				expect(',');
 			}
 			return true;
 		});
@@ -92,8 +93,10 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token value() {
 		Token res = doWhile("VALUE", t -> {
-			if ((match('(') || match(')') || match(',') || match('\'')) && clash('\\', -1)) {
+			if ((match(')') || match(',')) && clash('\\', -1)) {
 				return false;
+			} else if ((match('(') || match('\'')) && clash('\\', -1)) {
+				error("Characters (' must be escaped within a filter VALUE");
 			}
 			matchConsume('\\');
 			t.appendValue(c());
