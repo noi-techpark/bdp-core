@@ -60,12 +60,16 @@ public class ResultBuilder {
 					station = se.makeObj(rec, "station", ignoreNull);
 					parent = se.makeObj(rec, "parent", ignoreNull);
 				case 2:
-					datatype = se.makeObj(rec, "datatype", ignoreNull);
+					if (hierarchy.size() > 2) {
+						datatype = se.makeObj(rec, "datatype", ignoreNull);
+					}
 				default:
-					measurement = se.makeObj(rec, "measurement", ignoreNull);
+					if (hierarchy.size() > 2) {
+						measurement = se.makeObj(rec, "measurement", ignoreNull);
+					}
 			}
 
-			if (!measurement.isEmpty()) {
+			if (measurement != null && !measurement.isEmpty()) {
 				measurements = (List<Object>) datatype.get("tmeasurements");
 				if (measurements == null) {
 					measurements = new ArrayList<Object>();
@@ -73,7 +77,7 @@ public class ResultBuilder {
 				}
 				measurements.add(measurement);
 			}
-			if (!datatype.isEmpty()) {
+			if (datatype != null && !datatype.isEmpty()) {
 				datatypes = (Map<String, Object>) station.get("sdatatypes");
 				if (datatypes == null) {
 					datatypes = new HashMap<String, Object>();
