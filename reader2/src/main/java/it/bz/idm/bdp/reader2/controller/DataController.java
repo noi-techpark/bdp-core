@@ -53,6 +53,7 @@ import it.bz.idm.bdp.reader2.utils.resultbuilder.ResultBuilder;
 @Api(value = "Data", produces = "application/json")
 public class DataController {
 
+	private static final String DOC_DISTINCT = "Remove duplicate entries.";
 	private static final String DOC_REPRESENTATION = "Do you want to have the result in a <code>hierarchical</code> or <code>flat</code> representation.";
 	private static final String DOC_STATIONTYPES = "Station types or categories. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_DATATYPES = "Data types. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
@@ -88,6 +89,7 @@ public class DataController {
 	private static final String DEFAULT_LIMIT = "200";
 	private static final String DEFAULT_OFFSET = "0";
 	private static final String DEFAULT_SHOWNULL = "false";
+	private static final String DEFAULT_DISTINCT = "true";
 
 	private static DateTimeFormatter DATE_FORMAT = new DateTimeFormatterBuilder()
 			.appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
@@ -118,7 +120,8 @@ public class DataController {
 											    @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 											    @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
 											    @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
-											    @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+											    @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull,
+												@ApiParam(value=DOC_DISTINCT) @RequestParam(value="distinct", required=false, defaultValue=DEFAULT_DISTINCT) Boolean distinct) {
 
 		boolean flat = isFlatRepresentation(representation);
 
@@ -128,6 +131,7 @@ public class DataController {
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
 		dataFetcher.setRole("GUEST");
+		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
 
@@ -158,7 +162,8 @@ public class DataController {
 												 @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 												 @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
 												 @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
-												 @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+												 @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull,
+												 @ApiParam(value=DOC_DISTINCT) @RequestParam(value="distinct", required=false, defaultValue=DEFAULT_DISTINCT) Boolean distinct) {
 
 		boolean flat = isFlatRepresentation(representation);
 
@@ -168,6 +173,7 @@ public class DataController {
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
 		dataFetcher.setRole("GUEST");
+		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, null, null, flat);
@@ -203,7 +209,8 @@ public class DataController {
 											   @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 											   @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
 											   @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
-											   @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
+											   @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull,
+											   @ApiParam(value=DOC_DISTINCT) @RequestParam(value="distinct", required=false, defaultValue=DEFAULT_DISTINCT) Boolean distinct) {
 
 		boolean flat = isFlatRepresentation(representation);
 
@@ -216,6 +223,7 @@ public class DataController {
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
 		dataFetcher.setRole("GUEST");
+		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, dateTimeFrom, dateTimeTo, flat);

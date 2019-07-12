@@ -31,7 +31,7 @@ public class DataFetcher {
 	private boolean ignoreNull;
 	private String select;
 	private String where;
-
+	private boolean distinct;
 
 	public List<Map<String, Object>> fetchStations(String stationTypeList, boolean flat) {
 
@@ -42,7 +42,8 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent")
-				.addSql("select distinct")
+				.addSql("select")
+				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode", !flat)
 				.expandSelectPrefix(", ", !flat)
 				.addSql("from station s")
@@ -93,7 +94,8 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
-				.addSql("select distinct")
+				.addSql("select")
+				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
 				.expandSelectPrefix(", ", !flat)
 				.addSqlIf("from measurementhistory me", from != null || to != null)
@@ -136,7 +138,7 @@ public class DataFetcher {
 	public String fetchStationTypes() {
 		return JsonStream.serialize(QueryExecutor
 				.init()
-				.build("select stationtype from station group by stationtype order by 1", String.class));
+				.build("select distinct stationtype from station order by 1", String.class));
 	}
 
 	public QueryBuilder getQuery() {
@@ -165,6 +167,10 @@ public class DataFetcher {
 
 	public void setWhere(String where) {
 		this.where = where;
+	}
+
+	public void setDistinct(Boolean distinct) {
+		this.distinct = distinct;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -239,6 +245,5 @@ public class DataFetcher {
 
 		System.out.println( JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
 	}
-
 
 }
