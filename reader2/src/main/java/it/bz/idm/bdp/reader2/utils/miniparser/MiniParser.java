@@ -83,14 +83,40 @@ public class MiniParser {
 		return "" + c;
 	}
 
+	protected String encode(String chars) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < chars.length(); i++) {
+			sb.append(encode(chars.charAt(i)));
+		}
+		return sb.toString();
+	}
+
+
 	protected void expect(char exp) {
 		if (c != exp) {
-			SimpleException ex = new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), encode(exp) + " expected");
-			ex.addData("position", i);
-			ex.addData("input_marked", input.substring(0, i) + "--->" + encode(c) + "<---" + input.substring(i+1, input.length() - 1));
-			ex.addData("input_origin", input.substring(0, input.length() - 1));
-			throw ex;
+			error(exp + " expected");
 		}
+	}
+
+	protected void expect(String expChars) {
+		boolean found = false;
+		for (int i = 0; i < expChars.length(); i++) {
+			if (c == expChars.charAt(i)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			error("One of the following characters " + expChars + " expected");
+		}
+	}
+
+	protected void error(String msg) {
+		SimpleException ex = new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), encode(msg));
+		ex.addData("position", i);
+		ex.addData("input_marked", input.substring(0, i) + "--->" + encode(c) + "<---" + input.substring(i+1, input.length() - 1));
+		ex.addData("input_origin", input.substring(0, input.length() - 1));
+		throw ex;
 	}
 
 	protected boolean match(char exp, int pos) {
