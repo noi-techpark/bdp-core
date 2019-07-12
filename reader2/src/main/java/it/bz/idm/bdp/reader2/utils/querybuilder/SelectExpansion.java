@@ -453,6 +453,17 @@ public class SelectExpansion {
 			case "NULL":
 			case "VALUE":
 				value = clauseValueToken.getValue();
+				if (value instanceof String) {
+					String strValue = ((String) value).toLowerCase();
+					switch (strValue) {
+						case "true":
+							value = true;
+							break;
+						case "false":
+							value = false;
+							break;
+					}
+				}
 			break;
 			default:
 				// FIXME give the whole where-clause from user input to generate a better error response
@@ -679,7 +690,8 @@ public class SelectExpansion {
 		se.addOperator("list", "in", "in (%s)");
 		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
-		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+//		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+		se.setWhereClause("a.eq.true");
 		se.expand("*", "A", "B", "C");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
