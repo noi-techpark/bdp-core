@@ -1,5 +1,6 @@
 package it.bz.idm.bdp.reader2;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -81,7 +82,15 @@ public class Reader2Application implements CommandLineRunner {
 //		String stations = fetchStationsAndTypes("ParkingStation", "occupied, availability", 2, 10, null);//"sorigin, sname, tunit, ttype");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "occupied, availability", 10, 0, "sorigin, sname, tname, tperiod, tlastmeasurement", "GUEST");
 //		String stations = fetchStationsAndTypes("ParkingStation, Bicycle", "*", 30, 0, "sname, sdatatypes", "ADMIN");
-		Map<String, Object> stations = df.fetchStationsTypesAndMeasurementHistory("EChargingPlug, EChargingStation", "*", 1, 0, "sname, tname, mvalue", "ADMIN", ignoreNull, null, null, "");
+
+		df.setIgnoreNull(ignoreNull);
+		df.setLimit(1);
+		df.setOffset(0);
+		df.setWhere("");
+		df.setSelect("sname, tname, mvalue");
+		df.setRole("ADMIN");
+
+		List<Map<String, Object>> stations = df.fetchStationsTypesAndMeasurementHistory("EChargingPlug, EChargingStation", "*", null, null, false);
 		log.info(DataFetcher.serializeJSON(stations));
 
 		log.info("READY.");

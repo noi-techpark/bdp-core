@@ -200,16 +200,22 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelect(final String... selectDef) {
-		return expandSelectPrefix("", selectDef);
+		return expandSelectPrefix("", true, selectDef);
 	}
 
-	public QueryBuilder expandSelectPrefix(String prefix, final String... selectDef) {
+	public QueryBuilder expandSelectPrefix(String prefix, boolean condition) {
+		return expandSelectPrefix(prefix, condition, (String[]) null);
+	}
+
+	public QueryBuilder expandSelectPrefix(String prefix, boolean condition, final String... selectDef) {
 		StringJoiner sj = new StringJoiner(", ");
 		for (String expansion : se.getExpansion(selectDef).values()) {
 			sj.add(expansion);
 		}
 		if (sj.length() > 0) {
-			sql.append(prefix);
+			sql.append(" ");
+			if (condition)
+				sql.append(prefix);
 			sql.append(sj.toString());
 		}
 		return this;
@@ -220,7 +226,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandSelectPrefix(String prefix) {
-		return expandSelectPrefix(prefix, (String[]) null);
+		return expandSelectPrefix(prefix, true, (String[]) null);
 	}
 
 	public QueryBuilder expandSelect(boolean condition, final String... selectDef) {

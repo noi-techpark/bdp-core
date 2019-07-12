@@ -26,6 +26,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,15 +43,17 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.bz.idm.bdp.reader2.DataFetcher;
+import it.bz.idm.bdp.reader2.utils.resultbuilder.ResultBuilder;
 
 /**
  * @author Peter Moser
  */
 @RestController
-@RequestMapping(value = "api/v2/hierarchy")
-@Api(value = "Hierarchy", produces = "application/json")
-public class HierarchyController {
+@RequestMapping(value = "api/v2")
+@Api(value = "Data", produces = "application/json")
+public class DataController {
 
+	private static final String DOC_REPRESENTATION = "Do you want to have the result in a <code>hierarchical</code> or <code>flat</code> representation.";
 	private static final String DOC_STATIONTYPES = "Station types or categories. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_DATATYPES = "Data types. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_LIMIT = "The limit of the response. Set it to -1 to disable it.";
@@ -105,35 +111,91 @@ public class HierarchyController {
 			value = "View details of all given station types",
 			notes = "You can put multiple station types as comma-seperated list.<br>The response is a hierarchy of <code>station-type / station-name</code>."
 			)
-	@GetMapping(value = "/{stationTypes}", produces = "application/json")
-	public @ResponseBody String requestStations(@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
+	@GetMapping(value = "/{representation}/{stationTypes}", produces = "application/json")
+	public @ResponseBody String requestStations(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+												@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											    @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
 											    @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 											    @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
 											    @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
 											    @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
-		return DataFetcher.serializeJSON(dataFetcher.fetchStations(stationTypes, limit, offset, select, "GUEST", !showNull, where));
+
+		boolean flat = isFlatRepresentation(representation);
+
+		dataFetcher.setIgnoreNull(!showNull);
+		dataFetcher.setLimit(limit);
+		dataFetcher.setOffset(offset);
+		dataFetcher.setWhere(where);
+		dataFetcher.setSelect(select);
+		dataFetcher.setRole("GUEST");
+
+		List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+
+		if (flat) {
+			result.put("data", queryResult);
+		} else {
+			List<String> hierarchy = new ArrayList<String>();
+			hierarchy.add("_stationtype");
+			hierarchy.add("_stationcode");
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+		}
+
+		return DataFetcher.serializeJSON(result);
 	}
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and most-recent measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
-	@GetMapping(value = "/{stationTypes}/{dataTypes}", produces = "application/json")
-	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
+	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}", produces = "application/json")
+	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+												 @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 												 @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 												 @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
 												 @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
 												 @ApiParam(value=DOC_SELECT) @RequestParam(value="select", required=false) String select,
 												 @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
 												 @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
-		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, null, null, where));
+
+		boolean flat = isFlatRepresentation(representation);
+
+		dataFetcher.setIgnoreNull(!showNull);
+		dataFetcher.setLimit(limit);
+		dataFetcher.setOffset(offset);
+		dataFetcher.setWhere(where);
+		dataFetcher.setSelect(select);
+		dataFetcher.setRole("GUEST");
+
+		List<Map<String, Object>> queryResult = dataFetcher
+				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, null, null, flat);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+
+		if (flat) {
+			result.put("data", queryResult);
+		} else {
+			List<String> hierarchy = new ArrayList<String>();
+			hierarchy.add("_stationtype");
+			hierarchy.add("_stationcode");
+			hierarchy.add("_datatypename");
+
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+		}
+
+		return DataFetcher.serializeJSON(result);
 	}
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and historical measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
-	@GetMapping(value = "/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
-	public @ResponseBody String requestHistory(@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
+	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
+	public @ResponseBody String requestHistory(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+											   @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											   @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 											   @ApiParam(value=DOC_TIME) @PathVariable String from,
 											   @ApiParam(value=DOC_TIME) @PathVariable String to,
@@ -143,9 +205,45 @@ public class HierarchyController {
 											   @ApiParam(value=DOC_WHERE) @RequestParam(value="where", required=false) String where,
 											   @ApiParam(value=DOC_SHOWNULL) @RequestParam(value="shownull", required=false, defaultValue=DEFAULT_SHOWNULL) Boolean showNull) {
 
+		boolean flat = isFlatRepresentation(representation);
+
 		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
 		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
 
-		return DataFetcher.serializeJSON(dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, limit, offset, select, "GUEST", !showNull, dateTimeFrom, dateTimeTo, where));
+		dataFetcher.setIgnoreNull(!showNull);
+		dataFetcher.setLimit(limit);
+		dataFetcher.setOffset(offset);
+		dataFetcher.setWhere(where);
+		dataFetcher.setSelect(select);
+		dataFetcher.setRole("GUEST");
+
+		List<Map<String, Object>> queryResult = dataFetcher
+				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, dateTimeFrom, dateTimeTo, flat);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+
+		if (flat) {
+			result.put("data", queryResult);
+		} else {
+			List<String> hierarchy = new ArrayList<String>();
+			hierarchy.add("_stationtype");
+			hierarchy.add("_stationcode");
+			hierarchy.add("_datatypename");
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+		}
+
+		return DataFetcher.serializeJSON(result);
+	}
+
+	private boolean isFlatRepresentation(String representation) {
+		if (representation.equalsIgnoreCase("flat")) {
+			return true;
+		}
+		if (representation.equalsIgnoreCase("hierarchy")) {
+			return false;
+		}
+		throw new RuntimeException("Please choose 'flat' or 'hierarchy' as representation. '" + representation + "' is not allowed.");
 	}
 }

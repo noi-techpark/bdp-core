@@ -24,17 +24,27 @@ public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
-	public Map<String, Object> fetchStations(String stationTypeList, long limit, long offset, String select, String role, boolean ignoreNull, String where) {
+	private QueryBuilder query;
+	private long limit;
+	private long offset;
+	private String role;
+	private boolean ignoreNull;
+	private String select;
+	private String where;
+
+
+	public List<Map<String, Object>> fetchStations(String stationTypeList, boolean flat) {
 
 		log.debug("FETCHING FROM STATIONS");
 
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 
 		long nanoTime = System.nanoTime();
-		QueryBuilder query = QueryBuilder
+		query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent")
-				.addSql("select distinct s.stationtype as _stationtype, s.stationcode as _stationcode")
-				.expandSelectPrefix(", ")
+				.addSql("select distinct")
+				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode", !flat)
+				.expandSelectPrefix(", ", !flat)
 				.addSql("from station s")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
@@ -42,7 +52,7 @@ public class DataFetcher {
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.expandWhere()
-				.addSql("order by _stationtype, _stationcode")
+				.addSqlIf("order by _stationtype, _stationcode", !flat)
 				.addLimit(limit)
 				.addOffset(offset);
 
@@ -61,27 +71,17 @@ public class DataFetcher {
 
 		log.debug("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
-		List<String> hierarchy = new ArrayList<String>();
-		hierarchy.add("_stationtype");
-		hierarchy.add("_stationcode");
-
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("offset", offset);
-		result.put("limit", limit);
-		result.put("data", ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy));
-
-		return result;
+		return queryResult;
 	}
 
-	public static String serializeJSON(Map<String, Object> resultMap) {
+	public static String serializeJSON(Object whatever) {
 		long nanoTime = System.nanoTime();
-		String serialize = JsonStream.serialize(resultMap);
+		String serialize = JsonStream.serialize(whatever);
 		log.debug("serialize json: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		return serialize;
 	}
 
-	public Map<String, Object> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, long limit,
-			long offset, String select, String role, boolean ignoreNull, LocalDateTime from, LocalDateTime to, String where) {
+	public List<Map<String, Object>> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, LocalDateTime from, LocalDateTime to, boolean flat) {
 		if (from == null && to == null) {
 			log.debug("FETCHING FROM MEASUREMENT");
 		} else {
@@ -93,8 +93,9 @@ public class DataFetcher {
 		long nanoTime = System.nanoTime();
 		QueryBuilder query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
-				.addSql("select distinct s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename")
-				.expandSelectPrefix(", ")
+				.addSql("select distinct")
+				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				.expandSelectPrefix(", ", !flat)
 				.addSqlIf("from measurementhistory me", from != null || to != null)
 				.addSqlIf("from measurement me", from == null && to == null)
 				.addSql("join bdppermissions pe on (",
@@ -115,7 +116,7 @@ public class DataFetcher {
 				.setParameterIfNotNull("from", from, "and timestamp >= :from")
 				.setParameterIfNotNull("to", to, "and timestamp < :to")
 				.expandWhere()
-				.addSql("order by _stationtype, _stationcode, _datatypename")
+				.addSqlIf("order by _stationtype, _stationcode, _datatypename", !flat)
 				.addLimit(limit)
 				.addOffset(offset);
 		log.debug("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
@@ -129,23 +130,41 @@ public class DataFetcher {
 
 		log.debug("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 
-		List<String> hierarchy = new ArrayList<String>();
-		hierarchy.add("_stationtype");
-		hierarchy.add("_stationcode");
-		hierarchy.add("_datatypename");
-
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("offset", offset);
-		result.put("limit", limit);
-		result.put("data", ResultBuilder.build(ignoreNull, queryResult, query.getSelectExpansion(), hierarchy));
-
-		return result;
+		return queryResult;
 	}
 
 	public String fetchStationTypes() {
 		return JsonStream.serialize(QueryExecutor
 				.init()
 				.build("select stationtype from station group by stationtype order by 1", String.class));
+	}
+
+	public QueryBuilder getQuery() {
+		return query;
+	}
+
+	public void setLimit(long limit) {
+		this.limit = limit;
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public void setIgnoreNull(boolean ignoreNull) {
+		this.ignoreNull = ignoreNull;
+	}
+
+	public void setSelect(String select) {
+		this.select = select;
+	}
+
+	public void setWhere(String where) {
+		this.where = where;
 	}
 
 	public static void main(String[] args) throws Exception {
