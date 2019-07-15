@@ -27,14 +27,19 @@ pipeline {
                 sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/database.properties'
             }
         }
+        stage('Test - Reader v2') {
+            steps {
+                sh 'cd reader2 && mvn -B -U clean test'
+            }
+        }
         stage('Build - Reader v2') {
             steps {
-                sh 'cd reader2 && mvn -B -U clean test package'
+                sh 'cd reader2 && mvn -B -DskipTests package'
             }
         }
         stage('Deploy - Reader v2') {
             steps {
-                sh 'cd reader2 && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader2 && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }
