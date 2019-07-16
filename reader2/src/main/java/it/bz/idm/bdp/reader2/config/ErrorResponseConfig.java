@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,8 @@ import it.bz.idm.bdp.reader2.utils.simpleexception.SimpleException;
  */
 @ControllerAdvice
 public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
+
+	private static final Logger log = LoggerFactory.getLogger(ErrorResponseConfig.class);
 
 	@ExceptionHandler
 	public ResponseEntity<Object> handleException(Exception ex) {
@@ -81,6 +85,9 @@ public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
 			}
 		}
 
+		if (log.isDebugEnabled()) {
+			exception.printStackTrace(System.err);
+		}
 		return new ResponseEntity<Object>(map, httpStatus);
 	}
 }

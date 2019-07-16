@@ -470,8 +470,10 @@ public class SelectExpansion {
 				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
 		}
 
-		paramName = "pwhere_" + whereParameters.size();
-		whereParameters.put(paramName, value);
+		if (value != null) {
+			paramName = "pwhere_" + whereParameters.size();
+			whereParameters.put(paramName, value);
+		}
 
 		/*
 		 * Search for a check-function for this operator/value-type combination. Execute it, if present
@@ -485,7 +487,7 @@ public class SelectExpansion {
 			}
 		}
 
-		return String.format(sqlOp, ":" + paramName);
+		return String.format(sqlOp, value == null ? "null" : ":" + paramName );
 	}
 
 	public void expand(final String aliases, String... defNames) {
