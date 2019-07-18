@@ -70,6 +70,7 @@ public abstract class DataPusher implements IntegreenPushable  {
 			throw new IllegalStateException("You need to provide a valid provenance to be able to send data");
 		this.provenance = provenance;
 	}
+
 	/**
 	 * set host, port and endpoint of the writer module
 	 */
@@ -83,5 +84,12 @@ public abstract class DataPusher implements IntegreenPushable  {
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
 			}
+	}
+
+	public String getIntegreenTypology() {
+		return integreenTypology;
+	}
+	public void setIntegreenTypology(String integreenTypology) {
+		this.integreenTypology = integreenTypology;
 	}
 }

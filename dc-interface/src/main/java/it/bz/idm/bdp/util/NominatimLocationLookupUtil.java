@@ -23,6 +23,7 @@
 package it.bz.idm.bdp.util;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,7 +40,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Patrick Bertolla
  */
-public class LocationLookupUtil {
+public class NominatimLocationLookupUtil implements LocationLookup{
 
 	private static final String NOMINATIM_SCHEME = "https";
 	private static final String NOMINATIM_PATH = "/reverse";
@@ -51,7 +52,7 @@ public class LocationLookupUtil {
 	 */
 	private String[] municipalityDenominators = new String[]{"city","town","village","hamlet"};
 
-	public LocationLookupUtil() {
+	public NominatimLocationLookupUtil() {
 		super();
 		this.uriVariables.add("format", "jsonv2");
 	}
@@ -60,7 +61,13 @@ public class LocationLookupUtil {
 	 * @param latitude in EPSG 4326 projection
 	 * @return municipality of the give coordinate, wit a fallback to hamlet
 	 */
+	@Override
 	public String lookupLocation(Double longitude, Double latitude) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		if (longitude==null || latitude == null)
 			throw new IllegalStateException("Missing parameter to reverse lookup location");
 		uriVariables.add("lon", longitude.toString());
@@ -79,8 +86,47 @@ public class LocationLookupUtil {
 
 		ResponseEntity<? extends NominatimDto> exchange = restTemplate.exchange(requestEntity,responseType.getClass());
 		NominatimDto body = exchange.getBody();
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		return extractMunicipality(body);
 	}
+	/**
+	 * @param address of the location you would like to find
+	 * @return coordinate pair in the order longitude,latitude in EPSG 4326 projection
+	 */
+	@Override
+	public Double[] lookupCoordinates(String address) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (address==null)
+			throw new IllegalStateException("Missing parameter to lookup position");
+		uriVariables.add("q", address.trim());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("referer", "NOI-Techpark");
+		headers.add("Content-Type", "application/json");
+		headers.add("accept", "application/json");
+		UriComponents uriComponents =
+	            UriComponentsBuilder.newInstance()
+	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path("/").queryParams(uriVariables)
+	                .build();
+		URI uri = uriComponents.toUri();
+		RequestEntity<List<NominatimAddressLookupResponseDto>> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
+
+		ResponseEntity<NominatimAddressLookupResponseDto[]> exchange = restTemplate.exchange(requestEntity,NominatimAddressLookupResponseDto[].class);
+		NominatimAddressLookupResponseDto[] body = exchange.getBody();
+		if (body.length<=0)
+			throw new IllegalStateException("could not find any coordinates for this string");
+		Double longitude = Double.parseDouble(body[0].getLon());
+		Double latitude = Double.parseDouble(body[0].getLat());
+		return new Double[] {longitude,latitude};
+	}
+
 	private String extractMunicipality(NominatimDto dto) {
 		for (String key : municipalityDenominators) {
 			String municipality = dto.getAddress().get(key);
