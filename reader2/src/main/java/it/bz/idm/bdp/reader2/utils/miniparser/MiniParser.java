@@ -114,7 +114,9 @@ public class MiniParser {
 	protected void error(String msg) {
 		SimpleException ex = new SimpleException(ErrorCode.SYNTAX_ERROR, i, encode(c), encode(msg));
 		ex.addData("position", i);
-		ex.addData("input_marked", input.substring(0, i) + "--->" + encode(c) + "<---" + input.substring(i+1, input.length() - 1));
+		ex.addData("input_marked", input.substring(0, i)
+								   + "--->" + encode(c) + "<---"
+								   + (input.length() > i+1 ? input.substring(i+1, input.length() - 1) : ""));
 		ex.addData("input_origin", input.substring(0, input.length() - 1));
 		throw ex;
 	}
