@@ -58,13 +58,17 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	private Token operator() {
-		return doWhile("OP", t -> {
+		Token res = doWhile("OP", t -> {
 			if (!Character.isLetter(c())) {
 				return false;
 			}
 			t.appendValue(c());
 			return true;
 		});
+		if (res.getValue() == null || res.getValue().isEmpty()) {
+			throw new SimpleException(ErrorCode.SYNTAX_ERROR, getPos() - 1, encode(la(-1)), "OPERATOR expected");
+		}
+		return res;
 	}
 
 	private Token listOrValue() {
