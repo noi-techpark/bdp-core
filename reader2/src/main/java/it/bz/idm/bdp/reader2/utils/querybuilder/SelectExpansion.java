@@ -464,7 +464,9 @@ public class SelectExpansion {
 							break;
 						default:
 							try {
-								value = Double.parseDouble(strValue);
+								if (! (boolean)clauseValueToken.getPayload("quoted")) {
+									value = Double.parseDouble(strValue);
+								}
 							} catch (NumberFormatException e) {
 								/*
 								 * nothing to do, we will keep the given object

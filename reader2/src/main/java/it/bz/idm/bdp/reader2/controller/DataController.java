@@ -81,7 +81,7 @@ public class DataController {
 			"\n\n<code>logical operations</code>\n" +
 			" -   and(alias.operator.value_or_list,...): Conjunction of filters (can be nested)\n" +
 			" -   or(alias.operator.value_or_list,...): Disjunction of filters (can be nested)\n" +
-			"\nMultiple conditions possible as comma-separated-values.\n\n" +
+			"\nMultiple conditions possible as comma-separated-values. <code>value</code>s will be casted to Double precision, if possible. Put them inside double quotes, if you want prevent that.\n\n" +
 			" Example-syntax for bbi/bbc could be <code>coordinate.bbi.(11,46,12,47,4326)</code>, where the ordering inside the list is left-x, left-y, right-x, right-y and SRID (optional).";
 	private static final String DOC_SHOWNULL = "Should JSON keys with null-values be returned, or removed from the response-JSON.";
 	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]</code>, where [] denotes optionality.";

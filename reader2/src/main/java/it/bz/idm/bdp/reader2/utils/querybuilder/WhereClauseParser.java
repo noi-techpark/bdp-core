@@ -96,11 +96,12 @@ public class WhereClauseParser extends MiniParser {
 	}
 
 	private Token value() {
+		boolean quoted = matchConsume('"');
 		Token res = doWhile("VALUE", t -> {
-			if ((match(')') || match(',')) && clash('\\', -1)) {
+			if ((match(')') || match(',') || (match('"') && quoted)) && clash('\\', -1)) {
 				return false;
-			} else if ((match('(') || match('\'')) && clash('\\', -1)) {
-				error("Characters (' must be escaped within a filter VALUE");
+			} else if ((match('(') || match('\'') || match('"')) && clash('\\', -1)) {
+				error("Characters ('\" must be escaped within a filter VALUE");
 			}
 			matchConsume('\\');
 			t.appendValue(c());
@@ -111,7 +112,10 @@ public class WhereClauseParser extends MiniParser {
 		} else if (res.valueIs("null")) {
 			res.setName("null");
 			res.setValue(null);
+		} else if (quoted) {
+			expectConsume('"');
 		}
+		res.addPayload("quoted", quoted);
 		return res;
 	}
 
