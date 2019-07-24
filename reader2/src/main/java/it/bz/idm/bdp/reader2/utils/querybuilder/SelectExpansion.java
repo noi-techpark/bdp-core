@@ -462,6 +462,16 @@ public class SelectExpansion {
 						case "false":
 							value = false;
 							break;
+						default:
+							try {
+								value = Double.parseDouble(strValue);
+							} catch (NumberFormatException e) {
+								/*
+								 * nothing to do, we will keep the given object
+								 * type and let Postgres handle possible casting errors
+								 */
+							}
+							break;
 					}
 				}
 			break;
