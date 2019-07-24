@@ -1,11 +1,14 @@
 package it.bz.idm.bdp.reader2.utils.miniparser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Token {
 	String name;
 	String value;
+	Map<String, Object> payload;
 	List<Token> children = new ArrayList<Token>();
 
 	public Token(String name, String value) {
@@ -182,6 +185,17 @@ public class Token {
 			}
 		}
 		return null;
+	}
+
+	public void addPayload(String key, Object value) {
+		if (payload == null) {
+			payload = new HashMap<String, Object>();
+		}
+		payload.put(key, value);
+	}
+
+	public Object getPayload(String key) {
+		return payload.getOrDefault(key, null);
 	}
 
 	public int getChildCount() {
