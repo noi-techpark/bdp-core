@@ -109,7 +109,7 @@ public class WhereClauseParser extends MiniParser {
 		});
 		if (res.valueIs(null)) {
 			res.setValue("");
-		} else if (res.valueIs("null")) {
+		} else if (res.valueIs("null") && !quoted) {
 			res.setName("null");
 			res.setValue(null);
 		} else if (quoted) {

@@ -62,7 +62,7 @@ public class DataController {
 	private static final String DOC_SELECT = "Select JSON keys (a.k.a. column-aliases), which will be used to build the response. Multiple aliases possible as comma-separated-values. All of them start with a single character prefix, ex., <code>sname</code>.";
 	private static final String DOC_WHERE = "Filter the result with filter-triples, like <code>alias.operator.value_or_list</code>" +
 			"\n\n<code>values_or_list</code>\n" +
-			" -   value: Whatever you want, also a regular expression. However, you need to escape <code>,</code> and <code>'</code> with a <code>\\\\</code>. Use url-encoded values, if your tool does not support certain characters.\n" +
+			" -   value: Whatever you want, also a regular expression. However, you need to escape <code>,'\"</code> with a <code>\\\\</code>. Use url-encoded values, if your tool does not support certain characters.\n" +
 			" -   list: <code>(value,value,value)</code>" +
 			"\n\n<code>operator</code>\n" +
 			" -   eq: Equal\n" +
@@ -81,7 +81,7 @@ public class DataController {
 			"\n\n<code>logical operations</code>\n" +
 			" -   and(alias.operator.value_or_list,...): Conjunction of filters (can be nested)\n" +
 			" -   or(alias.operator.value_or_list,...): Disjunction of filters (can be nested)\n" +
-			"\nMultiple conditions possible as comma-separated-values. <code>value</code>s will be casted to Double precision, if possible. Put them inside double quotes, if you want prevent that.\n\n" +
+			"\nMultiple conditions possible as comma-separated-values. <code>value</code>s will be casted to Double precision or <code>null</code>, if possible. Put them inside double quotes, if you want to prevent that.\n\n" +
 			" Example-syntax for bbi/bbc could be <code>coordinate.bbi.(11,46,12,47,4326)</code>, where the ordering inside the list is left-x, left-y, right-x, right-y and SRID (optional).";
 	private static final String DOC_SHOWNULL = "Should JSON keys with null-values be returned, or removed from the response-JSON.";
 	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]</code>, where [] denotes optionality.";

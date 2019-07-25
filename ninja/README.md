@@ -135,8 +135,8 @@ A `where` clause is a list of filter-triples, like `alias.operator.value_or_list
 
 **values_or_list**
 - `value`: Whatever you want, also a regular expression. However, you need to
-  escape `,` and `'` with a `\`. Use url-encoding, if your tool does not support
-  certain characters. Special values are `null` or an omitted value. Examples:
+  escape `,`, `'` and `"` with a `\`. Use url-encoding, if your tool does not support
+  certain characters. Special values are `null`, numbers or an omitted value. Examples:
   - `description.eq.null`, checks if a description is not set
   - `description.eq.`, checks if a description is set, but the string has length 0
 - `list`: `(value,value,value)`
@@ -158,8 +158,8 @@ A `where` clause is a list of filter-triples, like `alias.operator.value_or_list
   completely covered by the box)
 - `in`: True, if the value of the alias can be found within the given list.
   Example: `name.in.(Patrick,Rudi,Peter)`
-- `and(alias.operator.value,...)`: Conjunction of filters (can be nested)
-- `or(alias.operator.value,...)`: Disjunction of filters (can be nested)
+- `and(alias.operator.value_or_list,...)`: Conjunction of filters (can be nested)
+- `or(alias.operator.value_or_list,...)`: Disjunction of filters (can be nested)
 
 Multiple conditions possible as comma-separated-values.
 
@@ -191,9 +191,10 @@ GET /ParkingStation/occupied/2019-01-01/2019-01-02?where=mvalue.gt.100,sorigin.e
 ```
 
 Here the syntax for each clause is `attribute.operator.value`, where value can
-be composed of any character except `,` and `'`, which must be escaped like `\,`
-and `\'`. A special value is `null`. Currently, it is therefore not possible to
-search for a string `"null"`.
+be composed of any character except `,'"`, which must be escaped like `\,`, `\'`
+or `\"`. A special value is `null`. If you want to use it as a literal value,
+that is, the String itself, then you must put it into double-quotes, like
+`"null"`.
 
 ### I want to see all information where the station code starts with "me" or "rovereto"
 
