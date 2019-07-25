@@ -30,13 +30,15 @@ public class SwaggerConfig {
 
 	private ApiInfo apiInfo() {
 		return new ApiInfo(
-				"Open Data Hub / Mobility - Consumer API",
-				"Documentation and examples can be found on <a href=https://github.com/noi-techpark/bdp-core/blob/readerv2/reader2/README.md>readerv2.bdp-core.git</a>",
-				"2.0",
-				"",
-				new Contact("Peter Moser", "https://opendatahub.bz.it", "p.moser@noi.bz.it"),
-				"AGPL-3.0",
-				"https://opensource.org/licenses/AGPL-3.0",
+				"Big Data Platform REST API",
+				"This page contains the documentation about the API REST calls of the Big Data Platform, the core component of the ODH Project.\n"
+	            + "More information about the project in its homepage: http://opendatahub.bz.it/ \n"
+	            + "Tutorials and technical documentation can be found at https://github.com/noi-techpark/bdp-core/blob/master/ninja/README.md",
+				"v2",
+				"http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
+				new Contact("","",""),
+				"API License",
+	            "http://opendatahub.readthedocs.io/en/latest/licenses.html",
 				Collections.emptyList());
 	}
 
