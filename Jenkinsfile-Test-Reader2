@@ -11,6 +11,8 @@ pipeline {
         TESTSERVER_TOMCAT_CREDENTIALS=credentials('testserver-tomcat8-credentials')
 
         READER2_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
+
+        ROOT_PATH = "ninja"
     }
 
     stages {
@@ -22,24 +24,24 @@ pipeline {
                 sh 'echo "    </servers>" >> ~/.m2/settings.xml'
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
 
-                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" reader2/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" ${ROOT_PATH}/src/main/resources/application.properties'
 
-                sh 'cat "${READER2_DATABASE_CONFIG}" > reader2/src/main/resources/database.properties'
+                sh 'cat "${READER2_DATABASE_CONFIG}" > ${ROOT_PATH}/src/main/resources/database.properties'
             }
         }
-        stage('Test - Reader v2') {
+        stage('Test - Ninja API (v2)') {
             steps {
-                sh 'cd reader2 && mvn -B -U clean test'
+                sh 'cd ${ROOT_PATH} && mvn -B -U clean test'
             }
         }
-        stage('Build - Reader v2') {
+        stage('Build - Ninja API (v2)') {
             steps {
-                sh 'cd reader2 && mvn -B -DskipTests package'
+                sh 'cd ${ROOT_PATH} && mvn -B -DskipTests package'
             }
         }
-        stage('Deploy - Reader v2') {
+        stage('Deploy - Ninja API (v2)') {
             steps {
-                sh 'cd reader2 && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd ${ROOT_PATH} && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }
