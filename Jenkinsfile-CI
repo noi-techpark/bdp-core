@@ -32,7 +32,7 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test'
             }
         }
-        stage('Test - Reader v2') {
+        stage('Test - Ninja (Reader v2)') {
             steps {
                 sh 'cd ninja && mvn -B -U clean test'
             }
