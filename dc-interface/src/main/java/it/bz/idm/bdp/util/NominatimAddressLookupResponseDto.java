@@ -20,28 +20,34 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp;
+package it.bz.idm.bdp.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import java.io.Serializable;
 
-import org.junit.Test;
+public class NominatimAddressLookupResponseDto implements Serializable{
 
-import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
-
-public class NominatimLookupTest {
-
-	private NominatimLocationLookupUtil util = new NominatimLocationLookupUtil();
-
-	@Test
-	public void testLocationLookup() {
-		String lookupLocation = util.lookupLocation(11.45, 49.45);
-		assertNotNull(lookupLocation);
-		assertFalse(lookupLocation.isEmpty());
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 5136628956589831385L;
+	private String lat;
+	private String lon;
+	public String getLat() {
+		return lat;
 	}
-	@Test
-	public void testCoordinateLookup() {
-		Double[] coordinates = util.lookupCoordinates("via Fago 26 Bolzano");
-		assertNotNull(coordinates);
+	public void setLat(String lat) {
+		this.lat = lat;
 	}
+	public String getLon() {
+		return lon;
+	}
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+
+
 }

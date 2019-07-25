@@ -20,28 +20,20 @@
  *
  * SPDX-License-Identifier: GPL-3.0
  */
-package it.bz.idm.bdp;
+package it.bz.idm.bdp.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+public class MapBoxLookupUtil implements LocationLookup {
 
-import org.junit.Test;
-
-import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
-
-public class NominatimLookupTest {
-
-	private NominatimLocationLookupUtil util = new NominatimLocationLookupUtil();
-
-	@Test
-	public void testLocationLookup() {
-		String lookupLocation = util.lookupLocation(11.45, 49.45);
-		assertNotNull(lookupLocation);
-		assertFalse(lookupLocation.isEmpty());
+	@Override
+	public String lookupLocation(Double longitude, Double latitude) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-	@Test
-	public void testCoordinateLookup() {
-		Double[] coordinates = util.lookupCoordinates("via Fago 26 Bolzano");
-		assertNotNull(coordinates);
+
+	@Override
+	public Double[] lookupCoordinates(String address) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
 }
