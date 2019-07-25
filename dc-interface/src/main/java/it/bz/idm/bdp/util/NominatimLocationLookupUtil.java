@@ -46,7 +46,7 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 	private static final String NOMINATIM_PATH = "/reverse";
 	private static final String NOMINATIM_HOST = "nominatim.openstreetmap.org";
 	protected RestTemplate restTemplate = new RestTemplate();
-	private MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
+	private MultiValueMap<String, String> defaultUriVariables = new LinkedMultiValueMap<>();
 	/**
 	 * Municipalities are described in the response DTO address field in one of this fields. If the first is missing the second one is used and so on
 	 */
@@ -54,7 +54,7 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 
 	public NominatimLocationLookupUtil() {
 		super();
-		this.uriVariables.add("format", "jsonv2");
+		this.defaultUriVariables.add("format", "jsonv2");
 	}
 	/**
 	 * @param longitude in EPSG 4326 projection
@@ -70,8 +70,10 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		}
 		if (longitude==null || latitude == null)
 			throw new IllegalStateException("Missing parameter to reverse lookup location");
-		uriVariables.add("lon", longitude.toString());
-		uriVariables.add("lat", latitude.toString());
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+		parameters.add("lon", longitude.toString());
+		parameters.add("lat", latitude.toString());
+		parameters.addAll(defaultUriVariables);
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("referer", "NOI-Techpark");
 		headers.add("Content-Type", "application/json");
@@ -79,7 +81,7 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		NominatimDto responseType = new NominatimDto();
 		UriComponents uriComponents =
 	            UriComponentsBuilder.newInstance()
-	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path(NOMINATIM_PATH).queryParams(uriVariables)
+	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path(NOMINATIM_PATH).queryParams(parameters)
 	                .build();
 		URI uri = uriComponents.toUri();
 		RequestEntity<NominatimDto> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
@@ -106,14 +108,16 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		}
 		if (address==null)
 			throw new IllegalStateException("Missing parameter to lookup position");
-		uriVariables.add("q", address.trim());
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+		parameters.add("q", address.trim());
+		parameters.addAll(defaultUriVariables);
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("referer", "NOI-Techpark");
 		headers.add("Content-Type", "application/json");
 		headers.add("accept", "application/json");
 		UriComponents uriComponents =
 	            UriComponentsBuilder.newInstance()
-	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path("/").queryParams(uriVariables)
+	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path("/").queryParams(parameters)
 	                .build();
 		URI uri = uriComponents.toUri();
 		RequestEntity<List<NominatimAddressLookupResponseDto>> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
