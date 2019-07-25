@@ -23,7 +23,7 @@ public class SwaggerConfig {
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2)
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("it.bz.idm.bdp.reader2"))
+				.apis(RequestHandlerSelectors.basePackage("it.bz.idm.bdp.ninja"))
 				.build()
 				.apiInfo(apiInfo());
 	}

@@ -10,7 +10,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@ComponentScan("it.bz.idm.bdp.reader2")
+@ComponentScan("it.bz.idm.bdp.ninja")
 public class DatabaseConfig {
 
 	@Bean
