@@ -36,7 +36,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 /**
- * TODO Please, describe it!
+ * see {@link AuthenticationEntryPoint}
  *
  * @author Patrick Bertolla
  */

@@ -23,6 +23,7 @@
 package it.bz.idm.bdp.writer;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,12 +39,14 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.MeasurementString;
+import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
@@ -213,5 +216,33 @@ public class DataManager {
 										  .path(mappingController + mapping)
 										  .buildAndExpand(uriVariableValues)
 										  .toUri();
+	}
+	public static ResponseEntity<?> addProvenance(ProvenanceDto provenance, URI responseLocation) {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			em.getTransaction().begin();
+			String uuid = Provenance.add(em,provenance);
+			em.getTransaction().commit();
+			return new ResponseEntity<>(uuid, HttpStatus.OK);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
+	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
+		EntityManager em = JPAUtil.createEntityManager();
+		List<ProvenanceDto> provenances = new ArrayList<>();
+		try {
+			List<Provenance> resultList = Provenance.find(em,uuid,name,version,lineage);
+			for (Provenance p : resultList) {
+				ProvenanceDto dto = new ProvenanceDto(p.getUuid(),p.getDataCollector(),p.getDataCollectorVersion(),p.getLineage());
+				provenances.add(dto);
+			}
+			return provenances;
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
 	}
 }

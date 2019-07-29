@@ -27,16 +27,21 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import it.bz.idm.bdp.util.LocationLookupUtil;
+import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
 
 public class NominatimLookupTest {
 
-	private LocationLookupUtil util = new LocationLookupUtil();
+	private NominatimLocationLookupUtil util = new NominatimLocationLookupUtil();
 
 	@Test
 	public void testLocationLookup() {
 		String lookupLocation = util.lookupLocation(11.45, 49.45);
 		assertNotNull(lookupLocation);
 		assertFalse(lookupLocation.isEmpty());
+	}
+	@Test
+	public void testCoordinateLookup() {
+		Double[] coordinates = util.lookupCoordinates("via Fago 26 Bolzano");
+		assertNotNull(coordinates);
 	}
 }

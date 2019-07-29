@@ -25,9 +25,10 @@ package it.bz.idm.bdp.dto;
 import java.util.List;
 
 /**
- * TODO Please, describe it!
- *
+ * converts acquired data to a format which the big data platform understands;
+ * currently it only exists for stations and types
  * @author Patrick Bertolla
+ *
  */
 public interface BDPAdapter {
 

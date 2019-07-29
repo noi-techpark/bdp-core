@@ -25,6 +25,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import it.bz.idm.bdp.DataPusher;
@@ -41,6 +44,7 @@ import it.bz.idm.bdp.dto.StationList;
  * @author Patrick Bertolla
  *
  */
+@Component
 public abstract class JSONPusher extends DataPusher {
 	private static final String SYNC_DATA_TYPES = "/syncDataTypes/";
 	private static final String SYNC_STATIONS = "/syncStations/";
@@ -48,21 +52,29 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
 	private static final String JSON_ENDPOINT = "json_endpoint";
 	private static final String STATIONS = "/stations/";
+	private static final String PROVENANCE = "/provenance/";
 
 	protected RestTemplate restTemplate = new RestTemplate();
 
 	private String url;
-	public JSONPusher() {
+	@Override
+	@PostConstruct
+	public void init() {
+		super.init();
 		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
 	}
 	@Override
 	public Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto) {
-		if (dto == null)
-			return null;
+		this.pushProvenance();
+		dto.setProvenance(this.provenance.getUuid());
 		return restTemplate.postForObject(url + PUSH_RECORDS + "{datasourceName}", dto, Object.class, datasourceName);
 	}
 
 
+	private void pushProvenance() {
+		String provenanceUuid = restTemplate.postForObject(url + PROVENANCE , this.provenance, String.class);
+		this.provenance.setUuid(provenanceUuid);
+	}
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
 		dto.clean();
 		return pushData(this.integreenTypology, dto);
@@ -98,6 +110,8 @@ public abstract class JSONPusher extends DataPusher {
 	}
 	@Override
 	public List<StationDto> fetchStations(String datasourceName, String origin) {
+		if (datasourceName==null)
+			datasourceName = this.integreenTypology;
 		StationDto[] object = restTemplate.getForObject(url + STATIONS +"{datasourceName}/?origin={origin}",StationDto[].class,datasourceName, origin);
 		return Arrays.asList(object);
 	}

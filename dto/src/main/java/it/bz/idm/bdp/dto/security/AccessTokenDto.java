@@ -27,7 +27,7 @@ import java.io.Serializable;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO Please, describe it!
+ * access token dto which grants time limited access the the API
  *
  * @author Patrick Bertolla
  */

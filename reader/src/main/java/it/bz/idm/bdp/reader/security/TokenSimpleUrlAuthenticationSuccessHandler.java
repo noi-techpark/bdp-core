@@ -32,7 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 /**
- * TODO Please, describe it!
+ * see {@link SimpleUrlAuthenticationSuccessHandler}
  *
  * @author Patrick Bertolla
  */

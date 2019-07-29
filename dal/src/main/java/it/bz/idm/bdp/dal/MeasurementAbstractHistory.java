@@ -165,6 +165,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 		boolean typeFound = false;
 		boolean jsonOK = false;
 		try {
+
+			Provenance provenance = Provenance.findByUuid(em, dataMap.getProvenance());
 			for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
 				Station station = Station.findStation(em, stationType, stationEntry.getKey());
 				if (station == null) {
@@ -216,6 +218,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 								if (latestNumberMeasurementTime < dateOfMeasurement) {
 									Double value = ((Number)valueObj).doubleValue();
 									MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+									record.setProvenance(provenance);
 									em.persist(record);
 								}
 								if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
@@ -226,6 +229,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 								if (latestStringMeasurementTime < dateOfMeasurement) {
 									String value = (String) valueObj;
 									MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+									record.setProvenance(provenance);
 									em.persist(record);
 								}
 								if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
@@ -245,9 +249,11 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
 							if (latestNumberMeasurement == null) {
 								latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
+								latestNumberMeasurement.setProvenance(provenance);
 								em.persist(latestNumberMeasurement);
 							} else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
 								latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
+								latestNumberMeasurement.setProvenance(provenance);
 								latestNumberMeasurement.setValue(valueNumber);
 								em.merge(latestNumberMeasurement);
 							}
@@ -257,10 +263,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							String valueString = (String) newestStringDto.getValue();
 							if (latestStringMeasurement == null) {
 								latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+								latestStringMeasurement.setProvenance(provenance);
 								em.persist(latestStringMeasurement);
 							} else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
 								latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
 								latestStringMeasurement.setValue(valueString);
+								latestStringMeasurement.setProvenance(provenance);
 								em.merge(latestStringMeasurement);
 							}
 						}

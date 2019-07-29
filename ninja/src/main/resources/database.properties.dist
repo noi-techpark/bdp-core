@@ -1,0 +1,13 @@
+# This is a HIKARI database configuration file
+
+driverClassName=org.postgresql.Driver
+
+# Remove "public" from currentSchema, if you do not need that (mostly useful, if postgis is installed there)
+jdbcUrl=jdbc:postgresql://localhost:5432/your_database?currentSchema=your_schema,public
+username=your_user
+password=your_password
+
+maximumPoolSize=20
+dataSource.cachePrepStmts=true
+dataSource.prepStmtCacheSize=250
+dataSource.prepStmtCacheSqlLimit=4096

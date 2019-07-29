@@ -7,8 +7,11 @@ pipeline {
     }
 
     environment {
-        TESTSERVER_TOMCAT_ENDPOINT=credentials('testserver-tomcat8-url')
-        TESTSERVER_TOMCAT_CREDENTIALS=credentials('testserver-tomcat8-credentials')
+        TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
+        TESTSERVER_TOMCAT_CREDENTIALS = credentials('testserver-tomcat8-credentials')
+
+		NINJA_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
+        NINJA_ROOT_PATH = "ninja"
 
         BDP_DATABASE_SCHEMA = "intimev2"
         BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
@@ -29,6 +32,9 @@ pipeline {
                 sh 'echo "        ${TESTSERVER_TOMCAT_CREDENTIALS}" >> ~/.m2/settings.xml'
                 sh 'echo "    </servers>" >> ~/.m2/settings.xml'
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
+
+                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'cat "${NINJA_DATABASE_CONFIG}" > ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
 
                 sh 'cp dal/src/main/resources/META-INF/persistence.xml.dist dal/src/main/resources/META-INF/persistence.xml'
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${BDP_DATABASE_SCHEMA} dal/src/main/resources/META-INF/persistence.xml'''
@@ -57,6 +63,11 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
+        stage('Build - Ninja') {
+            steps {
+                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -U clean test package'
+            }
+        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -64,12 +75,17 @@ pipeline {
         }
         stage('Deploy - Reader') {
             steps {
-                sh 'cd reader && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd reader && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+            }
+        }
+        stage('Deploy - Ninja API (v2)') {
+            steps {
+                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
         stage('Deploy - Writer') {
             steps {
-                sh 'cd writer && mvn -B -U tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd writer && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }

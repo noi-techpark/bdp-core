@@ -27,7 +27,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * TODO Please, describe it!
+ * describes the validity of a record and makes it serializable
  *
  * @author Patrick Bertolla
  */

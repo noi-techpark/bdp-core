@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 
@@ -49,6 +50,21 @@ import it.bz.idm.bdp.dto.StationDto;
 @RequestMapping("/json")
 @Controller
 public class JsonController extends DataManager {
+
+	@RequestMapping(value="/provenance", method=RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?>  createProvenance(@RequestBody ProvenanceDto provenance) {
+		return DataManager.addProvenance(provenance,getURIMapping("/provenance"));
+	}
+
+	@RequestMapping(value = "/provenance", method = RequestMethod.GET)
+	public @ResponseBody List<ProvenanceDto> getProvenance(
+			@RequestParam(value = "uuid", required = false) String uuid,
+			@RequestParam(value = "dataCollector", required = false) String name,
+			@RequestParam(value = "dataCollectorVersion", required = false) String version,
+			@RequestParam(value = "lineage", required = false) String lineage) {
+		return DataManager.findProvenance(uuid,name,version,lineage);
+	}
+
 
 	@RequestMapping(value = "/getDateOfLastRecord", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<Date> dateOfLastRecordMissingTopology() {
