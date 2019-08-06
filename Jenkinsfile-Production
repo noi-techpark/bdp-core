@@ -48,6 +48,11 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
+        stage('Build - Ninja') {
+            steps {
+                sh 'cd ninja && mvn -B -U clean test package'
+            }
+        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -56,8 +61,10 @@ pipeline {
         stage('Archive') {
             steps {
                 sh 'cp reader/target/reader.war reader.war'
+                sh 'cp ninja/target/ninja.war ninja.war'
                 sh 'cp writer/target/writer.war writer.war'
                 archiveArtifacts artifacts: 'reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'ninja.war', onlyIfSuccessful: true
                 archiveArtifacts artifacts: 'writer.war', onlyIfSuccessful: true
             }
         }
