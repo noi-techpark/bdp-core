@@ -18,6 +18,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<finalName>ninja</finalName>
 	</properties>
 
 	<dependencies>
@@ -66,6 +67,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>${finalName}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
