@@ -39,7 +39,7 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" dal/src/main/resources/log4j.properties'
 
-                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1INFO,R%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1INFO%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
                 sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
                 sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
                 sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
