@@ -10,7 +10,6 @@ pipeline {
         TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
         TESTSERVER_TOMCAT_CREDENTIALS = credentials('testserver-tomcat8-credentials')
 
-		NINJA_DATABASE_CONFIG = credentials('bdp-core-test-reader2-database.properties')
         NINJA_ROOT_PATH = "ninja"
 
         BDP_DATABASE_SCHEMA = "intimev2"
@@ -33,9 +32,14 @@ pipeline {
                 sh 'echo "    </servers>" >> ~/.m2/settings.xml'
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
 
+                // Configure NINJA - API v2
                 sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'cat "${NINJA_DATABASE_CONFIG}" > ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
+                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
+                sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
+                sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
+                sh 'sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${BDP_DATABASE_HOST}:${BDP_DATABASE_PORT}/${BDP_DATABASE_NAME}?currentSchema=${BDP_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
 
+                // Configure DAL - API v1
                 sh 'cp dal/src/main/resources/META-INF/persistence.xml.dist dal/src/main/resources/META-INF/persistence.xml'
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${BDP_DATABASE_SCHEMA} dal/src/main/resources/META-INF/persistence.xml'''
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v ${BDP_DATABASE_HOST} dal/src/main/resources/META-INF/persistence.xml'''

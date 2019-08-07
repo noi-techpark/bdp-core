@@ -16,6 +16,8 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-prod-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-prod-reader-jwt-secret')
+
+        NINJA_ROOT_PATH = "ninja"
     }
 
     stages {
@@ -36,6 +38,12 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" dal/src/main/resources/log4j.properties'
+
+                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1INFO,R%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
+                sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
+                sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
+                sh 'sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${BDP_DATABASE_HOST}:${BDP_DATABASE_PORT}/${BDP_DATABASE_NAME}?currentSchema=${BDP_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
             }
         }
         stage('Install') {
@@ -48,6 +56,11 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
+        stage('Build - Ninja') {
+            steps {
+                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -U clean test package'
+            }
+        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -56,8 +69,10 @@ pipeline {
         stage('Archive') {
             steps {
                 sh 'cp reader/target/reader.war reader.war'
+                sh 'cp ${NINJA_ROOT_PATH}/target/ninja.war ninja.war'
                 sh 'cp writer/target/writer.war writer.war'
                 archiveArtifacts artifacts: 'reader.war', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'ninja.war', onlyIfSuccessful: true
                 archiveArtifacts artifacts: 'writer.war', onlyIfSuccessful: true
             }
         }
