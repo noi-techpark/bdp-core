@@ -7,7 +7,7 @@ jdbcUrl=jdbc:postgresql://localhost:5432/your_database?currentSchema=your_schema
 username=your_user
 password=your_password
 
-maximumPoolSize=20
+maximumPoolSize=5
 dataSource.cachePrepStmts=true
 dataSource.prepStmtCacheSize=250
 dataSource.prepStmtCacheSqlLimit=4096
