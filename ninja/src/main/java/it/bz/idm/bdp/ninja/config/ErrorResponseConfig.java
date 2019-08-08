@@ -25,7 +25,6 @@ package it.bz.idm.bdp.ninja.config;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
 	}
 
 	private ResponseEntity<Object> buildResponse(final HttpStatus httpStatus, final Exception exception, final String logRef) {
-		final String message = Optional.of(exception.getMessage()).orElse(exception.getClass().getSimpleName());
+		String message = (exception == null || exception.getMessage() == null) ? exception.getClass().getSimpleName() : exception.getMessage();
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("message", message);
 		map.put("timestamp", new Date());
