@@ -6,18 +6,16 @@ import java.util.Map;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
-
 public class QueryExecutor {
 	private static NamedParameterJdbcTemplate npjt;
 	private MapSqlParameterSource parameters = new MapSqlParameterSource();
 
 	/**
-	 * Create a new {@link QueryBuilder} instance
+	 * Create a new {@link QueryExecutor} instance
 	 *
-	 * @see QueryBuilder#QueryBuilder(EntityManager)
+	 * @see QueryExecutor#QueryExecutor(NamedParameterJdbcTemplate)
 	 *
-	 * @param namedParameterJdbcTemplate {@link EntityManager}
+	 * @param namedParameterJdbcTemplate {@link NamedParameterJdbcTemplate}
 	 */
 	public static synchronized void setup(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		if (namedParameterJdbcTemplate == null) {
