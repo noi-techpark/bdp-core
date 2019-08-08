@@ -112,9 +112,12 @@ public class DataController {
 			.parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
 			.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
 			.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-			.parseDefaulting(ChronoField.MILLI_OF_SECOND, 0)
+			.parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
 			.toFormatter();
 
+	protected static LocalDateTime getDateTime(String dateString) {
+		return LocalDateTime.from(DATE_FORMAT.parse(dateString));
+	}
 
 	@Autowired
 	DataFetcher dataFetcher;
@@ -230,8 +233,8 @@ public class DataController {
 
 		boolean flat = isFlatRepresentation(representation);
 
-		LocalDateTime dateTimeFrom = LocalDateTime.from(DATE_FORMAT.parse(from));
-		LocalDateTime dateTimeTo = LocalDateTime.from(DATE_FORMAT.parse(to));
+		LocalDateTime dateTimeFrom = getDateTime(from);
+		LocalDateTime dateTimeTo = getDateTime(to);
 
 		dataFetcher.setIgnoreNull(!showNull);
 		dataFetcher.setLimit(limit);
