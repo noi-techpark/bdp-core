@@ -92,7 +92,7 @@ public class DataFetcher {
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
 		long nanoTime = System.nanoTime();
-		QueryBuilder query = QueryBuilder
+		query = QueryBuilder
 				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
 				.addSql("select")
 				.addSqlIf("distinct", distinct)
