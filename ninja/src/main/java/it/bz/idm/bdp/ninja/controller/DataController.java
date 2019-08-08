@@ -44,6 +44,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.bz.idm.bdp.ninja.DataFetcher;
 import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
+import it.bz.idm.bdp.ninja.utils.simpleexception.ErrorCodeInterface;
+import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
 /**
  * @author Peter Moser
@@ -53,8 +55,22 @@ import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
 @Api(value = "Data", produces = "application/json")
 public class DataController {
 
+	public static enum ErrorCode implements ErrorCodeInterface {
+		WRONG_REPRESENTATION ("Please choose 'flat' or 'tree' as representation. '%s' is not allowed.");
+
+		private final String msg;
+		ErrorCode(String msg) {
+			this.msg = msg;
+		}
+
+		@Override
+		public String getMsg() {
+			return "PARSING ERROR: " + msg;
+		}
+	}
+
 	private static final String DOC_DISTINCT = "Remove duplicate entries.";
-	private static final String DOC_REPRESENTATION = "Do you want to have the result in a <code>hierarchical</code> or <code>flat</code> representation.";
+	private static final String DOC_REPRESENTATION = "Do you want to have the result in a <code>tree</code> or <code>flat</code> representation.";
 	private static final String DOC_STATIONTYPES = "Station types or categories. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_DATATYPES = "Data types. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_LIMIT = "The limit of the response. Set it to -1 to disable it.";
@@ -111,10 +127,10 @@ public class DataController {
 
 	@ApiOperation(
 			value = "View details of all given station types",
-			notes = "You can put multiple station types as comma-seperated list.<br>The response is a hierarchy of <code>station-type / station-name</code>."
+			notes = "You can put multiple station types as comma-seperated list.<br>The response is a tree of <code>station-type / station-name</code>."
 			)
 	@GetMapping(value = "/{representation}/{stationTypes}", produces = "application/json")
-	public @ResponseBody String requestStations(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+	public @ResponseBody String requestStations(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
 												@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											    @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
 											    @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
@@ -142,10 +158,10 @@ public class DataController {
 		if (flat) {
 			result.put("data", queryResult);
 		} else {
-			List<String> hierarchy = new ArrayList<String>();
-			hierarchy.add("_stationtype");
-			hierarchy.add("_stationcode");
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+			List<String> tree = new ArrayList<String>();
+			tree.add("_stationtype");
+			tree.add("_stationcode");
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
 		}
 
 		return DataFetcher.serializeJSON(result);
@@ -153,9 +169,9 @@ public class DataController {
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and most-recent measurements",
-			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
+			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a tree of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}", produces = "application/json")
-	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
 												 @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 												 @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 												 @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
@@ -185,12 +201,12 @@ public class DataController {
 		if (flat) {
 			result.put("data", queryResult);
 		} else {
-			List<String> hierarchy = new ArrayList<String>();
-			hierarchy.add("_stationtype");
-			hierarchy.add("_stationcode");
-			hierarchy.add("_datatypename");
+			List<String> tree = new ArrayList<String>();
+			tree.add("_stationtype");
+			tree.add("_stationcode");
+			tree.add("_datatypename");
 
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
 		}
 
 		return DataFetcher.serializeJSON(result);
@@ -198,9 +214,9 @@ public class DataController {
 
 	@ApiOperation(
 			value = "View details of all given station types including data types and historical measurements",
-			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a hierarchy of <code>station-type / station-name / data-type / measurements</code>.")
+			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a tree of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
-	public @ResponseBody String requestHistory(@ApiParam(value=DOC_REPRESENTATION, defaultValue="hierarchy") @PathVariable String representation,
+	public @ResponseBody String requestHistory(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
 											   @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											   @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 											   @ApiParam(value=DOC_TIME) @PathVariable String from,
@@ -235,11 +251,11 @@ public class DataController {
 		if (flat) {
 			result.put("data", queryResult);
 		} else {
-			List<String> hierarchy = new ArrayList<String>();
-			hierarchy.add("_stationtype");
-			hierarchy.add("_stationcode");
-			hierarchy.add("_datatypename");
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), hierarchy));
+			List<String> tree = new ArrayList<String>();
+			tree.add("_stationtype");
+			tree.add("_stationcode");
+			tree.add("_datatypename");
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
 		}
 
 		return DataFetcher.serializeJSON(result);
@@ -249,9 +265,9 @@ public class DataController {
 		if (representation.equalsIgnoreCase("flat")) {
 			return true;
 		}
-		if (representation.equalsIgnoreCase("hierarchy")) {
+		if (representation.equalsIgnoreCase("tree")) {
 			return false;
 		}
-		throw new RuntimeException("Please choose 'flat' or 'hierarchy' as representation. '" + representation + "' is not allowed.");
+		throw new SimpleException(ErrorCode.WRONG_REPRESENTATION, representation);
 	}
 }
