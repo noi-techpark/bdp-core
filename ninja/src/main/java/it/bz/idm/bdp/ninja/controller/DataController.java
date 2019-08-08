@@ -106,6 +106,7 @@ public class DataController {
 	private static final String DEFAULT_OFFSET = "0";
 	private static final String DEFAULT_SHOWNULL = "false";
 	private static final String DEFAULT_DISTINCT = "true";
+	private static final String DEFAULT_REPRESENTATION = "flat";
 
 	private static DateTimeFormatter DATE_FORMAT = new DateTimeFormatterBuilder()
 			.appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
@@ -133,7 +134,7 @@ public class DataController {
 			notes = "You can put multiple station types as comma-seperated list.<br>The response is a tree of <code>station-type / station-name</code>."
 			)
 	@GetMapping(value = "/{representation}/{stationTypes}", produces = "application/json")
-	public @ResponseBody String requestStations(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
+	public @ResponseBody String requestStations(@ApiParam(value=DOC_REPRESENTATION, defaultValue=DEFAULT_REPRESENTATION) @PathVariable String representation,
 												@ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											    @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
 											    @ApiParam(value=DOC_OFFSET) @RequestParam(value="offset", required=false, defaultValue=DEFAULT_OFFSET) Long offset,
@@ -174,7 +175,7 @@ public class DataController {
 			value = "View details of all given station types including data types and most-recent measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a tree of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}", produces = "application/json")
-	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
+	public @ResponseBody String requestDataTypes(@ApiParam(value=DOC_REPRESENTATION, defaultValue=DEFAULT_REPRESENTATION) @PathVariable String representation,
 												 @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 												 @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 												 @ApiParam(value=DOC_LIMIT) @RequestParam(value="limit", required=false, defaultValue=DEFAULT_LIMIT) Long limit,
@@ -219,7 +220,7 @@ public class DataController {
 			value = "View details of all given station types including data types and historical measurements",
 			notes = "You can put multiple station or data types as comma-seperated lists.<br>The response is a tree of <code>station-type / station-name / data-type / measurements</code>.")
 	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}/{from}/{to}", produces = "application/json")
-	public @ResponseBody String requestHistory(@ApiParam(value=DOC_REPRESENTATION, defaultValue="tree") @PathVariable String representation,
+	public @ResponseBody String requestHistory(@ApiParam(value=DOC_REPRESENTATION, defaultValue=DEFAULT_REPRESENTATION) @PathVariable String representation,
 											   @ApiParam(value=DOC_STATIONTYPES, defaultValue="*") @PathVariable String stationTypes,
 											   @ApiParam(value=DOC_DATATYPES, defaultValue="*") @PathVariable String dataTypes,
 											   @ApiParam(value=DOC_TIME) @PathVariable String from,
