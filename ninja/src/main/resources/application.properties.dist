@@ -1,0 +1,18 @@
+# Local server
+server.port = 8081
+
+# Logging
+logging.level.root = INFO
+logging.level.org.springframework.jdbc.core = TRACE
+logging.level.it.bz.idm.bdp.ninja = INFO
+
+# Compression
+server.compression.enabled = true
+server.compression.mime-types = text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+server.compression.min-response-size = 1024
+
+# Security (base64 encoded, PEM format optional, x5c chain possible)
+ninja.security.oauth2.pubkey =
+ninja.security.oauth2.scopes =
+ninja.security.oauth2.issuer =
+ninja.security.cors.allowed-origins = *

@@ -1,6 +1,15 @@
 *.class
 *.orig
 persistence.xml
+*.mde 
+*.she
+*.old
+*.xmle
+*.sqle
+*.backup
+*.diste
+.mvn
+.vscode
 
 
 # Taken from https://github.com/spring-projects/spring-boot/blob/master/.gitignore

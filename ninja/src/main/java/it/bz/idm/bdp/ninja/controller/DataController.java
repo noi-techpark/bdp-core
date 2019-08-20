@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +45,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.bz.idm.bdp.ninja.DataFetcher;
+import it.bz.idm.bdp.ninja.security.SecurityUtils;
 import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
 import it.bz.idm.bdp.ninja.utils.simpleexception.ErrorCodeInterface;
 import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
@@ -150,7 +153,6 @@ public class DataController {
 		dataFetcher.setOffset(offset);
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
-		dataFetcher.setRole("GUEST");
 		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
@@ -187,12 +189,14 @@ public class DataController {
 
 		boolean flat = isFlatRepresentation(representation);
 
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
 		dataFetcher.setIgnoreNull(!showNull);
 		dataFetcher.setLimit(limit);
 		dataFetcher.setOffset(offset);
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
-		dataFetcher.setRole("GUEST");
+		dataFetcher.setRoles(SecurityUtils.getRolesFromAuthentication(auth));
 		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher
@@ -234,6 +238,8 @@ public class DataController {
 
 		boolean flat = isFlatRepresentation(representation);
 
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
 		LocalDateTime dateTimeFrom = getDateTime(from);
 		LocalDateTime dateTimeTo = getDateTime(to);
 
@@ -242,7 +248,7 @@ public class DataController {
 		dataFetcher.setOffset(offset);
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
-		dataFetcher.setRole("GUEST");
+		dataFetcher.setRoles(SecurityUtils.getRolesFromAuthentication(auth));
 		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher
