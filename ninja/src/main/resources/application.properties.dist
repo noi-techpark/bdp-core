@@ -15,4 +15,5 @@ server.compression.min-response-size = 1024
 ninja.security.oauth2.pubkey =
 ninja.security.oauth2.scopes =
 ninja.security.oauth2.issuer =
+ninja.security.oauth2.audien =
 ninja.security.cors.allowed-origins = *

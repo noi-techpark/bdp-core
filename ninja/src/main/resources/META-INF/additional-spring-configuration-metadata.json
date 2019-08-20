@@ -17,6 +17,11 @@
   {
     "name": "ninja.security.cors.allowed-origins",
     "type": "java.lang.String",
-    "description": "A description for 'ninja.security.cors.allowed-origins'"
+    "description": "CORS: Allowed origins or * for all"
+  },
+  {
+    "name": "ninja.security.oauth2.audien",
+    "type": "java.lang.String",
+    "description": "Oauth audience CSV. Which resource server (API) can access?"
   }
 ]}
