@@ -27,7 +27,7 @@ public class DataFetcher {
 	private QueryBuilder query;
 	private long limit;
 	private long offset;
-	private String role;
+	private List<String> roles;
 	private boolean ignoreNull;
 	private String select;
 	private String where;
@@ -104,8 +104,7 @@ public class DataFetcher {
 								"(me.station_id = pe.station_id OR pe.station_id is null)",
 								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
 								"AND (me.period = pe.period OR pe.period is null)",
-								"AND pe.role_id = (select id from bdprole r where r.name = '" +
-								(role == null ? role = "GUEST" : role) + "')",
+								"AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
 							")",
 						"join station s on me.station_id = s.id")
 				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
@@ -117,6 +116,7 @@ public class DataFetcher {
 				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				.setParameterIfNotNull("from", from, "and timestamp >= :from")
 				.setParameterIfNotNull("to", to, "and timestamp < :to")
+				.setParameter("roles", roles)
 				.expandWhere()
 				.addSqlIf("order by _stationtype, _stationcode, _datatypename", !flat)
 				.addLimit(limit)
@@ -153,8 +153,12 @@ public class DataFetcher {
 		this.offset = offset;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setRoles(List<String> roles) {
+		if (roles == null) {
+			roles = new ArrayList<String>();
+			roles.add("GUEST");
+		}
+		this.roles = roles;
 	}
 
 	public void setIgnoreNull(boolean ignoreNull) {

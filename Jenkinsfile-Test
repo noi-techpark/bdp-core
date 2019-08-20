@@ -11,6 +11,10 @@ pipeline {
         TESTSERVER_TOMCAT_CREDENTIALS = credentials('testserver-tomcat8-credentials')
 
         NINJA_ROOT_PATH = "ninja"
+        NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
+        NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
+        NINJA_OAUTH_SCOPES = "read"
+        NINJA_OAUTH_AUDIEN = "https://tomcatsec.testingmachine.eu/ninja"
 
         BDP_DATABASE_SCHEMA = "intimev2"
         BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
@@ -33,7 +37,11 @@ pipeline {
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
 
                 // Configure NINJA - API v2
-                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG,R%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(ninja.security.oauth2.pubkey\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_PUBKEY}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(ninja.security.oauth2.issuer\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_ISSUER}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(ninja.security.oauth2.scopes\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_SCOPES}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
+                sh 'sed -i -e "s%\\(ninja.security.oauth2.audien\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_AUDIEN}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
                 sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
                 sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
                 sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
