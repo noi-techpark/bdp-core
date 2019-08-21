@@ -79,10 +79,12 @@ public class SecurityUtils {
 
 	public static List<String> getRolesFromAuthentication(Authentication auth) {
 		List<String> result = new ArrayList<String>();
-		JWTUser user = (JWTUser) auth.getPrincipal();
-		for (GrantedAuthority role : user.getAuthorities()) {
-			if (role.getAuthority().startsWith("BDP_")) {
-				result.add(role.getAuthority().replaceFirst("BDP_", ""));
+		if (auth.getPrincipal() instanceof JWTUser) {
+			JWTUser user = (JWTUser) auth.getPrincipal();
+			for (GrantedAuthority role : user.getAuthorities()) {
+				if (role.getAuthority().startsWith("BDP_")) {
+					result.add(role.getAuthority().replaceFirst("BDP_", ""));
+				}
 			}
 		}
 
