@@ -110,7 +110,7 @@ public class DataFetcher {
 		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
 		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
 
-		if (where.contains("mvalue")) {
+		if (where != null && where.contains("mvalue")) {
 			throw new SimpleException(ErrorCode.WHERE_NO_MIXED_DATA_TYPES, "mvalue");
 		}
 
