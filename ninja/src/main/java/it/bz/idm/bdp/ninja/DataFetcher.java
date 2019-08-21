@@ -18,11 +18,27 @@ import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.QueryExecutor;
 import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
+import it.bz.idm.bdp.ninja.utils.simpleexception.ErrorCodeInterface;
+import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
 @Component
 public class DataFetcher {
 
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
+
+	public static enum ErrorCode implements ErrorCodeInterface {
+		WHERE_NO_MIXED_DATA_TYPES ("'%s' could return various data types, i.e., INTEGERS and STRINGS. Therefore, it cannot be used in WHERE.");
+
+		private final String msg;
+		ErrorCode(String msg) {
+			this.msg = msg;
+		}
+
+		@Override
+		public String getMsg() {
+			return "DATA FETCHING ERROR: " + msg;
+		}
+	}
 
 	private QueryBuilder query;
 	private long limit;
@@ -93,6 +109,10 @@ public class DataFetcher {
 
 		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
 		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
+
+		if (where.contains("mvalue")) {
+			throw new SimpleException(ErrorCode.WHERE_NO_MIXED_DATA_TYPES, "mvalue");
+		}
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
