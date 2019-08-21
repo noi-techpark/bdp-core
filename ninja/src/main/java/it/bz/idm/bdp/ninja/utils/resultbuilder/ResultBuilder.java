@@ -66,6 +66,21 @@ public class ResultBuilder {
 				default:
 					if (hierarchy.size() > 2) {
 						measurement = se.makeObj(rec, "measurement", ignoreNull);
+
+						/*
+						 * Depending whether we get a string or double measurement, we have different
+						 * columns in our record due to an UNION ALL query. We unify these two fields
+						 * into a single "mvalue" to hide internals from the API consumers.
+						 * XXX This could later maybe be integrated into select expansion or in a generic
+						 * way into the result builder.
+						 */
+						Object value = rec.get("mvalue_string");
+						if (value == null) {
+							value = rec.get("mvalue_double");
+						}
+						if (value != null) {
+							measurement.put("mvalue", value);
+						}
 					}
 			}
 

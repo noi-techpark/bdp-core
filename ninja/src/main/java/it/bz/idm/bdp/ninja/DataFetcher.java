@@ -91,15 +91,44 @@ public class DataFetcher {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
+		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
+		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
+
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select == null ? "*" : select, where, "station", "parent", "measurement", "datatype")
+				.init(selectDouble, where, "station", "parent", "measurementdouble", "measurement", "datatype")
 				.addSql("select")
 				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
 				.expandSelectPrefix(", ", !flat)
 				.addSqlIf("from measurementhistory me", from != null || to != null)
 				.addSqlIf("from measurement me", from == null && to == null)
+				.addSql("join bdppermissions pe on (",
+								"(me.station_id = pe.station_id OR pe.station_id is null)",
+								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
+								"AND (me.period = pe.period OR pe.period is null)",
+								"AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
+							")",
+						"join station s on me.station_id = s.id")
+				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				.addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
+				.addSql("join type t on me.type_id = t.id",
+						"where true")
+				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				.setParameterIfNotNull("from", from, "and timestamp >= :from")
+				.setParameterIfNotNull("to", to, "and timestamp < :to")
+				.setParameter("roles", roles)
+				.expandWhere()
+				.addSql("union all")
+				.reset(selectString, where, "station", "parent", "measurementstring", "measurement", "datatype")
+				.addSql("select")
+				.addSqlIf("distinct", distinct)
+				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				.expandSelectPrefix(", ", !flat)
+				.addSqlIf("from measurementstringhistory me", from != null || to != null)
+				.addSqlIf("from measurementstring me", from == null && to == null)
 				.addSql("join bdppermissions pe on (",
 								"(me.station_id = pe.station_id OR pe.station_id is null)",
 								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
@@ -184,6 +213,16 @@ public class DataFetcher {
 		se.addColumn("measurement", "mperiod", "me.period");
 		se.addColumn("measurement", "mvalue", "me.double_value");
 
+		se.addColumn("measurementdouble", "mvalidtime", "me.timestamp");
+		se.addColumn("measurementdouble", "mtransactiontime", "me.created_on");
+		se.addColumn("measurementdouble", "mperiod", "me.period");
+		se.addColumn("measurementdouble", "mvalue_double", "me.double_value", null, "null::character varying as mvalue_string");
+
+		se.addColumn("measurementstring", "mvalidtime", "me.timestamp");
+		se.addColumn("measurementstring", "mtransactiontime", "me.created_on");
+		se.addColumn("measurementstring", "mperiod", "me.period");
+		se.addColumn("measurementstring", "mvalue_string", "me.string_value", "null::double precision as mvalue_double", null);
+
 		se.addColumn("datatype", "tname", "t.cname");
 		se.addColumn("datatype", "tunit", "t.cunit");
 		se.addColumn("datatype", "ttype", "t.rtype");
@@ -210,7 +249,18 @@ public class DataFetcher {
 
 		se.addSubDef("stationtype", "stations", "station");
 
-		se.expand("*", "stationtype", "station", "parent", "datatype", "measurement");
+		se.expand("*", "station", "parent", "measurementdouble");
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
+
+		se.setWhereClause("");
+		se.expand("*", "station", "parent", "measurementstring");
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
 
 		List<Map<String, Object>> queryResult = new ArrayList<>();
 		Map<String, Object> rec1 = new HashMap<String, Object>();
@@ -235,10 +285,10 @@ public class DataFetcher {
 		rec2.put("mvalue", 2);
 		queryResult.add(rec2);
 
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getWhereSql());
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
 
 //		System.out.println(se.makeObjectOrEmptyMap(rec1, false, "stationtype").toString());
 
@@ -247,7 +297,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		System.out.println( JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
+		System.out.println(JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
 	}
 
 }

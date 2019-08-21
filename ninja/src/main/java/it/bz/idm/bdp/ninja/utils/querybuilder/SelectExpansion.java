@@ -679,13 +679,16 @@ public class SelectExpansion {
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
 		se.addColumn("C", "h", "C.h", "before", null);
-		se.addColumn("D", "dd", "D.h", null, "after");
+		se.addColumn("D", "d", "D.d", null, "after");
 		se.addColumn("B", "x", "B.x");
 		se.addSubDef("B", "y", "C");
 		se.addColumn("A", "a", "A.a");
 		se.addColumn("A", "b", "A.b");
 		se.addSubDef("A", "c", "B");
 		se.addSubDef("main", "t", "A");
+
+//		se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
+//		se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");
 
 ////		{}
 ////		[]
@@ -711,16 +714,16 @@ public class SelectExpansion {
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
 //
-		se.addOperator("value", "eq", "= %s");
-		se.addOperator("value", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("list", "in", "in (%s)");
-		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+//		se.addOperator("value", "eq", "= %s");
+//		se.addOperator("value", "neq", "<> %s");
+//		se.addOperator("null", "eq", "is null");
+//		se.addOperator("null", "neq", "is not null");
+//		se.addOperator("list", "in", "in (%s)");
+//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
 //		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-		se.setWhereClause("a.eq.true");
-		se.expand("*", "A", "C", "B");
+//		se.setWhereClause("a.eq.true");
+		se.expand("h", "A", "C", "B");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
@@ -728,13 +731,13 @@ public class SelectExpansion {
 		System.out.println(se.getWhereParameters());
 
 
-		se.setWhereClause("");
-		se.expand("*", "A", "D", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
-		System.out.println(se.getWhereSql());
-		System.out.println(se.getWhereParameters());
+//		se.setWhereClause("");
+//		se.expand("mvalue", "A", "D", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//		System.out.println(se.getWhereSql());
+//		System.out.println(se.getWhereParameters());
 
 //		se.expand("*", "A", "B");
 //		se.expand("*", "main", "A", "B", "C");
