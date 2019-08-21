@@ -152,8 +152,8 @@ public class SelectExpansionTests {
 		assertEquals("a", seNested.getUsedAliases().get(0));
 		assertEquals("b", seNested.getUsedAliases().get(1));
 		assertEquals("c", seNested.getUsedAliases().get(2));
-		assertEquals("x", seNested.getUsedAliases().get(3));
-		assertEquals("h", seNested.getUsedAliases().get(4));
+		assertEquals("h", seNested.getUsedAliases().get(3));
+		assertEquals("x", seNested.getUsedAliases().get(4));
 		assertEquals("y", seNested.getUsedAliases().get(5));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
 		assertEquals("B", seNested.getUsedDefNames().get(1));
