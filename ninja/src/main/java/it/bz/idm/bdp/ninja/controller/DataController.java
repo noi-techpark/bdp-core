@@ -156,20 +156,7 @@ public class DataController {
 		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
-
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("offset", offset);
-		result.put("limit", limit);
-
-		if (flat) {
-			result.put("data", queryResult);
-		} else {
-			List<String> tree = new ArrayList<String>();
-			tree.add("_stationtype");
-			tree.add("_stationcode");
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
-		}
-
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -201,42 +188,7 @@ public class DataController {
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, null, null, flat);
-
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("offset", offset);
-		result.put("limit", limit);
-
-		if (flat) {
-
-			/*
-			 * Depending whether we get a string or double measurement, we have different
-			 * columns in our record due to an UNION ALL query. We unify these two fields
-			 * into a single "mvalue" to hide internals from the API consumers.
-			 * XXX This could later maybe be integrated into select expansion or in a generic
-			 * way into the result builder.
-			 */
-			for (Map<String, Object> row : queryResult) {
-				Object value = row.remove("mvalue_string");
-				if (value == null) {
-					value = row.remove("mvalue_double");
-				}
-				if (value == null) {
-					break;
-				} else {
-					row.put("mvalue", value);
-				}
-			}
-
-			result.put("data", queryResult);
-		} else {
-			List<String> tree = new ArrayList<String>();
-			tree.add("_stationtype");
-			tree.add("_stationcode");
-			tree.add("_datatypename");
-
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
-		}
-
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -273,21 +225,7 @@ public class DataController {
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, dateTimeFrom, dateTimeTo, flat);
-
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("offset", offset);
-		result.put("limit", limit);
-
-		if (flat) {
-			result.put("data", queryResult);
-		} else {
-			List<String> tree = new ArrayList<String>();
-			tree.add("_stationtype");
-			tree.add("_stationcode");
-			tree.add("_datatypename");
-			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
-		}
-
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -299,5 +237,45 @@ public class DataController {
 			return false;
 		}
 		throw new SimpleException(ErrorCode.WRONG_REPRESENTATION, representation);
+	}
+
+	private Map<String, Object> buildResult(List<Map<String, Object>> queryResult, long offset, long limit, boolean flat, boolean showNull) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("offset", offset);
+		result.put("limit", limit);
+
+		if (flat) {
+			replaceMixedValueKeys(queryResult);
+			result.put("data", queryResult);
+		} else {
+			List<String> tree = new ArrayList<String>();
+			tree.add("_stationtype");
+			tree.add("_stationcode");
+			tree.add("_datatypename");
+
+			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
+		}
+		return result;
+	}
+
+	/**
+	 * Depending whether we get a string or double measurement, we have different
+	 * columns in our record due to an UNION ALL query. We unify these two fields
+	 * into a single "mvalue" to hide internals from the API consumers.
+	 * XXX This could later maybe be integrated into select expansion or in a generic
+	 * way into the result builder.
+	 */
+	private void replaceMixedValueKeys(List<Map<String, Object>> queryResult) {
+		for (Map<String, Object> row : queryResult) {
+			Object value = row.remove("mvalue_string");
+			if (value == null) {
+				value = row.remove("mvalue_double");
+			}
+			if (value == null) {
+				break;
+			} else {
+				row.put("mvalue", value);
+			}
+		}
 	}
 }
