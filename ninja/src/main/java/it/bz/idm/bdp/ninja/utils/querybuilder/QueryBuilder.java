@@ -23,11 +23,16 @@ public class QueryBuilder {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
+		reset(select, where, selectDefNames);
+	}
+
+	public QueryBuilder reset(final String select, final String where, String... selectDefNames) {
 		if (select == null || select.isEmpty()) {
 			throw new RuntimeException("No alias list defined. For example: \"name, age, gender\".");
 		}
 		se.setWhereClause(where);
 		se.expand(select, selectDefNames);
+		return this;
 	}
 
 	/**
