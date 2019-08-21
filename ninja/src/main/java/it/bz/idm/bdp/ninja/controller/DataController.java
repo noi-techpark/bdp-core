@@ -207,6 +207,26 @@ public class DataController {
 		result.put("limit", limit);
 
 		if (flat) {
+
+			/*
+			 * Depending whether we get a string or double measurement, we have different
+			 * columns in our record due to an UNION ALL query. We unify these two fields
+			 * into a single "mvalue" to hide internals from the API consumers.
+			 * XXX This could later maybe be integrated into select expansion or in a generic
+			 * way into the result builder.
+			 */
+			for (Map<String, Object> row : queryResult) {
+				Object value = row.remove("mvalue_string");
+				if (value == null) {
+					value = row.remove("mvalue_double");
+				}
+				if (value == null) {
+					break;
+				} else {
+					row.put("mvalue", value);
+				}
+			}
+
 			result.put("data", queryResult);
 		} else {
 			List<String> tree = new ArrayList<String>();

@@ -37,7 +37,9 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		se.addColumn("measurement", "mvalidtime", "me.timestamp");
 		se.addColumn("measurement", "mtransactiontime", "me.created_on");
 		se.addColumn("measurement", "mperiod", "me.period");
-		se.addColumn("measurement", "mvalue", "me.double_value");
+
+		se.addColumn("measurementdouble", "mvalue_double", "me.double_value", null, "null::character varying as mvalue_string");
+		se.addColumn("measurementstring", "mvalue_string", "me.string_value", "null::double precision as mvalue_double", null);
 
 		se.addColumn("datatype", "tname", "t.cname");
 		se.addColumn("datatype", "tunit", "t.cunit");

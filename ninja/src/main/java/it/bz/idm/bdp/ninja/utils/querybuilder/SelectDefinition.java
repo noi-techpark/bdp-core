@@ -24,9 +24,21 @@ import java.util.Set;
 public class SelectDefinition {
 
 	private final String name;
+
+	/**
+	 * <pre>
+	 * Column names in SQL, where the key is the ALIAS and the value is
+	 * the COLUMN name.
+	 *
+	 * For example, mvalue -> measurements.double_value
+	 * This could be rewritten into: "measurements.double_value AS mvalue"
+	 * </pre>
+	 */
 	private Map<String, String> columns = new HashMap<String, String>();
 	private Map<String, SelectDefinition> pointers = new HashMap<String, SelectDefinition>();
 	private Set<String> aliases = new HashSet<String>();
+	private Map<String, String> sqlBefore = new HashMap<String, String>();
+	private Map<String, String> sqlAfter = new HashMap<String, String>();
 
 	public SelectDefinition(final String name) {
 		if (name == null || name.isEmpty()) {
@@ -40,6 +52,10 @@ public class SelectDefinition {
 	}
 
 	public void addAlias(final String alias, final String column) {
+		addAlias(alias, column, null, null);
+	}
+
+	public void addAlias(final String alias, final String column, final String sqlBefore, final String sqlAfter) {
 		if (alias == null || alias.isEmpty() || column == null || column.isEmpty()) {
 			throw new RuntimeException("A select definition's alias must have a name and a column!");
 		}
@@ -48,6 +64,12 @@ public class SelectDefinition {
 		}
 		aliases.add(alias);
 		columns.put(alias, column);
+		if (sqlBefore != null && !sqlBefore.isEmpty()) {
+			this.sqlBefore.put(alias, sqlBefore);
+		}
+		if (sqlAfter != null && !sqlAfter.isEmpty()) {
+			this.sqlAfter.put(alias, sqlAfter);
+		}
 	}
 
 	public void addPointer(final String alias, final SelectDefinition selectDefinition) {
@@ -67,6 +89,14 @@ public class SelectDefinition {
 
 	public String getColumn(final String alias) {
 		return columns.get(alias);
+	}
+
+	public String getSqlBefore(final String alias) {
+		return sqlBefore.get(alias);
+	}
+
+	public String getSqlAfter(final String alias) {
+		return sqlAfter.get(alias);
 	}
 
 	private Object _get(final String alias) {

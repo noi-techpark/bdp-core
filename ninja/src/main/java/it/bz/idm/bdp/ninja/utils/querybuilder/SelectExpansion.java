@@ -3,13 +3,15 @@ package it.bz.idm.bdp.ninja.utils.querybuilder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,14 +101,15 @@ public class SelectExpansion {
 		}
 	}
 
-	private Map<String, SelectDefinition> schema = new HashMap<String, SelectDefinition>();
-	private Map<String, String> aliases = new HashMap<String, String>();
-	private Map<String, String> pointers = new HashMap<String, String>();
-	private Map<String, String> expandedSelects = new HashMap<String, String>();
-	private Set<String> usedJSONAliases = new HashSet<String>();
-	private Set<String> usedJSONDefNames = new HashSet<String>();
-	private Map<String, String> whereClauseOperatorMap = new HashMap<String, String>();
-	private Map<String, Consumer> whereClauseOperatorCheckMap = new HashMap<String, Consumer>();
+	/* We use tree sets and maps here, because we want to have elements naturally sorted */
+	private Map<String, SelectDefinition> schema = new TreeMap<String, SelectDefinition>();
+	private Map<String, String> aliases = new TreeMap<String, String>();
+	private Map<String, String> pointers = new TreeMap<String, String>();
+	private Map<String, String> expandedSelects = new TreeMap<String, String>();
+	private Set<String> usedJSONAliases = new TreeSet<String>();
+	private Set<String> usedJSONDefNames = new TreeSet<String>();
+	private Map<String, String> whereClauseOperatorMap = new TreeMap<String, String>();
+	private Map<String, Consumer> whereClauseOperatorCheckMap = new TreeMap<String, Consumer>();
 
 	private Map<String, Object> whereParameters = null;
 	private String whereSQL = null;
@@ -142,11 +145,15 @@ public class SelectExpansion {
 		return res;
 	}
 
-	public void addColumn(final String name, final String alias, final String column) {
+	public void addColumn(final String name, final String alias, final String column, final String sqlBefore, final String sqlAfter) {
 		SelectDefinition selDef = getOrNew(name);
-		selDef.addAlias(alias, column);
+		selDef.addAlias(alias, column, sqlBefore, sqlAfter);
 		schema.put(name, selDef);
 		dirty = true;
+	}
+
+	public void addColumn(final String name, final String alias, final String column) {
+		addColumn(name, alias, column, null, null);
 	}
 
 	public void addSubDef(final String name, final String alias, final String subName) {
@@ -294,6 +301,7 @@ public class SelectExpansion {
 		} else {
 			candidateAliases = new ArrayList<String>(aliases);
 		}
+		Collections.sort(candidateAliases);
 		int curPos = 0;
 		while (curPos < candidateAliases.size()) {
 			String alias = candidateAliases.get(curPos);
@@ -309,7 +317,12 @@ public class SelectExpansion {
 				String defName = getAliasMap().get(alias);
 				usedJSONDefNames.add(defName);
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
-				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + def.getColumn(alias) + " as " + alias);
+
+				String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
+				String middle = def.getColumn(alias) + " as " + alias;
+				String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+
+				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + middle + after);
 			} else {
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
@@ -364,7 +377,7 @@ public class SelectExpansion {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		whereParameters = new HashMap<String, Object>();
+		whereParameters = new TreeMap<String, Object>();
 
 		whereAST.walker(new ConsumerExtended() {
 
@@ -542,7 +555,7 @@ public class SelectExpansion {
 		if (defNames == null) {
 			return getExpansion();
 		}
-		Map<String, String> res = new HashMap<String, String>();
+		Map<String, String> res = new TreeMap<String, String>();
 		for (String defName : defNames) {
 			 String exp = getExpansion(defName);
 			 if (exp == null) {
@@ -557,7 +570,7 @@ public class SelectExpansion {
 		if (defNames == null) {
 			return getExpansion();
 		}
-		return getExpansion(new HashSet<String>(Arrays.asList(defNames)));
+		return getExpansion(new TreeSet<String>(Arrays.asList(defNames)));
 	}
 
 	public String getWhereSql() {
@@ -600,7 +613,7 @@ public class SelectExpansion {
 
 	public Map<String, Object> makeObj(Map<String, Object> record, String defName, boolean ignoreNull) {
 		SelectDefinition def = getDefinition(defName);
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new TreeMap<String, Object>();
 		for (String alias : def.getAliases()) {
 			Object value = record.get(alias);
 			if (ignoreNull && value == null)
@@ -620,12 +633,12 @@ public class SelectExpansion {
 	}
 
 	public Map<String, Object> makeObjectOrEmptyMap(Map<String, Object> record, boolean ignoreNull, Set<String> defNames) {
-		Map<String, Map<String, Object>> result = new HashMap<String, Map<String, Object>>();
+		Map<String, Map<String, Object>> result = new TreeMap<String, Map<String, Object>>();
 		List<String> usedAliases = getUsedAliases();
 
 		List<String> rootDefinition = new ArrayList<String>();
 		for (String defName : getUsedDefNames()) {
-			result.put(defName, new HashMap<String, Object>());
+			result.put(defName, new TreeMap<String, Object>());
 			rootDefinition.add(defName);
 		}
 
@@ -665,13 +678,17 @@ public class SelectExpansion {
 
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addColumn("C", "h", "C.h");
+		se.addColumn("C", "h", "C.h", "before", null);
+		se.addColumn("D", "d", "D.d", null, "after");
 		se.addColumn("B", "x", "B.x");
 		se.addSubDef("B", "y", "C");
 		se.addColumn("A", "a", "A.a");
 		se.addColumn("A", "b", "A.b");
 		se.addSubDef("A", "c", "B");
 		se.addSubDef("main", "t", "A");
+
+//		se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
+//		se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");
 
 ////		{}
 ////		[]
@@ -697,21 +714,30 @@ public class SelectExpansion {
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
 //
-		se.addOperator("value", "eq", "= %s");
-		se.addOperator("value", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("list", "in", "in (%s)");
-		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+//		se.addOperator("value", "eq", "= %s");
+//		se.addOperator("value", "neq", "<> %s");
+//		se.addOperator("null", "eq", "is null");
+//		se.addOperator("null", "neq", "is not null");
+//		se.addOperator("list", "in", "in (%s)");
+//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
 //		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-		se.setWhereClause("a.eq.true");
-		se.expand("*", "A", "B", "C");
+//		se.setWhereClause("a.eq.true");
+		se.expand("h", "A", "C", "B");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 		System.out.println(se.getWhereParameters());
+
+
+//		se.setWhereClause("");
+//		se.expand("mvalue", "A", "D", "B");
+//		System.out.println(se.getExpansion());
+//		System.out.println(se.getUsedAliases());
+//		System.out.println(se.getUsedDefNames());
+//		System.out.println(se.getWhereSql());
+//		System.out.println(se.getWhereParameters());
 
 //		se.expand("*", "A", "B");
 //		se.expand("*", "main", "A", "B", "C");
