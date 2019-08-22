@@ -13,7 +13,7 @@ pipeline {
         NINJA_ROOT_PATH = "ninja"
         NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
         NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
-        NINJA_OAUTH_SCOPES = "read"
+        NINJA_OAUTH_SCOPES = "api1"
         NINJA_OAUTH_AUDIEN = "https://tomcatsec.testingmachine.eu/ninja"
 
         BDP_DATABASE_SCHEMA = "intimev2"
