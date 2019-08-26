@@ -18,7 +18,7 @@ REP_URL="http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/$TYPE"
 XMLNS=http://maven.apache.org/POM/4.0.0
 CMD="xmlstarlet ed -P -L -N pom=$XMLNS"
 
-for FOLDER in dto dal reader writer dc-interface ws-interface
+for FOLDER in dto dal reader writer dc-interface
 do
     $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:url" -v $REP_URL $FOLDER/pom.xml
     $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:id" -v $REP_ID $FOLDER/pom.xml
