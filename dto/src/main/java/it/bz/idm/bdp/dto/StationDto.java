@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -82,7 +80,6 @@ public class StationDto implements Serializable {
 	private String parentStation;
 
 	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
-	@JsonAnySetter
 	private Map<String, Object> metaData = new HashMap<>();
 
 	public StationDto() {
@@ -160,7 +157,6 @@ public class StationDto implements Serializable {
 		this.origin = origin;
 	}
 
-	@JsonAnyGetter
 	public Map<String, Object> getMetaData() {
 		return metaData;
 	}
