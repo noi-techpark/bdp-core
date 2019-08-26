@@ -38,7 +38,7 @@ import it.bz.idm.bdp.dto.ProvenanceDto;
  */
 @Component
 public abstract class DataPusher implements IntegreenPushable  {
-	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
+	private static final String APPLICATION_PROPERTIES_FILE 		= "classpath:application.properties";
 	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
 	protected static final String HOST_KEY							= "bdp_host";
 	protected static final String PORT_KEY							= "bdp_port";
