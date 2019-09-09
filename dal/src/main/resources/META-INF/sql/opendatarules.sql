@@ -29,4 +29,4 @@ insert into bdprules (role_id,station_id) select r.id,s.id from  station s, bdpr
 
 
 refresh materialized view bdppermissions;
-commit;s
+commit;
