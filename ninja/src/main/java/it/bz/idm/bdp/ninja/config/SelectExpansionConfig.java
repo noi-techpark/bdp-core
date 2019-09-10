@@ -87,6 +87,9 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		se.addOperator("LIST", "in", "in (%s)", t -> {
 			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
+		se.addOperator("LIST", "nin", "not in (%s)", t -> {
+			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
+		});
 		se.addOperator("LIST", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});

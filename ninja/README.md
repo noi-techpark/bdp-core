@@ -48,40 +48,42 @@ GET /
 ## Stations
 
 Please note, that the reponse is limited. However, you can [set another limit or
-disable it completely](#pagination).
+disable it completely](#pagination). The first path variable is the
+representation, which can be either `flat` or `tree`. For compactness, we will
+use only flat representations throughout this tutorial.
 
 ### I want to get all e-charging stations including details
 ```
-GET /EChargingStation
+GET /flat/EChargingStation
 ```
 
 ### I want to get all e-charging stations and their plugs including details
 ```
-GET /EChargingStation,EChargingPlug
+GET /flat/EChargingStation,EChargingPlug
 ```
 
 As you see an `EChargingStation` is a parent of `EchargingPlug`s, hence we could
 avoid duplicate output, by simply fetching only plugs.
 
 ```
-GET /EChargingPlug
+GET /flat/EChargingPlug
 ```
 
 ### I want to get all stations of any type including details
 ```
-GET /*
+GET /flat/*
 ```
 
 ## Stations, Data Types and most up-to-date Measurements
 
 ### I want to get all most up-to-date measurements of all parking lots
 ```
-GET /ParkingStation/*
+GET /flat/ParkingStation/*
 ```
 
 ### I want to get all most up-to-date occupancy values of all parking lots
 ```
-GET /ParkingStation/occupied
+GET /flat/ParkingStation/occupied
 ```
 
 ## Stations, Data Types and historical Measurements
@@ -93,15 +95,15 @@ times.
 
 ### I want to get historical occupancy values of all parking lots from a certain period
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02
 ```
 
 ```
-GET /ParkingStation/occupied/2019-01-01T23/2019-01-02
+GET /flat/ParkingStation/occupied/2019-01-01T23/2019-01-02
 ```
 
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02T12:30:15
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02T12:30:15
 ```
 
 The date format is `yyyy-MM-dd` or `yyyy-MM-ddThh:mm:ss.SSS`, where
@@ -116,7 +118,7 @@ number, like `limit=-1`. Per default, the limit is set to a low number to
 prevent excessive response times.
 
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
 ```
 
 ## Filtering
@@ -158,36 +160,40 @@ A `where` clause is a list of filter-triples, like `alias.operator.value_or_list
   completely covered by the box)
 - `in`: True, if the value of the alias can be found within the given list.
   Example: `name.in.(Patrick,Rudi,Peter)`
+- `nin`: False, if the value of the alias can be found within the given list.
+  Example: `name.nin.(Patrick,Rudi,Peter)`
+
+**logical operations**
 - `and(alias.operator.value_or_list,...)`: Conjunction of filters (can be nested)
 - `or(alias.operator.value_or_list,...)`: Disjunction of filters (can be nested)
 
 Multiple conditions possible as comma-separated-values.
 
-Example-syntax for bbi/bbc could be `coordinate.bbi.(11,46,12,47,4326)`, where
+Example-syntax for `bbi` or `bbc` could be `coordinate.bbi.(11,46,12,47,4326)`, where
 the ordering inside the list is left-x, left-y, right-x, right-y and SRID
 (optional).
 
 
 ### I want to see only station names, data type names and the value of the measurement
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02?select=sname,tname,mvalue
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?select=sname,tname,mvalue
 ```
 
 ### I want to see only parking stations within a bounding box of a map
 ```
-GET /ParkingStation/*?where=scoordinate.bbi.(11.63,46.0,11.65,47.0,4326)
+GET /flat/ParkingStation/*?where=scoordinate.bbi.(11.63,46.0,11.65,47.0,4326)
 ```
 
 ... I want now to add to that query two additional stations (ex., 69440GW and AB3), that I
 need regardless, if they are within the bounding box or not.
 
 ```
-GET /ParkingStation/*?where=or(scoordinate.bbi.(11.63,46.0,11.65,47.0,4326),scode.in.(69440GW,AB3))
+GET /flat/ParkingStation/*?where=or(scoordinate.bbi.(11.63,46.0,11.65,47.0,4326),scode.in.(69440GW,AB3))
 ```
 
 ### I want to see all information where the measured value is greater than 100 and the station origin is FAMAS
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02?where=mvalue.gt.100,sorigin.eq.FAMAS
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=mvalue.gt.100,sorigin.eq.FAMAS
 ```
 
 Here the syntax for each clause is `attribute.operator.value`, where value can
@@ -200,7 +206,7 @@ that is, the String itself, then you must put it into double-quotes, like
 
 We use a key-insensitive regular expression here:
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
 ```
 
 ## Null values
@@ -208,8 +214,5 @@ GET /ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
 You can also see null-values within JSON, by adding `shownull=true` to your parameter list.
 
 ```
-GET /ParkingStation/occupied/2019-01-01/2019-01-02?shownull=true
+GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?shownull=true
 ```
-
-
-
