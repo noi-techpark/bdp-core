@@ -2,6 +2,7 @@ package it.bz.idm.bdp.ninja.config;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +20,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 public class SwaggerConfig {
 
+	@Value("${ninja.swagger.readme-url}")
+	private String readmeURL;
+
+
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2)
@@ -33,7 +38,7 @@ public class SwaggerConfig {
 				"Big Data Platform REST API",
 				"This page contains the documentation about the API REST calls of the Big Data Platform, the core component of the ODH Project.\n"
 	            + "More information about the project in its homepage: http://opendatahub.bz.it/ \n"
-	            + "Tutorials and technical documentation can be found at https://github.com/noi-techpark/bdp-core/blob/master/ninja/README.md",
+	            + "Tutorials and technical documentation can be found at " + readmeURL,
 				"v2",
 				"http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
 				new Contact("","",""),
