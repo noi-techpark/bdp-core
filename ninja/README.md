@@ -236,9 +236,8 @@ Example with `select=stype,dtype,mvalue,smetadata`:
             "mvalue": 300,
             "smetadata": {
                 "capacity": 1200,
-                "...": ...
-        },
-        ...
+                "...": "..."
+        }
     ]
 }
 ```
