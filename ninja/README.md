@@ -47,10 +47,10 @@ GET /
 
 ## Stations
 
-Please note, that the reponse is limited. However, you can [set another limit or
-disable it completely](#pagination). The first path variable is the
-representation, which can be either `flat` or `tree`. For compactness, we will
-use only flat representations throughout this tutorial.
+Please note, that the response is limited. However, you can [set another limit
+or disable it completely](#pagination). The first path variable is the
+[representation](#representation), which can be either `flat` or `tree`. For
+compactness, we will use only flat representations throughout this tutorial.
 
 ### I want to get all e-charging stations including details
 ```
@@ -215,4 +215,80 @@ You can also see null-values within JSON, by adding `shownull=true` to your para
 
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?shownull=true
+```
+
+## Representation
+
+We have two types of representations: `flat` and `tree`. The former one shows
+each JSON object with all selected attributes at the first level. Deeper levels
+represent complex data types, such as `coordinates` and `jsonb`. Only the first
+level can be selected or filtered.
+
+Example with `select=stype,dtype,mvalue,smetadata`:
+```json
+{
+    "data": [
+        {
+            "stype": "ParkingStation",
+            "dtype": "occupied",
+            "mvalue": 300,
+            "smetadata": {
+                "capacity": 1200,
+                "...": ...
+        },
+        ...
+    ]
+}
+```
+
+As you can see, the station type `stype` and the data type `dtype` are on the
+same level within the JSON object. These are first order attributes, whereas
+`smetadata` is a `jsonb`-typed column.
+
+If you want to retrieve only subsets of information, like `all data types`,
+which do not match inside a hierarchy, this representation is suited for you.
+
+```json
+{
+    "data": [
+        {
+            "dtype": "ParkingStation"
+        },
+        {
+            "dtype": "VMS"
+        },
+        {
+            "dtype": "EChargingStation"
+        },
+    ]
+}
+```
+
+The `tree` representation, shows a hierarchy of the following kind:
+
+```
+station types / categories
+└── stations
+    └── data types
+        └── measurements
+```
+
+NB: The `tree` is more expensive to generate on the server and use within your
+application, but the response size can be much smaller due to nesting and thus
+duplicate attribute elimination. However, some queries do not match that
+hierarchy, so the `flat` representation is more suited for them.
+
+## Authentication
+
+We use a token based authentication (JWT) which can be retrieved from an OAuth
+2.0 server.
+
+### I want to retrieve protected measurements (closed data)
+
+NB: Swagger does not support authentication yet, therefore we provide a `curl`
+example.
+
+```sh
+curl -X GET "https://example.com/tree/VMS/*" \
+     -H 'Authorization: Bearer header.payload.signature'
 ```
