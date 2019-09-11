@@ -19,11 +19,13 @@
 - [Pagination](#pagination)
 - [Filtering](#filtering)
   - [I want to see only station names, data type names and the value of the measurement](#i-want-to-see-only-station-names-data-type-names-and-the-value-of-the-measurement)
-  - [I want to see only parking stations and their coordinates within a bounding box of a map](#i-want-to-see-only-parking-stations-and-their-coordinates-within-a-bounding-box-of-a-map)
-  - [I want to see only parking stations and their coordinates within a bounding box of a map](#i-want-to-see-only-parking-stations-and-their-coordinates-within-a-bounding-box-of-a-map-1)
+  - [I want to see only parking stations within a bounding box of a map](#i-want-to-see-only-parking-stations-within-a-bounding-box-of-a-map)
   - [I want to see all information where the measured value is greater than 100 and the station origin is FAMAS](#i-want-to-see-all-information-where-the-measured-value-is-greater-than-100-and-the-station-origin-is-famas)
   - [I want to see all information where the station code starts with "me" or "rovereto"](#i-want-to-see-all-information-where-the-station-code-starts-with-me-or-rovereto)
 - [Null values](#null-values)
+- [Representation](#representation)
+- [Authentication](#authentication)
+  - [I want to retrieve protected measurements (closed data)](#i-want-to-retrieve-protected-measurements-closed-data)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
