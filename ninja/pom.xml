@@ -5,7 +5,7 @@
     <packaging>war</packaging>
 	<groupId>it.bz.opendatahub</groupId>
 	<artifactId>ninja</artifactId>
-	<version>0.5.0</version>
+	<version>0.6.0</version>
 	<name>ninja</name>
 	<description>Spring Boot</description>
 
