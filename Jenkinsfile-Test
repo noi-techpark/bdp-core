@@ -10,13 +10,6 @@ pipeline {
         TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
         TESTSERVER_TOMCAT_CREDENTIALS = credentials('testserver-tomcat8-credentials')
 
-        NINJA_ROOT_PATH = "ninja"
-        NINJA_SWAGGER_READMEURL = "https://github.com/noi-techpark/bdp-core/blob/development/ninja/README.md"
-        NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
-        NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
-        NINJA_OAUTH_SCOPES = "api1"
-        NINJA_OAUTH_AUDIEN = "https://tomcatsec.testingmachine.eu/ninja"
-
         BDP_DATABASE_SCHEMA = "intimev2"
         BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
@@ -36,19 +29,6 @@ pipeline {
                 sh 'echo "        ${TESTSERVER_TOMCAT_CREDENTIALS}" >> ~/.m2/settings.xml'
                 sh 'echo "    </servers>" >> ~/.m2/settings.xml'
                 sh 'echo "</settings>" >> ~/.m2/settings.xml'
-
-                // Configure NINJA - API v2
-                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/application.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/application.properties"'
-                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.swagger.readme-url\\s*=\\).*\\$%\\1 ${NINJA_SWAGGER_READMEURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.pubkey\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_PUBKEY}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.issuer\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_ISSUER}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.scopes\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_SCOPES}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.audien\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_AUDIEN}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
-                sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
-                sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
-                sh 'sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${BDP_DATABASE_HOST}:${BDP_DATABASE_PORT}/${BDP_DATABASE_NAME}?currentSchema=${BDP_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
 
                 // Configure DAL - API v1
                 sh 'cp dal/src/main/resources/META-INF/persistence.xml.dist dal/src/main/resources/META-INF/persistence.xml'
@@ -78,11 +58,6 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
-        stage('Build - Ninja') {
-            steps {
-                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -U clean test package'
-            }
-        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -91,11 +66,6 @@ pipeline {
         stage('Deploy - Reader') {
             steps {
                 sh 'cd reader && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
-            }
-        }
-        stage('Deploy - Ninja API (v2)') {
-            steps {
-                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
         stage('Deploy - Writer') {
