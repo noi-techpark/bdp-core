@@ -7,12 +7,6 @@ pipeline {
     }
 
     environment {
-        NINJA_ROOT_PATH = "ninja"
-        NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
-        NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
-        NINJA_OAUTH_SCOPES = "api1"
-        NINJA_OAUTH_AUDIEN = "https://ipchannels.integreen-life.bz.it/ninja"
-
         BDP_DATABASE_SCHEMA = "intimev2"
         BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
@@ -27,18 +21,6 @@ pipeline {
     stages {
         stage('Configure') {
             steps {
-                // Configure NINJA - API v2
-                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/application.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/application.properties"'
-                sh 'sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1INFO%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.pubkey\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_PUBKEY}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.issuer\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_ISSUER}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.scopes\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_SCOPES}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'sed -i -e "s%\\(ninja.security.oauth2.audien\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_AUDIEN}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties'
-                sh 'cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"'
-                sh 'sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
-                sh 'sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
-                sh 'sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${BDP_DATABASE_HOST}:${BDP_DATABASE_PORT}/${BDP_DATABASE_NAME}?currentSchema=${BDP_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties'
-
                 // Configure DAL - API v1
                 sh 'cp dal/src/main/resources/META-INF/persistence.xml.dist dal/src/main/resources/META-INF/persistence.xml'
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${BDP_DATABASE_SCHEMA} dal/src/main/resources/META-INF/persistence.xml'''
@@ -67,11 +49,6 @@ pipeline {
                 sh 'cd reader && mvn -B -U clean test package'
             }
         }
-        stage('Build - Ninja') {
-            steps {
-                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -U clean test package'
-            }
-        }
         stage('Build - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test package'
@@ -80,10 +57,8 @@ pipeline {
         stage('Archive') {
             steps {
                 sh 'cp reader/target/reader.war reader.war'
-                sh 'cp ${NINJA_ROOT_PATH}/target/ninja.war ninja.war'
                 sh 'cp writer/target/writer.war writer.war'
                 archiveArtifacts artifacts: 'reader.war', onlyIfSuccessful: true
-                archiveArtifacts artifacts: 'ninja.war', onlyIfSuccessful: true
                 archiveArtifacts artifacts: 'writer.war', onlyIfSuccessful: true
             }
         }

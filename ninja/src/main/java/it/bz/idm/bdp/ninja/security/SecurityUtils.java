@@ -88,9 +88,6 @@ public class SecurityUtils {
 			}
 		}
 
-		//FIXME Remove this line after our Oauth server is functional...
-		result.clear();
-
 		if (result.isEmpty() || !result.contains("GUEST")) {
 			result.add("GUEST");
 		}

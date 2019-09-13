@@ -1,6 +1,7 @@
 package it.bz.idm.bdp.ninja.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -21,6 +22,9 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 
 	@Autowired
     NamedParameterJdbcTemplate jdbcTemplate;
+
+	@Value("${server.compression.enabled:true}")
+	private boolean enableCompression4JSON;
 
     private boolean alreadySetup = false;
 
@@ -87,6 +91,9 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		se.addOperator("LIST", "in", "in (%s)", t -> {
 			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
+		se.addOperator("LIST", "nin", "not in (%s)", t -> {
+			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
+		});
 		se.addOperator("LIST", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
@@ -100,7 +107,10 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 
 		// The API should have a flag to remove null values (what should be default? <-- true)
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
-		JsonStream.setIndentionStep(4);
+
+		if (!enableCompression4JSON) {
+			JsonStream.setIndentionStep(4);
+		}
 //		JsonIterUnicodeSupport.enable();
 		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
 		JsonIterPostgresSupport.enable();

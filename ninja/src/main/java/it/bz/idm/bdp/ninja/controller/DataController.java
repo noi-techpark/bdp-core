@@ -97,6 +97,7 @@ public class DataController {
 			" -   bbi: Bounding box intersecting objects (ex., a street that is only partially covered by the box). Syntax? See below.\n" +
 			" -   bbc: Bounding box containing objects (ex., a station or street, that is completely covered by the box). Syntax? See below.\n" +
 			" -   in: True, if the value of the alias can be found within the given list. Example: name.in.(Peter,Patrick,Rudi)\n" +
+			" -   nin: False, if the value of the alias can be found within the given list. Example: name.nin.(Peter,Patrick,Rudi)\n" +
 			"\n\n<code>logical operations</code>\n" +
 			" -   and(alias.operator.value_or_list,...): Conjunction of filters (can be nested)\n" +
 			" -   or(alias.operator.value_or_list,...): Disjunction of filters (can be nested)\n" +
@@ -110,6 +111,22 @@ public class DataController {
 	private static final String DEFAULT_SHOWNULL = "false";
 	private static final String DEFAULT_DISTINCT = "true";
 	private static final String DEFAULT_REPRESENTATION = "flat";
+
+	private static final List<String> TREE_PARTIAL = new ArrayList<String>() {
+		private static final long serialVersionUID = -1699134802805589710L;
+	{
+		add("_stationtype");
+		add("_stationcode");
+	}};
+
+	private static final List<String> TREE_FULL = new ArrayList<String>() {
+		private static final long serialVersionUID = -1699134802805589710L;
+	{
+		addAll(TREE_PARTIAL);
+		add("_datatypename");
+	}};
+
+
 
 	private static DateTimeFormatter DATE_FORMAT = new DateTimeFormatterBuilder()
 			.appendPattern("yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]]")
@@ -156,7 +173,7 @@ public class DataController {
 		dataFetcher.setDistinct(distinct);
 
 		List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
-		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_PARTIAL);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -188,7 +205,7 @@ public class DataController {
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, null, null, flat);
-		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -225,7 +242,7 @@ public class DataController {
 
 		List<Map<String, Object>> queryResult = dataFetcher
 				.fetchStationsTypesAndMeasurementHistory(stationTypes, dataTypes, dateTimeFrom, dateTimeTo, flat);
-		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull);
+		Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -239,7 +256,7 @@ public class DataController {
 		throw new SimpleException(ErrorCode.WRONG_REPRESENTATION, representation);
 	}
 
-	private Map<String, Object> buildResult(List<Map<String, Object>> queryResult, long offset, long limit, boolean flat, boolean showNull) {
+	private Map<String, Object> buildResult(List<Map<String, Object>> queryResult, long offset, long limit, boolean flat, boolean showNull, List<String> tree) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("offset", offset);
 		result.put("limit", limit);
@@ -248,11 +265,6 @@ public class DataController {
 			replaceMixedValueKeys(queryResult);
 			result.put("data", queryResult);
 		} else {
-			List<String> tree = new ArrayList<String>();
-			tree.add("_stationtype");
-			tree.add("_stationcode");
-			tree.add("_datatypename");
-
 			result.put("data", ResultBuilder.build(!showNull, queryResult, dataFetcher.getQuery().getSelectExpansion(), tree));
 		}
 		return result;
