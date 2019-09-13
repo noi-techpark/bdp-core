@@ -55,7 +55,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 The core of the platform contains all the business logic which handles connections to the database, to the data collectors which provide the data and to the web services which serve the data.
 
-The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services.
+The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services. The new version of the `reader` is called `ninja`. See ![ninja/README.md](ninja/README.md) for details.
 
 ### WRITER
 The writer is a REST API, which takes JSON DTOs, deserializes and validates them and finally stores them in the database. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
@@ -101,6 +101,8 @@ As value you can put a list of [SimpleRecordDto.java](https://github.com/noi-tec
 
   
 ### READER
+
+**NB: This is the old version of the reader, please use the new one instead, which is called `ninja`. See ![ninja/README.md](ninja/README.md) for details.**
 
 The reader is an API exposing data through a [JSON REST service](https://github.com/noi-techpark/bdp-core/blob/master/ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
 It depends on the DAL module and retrieves data by querying the underlying database through JPA query language.
