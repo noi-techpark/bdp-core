@@ -1,9 +1,42 @@
 set search_path=public,intimev2;
 begin;
--- define rules for anonymous user by excluding all non opendata sets
+-- define rules for anonymous user by defining all open data sets
+--     stationtype     |                    origin       | period             
+---------------------+----------------------------------------------
+-- Bicycle             | ALGORAB
+-- BikesharingStation  | ALGORAB
+-- BluetoothStation    | 
+-- CarpoolingHub       | FLOOTA
+-- CarpoolingService   | FLOOTA
+-- CarpoolingUser      | FLOOTA
+-- CarsharingCar       | HAL-API
+-- CarsharingStation   | CARSHARINGBZ
+-- CarsharingStation   | HAL-API
+-- EChargingPlug       | DRIWE
+-- EChargingPlug       | ALPERIA
+-- EChargingPlug       | 
+-- EChargingPlug       | IIT
+-- EChargingPlug       | route220
+-- EChargingPlug       | Nevicam
+-- EChargingStation    | Nevicam
+-- EChargingStation    | 
+-- EChargingStation    | IIT
+-- EChargingStation    | ALPERIA
+-- EChargingStation    | DRIWE
+-- EChargingStation    | route220
+-- EnvironmentStation  | APPATN-open
+-- EnvironmentStation  | APPABZ | 3600
+-- Linkstation         | 
+-- MeteoStation        | meteotrentino
+-- MeteoStation        | SIAG
+-- Mobilestation       | 
+-- ParkingStation      | FAMAS
+-- ParkingStation      | Municipality Merano
+-- ParkingStation      | FBK
+-- RWISstation         | InfoMobility
+-- Streetstation       | 
 delete from bdprules ru  where ru.role_id in (select id from bdprole where name='GUEST');
-insert into bdprules (role_id,station_id) select r.id,s.id from  station s, bdprole r where r.name = 'GUEST' and s.stationtype not in ('TrafficSensor','MobileStation','VMS') and (s.origin is null or s.origin not in('FAMAS-traffic','APPATN','A22–algorab'));
-insert into bdprules (role_id,station_id) select r.id,s.id from  station s, bdprole r where r.name = 'GUEST' and s.origin='A22-traffic' and s.stationtype='Linkstation';
+insert into bdprules (role_id,station_id) select r.id,s.id from  station s, bdprole r where r.name = 'GUEST' and s.stationtype in ('Bicycle','BikesharingStation','BluetoothStation','CarpoolingHub','CarpoolingService','CarpoolingUser','CarsharingCar','CarsharingStation','EChargingPlug','EChargingStation','EnvironmentStation', 'Linkstation','MeteoStation','Mobilestation','ParkingStation','RWISstation','Streetstation') and (s.origin is null or s.origin in('ALGORAB','FLOOTA','HAL-API','CARSHARINGBZ','DRIWE','ALPERIA','IIT','route220','Nevicam','APPATN-open','meteotrentino','SIAG','FAMAS','Municipality Merano','FBK','InfoMobility','APPABZ'));
 
 update bdprules set period = 3600 where station_id in (select id from station where origin = 'APPABZ') and role_id=(select id from bdprole where name='GUEST');
 
