@@ -445,6 +445,48 @@ public class SelectExpansion {
 		whereSQL = sb.toString();
 	}
 
+	/**
+	 * Check if a given value clause is of type Boolean, String (aka character varying) or Double,
+	 * and parse it accordingly. If it is either of those, just keep the original type and let
+	 * PostgreSQL decide whether it can be handled or not.
+	 *
+	 * @param clauseValueToken
+	 * @return Correctly typed value
+	 */
+	private Object _parseSingleValue(Token clauseValueToken) {
+		Object value = clauseValueToken.getValue();
+		if (value instanceof String) {
+			String strValue = ((String) value).toLowerCase();
+			switch (strValue) {
+				case "true":
+					value = true;
+					break;
+				case "false":
+					value = false;
+					break;
+				default:
+					/* Quoted string, nothing to parse */
+					if ((boolean)clauseValueToken.getPayload("quoted")) {
+						break;
+					}
+					try {
+						value = Integer.parseInt(strValue);
+						break;
+					} catch (NumberFormatException e) {
+						/* it is not an integer, go ahead */
+					}
+					try {
+						value = Double.parseDouble(strValue);
+					} catch (NumberFormatException e) {
+						/* nothing more to try, we will keep the given object
+						 * type and let Postgres handle possible casting errors */
+					}
+					break;
+			}
+		}
+		return value;
+	}
+
 	private String whereClauseItem(String operator, Token clauseValueToken) {
 		/* Search for a definition of this operator for a the given value input type (list, null or value) */
 		String sqlOp = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
@@ -457,39 +499,16 @@ public class SelectExpansion {
 		Object value = null;
 		switch (clauseValueToken.getName()) {
 			case "LIST":
-				List<String> listItems = new ArrayList<String>();
+				List<Object> listItems = new ArrayList<Object>();
 				for (Token listItem : clauseValueToken.getChildren()) {
-					listItems.add(listItem.getValue());
+					listItems.add(_parseSingleValue(listItem));
 				}
 				value = listItems;
-			break;
+				break;
 			case "NULL":
 			case "VALUE":
-				value = clauseValueToken.getValue();
-				if (value instanceof String) {
-					String strValue = ((String) value).toLowerCase();
-					switch (strValue) {
-						case "true":
-							value = true;
-							break;
-						case "false":
-							value = false;
-							break;
-						default:
-							try {
-								if (! (boolean)clauseValueToken.getPayload("quoted")) {
-									value = Double.parseDouble(strValue);
-								}
-							} catch (NumberFormatException e) {
-								/*
-								 * nothing to do, we will keep the given object
-								 * type and let Postgres handle possible casting errors
-								 */
-							}
-							break;
-					}
-				}
-			break;
+				value = _parseSingleValue(clauseValueToken);
+				break;
 			default:
 				// FIXME give the whole where-clause from user input to generate a better error response
 				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
