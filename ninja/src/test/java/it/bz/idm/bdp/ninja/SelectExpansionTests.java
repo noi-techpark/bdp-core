@@ -212,7 +212,7 @@ public class SelectExpansionTests {
 		seFlat.setWhereClause("and(or(a.eq.null,b.eq.5))");
 		seFlat.expand("a", "A");
 		assertEquals("(((A.a is null OR A.b = :pwhere_0)))", seFlat.getWhereSql());
-		assertEquals(5.0, seFlat.getWhereParameters().get("pwhere_0"));
+		assertEquals(5, seFlat.getWhereParameters().get("pwhere_0"));
 	}
 
 	@Test
