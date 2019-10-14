@@ -28,15 +28,17 @@ create index idx_bdppermissions_station_id_type_id_period on bdppermissions (sta
 alter table bdprole add constraint uc_bdprole_name unique (name);
 alter table bdpuser add constraint uc_bdpuser_email unique (email);
 create index idx_measurement_timestamp on measurement (timestamp desc);
+create index idx_measurementhistory_created_on on measurementhistory (created_on desc);
 alter table measurement add constraint uc_measurement_station_id_type_id_period unique (station_id, type_id, period);
 create index idx_measurementhistory_station_id_type_id_timestamp_period on measurementhistory (station_id, type_id, timestamp desc, period);
 alter table measurementhistory add constraint uc_measurementhistory_station_i__timestamp_period_double_value_ unique (station_id, type_id, timestamp, period, double_value);
 create index idx_measurementstring_timestamp on measurementstring (timestamp desc);
 alter table measurementstring add constraint uc_measurementstring_station_id_type_id_period unique (station_id, type_id, period);
+create index idx_measurementstringhistory_created_on on measurementstringhistory (created_on desc);
 create index idx_measurementstringhistory_st_on_id_type_id_timestamp_period_ on measurementstringhistory (station_id, type_id, timestamp desc, period);
 alter table measurementstringhistory add constraint uc_measurementstringhistory_sta__timestamp_period_string_value_ unique (station_id, type_id, timestamp, period, string_value);
 alter table provenance add constraint uc_provenance_lineage_data_collector_data_collector_version unique (lineage, data_collector, data_collector_version);
-alter table provenance add constraint UK_artnbcgma8xkcqb9q48hbda14 unique (uuid);
+alter table provenance add constraint uc_provenance_uuid unique (uuid);
 alter table station add constraint uc_station_stationcode_stationtype unique (stationcode, stationtype);
 alter table type add constraint uc_type_cname unique (cname);
 alter table bdppermissions add constraint fk_bdppermissions_role_id_bdprole_pk foreign key (role_id) references bdprole;
