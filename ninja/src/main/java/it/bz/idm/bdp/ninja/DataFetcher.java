@@ -108,9 +108,13 @@ public class DataFetcher {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
+		/*
+		 * FIXME This needs to be done as "replacement" within select expansion, otherwise
+		 * wrong values could be replaced and error messages show renamed aliases, which
+		 * is confusing for users.
+		 */
 		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
 		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
-
 		String whereDouble = where.replace("mvalue", "mvalue_double");
 		String whereString = where.replace("mvalue", "mvalue_string");
 

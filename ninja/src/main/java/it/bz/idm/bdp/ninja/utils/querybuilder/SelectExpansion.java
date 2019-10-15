@@ -417,7 +417,7 @@ public class SelectExpansion {
 					}
 					usedJSONAliasesInWhere.put(alias, t.getChild(2));
 
-					sb.append(column + " " + whereClauseItem(operator, t.getChild(2)));
+					sb.append(column + " " + whereClauseItem(alias, operator, t.getChild(2)));
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
@@ -451,51 +451,7 @@ public class SelectExpansion {
 		whereSQL = sb.toString();
 	}
 
-	/**
-	 * Check if a given value clause is of type Boolean, String (aka character varying) or Double,
-	 * and parse it accordingly. If it is either of those, just keep the original type and let
-	 * PostgreSQL decide whether it can be handled or not.
-	 *
-	 * @param clauseValueToken
-	 * @return Correctly typed value
-	 */
-	private Object _parseSingleValue(Token clauseValueToken) {
-		Object value = clauseValueToken.getValue();
-		if (value instanceof String) {
-			String strValue = ((String) value).toLowerCase();
-			switch (strValue) {
-			case "true":
-				value = true;
-				break;
-			case "false":
-				value = false;
-				break;
-			default:
-				/* Quoted string, nothing to parse */
-				if ((boolean) clauseValueToken.getPayload("quoted")) {
-					break;
-				}
-				try {
-					value = Integer.parseInt(strValue);
-					break;
-				} catch (NumberFormatException e) {
-					/* it is not an integer, go ahead */
-				}
-				try {
-					value = Double.parseDouble(strValue);
-				} catch (NumberFormatException e) {
-					/*
-					 * nothing more to try, we will keep the given object
-					 * type and let Postgres handle possible casting errors
-					 */
-				}
-				break;
-			}
-		}
-		return value;
-	}
-
-	private String whereClauseItem(String operator, Token clauseValueToken) {
+	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
 		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap
 				.get(clauseValueToken.getName() + "_" + operator);
@@ -509,8 +465,14 @@ public class SelectExpansion {
 		switch (clauseValueToken.getName()) {
 		case "LIST":
 			List<Object> listItems = new ArrayList<Object>();
+			int i = 0;
 			for (Token listItem : clauseValueToken.getChildren()) {
-				listItems.add(_parseSingleValue(listItem));
+				listItems.add(listItem.getPayload("typedvalue"));
+				if (usedJSONAliasesInWhere.containsKey(alias + "[" + i + "]")) {
+					throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
+				}
+				usedJSONAliasesInWhere.put(alias + "[" + i + "]", listItem);
+				i++;
 			}
 			value = listItems;
 			break;
@@ -518,7 +480,7 @@ public class SelectExpansion {
 		case "NUMBER":
 		case "STRING":
 		case "BOOLEAN":
-			value = _parseSingleValue(clauseValueToken);
+			value = clauseValueToken.getPayload("typedvalue");
 			break;
 		default:
 			// FIXME give the whole where-clause from user input to generate a better error response
