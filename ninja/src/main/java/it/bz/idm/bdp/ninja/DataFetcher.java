@@ -115,8 +115,12 @@ public class DataFetcher {
 		 */
 		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
 		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
-		String whereDouble = where.replace("mvalue", "mvalue_double");
-		String whereString = where.replace("mvalue", "mvalue_string");
+		String whereDouble = null;
+		String whereString = null;
+		if (where != null) {
+			whereDouble = where.replace("mvalue", "mvalue_double");
+			whereString = where.replace("mvalue", "mvalue_string");
+		}
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
