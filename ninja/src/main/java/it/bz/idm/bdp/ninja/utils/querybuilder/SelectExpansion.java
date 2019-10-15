@@ -340,7 +340,7 @@ public class SelectExpansion {
 				if (aliasToJSONPath.containsKey(alias)) {
 					StringJoiner sj = new StringJoiner(", ", "jsonb_build_object(", ") as ");
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
-						sj.add(String.format("'%s', %s->>'%s'", jsonSelector, def.getColumn(alias), jsonSelector));
+						sj.add(String.format("'%s', %s->'%s'", jsonSelector, def.getColumn(alias), jsonSelector));
 					}
 					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj + alias);
 				} else { /* Regular column */
