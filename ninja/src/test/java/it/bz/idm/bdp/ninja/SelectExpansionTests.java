@@ -49,20 +49,25 @@ public class SelectExpansionTests {
 		seMinimal = new SelectExpansion();
 		seMinimal.addColumn("A", "a", "A.a");
 
-		seMinimal.addOperator("value", "eq", "= %s");
-		seMinimal.addOperator("value", "neq", "<> %s");
+		seMinimal.addOperator("string", "eq", "= %s");
+		seMinimal.addOperator("string", "neq", "<> %s");
+		seMinimal.addOperator("number", "eq", "= %s");
+		seMinimal.addOperator("number", "neq", "<> %s");
 		seMinimal.addOperator("null", "eq", "is %s");
 		seMinimal.addOperator("null", "neq", "is not %s");
-		seMinimal.addOperator("value", "lt", "< %s");
-		seMinimal.addOperator("value", "gt", "> %s");
-		seMinimal.addOperator("value", "lteq", "=< %s");
-		seMinimal.addOperator("value", "gteq", ">= %s");
-		seMinimal.addOperator("value", "re", "~ %s");
-		seMinimal.addOperator("value", "ire", "~* %s");
-		seMinimal.addOperator("value", "nre", "!~ %s");
-		seMinimal.addOperator("value", "nire", "!~* %s");
+		seMinimal.addOperator("number", "lt", "< %s");
+		seMinimal.addOperator("number", "gt", "> %s");
+		seMinimal.addOperator("number", "lteq", "=< %s");
+		seMinimal.addOperator("number", "gteq", ">= %s");
+		seMinimal.addOperator("string", "re", "~ %s");
+		seMinimal.addOperator("string", "ire", "~* %s");
+		seMinimal.addOperator("string", "nre", "!~ %s");
+		seMinimal.addOperator("string", "nire", "!~* %s");
 		seMinimal.addOperator("list", "in", "in (%s)", t -> {
-			return !(t.getChildCount() == 1 && t.getChild("value").getValue() == null);
+			return !(t.getChildCount() == 1 && (
+					t.getChild("string") != null && t.getChild("string").getValue() == null ||
+					t.getChild("number") != null && t.getChild("number").getValue() == null
+					));
 		});
 		seMinimal.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
@@ -80,7 +85,7 @@ public class SelectExpansionTests {
 		}
 
 		seFlat.addOperator("null", "eq", "is %s");
-		seFlat.addOperator("value", "eq", "= %s");
+		seFlat.addOperator("number", "eq", "= %s");
 	}
 
 	@Test
@@ -181,7 +186,6 @@ public class SelectExpansionTests {
 		assertEquals("(A.a && ST_MakeEnvelope(:pwhere_0))", seMinimal.getWhereSql());
 		assertEquals("{pwhere_0=[1, 2, 3, 4]}", seMinimal.getWhereParameters().toString());
 
-
 		seMinimal.setWhereClause("a.in.()");
 		seMinimal.expand("a", "A");
 		assertEquals("(A.a in (:pwhere_0))", seMinimal.getWhereSql());
@@ -212,7 +216,22 @@ public class SelectExpansionTests {
 		seFlat.setWhereClause("and(or(a.eq.null,b.eq.5))");
 		seFlat.expand("a", "A");
 		assertEquals("(((A.a is null OR A.b = :pwhere_0)))", seFlat.getWhereSql());
-		assertEquals(5.0, seFlat.getWhereParameters().get("pwhere_0"));
+		assertEquals(5, seFlat.getWhereParameters().get("pwhere_0"));
+
+		seMinimal.setWhereClause("a.eq.3");
+		seMinimal.expand("a", "A");
+		assertTrue(seMinimal.getUsedAliasesInWhere().containsKey("a"));
+		assertEquals("NUMBER", seMinimal.getUsedAliasesInWhere().get("a").getName());
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").getPayload("typedvalue") instanceof Integer);
+
+		seMinimal.setWhereClause("a.in.(1,3.2,a,null)");
+		seMinimal.expand("a", "A");
+		assertTrue(seMinimal.getUsedAliasesInWhere().containsKey("a"));
+		assertEquals("LIST", seMinimal.getUsedAliasesInWhere().get("a").getName());
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[0]").getPayload("typedvalue") instanceof Integer);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[1]").getPayload("typedvalue") instanceof Double);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[2]").getPayload("typedvalue") instanceof String);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[3]").getPayload("typedvalue") == null);
 	}
 
 	@Test

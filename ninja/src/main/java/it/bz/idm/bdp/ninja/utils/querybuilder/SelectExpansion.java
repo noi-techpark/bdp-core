@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -79,18 +80,20 @@ public class SelectExpansion {
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
 
 	public static enum ErrorCode implements ErrorCodeInterface {
-		KEY_NOT_FOUND 	         ("Key '%s' does not exist"),
-		KEY_NOT_INSIDE_DEFLIST   ("Key '%s' is not reachable from the expanded select definition list: %s"),
-		DEFINITION_NOT_FOUND     ("Select Definition '%s' not found! It must exist before we can point to it"),
-		ADD_INVALID_DATA         ("A schema entry must have a name and a valid definition"),
-		WHERE_ALIAS_VALUE_ERROR  ("Syntax Error in WHERE clause: '%s.<%s>' with value %s is not valid (checks failed)"),
-		WHERE_ALIAS_NOT_FOUND    ("Syntax Error in WHERE clause: Alias '%s' does not exist"),
-		WHERE_OPERATOR_NOT_FOUND ("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
-		WHERE_SYNTAX_ERROR       ("Syntax Error in WHERE clause: %s"),
-		DIRTY_STATE              ("We are in a dirty state. Run expand() to clean up"),
-		EXPAND_INVALID_DATA      ("Provide valid alias and definition sets!");
+		KEY_NOT_FOUND("Key '%s' does not exist"),
+		KEY_NOT_INSIDE_DEFLIST("Key '%s' is not reachable from the expanded select definition list: %s"),
+		DEFINITION_NOT_FOUND("Select Definition '%s' not found! It must exist before we can point to it"),
+		ADD_INVALID_DATA("A schema entry must have a name and a valid definition"),
+		WHERE_ALIAS_VALUE_ERROR("Syntax Error in WHERE clause: '%s.<%s>' with value %s is not valid (checks failed)"),
+		WHERE_ALIAS_NOT_FOUND("Syntax Error in WHERE clause: Alias '%s' does not exist"),
+		WHERE_ALIAS_ALREADY_EXISTS("Syntax Error in WHERE clause: Alias '%s' cannot be used more than once"),
+		WHERE_OPERATOR_NOT_FOUND("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
+		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
+		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
+		EXPAND_INVALID_DATA("Provide valid alias and definition sets!");
 
 		private final String msg;
+
 		ErrorCode(String msg) {
 			this.msg = msg;
 		}
@@ -108,8 +111,8 @@ public class SelectExpansion {
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedJSONAliases = new TreeSet<String>();
 	private Set<String> usedJSONDefNames = new TreeSet<String>();
-	private Map<String, String> whereClauseOperatorMap = new TreeMap<String, String>();
-	private Map<String, Consumer> whereClauseOperatorCheckMap = new TreeMap<String, Consumer>();
+	private Map<String, Token> usedJSONAliasesInWhere = new TreeMap<String, Token>();
+	private Map<String, WhereClauseOperator> whereClauseOperatorMap = new TreeMap<String, WhereClauseOperator>();
 
 	private Map<String, Object> whereParameters = null;
 	private String whereSQL = null;
@@ -121,9 +124,8 @@ public class SelectExpansion {
 	}
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
-		whereClauseOperatorMap.put(tokenType.toUpperCase() + "_" + operator, sqlSnippet);
-		if (check != null)
-			whereClauseOperatorCheckMap.put(tokenType.toUpperCase() + "_" + operator, check);
+		String opName = tokenType.toUpperCase() + "_" + operator;
+		whereClauseOperatorMap.put(opName, new WhereClauseOperator(opName, sqlSnippet, check));
 	}
 
 	public void add(final String name, final SelectDefinition selDef) {
@@ -194,7 +196,7 @@ public class SelectExpansion {
 	public Set<String> getAliases(Set<String> defNames) {
 		Set<String> res = new HashSet<String>();
 		for (SelectDefinition def : getDefinitions(defNames)) {
-			 res.addAll(def.getAliases());
+			res.addAll(def.getAliases());
 		}
 		return res;
 	}
@@ -290,16 +292,31 @@ public class SelectExpansion {
 		usedJSONAliases.clear();
 		usedJSONDefNames.clear();
 		expandedSelects.clear();
+		usedJSONAliasesInWhere.clear();
 
 		/*
 		 * We cannot use a HashSet here, because we need a get by position within the while loop.
 		 * This is, because we cannot use an iterator here, since we add elements to it while processing.
 		 */
 		List<String> candidateAliases = null;
+		Map<String, List<String>> aliasToJSONPath = new TreeMap<String, List<String>>();
 		if (aliases.size() == 1 && aliases.contains("*")) {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
 		} else {
-			candidateAliases = new ArrayList<String>(aliases);
+			candidateAliases = new ArrayList<String>();
+			for (String alias : aliases) {
+				int index = alias.indexOf('.');
+				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
+				if (!candidateAliases.contains(mainAlias)) {
+					candidateAliases.add(mainAlias);
+				}
+
+				if (index > 0) {
+					List<String> aliasList = aliasToJSONPath.getOrDefault(mainAlias, new ArrayList<String>());
+					aliasList.add(alias.substring(index + 1));
+					aliasToJSONPath.putIfAbsent(mainAlias, aliasList);
+				}
+			}
 		}
 		Collections.sort(candidateAliases);
 		int curPos = 0;
@@ -316,13 +333,23 @@ public class SelectExpansion {
 				usedJSONAliases.add(alias);
 				String defName = getAliasMap().get(alias);
 				usedJSONDefNames.add(defName);
+
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
 
-				String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
-				String middle = def.getColumn(alias) + " as " + alias;
-				String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+				/* Look, if it is a JSON selector */
+				if (aliasToJSONPath.containsKey(alias)) {
+					StringJoiner sj = new StringJoiner(", ", "jsonb_build_object(", ") as ");
+					for (String jsonSelector : aliasToJSONPath.get(alias)) {
+						sj.add(String.format("'%s', %s->'%s'", jsonSelector, def.getColumn(alias), jsonSelector));
+					}
+					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj + alias);
+				} else { /* Regular column */
+					String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
+					String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+					String middle = def.getColumn(alias) + " as " + alias;
+					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + middle + after);
+				}
 
-				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + middle + after);
 			} else {
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
@@ -392,31 +419,35 @@ public class SelectExpansion {
 
 			@Override
 			public boolean before(Token t) {
-				switch(t.getName()) {
-					case "AND":
-					case "OR":
-						sb.append("(");
-						context.push(new Context(t.getChildCount(), t.getName()));
-						log.debug("AND/OR" + context.getFirst());
+				switch (t.getName()) {
+				case "AND":
+				case "OR":
+					sb.append("(");
+					context.push(new Context(t.getChildCount(), t.getName()));
+					log.debug("AND/OR" + context.getFirst());
 					break;
-					case "CLAUSE": {
-						log.debug("CLAUSE");
-						String alias = t.getChild("ALIAS").getValue();
-						String column = getColumn(alias);
-						if (column == null) {
-							throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
-						}
-						String operator = t.getChild("OP").getValue();
-
-						usedJSONAliases.add(alias);
-						usedJSONDefNames.add(getAliasMap().get(alias));
-
-						sb.append(column + " " + whereClauseItem(operator, t.getChild(2)));
-						ctx = context.getFirst();
-						ctx.clauseCnt--;
-						if (ctx.clauseCnt > 0)
-							sb.append(" " + ctx.logicalOp + " ");
+				case "CLAUSE": {
+					log.debug("CLAUSE");
+					String alias = t.getChild("ALIAS").getValue();
+					String column = getColumn(alias);
+					if (column == null) {
+						throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
 					}
+					String operator = t.getChild("OP").getValue();
+
+					usedJSONAliases.add(alias);
+					usedJSONDefNames.add(getAliasMap().get(alias));
+					if (usedJSONAliasesInWhere.containsKey(alias)) {
+						throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
+					}
+					usedJSONAliasesInWhere.put(alias, t.getChild(2));
+
+					sb.append(column + " " + whereClauseItem(alias, operator, t.getChild(2)));
+					ctx = context.getFirst();
+					ctx.clauseCnt--;
+					if (ctx.clauseCnt > 0)
+						sb.append(" " + ctx.logicalOp + " ");
+				}
 					break;
 				}
 				return true;
@@ -424,17 +455,17 @@ public class SelectExpansion {
 
 			@Override
 			public boolean after(Token t) {
-				switch(t.getName()) {
-					case "AND":
-					case "OR":
-						sb.append(")");
-						context.pop();
-						ctx = context.peekFirst();
-						if (ctx == null)
-							break;
-						ctx.clauseCnt--;
-						if (ctx.clauseCnt > 0)
-							sb.append(" " + ctx.logicalOp + " ");
+				switch (t.getName()) {
+				case "AND":
+				case "OR":
+					sb.append(")");
+					context.pop();
+					ctx = context.peekFirst();
+					if (ctx == null)
+						break;
+					ctx.clauseCnt--;
+					if (ctx.clauseCnt > 0)
+						sb.append(" " + ctx.logicalOp + " ");
 					break;
 				}
 				return true;
@@ -445,10 +476,11 @@ public class SelectExpansion {
 		whereSQL = sb.toString();
 	}
 
-	private String whereClauseItem(String operator, Token clauseValueToken) {
-		/* Search for a definition of this operator for a the given value input type (list, null or value) */
-		String sqlOp = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
-		if (sqlOp == null) {
+	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
+		/* Search for a definition of this operator for a the given value input type (list, null or values) */
+		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap
+				.get(clauseValueToken.getName() + "_" + operator);
+		if (whereClauseOperator == null) {
 			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
 		}
 
@@ -456,43 +488,28 @@ public class SelectExpansion {
 		String paramName = null;
 		Object value = null;
 		switch (clauseValueToken.getName()) {
-			case "LIST":
-				List<String> listItems = new ArrayList<String>();
-				for (Token listItem : clauseValueToken.getChildren()) {
-					listItems.add(listItem.getValue());
+		case "LIST":
+			List<Object> listItems = new ArrayList<Object>();
+			int i = 0;
+			for (Token listItem : clauseValueToken.getChildren()) {
+				listItems.add(listItem.getPayload("typedvalue"));
+				if (usedJSONAliasesInWhere.containsKey(alias + "[" + i + "]")) {
+					throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
 				}
-				value = listItems;
+				usedJSONAliasesInWhere.put(alias + "[" + i + "]", listItem);
+				i++;
+			}
+			value = listItems;
 			break;
-			case "NULL":
-			case "VALUE":
-				value = clauseValueToken.getValue();
-				if (value instanceof String) {
-					String strValue = ((String) value).toLowerCase();
-					switch (strValue) {
-						case "true":
-							value = true;
-							break;
-						case "false":
-							value = false;
-							break;
-						default:
-							try {
-								if (! (boolean)clauseValueToken.getPayload("quoted")) {
-									value = Double.parseDouble(strValue);
-								}
-							} catch (NumberFormatException e) {
-								/*
-								 * nothing to do, we will keep the given object
-								 * type and let Postgres handle possible casting errors
-								 */
-							}
-							break;
-					}
-				}
+		case "NULL":
+		case "NUMBER":
+		case "STRING":
+		case "BOOLEAN":
+			value = clauseValueToken.getPayload("typedvalue");
 			break;
-			default:
-				// FIXME give the whole where-clause from user input to generate a better error response
-				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
+		default:
+			// FIXME give the whole where-clause from user input to generate a better error response
+			throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator);
 		}
 
 		if (value != null) {
@@ -505,14 +522,14 @@ public class SelectExpansion {
 		 * and error-out on failure. For instance, check if a list has exactly 3 elements. This cannot
 		 * be done during parsing.
 		 */
-		Consumer checker = whereClauseOperatorCheckMap.get(clauseValueToken.getName() + "_" + operator);
-		if (checker != null) {
-			if (! checker.middle(clauseValueToken)) {
-				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(), value);
+		if (whereClauseOperator.getOperatorCheck() != null) {
+			if (!whereClauseOperator.getOperatorCheck().middle(clauseValueToken)) {
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(),
+						value);
 			}
 		}
 
-		return String.format(sqlOp, value == null ? "null" : ":" + paramName );
+		return String.format(whereClauseOperator.getSqlSnippet(), value == null ? "null" : ":" + paramName);
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -524,6 +541,13 @@ public class SelectExpansion {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return new ArrayList<String>(usedJSONAliases);
+	}
+
+	public Map<String, Token> getUsedAliasesInWhere() {
+		if (dirty) {
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
+		}
+		return usedJSONAliasesInWhere;
 	}
 
 	public List<String> getUsedDefNames() {
@@ -557,11 +581,11 @@ public class SelectExpansion {
 		}
 		Map<String, String> res = new TreeMap<String, String>();
 		for (String defName : defNames) {
-			 String exp = getExpansion(defName);
-			 if (exp == null) {
-				 throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
-			 }
-			 res.put(defName, exp);
+			String exp = getExpansion(defName);
+			if (exp == null) {
+				throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
+			}
+			res.put(defName, exp);
 		}
 		return res;
 	}
@@ -650,7 +674,7 @@ public class SelectExpansion {
 				 * record.get cannot distinguish between "not-found" and "found-but-null", therefore
 				 * we need to use containsKey here
 				 */
-				if (! record.containsKey(alias)) {
+				if (!record.containsKey(alias)) {
 					continue;
 				}
 				Object value = record.get(alias);
@@ -658,7 +682,7 @@ public class SelectExpansion {
 					continue;
 				}
 				curMap.put(alias, value);
-			}  else {
+			} else {
 				String pointingTo = def.getPointersOnly().get(alias).getName();
 				rootDefinition.remove(pointingTo);
 				curMap.put(alias, result.get(pointingTo));
@@ -687,98 +711,101 @@ public class SelectExpansion {
 		se.addSubDef("A", "c", "B");
 		se.addSubDef("main", "t", "A");
 
-//		se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
-//		se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");
+		// se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
+		// se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");
 
-////		{}
-////		[]
-////		[]
-//		se.expand("y", "B");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
-////		{B=B.x as x}
-////		[x]
-////		[B]
-//		se.expand("x, y", "B");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
-////		{A=A.a as a, A.b as b, B=B.x as x}
-////		[a, b, c, x]
-////		[A, B]
-//		se.expand("a, b, c", "A", "B");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//
-//		se.addOperator("value", "eq", "= %s");
-//		se.addOperator("value", "neq", "<> %s");
-//		se.addOperator("null", "eq", "is null");
-//		se.addOperator("null", "neq", "is not null");
-//		se.addOperator("list", "in", "in (%s)");
-//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+		//// {}
+		//// []
+		//// []
+		// se.expand("y", "B");
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		//
+		//// {B=B.x as x}
+		//// [x]
+		//// [B]
+		// se.expand("x, y", "B");
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		//
+		//// {A=A.a as a, A.b as b, B=B.x as x}
+		//// [a, b, c, x]
+		//// [A, B]
+		// se.expand("a, b, c", "A", "B");
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		//
+		se.addOperator("number", "gt", "> %s");
+		se.addOperator("string", "eq", "= %s");
+		se.addOperator("string", "neq", "<> %s");
+		se.addOperator("number", "eq", "= %s");
+		se.addOperator("boolean", "eq", "= %s");
+		se.addOperator("number", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("list", "in", "in (%s)");
+		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
-//		se.setWhereClause("a.eq.0,b.neq.3,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-//		se.setWhereClause("a.eq.true");
-		se.expand("h", "A", "C", "B");
-		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
-		System.out.println(se.getUsedDefNames());
-		System.out.println(se.getWhereSql());
-		System.out.println(se.getWhereParameters());
-
-
-//		se.setWhereClause("");
-//		se.expand("mvalue", "A", "D", "B");
+//		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+//		// se.setWhereClause("a.eq.true");
+//		se.expand("h", "A", "C", "B");
 //		System.out.println(se.getExpansion());
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
 //		System.out.println(se.getWhereSql());
 //		System.out.println(se.getWhereParameters());
 
-//		se.expand("*", "A", "B");
-//		se.expand("*", "main", "A", "B", "C");
-//		Map<String, Object> rec = new HashMap<String, Object>();
-//		rec.put("a", "3");
-//		rec.put("b", "7");
-//		rec.put("x", "0");
-//		rec.put("h", "v");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getWhereSql());
-//		System.out.println();
-//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A").toString());
-//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A").toString());
-//		System.out.println();
-//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "B").toString());
-//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "B").toString());
-//		System.out.println();
-//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "C").toString());
-//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "C").toString());
-//		System.out.println();
-//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "main", "A", "C").toString());
-//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "C").toString());
-//		System.out.println();
-////		System.out.println(se.makeObjectOrEmptyMap(rec, false, "B", "C").toString());
-////		System.out.println(se.makeObjectOrEmptyMap(rec, true, "B", "C").toString());
-////		System.out.println();
-////		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B").toString());
-////		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B").toString());
-//		System.out.println();
-//		System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B", "C").toString());
-//		System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B", "C").toString());
+		// se.setWhereClause("");
+		// se.expand("mvalue", "A", "D", "B");
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		// System.out.println(se.getWhereSql());
+		// System.out.println(se.getWhereParameters());
 
-////		{A=A.a as a, A.b as b, B=B.x as x, X=X.h as h}
-////		[a, b, c, x, h, y]
-////		[A, B, X]
-//		se.build("x, y", RecursionType.FULL, "B");
-//		System.out.println(se.getExpandedSelects());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
+		// se.expand("*", "A", "B");
+		// se.expand("*", "main", "A", "B", "C");
+		// Map<String, Object> rec = new HashMap<String, Object>();
+		// rec.put("a", "3");
+		// rec.put("b", "7");
+		// rec.put("x", "0");
+		// rec.put("h", "v");
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		// System.out.println(se.getWhereSql());
+		// System.out.println();
+		// System.out.println(se.makeObjectOrEmptyMap(rec, false, "A").toString());
+		// System.out.println(se.makeObjectOrEmptyMap(rec, true, "A").toString());
+		// System.out.println();
+		// System.out.println(se.makeObjectOrEmptyMap(rec, false, "B").toString());
+		// System.out.println(se.makeObjectOrEmptyMap(rec, true, "B").toString());
+		// System.out.println();
+		// System.out.println(se.makeObjectOrEmptyMap(rec, false, "C").toString());
+		// System.out.println(se.makeObjectOrEmptyMap(rec, true, "C").toString());
+		// System.out.println();
+		// System.out.println(se.makeObjectOrEmptyMap(rec, false, "main", "A", "C").toString());
+		// System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "C").toString());
+		// System.out.println();
+		//// System.out.println(se.makeObjectOrEmptyMap(rec, false, "B", "C").toString());
+		//// System.out.println(se.makeObjectOrEmptyMap(rec, true, "B", "C").toString());
+		//// System.out.println();
+		//// System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B").toString());
+		//// System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B").toString());
+		// System.out.println();
+		// System.out.println(se.makeObjectOrEmptyMap(rec, false, "A", "B", "C").toString());
+		// System.out.println(se.makeObjectOrEmptyMap(rec, true, "A", "B", "C").toString());
+
+		//// {A=A.a as a, A.b as b, B=B.x as x, X=X.h as h}
+		//// [a, b, c, x, h, y]
+		//// [A, B, X]
+		// se.build("x, y", RecursionType.FULL, "B");
+		// System.out.println(se.getExpandedSelects());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
 
 	}
 }

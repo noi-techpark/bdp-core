@@ -18,7 +18,7 @@ public class WhereClauseParserTests {
 		String input = "a.eq.";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{STRING=}}}", ast.format());
 
 		we.setInput("a.eq.null");
 		ast = we.parse();
@@ -26,23 +26,23 @@ public class WhereClauseParserTests {
 
 		we.setInput("a.eq.1.and\\(33\\)");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=1.and(33)}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{STRING=1.and(33)}}}", ast.format());
 
 		we.setInput("a.eq.1.2");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{VALUE=1.2}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{NUMBER=1.2}}}", ast.format());
 
 		we.setInput("a.bbi.(1,2.3,7.0000)");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2.3}{VALUE=7.0000}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{NUMBER=1}{NUMBER=2.3}{NUMBER=7.0000}}}}", ast.format());
 
 		we.setInput("a.ire..*\\,3");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=ire}{VALUE=.*,3}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=ire}{STRING=.*,3}}}", ast.format());
 
 		we.setInput("scode.ire.\\(TRENTO|rovereto\\).*,mvalue.neq.0");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{VALUE=(TRENTO|rovereto).*}}CLAUSE{{ALIAS=mvalue}{OP=neq}{VALUE=0}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{STRING=(TRENTO|rovereto).*}}CLAUSE{{ALIAS=mvalue}{OP=neq}{NUMBER=0}}}", ast.format());
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class WhereClauseParserTests {
 		String input = "a.in.()";
 		WhereClauseParser we = new WhereClauseParser(input);
 		Token ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=in}LIST{{VALUE=}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=in}LIST{{STRING=}}}}", ast.format());
 
 		we.setInput("a.in.(null)");
 		ast = we.parse();
@@ -58,11 +58,11 @@ public class WhereClauseParserTests {
 
 		we.setInput("a.bbi.(1,2,3,4,5)");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{VALUE=1}{VALUE=2}{VALUE=3}{VALUE=4}{VALUE=5}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{NUMBER=1}{NUMBER=2}{NUMBER=3}{NUMBER=4}{NUMBER=5}}}}", ast.format());
 
 		we.setInput("scode.ire.(TRENTO|rovereto)");
 		ast = we.parse();
-		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}LIST{{VALUE=TRENTO|rovereto}}}}", ast.format());
+		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}LIST{{STRING=TRENTO|rovereto}}}}", ast.format());
 
 		we.setInput("scode.ire.(TRENTO|rovereto).*,mvalue.neq.0");
 		try {
