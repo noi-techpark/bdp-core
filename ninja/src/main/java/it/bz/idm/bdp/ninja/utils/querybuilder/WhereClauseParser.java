@@ -107,15 +107,41 @@ public class WhereClauseParser extends MiniParser {
 			t.appendValue(c());
 			return true;
 		});
+
+		Object typedValue = null;
 		if (res.valueIs(null)) {
+			res.setName("string");
 			res.setValue("");
-		} else if (res.valueIs("null") && !quoted) {
-			res.setName("null");
-			res.setValue(null);
 		} else if (quoted) {
 			expectConsume('"');
+			res.setName("string");
+		} else if (res.valueIs("null")) {
+			res.setName("null");
+			res.setValue(null);
+		} else if (res.getValue().equalsIgnoreCase("true") || res.getValue().equalsIgnoreCase("false")) {
+			res.setName("boolean");
+			typedValue = res.getValue().equalsIgnoreCase("true");
+		} else {
+			try {
+				typedValue = Integer.parseInt(res.getValue());
+				res.setName("number");
+			} catch (NumberFormatException e) {
+				/* it is not an integer, go ahead */
+				try {
+					typedValue = Double.parseDouble(res.getValue());
+					res.setName("number");
+				} catch (NumberFormatException ex) {
+					/* nothing more to try, we will keep the given object
+					 * type and let Postgres handle possible casting errors */
+					res.setName("string");
+				}
+			}
 		}
 		res.addPayload("quoted", quoted);
+		if (typedValue == null) {
+			typedValue = res.getValue();
+		}
+		res.addPayload("typedvalue", typedValue);
 		return res;
 	}
 
@@ -157,12 +183,12 @@ public class WhereClauseParser extends MiniParser {
 	public static void main(String[] args) throws Exception {
 		String input;
 		input = "x.eq.e";
-//		input = "and(x.eq.3,y.bbi.(1,2,3,4,5),or(z.neq.null,abc.in.(ciao,ha\\,llo),t.ire..*77|e3))";
+		input = "and(x.eq.3,y.bbi.(1,2,3,4,5),or(z.neq.null,abc.in.(ciao,ha\\,llo),t.ire..*77|e3))";
 //		input = "xy.in.(1,2)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
 //		input = "f.eq.(null,null,null)";
-		input = "f_.eq.";//,or(a.eq.7,and(b.eq.9))";
+//		input = "f_.eq.";//,or(a.eq.7,and(b.eq.9))";
 //		input = "a.eq.1.and(a.eq.0)";
 //		input = "or(scode.ire.TRENTO|rovere'to.*,mvalue.eq.0)";
 		WhereClauseParser we = new WhereClauseParser(input);

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.jsoniter.output.JsonStream;
 
+import it.bz.idm.bdp.ninja.utils.miniparser.Token;
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.ColumnMapRowMapper;
@@ -27,7 +28,7 @@ public class DataFetcher {
 	private static final Logger log = LoggerFactory.getLogger(DataFetcher.class);
 
 	public static enum ErrorCode implements ErrorCodeInterface {
-		WHERE_NO_MIXED_DATA_TYPES ("'%s' could return various data types, i.e., INTEGERS and STRINGS. Therefore, it cannot be used in WHERE.");
+		WHERE_WRONG_DATA_TYPE ("'%s' can only be used with NULL, NUMBERS or STRINGS: '%s' given.");
 
 		private final String msg;
 		ErrorCode(String msg) {
@@ -110,66 +111,85 @@ public class DataFetcher {
 		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
 		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
 
-		if (where != null && where.contains("mvalue")) {
-			throw new SimpleException(ErrorCode.WHERE_NO_MIXED_DATA_TYPES, "mvalue");
-		}
+		String whereDouble = where.replace("mvalue", "mvalue_double");
+		String whereString = where.replace("mvalue", "mvalue_string");
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(selectDouble, where, "station", "parent", "measurementdouble", "measurement", "datatype")
-				.addSql("select")
-				.addSqlIf("distinct", distinct)
-				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
-				.expandSelectPrefix(", ", !flat)
-				.addSqlIf("from measurementhistory me", from != null || to != null)
-				.addSqlIf("from measurement me", from == null && to == null)
-				.addSql("join bdppermissions pe on (",
-								"(me.station_id = pe.station_id OR pe.station_id is null)",
-								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
-								"AND (me.period = pe.period OR pe.period is null)",
-								"AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
-							")",
-						"join station s on me.station_id = s.id")
-				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
-				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
-				.addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
-				.addSql("join type t on me.type_id = t.id",
-						"where true")
-				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
-				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
-				.setParameterIfNotNull("from", from, "and timestamp >= :from")
-				.setParameterIfNotNull("to", to, "and timestamp < :to")
-				.setParameter("roles", roles)
-				.expandWhere()
-				.addSql("union all")
-				.reset(selectString, where, "station", "parent", "measurementstring", "measurement", "datatype")
-				.addSql("select")
-				.addSqlIf("distinct", distinct)
-				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
-				.expandSelectPrefix(", ", !flat)
-				.addSqlIf("from measurementstringhistory me", from != null || to != null)
-				.addSqlIf("from measurementstring me", from == null && to == null)
-				.addSql("join bdppermissions pe on (",
-								"(me.station_id = pe.station_id OR pe.station_id is null)",
-								"AND (me.type_id = pe.type_id OR pe.type_id is null)",
-								"AND (me.period = pe.period OR pe.period is null)",
-								"AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
-							")",
-						"join station s on me.station_id = s.id")
-				.addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
-				.addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
-				.addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
-				.addSql("join type t on me.type_id = t.id",
-						"where true")
-				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
-				.setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
-				.setParameterIfNotNull("from", from, "and timestamp >= :from")
-				.setParameterIfNotNull("to", to, "and timestamp < :to")
-				.setParameter("roles", roles)
-				.expandWhere()
-				.addSqlIf("order by _stationtype, _stationcode, _datatypename", !flat)
-				.addLimit(limit)
-				.addOffset(offset);
+				.init(selectDouble, whereDouble, "station", "parent", "measurementdouble", "measurement", "datatype");
+
+		Token mvalueToken = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		boolean mvalueExists = mvalueToken != null;
+
+		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("number") || mvalueToken.getName().equalsIgnoreCase("null")) {
+			query.addSql("select")
+				 .addSqlIf("distinct", distinct)
+				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				 .expandSelectPrefix(", ", !flat)
+				 .addSqlIf("from measurementhistory me", from != null || to != null)
+				 .addSqlIf("from measurement me", from == null && to == null)
+				 .addSql("join bdppermissions pe on (",
+						 "(me.station_id = pe.station_id OR pe.station_id is null)",
+						 "AND (me.type_id = pe.type_id OR pe.type_id is null)",
+						 "AND (me.period = pe.period OR pe.period is null)",
+						 "AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
+						 ")",
+						 "join station s on me.station_id = s.id")
+				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
+				 .addSql("join type t on me.type_id = t.id",
+						 "where true")
+				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
+				 .setParameterIfNotNull("to", to, "and timestamp < :to")
+				 .setParameter("roles", roles)
+				 .expandWhere();
+		}
+
+		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("null")) {
+			query.addSql("union all");
+		}
+
+		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("string") || mvalueToken.getName().equalsIgnoreCase("null")) {
+			query.reset(selectString, whereString, "station", "parent", "measurementstring", "measurement", "datatype")
+				 .addSql("select")
+				 .addSqlIf("distinct", distinct)
+				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				 .expandSelectPrefix(", ", !flat)
+				 .addSqlIf("from measurementstringhistory me", from != null || to != null)
+				 .addSqlIf("from measurementstring me", from == null && to == null)
+				 .addSql("join bdppermissions pe on (",
+						 "(me.station_id = pe.station_id OR pe.station_id is null)",
+						 "AND (me.type_id = pe.type_id OR pe.type_id is null)",
+						 "AND (me.period = pe.period OR pe.period is null)",
+						 "AND pe.role_id in (select id from bdprole r where r.name in (:roles))",
+						 ")",
+						 "join station s on me.station_id = s.id")
+				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
+				 .addSql("join type t on me.type_id = t.id",
+						 "where true")
+				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
+				 .setParameterIfNotNull("to", to, "and timestamp < :to")
+				 .setParameter("roles", roles)
+				 .expandWhere();
+		}
+
+		if (mvalueExists && !mvalueToken.getName().equalsIgnoreCase("string")
+						 && !mvalueToken.getName().equalsIgnoreCase("number")
+						 && !mvalueToken.getName().equalsIgnoreCase("null")) {
+			throw new SimpleException(ErrorCode.WHERE_WRONG_DATA_TYPE, "mvalue", mvalueToken.getName());
+		}
+
+		query.addSqlIf("order by _stationtype, _stationcode, _datatypename", !flat)
+			 .addLimit(limit)
+			 .addOffset(offset);
+
 		log.debug("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
 

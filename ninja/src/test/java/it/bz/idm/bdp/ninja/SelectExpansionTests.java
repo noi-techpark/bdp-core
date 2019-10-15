@@ -49,20 +49,25 @@ public class SelectExpansionTests {
 		seMinimal = new SelectExpansion();
 		seMinimal.addColumn("A", "a", "A.a");
 
-		seMinimal.addOperator("value", "eq", "= %s");
-		seMinimal.addOperator("value", "neq", "<> %s");
+		seMinimal.addOperator("string", "eq", "= %s");
+		seMinimal.addOperator("string", "neq", "<> %s");
+		seMinimal.addOperator("number", "eq", "= %s");
+		seMinimal.addOperator("number", "neq", "<> %s");
 		seMinimal.addOperator("null", "eq", "is %s");
 		seMinimal.addOperator("null", "neq", "is not %s");
-		seMinimal.addOperator("value", "lt", "< %s");
-		seMinimal.addOperator("value", "gt", "> %s");
-		seMinimal.addOperator("value", "lteq", "=< %s");
-		seMinimal.addOperator("value", "gteq", ">= %s");
-		seMinimal.addOperator("value", "re", "~ %s");
-		seMinimal.addOperator("value", "ire", "~* %s");
-		seMinimal.addOperator("value", "nre", "!~ %s");
-		seMinimal.addOperator("value", "nire", "!~* %s");
+		seMinimal.addOperator("number", "lt", "< %s");
+		seMinimal.addOperator("number", "gt", "> %s");
+		seMinimal.addOperator("number", "lteq", "=< %s");
+		seMinimal.addOperator("number", "gteq", ">= %s");
+		seMinimal.addOperator("string", "re", "~ %s");
+		seMinimal.addOperator("string", "ire", "~* %s");
+		seMinimal.addOperator("string", "nre", "!~ %s");
+		seMinimal.addOperator("string", "nire", "!~* %s");
 		seMinimal.addOperator("list", "in", "in (%s)", t -> {
-			return !(t.getChildCount() == 1 && t.getChild("value").getValue() == null);
+			return !(t.getChildCount() == 1 && (
+					t.getChild("string") != null && t.getChild("string").getValue() == null ||
+					t.getChild("number") != null && t.getChild("number").getValue() == null
+					));
 		});
 		seMinimal.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
@@ -80,7 +85,7 @@ public class SelectExpansionTests {
 		}
 
 		seFlat.addOperator("null", "eq", "is %s");
-		seFlat.addOperator("value", "eq", "= %s");
+		seFlat.addOperator("number", "eq", "= %s");
 	}
 
 	@Test

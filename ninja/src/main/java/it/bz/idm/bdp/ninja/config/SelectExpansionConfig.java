@@ -76,18 +76,26 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		 * checks of their values or list items. These can be defined with Lambda
 		 * functions.
 		 */
-		se.addOperator("VALUE", "eq", "= %s");
-		se.addOperator("VALUE", "neq", "<> %s");
 		se.addOperator("NULL", "eq", "is %s");
 		se.addOperator("NULL", "neq", "is not %s");
-		se.addOperator("VALUE", "lt", "< %s");
-		se.addOperator("VALUE", "gt", "> %s");
-		se.addOperator("VALUE", "lteq", "=< %s");
-		se.addOperator("VALUE", "gteq", ">= %s");
-		se.addOperator("VALUE", "re", "~ %s");
-		se.addOperator("VALUE", "ire", "~* %s");
-		se.addOperator("VALUE", "nre", "!~ %s");
-		se.addOperator("VALUE", "nire", "!~* %s");
+
+		se.addOperator("BOOLEAN", "eq", "= %s");
+		se.addOperator("BOOLEAN", "neq", "<> %s");
+
+		se.addOperator("NUMBER", "eq", "= %s");
+		se.addOperator("NUMBER", "neq", "<> %s");
+		se.addOperator("NUMBER", "lt", "< %s");
+		se.addOperator("NUMBER", "gt", "> %s");
+		se.addOperator("NUMBER", "lteq", "=< %s");
+		se.addOperator("NUMBER", "gteq", ">= %s");
+
+		se.addOperator("STRING", "eq", "= %s");
+		se.addOperator("STRING", "neq", "<> %s");
+		se.addOperator("STRING", "re", "~ %s");
+		se.addOperator("STRING", "ire", "~* %s");
+		se.addOperator("STRING", "nre", "!~ %s");
+		se.addOperator("STRING", "nire", "!~* %s");
+
 		se.addOperator("LIST", "in", "in (%s)", t -> {
 			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
