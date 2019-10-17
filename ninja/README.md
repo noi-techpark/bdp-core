@@ -26,6 +26,13 @@
 - [Representation](#representation)
 - [Authentication](#authentication)
   - [I want to retrieve protected measurements (closed data)](#i-want-to-retrieve-protected-measurements-closed-data)
+- [Sample queries](#sample-queries)
+  - [show all echarging stations of bolzano](#show-all-echarging-stations-of-bolzano)
+  - [show number of public, private and private with public access echarging stations](#show-number-of-public-private-and-private-with-public-access-echarging-stations)
+  - [show the total number of plugs and how many are currently available](#show-the-total-number-of-plugs-and-how-many-are-currently-available)
+  - [filter EchargingPlugs by voltage](#filter-echargingplugs-by-voltage)
+  - [filter EchargingStations by payment method](#filter-echargingstations-by-payment-method)
+  - [filter EchargingStations by state](#filter-echargingstations-by-state)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -294,3 +301,25 @@ example.
 curl -X GET "https://example.com/tree/VMS/*" \
      -H 'Authorization: Bearer header.payload.signature'
 ```
+
+## Sample queries
+### show all echarging stations of bolzano
+`http://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&where=sactive.eq.true%2Cscoordinate.bbi.(11.27539%2C46.444913%2C11.432577%2C46.530384)&shownull=false&distinct=true`
+
+### show number of public, private and private with public access echarging stations
+```
+https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&select=smetadata&where=sactive.eq.true&shownull=false&distinct=true
+...or...
+https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&select=smetadata.accessType&where=sactive.eq.true&shownull=false&distinct=false
+```
+### show the total number of plugs and how many are currently available
+`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug/*?select=scode&limit=-1&offset=0&where=sactive.eq.true,tname.eq.echarging-plug-status,mvalue.eq.1&shownull=false&distinct=true`
+
+### filter EchargingPlugs by voltage
+`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
+
+### filter EchargingStations by payment method
+`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
+
+### filter EchargingStations by state
+`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
