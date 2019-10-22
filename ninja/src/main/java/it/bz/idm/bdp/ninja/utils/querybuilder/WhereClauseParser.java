@@ -45,16 +45,55 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token clause() {
 		return doSingle("CLAUSE", t -> {
-			Token alias = alias();
+			t.add(alias());
 			expectConsume('.');
-			Token operator = operator();
+			Token jsonSelector = jsonSelector();
+			if (jsonSelector != null) {
+				expectConsume('.');
+				t.add(jsonSelector);
+			}
+			t.add(operator());
 			expectConsume('.');
-			Token listOrValue = listOrValue();
-			t.add(alias);
-			t.add(operator);
-			t.combineForce(listOrValue);
+			t.combineForce(listOrValue());
 			return true;
 		});
+	}
+
+	private Token jsonSelector() {
+		Token res = doWhile("JSONSEL", t -> {
+			if (!Character.isLetter(c()) && !match('.') && !Character.isDigit(c())) {
+				return false;
+			}
+			t.appendValue(c());
+			return true;
+		});
+
+		/*
+		 * A CLAUSE-token is composed of four parts: alias, json selector, operator, and value.
+		 * JSON selectors are optional, hence we must first check if they are present. For that,
+		 * we eliminate first the value part, and try to find the dot which shows the start of the operator.
+		 * A value could be a number and hence have a dot inside. If that happens, we need to jump another
+		 * dot back. Strings are kept as they are. If a dot inside a string should be handled correctly, the
+		 * user must use quotes.
+		 */
+		String value = res.getValue() == null ? "" : res.getValue();
+		int indexBeforeOperator = value.lastIndexOf(".", value.lastIndexOf(".") - 1);
+		try {
+			String numberCandidate = value.substring(indexBeforeOperator + 1);
+			Double.parseDouble(numberCandidate);
+			indexBeforeOperator -= numberCandidate.length();
+		} catch (NumberFormatException e) {
+			/* nothing to do, the other tokenizers will handled possible errors */
+		}
+
+		if (value.isEmpty() || indexBeforeOperator < 0) {
+			goBack(value.length());
+			return null;
+		}
+
+		goBack(value.length() - indexBeforeOperator);
+		res.setValue(value.substring(0, indexBeforeOperator));
+		return res;
 	}
 
 	private Token operator() {
@@ -182,9 +221,11 @@ public class WhereClauseParser extends MiniParser {
 
 	public static void main(String[] args) throws Exception {
 		String input;
-		input = "x.eq.e";
-		input = "and(x.eq.3,y.bbi.(1,2,3,4,5),or(z.neq.null,abc.in.(ciao,ha\\,llo),t.ire..*77|e3))";
-//		input = "xy.in.(1,2)";
+//		input = "a.b.c.eq.x=b";
+//		input = "and(x.eq.3,y.bbi.(1,2,3,4,5),or(z.neq.null,abc.in.(ciao,ha\\,llo),t.ire.\\.*77|e3))";
+//		input = "a.eq.1.and(a.eq.0)";
+		input = "smetadata.outlets.0.maxPower.eq.\".*\",x.gt.7";
+//		input = "a.3.c.in.(1,2)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5)";
 //		input = "a.eq.0,b.neq.3,or(a.eq.3,b.eq.5),a.bbi.(1,2,3,4),d.eq.,f.in.()";
 //		input = "f.eq.(null,null,null)";

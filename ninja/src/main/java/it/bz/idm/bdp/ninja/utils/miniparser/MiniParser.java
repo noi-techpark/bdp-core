@@ -54,6 +54,16 @@ public class MiniParser {
 		return laExists;
 	}
 
+	public boolean goBack(int stepsBack) {
+		boolean laExists = get(i - stepsBack);
+		if (laExists) {
+			c = la;
+			i -= stepsBack;
+			log.debug("B c={}, stepsBack={}", c, stepsBack);
+		}
+		return laExists;
+	}
+
 	protected boolean consume(int times) {
 		for (int i = 0; i < times; i++) {
 			if (!consume()) {
