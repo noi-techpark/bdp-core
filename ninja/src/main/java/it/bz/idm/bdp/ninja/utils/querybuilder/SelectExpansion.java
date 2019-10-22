@@ -78,7 +78,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class SelectExpansion {
 
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
-	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\.]+";
+	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\._]+";
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND("Key '%s' does not exist"),
@@ -113,7 +113,7 @@ public class SelectExpansion {
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedJSONAliases = new TreeSet<String>();
 	private Set<String> usedJSONDefNames = new TreeSet<String>();
-	private Map<String, Token> usedJSONAliasesInWhere = new TreeMap<String, Token>();
+	private Map<String, List<Token>> usedJSONAliasesInWhere = new TreeMap<String, List<Token>>();
 	private Map<String, WhereClauseOperator> whereClauseOperatorMap = new TreeMap<String, WhereClauseOperator>();
 
 	private Map<String, Object> whereParameters = null;
@@ -394,6 +394,12 @@ public class SelectExpansion {
 
 	}
 
+	private void _addAliasesInWhere(final String alias, Token token) {
+		List<Token> tokens = usedJSONAliasesInWhere.getOrDefault(alias, new ArrayList<Token>());
+		tokens.add(token);
+		usedJSONAliasesInWhere.put(alias, tokens);
+	}
+
 	private void _expandWhere(String where) {
 		if (where == null || where.isEmpty()) {
 			whereSQL = null;
@@ -445,12 +451,25 @@ public class SelectExpansion {
 
 					usedJSONAliases.add(alias);
 					usedJSONDefNames.add(getAliasMap().get(alias));
-					if (usedJSONAliasesInWhere.containsKey(alias)) {
-						throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
-					}
-					usedJSONAliasesInWhere.put(alias, t.getChild(2));
+					Token jsonSel = t.getChild("JSONSEL");
+					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
+					_addAliasesInWhere(alias, clauseOrValueToken);
 
-					sb.append(column + " " + whereClauseItem(alias, operator, t.getChild(2)));
+					String jsonSelSQL = "";
+					if (jsonSel == null) {
+						jsonSelSQL = column;
+					} else {
+						jsonSelSQL = column + "#>";
+						if (clauseOrValueToken.getName().equalsIgnoreCase("string")) {
+							jsonSelSQL += ">";
+						}
+						jsonSelSQL += "'{" + jsonSel.getValue().replace(".", ",") + "}'";
+
+						if (clauseOrValueToken.getName().equalsIgnoreCase("number")) {
+							jsonSelSQL = "(" + jsonSelSQL + ")::double precision";
+						}
+					}
+					sb.append(jsonSelSQL + " " + whereClauseItem(alias, operator, clauseOrValueToken));
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
@@ -486,8 +505,7 @@ public class SelectExpansion {
 
 	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
-		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap
-				.get(clauseValueToken.getName() + "_" + operator);
+		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
 		if (whereClauseOperator == null) {
 			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
 		}
@@ -498,14 +516,9 @@ public class SelectExpansion {
 		switch (clauseValueToken.getName()) {
 		case "LIST":
 			List<Object> listItems = new ArrayList<Object>();
-			int i = 0;
 			for (Token listItem : clauseValueToken.getChildren()) {
 				listItems.add(listItem.getPayload("typedvalue"));
-				if (usedJSONAliasesInWhere.containsKey(alias + "[" + i + "]")) {
-					throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
-				}
-				usedJSONAliasesInWhere.put(alias + "[" + i + "]", listItem);
-				i++;
+				_addAliasesInWhere(alias, listItem); //XXX Needed?
 			}
 			value = listItems;
 			break;
@@ -551,7 +564,7 @@ public class SelectExpansion {
 		return new ArrayList<String>(usedJSONAliases);
 	}
 
-	public Map<String, Token> getUsedAliasesInWhere() {
+	public Map<String, List<Token>> getUsedAliasesInWhere() {
 		if (dirty) {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}

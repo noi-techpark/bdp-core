@@ -126,7 +126,9 @@ public class DataFetcher {
 		query = QueryBuilder
 				.init(selectDouble, whereDouble, "station", "parent", "measurementdouble", "measurement", "datatype");
 
-		Token mvalueToken = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		// FIXME Consider all possibilities and build a query with both mvalue types if strings and numbers are present
+		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
 		boolean mvalueExists = mvalueToken != null;
 
 		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("number") || mvalueToken.getName().equalsIgnoreCase("null")) {
