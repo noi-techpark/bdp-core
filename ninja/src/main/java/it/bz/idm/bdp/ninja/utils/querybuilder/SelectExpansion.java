@@ -78,6 +78,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class SelectExpansion {
 
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
+	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\.]+";
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND("Key '%s' does not exist"),
@@ -90,7 +91,8 @@ public class SelectExpansion {
 		WHERE_OPERATOR_NOT_FOUND("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
 		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
-		EXPAND_INVALID_DATA("Provide valid alias and definition sets!");
+		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
+		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9' and '.'");
 
 		private final String msg;
 
@@ -305,6 +307,9 @@ public class SelectExpansion {
 		} else {
 			candidateAliases = new ArrayList<String>();
 			for (String alias : aliases) {
+				if (!alias.matches(ALIAS_VALIDATION)) {
+					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
+				}
 				int index = alias.indexOf('.');
 				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
 				if (!candidateAliases.contains(mainAlias)) {
@@ -338,11 +343,15 @@ public class SelectExpansion {
 
 				/* Look, if it is a JSON selector */
 				if (aliasToJSONPath.containsKey(alias)) {
-					StringJoiner sj = new StringJoiner(", ", "jsonb_build_object(", ") as ");
+					StringJoiner sj = new StringJoiner(", ");
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
-						sj.add(String.format("'%s', %s->'%s'", jsonSelector, def.getColumn(alias), jsonSelector));
+						sj.add(String.format("%s#>'{%s}' as \"%s.%s\"",
+											 def.getColumn(alias),
+											 jsonSelector.replace(".", ","),
+											 alias,
+											 jsonSelector));
 					}
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj + alias);
+					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj);
 				} else { /* Regular column */
 					String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
 					String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
@@ -360,7 +369,6 @@ public class SelectExpansion {
 							candidateAliases.add(subAlias);
 						}
 					}
-
 				}
 			}
 			curPos++;
