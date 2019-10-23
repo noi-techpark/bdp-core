@@ -149,10 +149,14 @@ For example, `metadata.municipality.cap` is an JSONB inside the database with a
 column `metadata` and a JSONB object called `municipality` which has a `cap`
 inside.
 
-**values_or_list**
-- `value`: Whatever you want, also a regular expression. However, you need to
-  escape `,`, `'` and `"` with a `\`. Use url-encoding, if your tool does not support
-  certain characters. Special values are `null`, numbers or an omitted value. Examples:
+**filter**
+A `filter` has the form `alias.operator.value_or_list`.
+
+**value_or_list**
+- `value`: Whatever you want, also a regular expression. Use double-quotes to
+  force string recognition. Alternatively, you can escape characters `,`, `'`
+  and `"` with a `\`. Use url-encoding, if your tool does not support certain
+  characters. Special values are `null`, numbers and omitted values. Examples:
   - `description.eq.null`, checks if a description is not set
   - `description.eq.`, checks if a description is a string of length 0
 - `list`: `(value,value,value)`
@@ -177,9 +181,6 @@ inside.
 - `nin`: False, if the value of the alias can be found within the given list.
   Example: `name.nin.(Patrick,Rudi,Peter)`
 
-**filter**
-A `filter` has the form `alias.operator.value_or_list`.
-
 **logical operations**
 - `and(filter,filter,...)`: Conjunction of filters (can be nested)
 - `or(filter,filter,...)`: Disjunction of filters (can be nested)
@@ -189,6 +190,9 @@ Multiple conditions possible as comma-separated-values.
 Example-syntax for `bbi` or `bbc` could be `coordinate.bbi.(11,46,12,47,4326)`, where
 the ordering inside the list is left-x, left-y, right-x, right-y and SRID
 (optional).
+
+NB: Currently it is not possible to distinguish between a JSON field containing `null`
+or a non-existing JSON field.
 
 
 ### I want to see only station names, data type names and the value of the measurement
