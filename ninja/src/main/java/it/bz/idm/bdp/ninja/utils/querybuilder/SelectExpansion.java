@@ -417,7 +417,7 @@ public class SelectExpansion {
 			throw e;
 		}
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sbFull = new StringBuilder();
 		whereParameters = new TreeMap<String, Object>();
 
 		whereAST.walker(new ConsumerExtended() {
@@ -436,7 +436,7 @@ public class SelectExpansion {
 				switch (t.getName()) {
 				case "AND":
 				case "OR":
-					sb.append("(");
+					sbFull.append("(");
 					context.push(new Context(t.getChildCount(), t.getName()));
 					log.debug("AND/OR" + context.getFirst());
 					break;
@@ -455,26 +455,28 @@ public class SelectExpansion {
 					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
 					_addAliasesInWhere(alias, clauseOrValueToken);
 
-					String jsonSelSQL = "";
-					if (jsonSel == null) {
-						jsonSelSQL = column;
-					} else {
-						jsonSelSQL = column + "#>";
-						if (clauseOrValueToken.getName().equalsIgnoreCase("string")) {
-							jsonSelSQL += ">";
+					StringBuffer sbItem = new StringBuffer();
+					sbItem.append(column);
+					if (jsonSel != null) {
+						if (clauseOrValueToken.is("string")) {
+							sbItem.append("#>");
+						} else {
+							sbItem.append("#>>");
 						}
-						jsonSelSQL += "'{" + jsonSel.getValue().replace(".", ",") + "}'";
-
-						if (clauseOrValueToken.getName().equalsIgnoreCase("number")) {
-							jsonSelSQL = "(" + jsonSelSQL + ")::double precision";
+						sbItem.append("'{" + jsonSel.getValue().replace(".", ",") + "}'");
+						if (clauseOrValueToken.is("number") || clauseOrValueToken.hasOnlyChildrenOf("number")) {
+							sbItem.insert(0, "(");
+							sbItem.append(")::double precision");
 						}
 					}
-					sb.append(jsonSelSQL + " " + whereClauseItem(alias, operator, clauseOrValueToken));
+					sbItem.append(" ");
+					sbItem.append(whereClauseItem(alias, operator, clauseOrValueToken));
+					sbFull.append(sbItem);
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
-						sb.append(" " + ctx.logicalOp + " ");
-				}
+						sbFull.append(" " + ctx.logicalOp + " ");
+					}
 					break;
 				}
 				return true;
@@ -485,14 +487,14 @@ public class SelectExpansion {
 				switch (t.getName()) {
 				case "AND":
 				case "OR":
-					sb.append(")");
+					sbFull.append(")");
 					context.pop();
 					ctx = context.peekFirst();
 					if (ctx == null)
 						break;
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
-						sb.append(" " + ctx.logicalOp + " ");
+						sbFull.append(" " + ctx.logicalOp + " ");
 					break;
 				}
 				return true;
@@ -500,7 +502,7 @@ public class SelectExpansion {
 
 		});
 
-		whereSQL = sb.toString();
+		whereSQL = sbFull.toString();
 	}
 
 	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
