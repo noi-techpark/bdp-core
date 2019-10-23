@@ -36,7 +36,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 
 			mapOfColumnValues.putIfAbsent(getColumnKey(column), value);
 		}
-		return mapOfColumnValues;
+		return mapOfColumnValues.isEmpty() ? null : mapOfColumnValues;
 	}
 
 	/**
@@ -91,6 +91,10 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 					return PGgeometry.geomFromString(pgObj.getValue());
 				case "jsonb":
 					// FIXME Return a proper map
+					/* This is a proper JSON null value, since a string would be ""null"" instead. */
+					if (pgObj.getValue().equalsIgnoreCase("null")) {
+						return null;
+					}
 					return JsonIterator.deserialize(pgObj.getValue());
 				default:
 					throw new RuntimeException("PGobject type " + pgObjType + " not supported!");
