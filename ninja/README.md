@@ -130,26 +130,33 @@ prevent excessive response times.
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
 ```
 
-## Filtering
+## Filtering with SELECT and WHERE
 
 Some JSON attributes can be selected, that is, all those which start with a
 table prefix. For instance, all station related fields start with `s`, all
 parent related fields with an `p`, measurements with an `m` and data types with
-an `t`. All other are generated JSON blocks, that cannot be selected yet.
+an `t`.
 
 It is possible to filter against JSON fields (columns in a database) with
-`select`, or per record (rows in a database) with `where`. The latter, is a
-conjunction (`and`) of all clauses. Also complex logic is possible, with nested
-`or(...)` and `and(...)` clauses.
+`select=alias,alias,alias,...`, or per record (rows in a database) with
+`where=filter,filter,filter,...`. The latter, is a conjunction (`and`) of all
+clauses. Also complex logic is possible, with nested `or(...)` and `and(...)`
+clauses, for instance `where=or(filter,filter,and(filter,filter))`.
 
-A `where` clause is a list of filter-triples, like `alias.operator.value_or_list`.
+**alias**
+An `alias` is a list of point-separated-fields, where each field corresponds
+to a step inside the JSON hierarchy. Internally, the first field represents the
+database column and all subsequent fields drill into the JSON hierarchy.
+For example, `metadata.municipality.cap` is an JSONB inside the database with a
+column `metadata` and a JSONB object called `municipality` which has a `cap`
+inside.
 
 **values_or_list**
 - `value`: Whatever you want, also a regular expression. However, you need to
   escape `,`, `'` and `"` with a `\`. Use url-encoding, if your tool does not support
   certain characters. Special values are `null`, numbers or an omitted value. Examples:
   - `description.eq.null`, checks if a description is not set
-  - `description.eq.`, checks if a description is set, but the string has length 0
+  - `description.eq.`, checks if a description is a string of length 0
 - `list`: `(value,value,value)`
 
 **operator**
@@ -172,9 +179,12 @@ A `where` clause is a list of filter-triples, like `alias.operator.value_or_list
 - `nin`: False, if the value of the alias can be found within the given list.
   Example: `name.nin.(Patrick,Rudi,Peter)`
 
+**filter**
+A `filter` has the form `alias.operator.value_or_list`.
+
 **logical operations**
-- `and(alias.operator.value_or_list,...)`: Conjunction of filters (can be nested)
-- `or(alias.operator.value_or_list,...)`: Disjunction of filters (can be nested)
+- `and(filter,filter,...)`: Conjunction of filters (can be nested)
+- `or(filter,filter,...)`: Disjunction of filters (can be nested)
 
 Multiple conditions possible as comma-separated-values.
 
@@ -217,6 +227,24 @@ We use a key-insensitive regular expression here:
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
 ```
+
+### I want active creative industry stations with their sector and website, but only if the have one
+
+We use a JSON selector and JSON filters here:
+```
+GET /flat/CreativeIndustry?where=sactive.eq.true,smetadata.website.neq.null,smetadata.website.ire."http"&select=sname,smetadata.sector,smetadata.website
+```
+
+We check not only for `smetadata.website` to be present, but also to start with `http` to be sure it
+is not a description telling us, that the website is currently under development or similar things.
+
+### I want all creative industry station names, which do not have a sector assigned
+
+We use a JSON selector and JSON filters here:
+```
+GET /flat/CreativeIndustry?where=smetadata.sector.eq.null&select=sname
+```
+
 
 ## Null values
 
@@ -302,24 +330,50 @@ curl -X GET "https://example.com/tree/VMS/*" \
      -H 'Authorization: Bearer header.payload.signature'
 ```
 
-## Sample queries
+## Additional Sample Queries
+
+For better readability, we assume that all queries are configured as follows, if
+not otherwise stated: `shownull=false&distinct=true&limit=-1`.
+
+NB: We need to count results on application level, because the API does
+currently not support aggregation, like `count` and other statistical methods
+involving `grouping`.
+
 ### show all echarging stations of bolzano
-`http://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&where=sactive.eq.true%2Cscoordinate.bbi.(11.27539%2C46.444913%2C11.432577%2C46.530384)&shownull=false&distinct=true`
-
-### show number of public, private and private with public access echarging stations
 ```
-https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&select=smetadata&where=sactive.eq.true&shownull=false&distinct=true
-...or...
-https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingStation?limit=-1&offset=0&select=smetadata.accessType&where=sactive.eq.true&shownull=false&distinct=false
+GET /flat/EChargingStation?where=sactive.eq.true,scoordinate.bbi.(11.27539,46.444913,11.432577,46.530384)
 ```
-### show the total number of plugs and how many are currently available
-`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug/*?select=scode&limit=-1&offset=0&where=sactive.eq.true,tname.eq.echarging-plug-status,mvalue.eq.1&shownull=false&distinct=true`
 
-### filter EchargingPlugs by voltage
-`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
+### Show number of public, private and private with public access echarging stations
+Since we want to count the results later, we need to set `distinct=false`.
+```
+GET /flat/EChargingStation?select=smetadata.accessType&where=sactive.eq.true&distinct=false
+```
 
-### filter EchargingStations by payment method
-`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
+### Show the total number of plugs and how many are currently available
+This means that the measured value `mvalue` must be equal `1`.
 
-### filter EchargingStations by state
-`https://ipchannels.integreen-life.bz.it/ninja/api/v2/flat/EChargingPlug?limit=-1&offset=0&select=*&where=sactive.eq.true&shownull=false&distinct=true`
+```
+GET /flat/EChargingPlug/*?select=scode&where=sactive.eq.true,tname.eq.echarging-plug-status,mvalue.eq.1
+```
+
+### Filter EchargingPlugs by voltage
+```
+GET /flat/EChargingPlug?where=sactive.eq.true
+```
+
+### Filter EchargingStations by payment method
+```
+GET /flat/EChargingStation?where=sactive.eq.true,smetadata.accessType.eq.PUBLIC
+```
+
+### Get all possible states of all echarging stations
+```
+GET /flat/EChargingStation?select=smetadata.state
+```
+
+### Filter EchargingStations by state
+For example filter against `ACTIVE` states.
+```
+GET /flat/EChargingPlug?where=sactive.eq.true,smetadata.state.eq.ACTIVE
+```
