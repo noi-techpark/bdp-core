@@ -78,7 +78,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class SelectExpansion {
 
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
-	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\._]+";
+	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\._]+"; // Do not forget to update ErrorCode.ALIAS_INVALID
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND("Key '%s' does not exist"),
@@ -92,7 +92,7 @@ public class SelectExpansion {
 		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
-		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9' and '.'");
+		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'");
 
 		private final String msg;
 
