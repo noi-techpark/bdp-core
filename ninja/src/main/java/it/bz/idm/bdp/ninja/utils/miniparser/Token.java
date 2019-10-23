@@ -188,6 +188,9 @@ public class Token {
 	}
 
 	public boolean hasOnlyChildrenOf(String childName) {
+		if (children.isEmpty()) {
+			return false;
+		}
 		for (Token child : children) {
 			if (! childName.equalsIgnoreCase(child.getName())) {
 				return false;

@@ -459,9 +459,9 @@ public class SelectExpansion {
 					sbItem.append(column);
 					if (jsonSel != null) {
 						if (clauseOrValueToken.is("string")) {
-							sbItem.append("#>");
-						} else {
 							sbItem.append("#>>");
+						} else {
+							sbItem.append("#>");
 						}
 						sbItem.append("'{" + jsonSel.getValue().replace(".", ",") + "}'");
 						if (clauseOrValueToken.is("number") || clauseOrValueToken.hasOnlyChildrenOf("number")) {
