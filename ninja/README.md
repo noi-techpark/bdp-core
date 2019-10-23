@@ -135,11 +135,6 @@ GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
 
 ## Filtering with SELECT and WHERE
 
-Some JSON attributes can be selected, that is, all those which start with a
-table prefix. For instance, all station related fields start with `s`, all
-parent related fields with an `p`, measurements with an `m` and data types with
-an `t`.
-
 It is possible to filter against JSON fields (columns in a database) with
 `select=alias,alias,alias,...`, or per record (rows in a database) with
 `where=filter,filter,filter,...`. The latter, is a conjunction (`and`) of all
