@@ -49,30 +49,30 @@ public class SelectExpansionTests {
 		seMinimal = new SelectExpansion();
 		seMinimal.addColumn("A", "a", "A.a");
 
-		seMinimal.addOperator("string", "eq", "= %s");
-		seMinimal.addOperator("string", "neq", "<> %s");
-		seMinimal.addOperator("number", "eq", "= %s");
-		seMinimal.addOperator("number", "neq", "<> %s");
-		seMinimal.addOperator("null", "eq", "is %s");
-		seMinimal.addOperator("null", "neq", "is not %s");
-		seMinimal.addOperator("number", "lt", "< %s");
-		seMinimal.addOperator("number", "gt", "> %s");
-		seMinimal.addOperator("number", "lteq", "=< %s");
-		seMinimal.addOperator("number", "gteq", ">= %s");
-		seMinimal.addOperator("string", "re", "~ %s");
-		seMinimal.addOperator("string", "ire", "~* %s");
-		seMinimal.addOperator("string", "nre", "!~ %s");
-		seMinimal.addOperator("string", "nire", "!~* %s");
-		seMinimal.addOperator("list", "in", "in (%s)", t -> {
+		seMinimal.addOperator("string", "eq", "%c = %v");
+		seMinimal.addOperator("string", "neq", "%c <> %v");
+		seMinimal.addOperator("number", "eq", "%c = %v");
+		seMinimal.addOperator("number", "neq", "%c <> %v");
+		seMinimal.addOperator("null", "eq", "%c is %v");
+		seMinimal.addOperator("null", "neq", "%c is not %v");
+		seMinimal.addOperator("number", "lt", "%c < %v");
+		seMinimal.addOperator("number", "gt", "%c > %v");
+		seMinimal.addOperator("number", "lteq", "%c =< %v");
+		seMinimal.addOperator("number", "gteq", "%c >= %v");
+		seMinimal.addOperator("string", "re", "%c ~ %v");
+		seMinimal.addOperator("string", "ire", "%c ~* %v");
+		seMinimal.addOperator("string", "nre", "%c !~ %v");
+		seMinimal.addOperator("string", "nire", "%c !~* %v");
+		seMinimal.addOperator("list", "in", "%c in (%v)", t -> {
 			return !(t.getChildCount() == 1 && (
 					t.getChild("string") != null && t.getChild("string").getValue() == null ||
 					t.getChild("number") != null && t.getChild("number").getValue() == null
 					));
 		});
-		seMinimal.addOperator("list", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+		seMinimal.addOperator("list", "bbi", "%c && ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
-		seMinimal.addOperator("list", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+		seMinimal.addOperator("list", "bbc", "%c @ ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 
@@ -84,8 +84,8 @@ public class SelectExpansionTests {
 			// nothing to do
 		}
 
-		seFlat.addOperator("null", "eq", "is %s");
-		seFlat.addOperator("number", "eq", "= %s");
+		seFlat.addOperator("null", "eq", "%c is %v");
+		seFlat.addOperator("number", "eq", "%c = %v");
 	}
 
 	@Test

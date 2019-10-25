@@ -10,6 +10,9 @@ public class WhereClauseOperator {
 	public WhereClauseOperator(String name, String sqlSnippet, Consumer operatorCheck) {
 		super();
 		this.name = name;
+		if (!sqlSnippet.contains("%v") || !sqlSnippet.contains("%c")) {
+			throw new RuntimeException("A WhereClauseOperator SQL snippet must contain a value (%v) and column (%c) part.");
+		}
 		this.sqlSnippet = sqlSnippet;
 		this.operatorCheck = operatorCheck;
 	}

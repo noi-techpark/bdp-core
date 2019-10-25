@@ -469,9 +469,7 @@ public class SelectExpansion {
 							sbItem.append(")::double precision");
 						}
 					}
-					sbItem.append(" ");
-					sbItem.append(whereClauseItem(alias, operator, clauseOrValueToken));
-					sbFull.append(sbItem);
+					sbFull.append(whereClauseItem(column, alias, operator, clauseOrValueToken));
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
@@ -505,7 +503,7 @@ public class SelectExpansion {
 		whereSQL = sbFull.toString();
 	}
 
-	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
+	private String whereClauseItem(String column, String alias, String operator, Token clauseValueToken) {
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
 		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
 		if (whereClauseOperator == null) {
@@ -547,12 +545,13 @@ public class SelectExpansion {
 		 */
 		if (whereClauseOperator.getOperatorCheck() != null) {
 			if (!whereClauseOperator.getOperatorCheck().middle(clauseValueToken)) {
-				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(),
-						value);
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(), value);
 			}
 		}
 
-		return String.format(whereClauseOperator.getSqlSnippet(), value == null ? "null" : ":" + paramName);
+		value = (value == null) ? "null" : ":" + paramName;
+
+		return whereClauseOperator.getSqlSnippet().replaceAll("%v", value.toString()).replaceAll("%c", column);
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -761,25 +760,27 @@ public class SelectExpansion {
 		// System.out.println(se.getUsedAliases());
 		// System.out.println(se.getUsedDefNames());
 		//
-		se.addOperator("number", "gt", "> %s");
-		se.addOperator("string", "eq", "= %s");
-		se.addOperator("string", "neq", "<> %s");
-		se.addOperator("number", "eq", "= %s");
-		se.addOperator("boolean", "eq", "= %s");
-		se.addOperator("number", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("list", "in", "in (%s)");
-		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+//		se.addOperator("number", "gt", "> %s");
+//		se.addOperator("string", "eq", "= %s");
+//		se.addOperator("string", "neq", "<> %s");
+//		se.addOperator("number", "eq", "= %s");
+//		se.addOperator("boolean", "eq", "= %s");
+//		se.addOperator("number", "neq", "<> %s");
+//		se.addOperator("null", "eq", "is null");
+//		se.addOperator("null", "neq", "is not null");
+//		se.addOperator("list", "in", "in (%s)");
+//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
 //		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-//		// se.setWhereClause("a.eq.true");
-//		se.expand("h", "A", "C", "B");
+
+		se.addOperator("boolean", "eq", "%c = %v");
+		se.setWhereClause("a.eq.true");
+		se.expand("h", "A", "C", "B");
 //		System.out.println(se.getExpansion());
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getWhereSql());
-//		System.out.println(se.getWhereParameters());
+		System.out.println(se.getWhereSql());
+		System.out.println(se.getWhereParameters());
 
 		// se.setWhereClause("");
 		// se.expand("mvalue", "A", "D", "B");

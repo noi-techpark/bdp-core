@@ -76,36 +76,36 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		 * checks of their values or list items. These can be defined with Lambda
 		 * functions.
 		 */
-		se.addOperator("NULL", "eq", "is %s");
-		se.addOperator("NULL", "neq", "is not %s");
+		se.addOperator("NULL", "eq", "%c is %v");
+		se.addOperator("NULL", "neq", "%c is not %v");
 
-		se.addOperator("BOOLEAN", "eq", "= %s");
-		se.addOperator("BOOLEAN", "neq", "<> %s");
+		se.addOperator("BOOLEAN", "eq", "%c = %v");
+		se.addOperator("BOOLEAN", "neq", "%c <> %v");
 
-		se.addOperator("NUMBER", "eq", "= %s");
-		se.addOperator("NUMBER", "neq", "<> %s");
-		se.addOperator("NUMBER", "lt", "< %s");
-		se.addOperator("NUMBER", "gt", "> %s");
-		se.addOperator("NUMBER", "lteq", "=< %s");
-		se.addOperator("NUMBER", "gteq", ">= %s");
+		se.addOperator("NUMBER", "eq", "%c = %v");
+		se.addOperator("NUMBER", "neq", "%c <> %v");
+		se.addOperator("NUMBER", "lt", "%c < %v");
+		se.addOperator("NUMBER", "gt", "%c > %v");
+		se.addOperator("NUMBER", "lteq", "%c =< %v");
+		se.addOperator("NUMBER", "gteq", "%c >= %v");
 
-		se.addOperator("STRING", "eq", "= %s");
-		se.addOperator("STRING", "neq", "<> %s");
-		se.addOperator("STRING", "re", "~ %s");
-		se.addOperator("STRING", "ire", "~* %s");
-		se.addOperator("STRING", "nre", "!~ %s");
-		se.addOperator("STRING", "nire", "!~* %s");
+		se.addOperator("STRING", "eq", "%c = %v");
+		se.addOperator("STRING", "neq", "%c <> %v");
+		se.addOperator("STRING", "re", "%c ~ %v");
+		se.addOperator("STRING", "ire", "%c ~* %v");
+		se.addOperator("STRING", "nre", "%c !~ %v");
+		se.addOperator("STRING", "nire", "%c !~* %v");
 
-		se.addOperator("LIST", "in", "in (%s)", t -> {
+		se.addOperator("LIST", "in", "%c in (%v)", t -> {
 			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
-		se.addOperator("LIST", "nin", "not in (%s)", t -> {
+		se.addOperator("LIST", "nin", "%c not in (%v)", t -> {
 			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
 		});
-		se.addOperator("LIST", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
+		se.addOperator("LIST", "bbi", "%c && ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
-		se.addOperator("LIST", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
+		se.addOperator("LIST", "bbc", "%c @ ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 
