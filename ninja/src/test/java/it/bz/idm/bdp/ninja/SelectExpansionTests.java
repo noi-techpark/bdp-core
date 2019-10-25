@@ -221,17 +221,17 @@ public class SelectExpansionTests {
 		seMinimal.setWhereClause("a.eq.3");
 		seMinimal.expand("a", "A");
 		assertTrue(seMinimal.getUsedAliasesInWhere().containsKey("a"));
-		assertEquals("NUMBER", seMinimal.getUsedAliasesInWhere().get("a").getName());
-		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").getPayload("typedvalue") instanceof Integer);
+		assertEquals("NUMBER", seMinimal.getUsedAliasesInWhere().get("a").get(0).getName());
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(0).getPayload("typedvalue") instanceof Integer);
 
 		seMinimal.setWhereClause("a.in.(1,3.2,a,null)");
 		seMinimal.expand("a", "A");
 		assertTrue(seMinimal.getUsedAliasesInWhere().containsKey("a"));
-		assertEquals("LIST", seMinimal.getUsedAliasesInWhere().get("a").getName());
-		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[0]").getPayload("typedvalue") instanceof Integer);
-		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[1]").getPayload("typedvalue") instanceof Double);
-		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[2]").getPayload("typedvalue") instanceof String);
-		assertTrue(seMinimal.getUsedAliasesInWhere().get("a[3]").getPayload("typedvalue") == null);
+		assertEquals("LIST", seMinimal.getUsedAliasesInWhere().get("a").get(0).getName());
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(1).getPayload("typedvalue") instanceof Integer);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(2).getPayload("typedvalue") instanceof Double);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(3).getPayload("typedvalue") instanceof String);
+		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(4).getPayload("typedvalue") == null);
 	}
 
 	@Test

@@ -17,15 +17,25 @@
 - [Stations, Data Types and historical Measurements](#stations-data-types-and-historical-measurements)
   - [I want to get historical occupancy values of all parking lots from a certain period](#i-want-to-get-historical-occupancy-values-of-all-parking-lots-from-a-certain-period)
 - [Pagination](#pagination)
-- [Filtering](#filtering)
+- [Filtering with SELECT and WHERE](#filtering-with-select-and-where)
   - [I want to see only station names, data type names and the value of the measurement](#i-want-to-see-only-station-names-data-type-names-and-the-value-of-the-measurement)
   - [I want to see only parking stations within a bounding box of a map](#i-want-to-see-only-parking-stations-within-a-bounding-box-of-a-map)
   - [I want to see all information where the measured value is greater than 100 and the station origin is FAMAS](#i-want-to-see-all-information-where-the-measured-value-is-greater-than-100-and-the-station-origin-is-famas)
   - [I want to see all information where the station code starts with "me" or "rovereto"](#i-want-to-see-all-information-where-the-station-code-starts-with-me-or-rovereto)
+  - [I want active creative industry stations with their sector and website, but only if the have one](#i-want-active-creative-industry-stations-with-their-sector-and-website-but-only-if-the-have-one)
+  - [I want all creative industry station names, which do not have a sector assigned](#i-want-all-creative-industry-station-names-which-do-not-have-a-sector-assigned)
 - [Null values](#null-values)
 - [Representation](#representation)
 - [Authentication](#authentication)
   - [I want to retrieve protected measurements (closed data)](#i-want-to-retrieve-protected-measurements-closed-data)
+- [Additional Sample Queries](#additional-sample-queries)
+  - [show all echarging stations of bolzano](#show-all-echarging-stations-of-bolzano)
+  - [Show number of public, private and private with public access echarging stations](#show-number-of-public-private-and-private-with-public-access-echarging-stations)
+  - [Show the total number of plugs and how many are currently available](#show-the-total-number-of-plugs-and-how-many-are-currently-available)
+  - [Filter EchargingPlugs by voltage](#filter-echargingplugs-by-voltage)
+  - [Filter EchargingStations by payment method](#filter-echargingstations-by-payment-method)
+  - [Get all possible states of all echarging stations](#get-all-possible-states-of-all-echarging-stations)
+  - [Filter EchargingStations by state](#filter-echargingstations-by-state)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -123,26 +133,32 @@ prevent excessive response times.
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?limit=100&offset=300
 ```
 
-## Filtering
-
-Some JSON attributes can be selected, that is, all those which start with a
-table prefix. For instance, all station related fields start with `s`, all
-parent related fields with an `p`, measurements with an `m` and data types with
-an `t`. All other are generated JSON blocks, that cannot be selected yet.
+## Filtering with SELECT and WHERE
 
 It is possible to filter against JSON fields (columns in a database) with
-`select`, or per record (rows in a database) with `where`. The latter, is a
-conjunction (`and`) of all clauses. Also complex logic is possible, with nested
-`or(...)` and `and(...)` clauses.
+`select=alias,alias,alias,...`, or per record (rows in a database) with
+`where=filter,filter,filter,...`. The latter, is a conjunction (`and`) of all
+clauses. Also complex logic is possible, with nested `or(...)` and `and(...)`
+clauses, for instance `where=or(filter,filter,and(filter,filter))`.
 
-A `where` clause is a list of filter-triples, like `alias.operator.value_or_list`.
+**alias**
+An `alias` is a list of point-separated-fields, where each field corresponds
+to a step inside the JSON hierarchy. Internally, the first field represents the
+database column and all subsequent fields drill into the JSON hierarchy.
+For example, `metadata.municipality.cap` is an JSONB inside the database with a
+column `metadata` and a JSONB object called `municipality` which has a `cap`
+inside.
 
-**values_or_list**
-- `value`: Whatever you want, also a regular expression. However, you need to
-  escape `,`, `'` and `"` with a `\`. Use url-encoding, if your tool does not support
-  certain characters. Special values are `null`, numbers or an omitted value. Examples:
+**filter**
+A `filter` has the form `alias.operator.value_or_list`.
+
+**value_or_list**
+- `value`: Whatever you want, also a regular expression. Use double-quotes to
+  force string recognition. Alternatively, you can escape characters `,`, `'`
+  and `"` with a `\`. Use url-encoding, if your tool does not support certain
+  characters. Special values are `null`, numbers and omitted values. Examples:
   - `description.eq.null`, checks if a description is not set
-  - `description.eq.`, checks if a description is set, but the string has length 0
+  - `description.eq.`, checks if a description is a string of length 0
 - `list`: `(value,value,value)`
 
 **operator**
@@ -166,14 +182,17 @@ A `where` clause is a list of filter-triples, like `alias.operator.value_or_list
   Example: `name.nin.(Patrick,Rudi,Peter)`
 
 **logical operations**
-- `and(alias.operator.value_or_list,...)`: Conjunction of filters (can be nested)
-- `or(alias.operator.value_or_list,...)`: Disjunction of filters (can be nested)
+- `and(filter,filter,...)`: Conjunction of filters (can be nested)
+- `or(filter,filter,...)`: Disjunction of filters (can be nested)
 
 Multiple conditions possible as comma-separated-values.
 
 Example-syntax for `bbi` or `bbc` could be `coordinate.bbi.(11,46,12,47,4326)`, where
 the ordering inside the list is left-x, left-y, right-x, right-y and SRID
 (optional).
+
+NB: Currently it is not possible to distinguish between a JSON field containing `null`
+or a non-existing JSON field.
 
 
 ### I want to see only station names, data type names and the value of the measurement
@@ -210,6 +229,24 @@ We use a key-insensitive regular expression here:
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
 ```
+
+### I want active creative industry stations with their sector and website, but only if the have one
+
+We use a JSON selector and JSON filters here:
+```
+GET /flat/CreativeIndustry?where=sactive.eq.true,smetadata.website.neq.null,smetadata.website.ire."http"&select=sname,smetadata.sector,smetadata.website
+```
+
+We check not only for `smetadata.website` to be present, but also to start with `http` to be sure it
+is not a description telling us, that the website is currently under development or similar things.
+
+### I want all creative industry station names, which do not have a sector assigned
+
+We use a JSON selector and JSON filters here:
+```
+GET /flat/CreativeIndustry?where=smetadata.sector.eq.null&select=sname
+```
+
 
 ## Null values
 
@@ -293,4 +330,52 @@ example.
 ```sh
 curl -X GET "https://example.com/tree/VMS/*" \
      -H 'Authorization: Bearer header.payload.signature'
+```
+
+## Additional Sample Queries
+
+For better readability, we assume that all queries are configured as follows, if
+not otherwise stated: `shownull=false&distinct=true&limit=-1`.
+
+NB: We need to count results on application level, because the API does
+currently not support aggregation, like `count` and other statistical methods
+involving `grouping`.
+
+### show all echarging stations of bolzano
+```
+GET /flat/EChargingStation?where=sactive.eq.true,scoordinate.bbi.(11.27539,46.444913,11.432577,46.530384)
+```
+
+### Show number of public, private and private with public access echarging stations
+Since we want to count the results later, we need to set `distinct=false`.
+```
+GET /flat/EChargingStation?select=smetadata.accessType&where=sactive.eq.true&distinct=false
+```
+
+### Show the total number of plugs and how many are currently available
+This means that the measured value `mvalue` must be equal `1`.
+
+```
+GET /flat/EChargingPlug/*?select=scode&where=sactive.eq.true,tname.eq.echarging-plug-status,mvalue.eq.1
+```
+
+### Filter EchargingPlugs by voltage
+```
+GET /flat/EChargingPlug?where=sactive.eq.true
+```
+
+### Filter EchargingStations by payment method
+```
+GET /flat/EChargingStation?where=sactive.eq.true,smetadata.accessType.eq.PUBLIC
+```
+
+### Get all possible states of all echarging stations
+```
+GET /flat/EChargingStation?select=smetadata.state
+```
+
+### Filter EchargingStations by state
+For example filter against `ACTIVE` states.
+```
+GET /flat/EChargingPlug?where=sactive.eq.true,smetadata.state.eq.ACTIVE
 ```

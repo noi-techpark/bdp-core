@@ -187,6 +187,18 @@ public class Token {
 		return null;
 	}
 
+	public boolean hasOnlyChildrenOf(String childName) {
+		if (children.isEmpty()) {
+			return false;
+		}
+		for (Token child : children) {
+			if (! childName.equalsIgnoreCase(child.getName())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public void addPayload(String key, Object value) {
 		if (payload == null) {
 			payload = new HashMap<String, Object>();

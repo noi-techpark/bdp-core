@@ -51,7 +51,7 @@ public class QueryExecutor {
 	 * @return A list of (key, value) pairs
 	 */
 	public List<Map<String, Object>> build(final String sql) {
-		return npjt.query(sql, parameters, new ColumnMapRowMapper());
+		return npjt.query(sql, parameters, new RowMapperResultSetExtractor<>(new ColumnMapRowMapper()));
 	}
 
 	public <T> List<T> build(final String sql, Class<T> resultClass) {

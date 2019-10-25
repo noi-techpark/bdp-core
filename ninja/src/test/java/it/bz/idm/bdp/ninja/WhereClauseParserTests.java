@@ -24,11 +24,11 @@ public class WhereClauseParserTests {
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{NULL}}}", ast.format());
 
-		we.setInput("a.eq.1.and\\(33\\)");
+		we.setInput("a.eq.1\\.and\\(33\\)");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{STRING=1.and(33)}}}", ast.format());
 
-		we.setInput("a.eq.1.2");
+		we.setInput("a.eq.1\\.2");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=eq}{NUMBER=1.2}}}", ast.format());
 
@@ -36,11 +36,11 @@ public class WhereClauseParserTests {
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=bbi}LIST{{NUMBER=1}{NUMBER=2.3}{NUMBER=7.0000}}}}", ast.format());
 
-		we.setInput("a.ire..*\\,3");
+		we.setInput("a.ire.\\.*\\,3");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=a}{OP=ire}{STRING=.*,3}}}", ast.format());
 
-		we.setInput("scode.ire.\\(TRENTO|rovereto\\).*,mvalue.neq.0");
+		we.setInput("scode.ire.\\(TRENTO|rovereto\\)\\.*,mvalue.neq.0");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{STRING=(TRENTO|rovereto).*}}CLAUSE{{ALIAS=mvalue}{OP=neq}{NUMBER=0}}}", ast.format());
 	}
@@ -64,6 +64,10 @@ public class WhereClauseParserTests {
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}LIST{{STRING=TRENTO|rovereto}}}}", ast.format());
 
+		we.setInput("scode.ire.info@example\\.com");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{STRING=info@example.com}}}", ast.format());
+
 		we.setInput("scode.ire.(TRENTO|rovereto).*,mvalue.neq.0");
 		try {
 			ast = we.parse();
@@ -85,7 +89,7 @@ public class WhereClauseParserTests {
 			ast = we.parse();
 			fail("Exception expected; Syntax error at ( after and");
 		} catch (SimpleException e) {
-			assertEquals("PARSING ERROR: Syntax error at position 10 with character (: Characters ('\" must be escaped within a filter VALUE", e.getMessage());
+			assertEquals("PARSING ERROR: Syntax error at position 4 with character .: OPERATOR expected", e.getMessage());
 		}
 
 		we.setInput("or(scode.ire.TRENTO|rovere'to.*,mvalue.eq.0)");
@@ -96,4 +100,46 @@ public class WhereClauseParserTests {
 			assertEquals("PARSING ERROR: Syntax error at position 26 with character ': Characters ('\" must be escaped within a filter VALUE", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testJson() throws ParseException {
+		String input = "a.b.c.in.()";
+		WhereClauseParser we = new WhereClauseParser(input);
+		Token ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=a}{JSONSEL=b.c}{OP=in}LIST{{STRING=}}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.maxPower.gt.3.7");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=3.7}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.maxPower.gt.-3.7");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=-3.7}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.maxPower.gt.-.7");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=-.7}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.maxPower.gt.-2.");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=-2.}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.maxPower.gt.+2");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=+2}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.type.ire.\"what.*ever\"");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.type}{OP=ire}{STRING=what.*ever}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.type.ire.what.*ever");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.type.ire}{OP=what}{STRING=*ever}}}", ast.format());
+
+		we.setInput("smetadata.outlets.0.type.ire.what\\.*ever");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.type}{OP=ire}{STRING=what.*ever}}}", ast.format());
+	}
+
+
 }

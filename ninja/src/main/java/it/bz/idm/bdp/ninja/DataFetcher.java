@@ -126,10 +126,12 @@ public class DataFetcher {
 		query = QueryBuilder
 				.init(selectDouble, whereDouble, "station", "parent", "measurementdouble", "measurement", "datatype");
 
-		Token mvalueToken = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		// FIXME Consider all possibilities and build a query with both mvalue types if strings and numbers are present
+		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
 		boolean mvalueExists = mvalueToken != null;
 
-		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("number") || mvalueToken.getName().equalsIgnoreCase("null")) {
+		if (!mvalueExists || mvalueToken.is("number") || mvalueToken.is("null")) {
 			query.addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
@@ -156,11 +158,11 @@ public class DataFetcher {
 				 .expandWhere();
 		}
 
-		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("null")) {
+		if (!mvalueExists || mvalueToken.is("null")) {
 			query.addSql("union all");
 		}
 
-		if (!mvalueExists || mvalueToken.getName().equalsIgnoreCase("string") || mvalueToken.getName().equalsIgnoreCase("null")) {
+		if (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null")) {
 			query.reset(selectString, whereString, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
@@ -188,9 +190,9 @@ public class DataFetcher {
 				 .expandWhere();
 		}
 
-		if (mvalueExists && !mvalueToken.getName().equalsIgnoreCase("string")
-						 && !mvalueToken.getName().equalsIgnoreCase("number")
-						 && !mvalueToken.getName().equalsIgnoreCase("null")) {
+		if (mvalueExists && !mvalueToken.is("string")
+						 && !mvalueToken.is("number")
+						 && !mvalueToken.is("null")) {
 			throw new SimpleException(ErrorCode.WHERE_WRONG_DATA_TYPE, "mvalue", mvalueToken.getName());
 		}
 

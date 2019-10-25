@@ -78,6 +78,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class SelectExpansion {
 
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
+	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\._]+"; // Do not forget to update ErrorCode.ALIAS_INVALID
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND("Key '%s' does not exist"),
@@ -90,7 +91,8 @@ public class SelectExpansion {
 		WHERE_OPERATOR_NOT_FOUND("Syntax Error in WHERE clause: Operator '%s.<%s>' does not exist"),
 		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
-		EXPAND_INVALID_DATA("Provide valid alias and definition sets!");
+		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
+		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'");
 
 		private final String msg;
 
@@ -111,7 +113,7 @@ public class SelectExpansion {
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedJSONAliases = new TreeSet<String>();
 	private Set<String> usedJSONDefNames = new TreeSet<String>();
-	private Map<String, Token> usedJSONAliasesInWhere = new TreeMap<String, Token>();
+	private Map<String, List<Token>> usedJSONAliasesInWhere = new TreeMap<String, List<Token>>();
 	private Map<String, WhereClauseOperator> whereClauseOperatorMap = new TreeMap<String, WhereClauseOperator>();
 
 	private Map<String, Object> whereParameters = null;
@@ -305,6 +307,9 @@ public class SelectExpansion {
 		} else {
 			candidateAliases = new ArrayList<String>();
 			for (String alias : aliases) {
+				if (!alias.matches(ALIAS_VALIDATION)) {
+					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
+				}
 				int index = alias.indexOf('.');
 				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
 				if (!candidateAliases.contains(mainAlias)) {
@@ -338,11 +343,15 @@ public class SelectExpansion {
 
 				/* Look, if it is a JSON selector */
 				if (aliasToJSONPath.containsKey(alias)) {
-					StringJoiner sj = new StringJoiner(", ", "jsonb_build_object(", ") as ");
+					StringJoiner sj = new StringJoiner(", ");
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
-						sj.add(String.format("'%s', %s->'%s'", jsonSelector, def.getColumn(alias), jsonSelector));
+						sj.add(String.format("%s#>'{%s}' as \"%s.%s\"",
+											 def.getColumn(alias),
+											 jsonSelector.replace(".", ","),
+											 alias,
+											 jsonSelector));
 					}
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj + alias);
+					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj);
 				} else { /* Regular column */
 					String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
 					String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
@@ -360,7 +369,6 @@ public class SelectExpansion {
 							candidateAliases.add(subAlias);
 						}
 					}
-
 				}
 			}
 			curPos++;
@@ -386,6 +394,12 @@ public class SelectExpansion {
 
 	}
 
+	private void _addAliasesInWhere(final String alias, Token token) {
+		List<Token> tokens = usedJSONAliasesInWhere.getOrDefault(alias, new ArrayList<Token>());
+		tokens.add(token);
+		usedJSONAliasesInWhere.put(alias, tokens);
+	}
+
 	private void _expandWhere(String where) {
 		if (where == null || where.isEmpty()) {
 			whereSQL = null;
@@ -403,7 +417,7 @@ public class SelectExpansion {
 			throw e;
 		}
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sbFull = new StringBuilder();
 		whereParameters = new TreeMap<String, Object>();
 
 		whereAST.walker(new ConsumerExtended() {
@@ -422,7 +436,7 @@ public class SelectExpansion {
 				switch (t.getName()) {
 				case "AND":
 				case "OR":
-					sb.append("(");
+					sbFull.append("(");
 					context.push(new Context(t.getChildCount(), t.getName()));
 					log.debug("AND/OR" + context.getFirst());
 					break;
@@ -437,17 +451,32 @@ public class SelectExpansion {
 
 					usedJSONAliases.add(alias);
 					usedJSONDefNames.add(getAliasMap().get(alias));
-					if (usedJSONAliasesInWhere.containsKey(alias)) {
-						throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
-					}
-					usedJSONAliasesInWhere.put(alias, t.getChild(2));
+					Token jsonSel = t.getChild("JSONSEL");
+					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
+					_addAliasesInWhere(alias, clauseOrValueToken);
 
-					sb.append(column + " " + whereClauseItem(alias, operator, t.getChild(2)));
+					StringBuffer sbItem = new StringBuffer();
+					sbItem.append(column);
+					if (jsonSel != null) {
+						if (clauseOrValueToken.is("string")) {
+							sbItem.append("#>>");
+						} else {
+							sbItem.append("#>");
+						}
+						sbItem.append("'{" + jsonSel.getValue().replace(".", ",") + "}'");
+						if (clauseOrValueToken.is("number") || clauseOrValueToken.hasOnlyChildrenOf("number")) {
+							sbItem.insert(0, "(");
+							sbItem.append(")::double precision");
+						}
+					}
+					sbItem.append(" ");
+					sbItem.append(whereClauseItem(alias, operator, clauseOrValueToken));
+					sbFull.append(sbItem);
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
-						sb.append(" " + ctx.logicalOp + " ");
-				}
+						sbFull.append(" " + ctx.logicalOp + " ");
+					}
 					break;
 				}
 				return true;
@@ -458,14 +487,14 @@ public class SelectExpansion {
 				switch (t.getName()) {
 				case "AND":
 				case "OR":
-					sb.append(")");
+					sbFull.append(")");
 					context.pop();
 					ctx = context.peekFirst();
 					if (ctx == null)
 						break;
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
-						sb.append(" " + ctx.logicalOp + " ");
+						sbFull.append(" " + ctx.logicalOp + " ");
 					break;
 				}
 				return true;
@@ -473,13 +502,12 @@ public class SelectExpansion {
 
 		});
 
-		whereSQL = sb.toString();
+		whereSQL = sbFull.toString();
 	}
 
 	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
-		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap
-				.get(clauseValueToken.getName() + "_" + operator);
+		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
 		if (whereClauseOperator == null) {
 			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
 		}
@@ -490,14 +518,9 @@ public class SelectExpansion {
 		switch (clauseValueToken.getName()) {
 		case "LIST":
 			List<Object> listItems = new ArrayList<Object>();
-			int i = 0;
 			for (Token listItem : clauseValueToken.getChildren()) {
 				listItems.add(listItem.getPayload("typedvalue"));
-				if (usedJSONAliasesInWhere.containsKey(alias + "[" + i + "]")) {
-					throw new SimpleException(ErrorCode.WHERE_ALIAS_ALREADY_EXISTS, alias);
-				}
-				usedJSONAliasesInWhere.put(alias + "[" + i + "]", listItem);
-				i++;
+				_addAliasesInWhere(alias, listItem); //XXX Needed?
 			}
 			value = listItems;
 			break;
@@ -543,7 +566,7 @@ public class SelectExpansion {
 		return new ArrayList<String>(usedJSONAliases);
 	}
 
-	public Map<String, Token> getUsedAliasesInWhere() {
+	public Map<String, List<Token>> getUsedAliasesInWhere() {
 		if (dirty) {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
