@@ -63,16 +63,34 @@ public class SelectExpansionTests {
 		seMinimal.addOperator("string", "ire", "%c ~* %v");
 		seMinimal.addOperator("string", "nre", "%c !~ %v");
 		seMinimal.addOperator("string", "nire", "%c !~* %v");
-		seMinimal.addOperator("list", "in", "%c in (%v)", t -> {
+		seMinimal.addOperator("list/number", "in", "%c in (%v)", t -> {
 			return !(t.getChildCount() == 1 && (
 					t.getChild("string") != null && t.getChild("string").getValue() == null ||
 					t.getChild("number") != null && t.getChild("number").getValue() == null
 					));
 		});
-		seMinimal.addOperator("list", "bbi", "%c && ST_MakeEnvelope(%v)", t -> {
+		seMinimal.addOperator("list/null", "in", "%c in (%v)", t -> {
+			return !(t.getChildCount() == 1 && (
+					t.getChild("string") != null && t.getChild("string").getValue() == null ||
+					t.getChild("number") != null && t.getChild("number").getValue() == null
+					));
+		});
+		seMinimal.addOperator("list/string", "in", "%c in (%v)", t -> {
+			return !(t.getChildCount() == 1 && (
+					t.getChild("string") != null && t.getChild("string").getValue() == null ||
+					t.getChild("number") != null && t.getChild("number").getValue() == null
+					));
+		});
+		seMinimal.addOperator("list/mixed", "in", "%c in (%v)", t -> {
+			return !(t.getChildCount() == 1 && (
+					t.getChild("string") != null && t.getChild("string").getValue() == null ||
+					t.getChild("number") != null && t.getChild("number").getValue() == null
+					));
+		});
+		seMinimal.addOperator("list/number", "bbi", "%c && ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
-		seMinimal.addOperator("list", "bbc", "%c @ ST_MakeEnvelope(%v)", t -> {
+		seMinimal.addOperator("list/number", "bbc", "%c @ ST_MakeEnvelope(%v)", t -> {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 

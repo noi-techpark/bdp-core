@@ -126,7 +126,7 @@ public class SelectExpansion {
 	}
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
-		String opName = tokenType.toUpperCase() + "_" + operator;
+		String opName = tokenType.toUpperCase() + "/" + operator.toUpperCase();
 		whereClauseOperatorMap.put(opName, new WhereClauseOperator(opName, sqlSnippet, check));
 	}
 
@@ -454,22 +454,7 @@ public class SelectExpansion {
 					Token jsonSel = t.getChild("JSONSEL");
 					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
 					_addAliasesInWhere(alias, clauseOrValueToken);
-
-					StringBuffer sbItem = new StringBuffer();
-					sbItem.append(column);
-					if (jsonSel != null) {
-						if (clauseOrValueToken.is("string")) {
-							sbItem.append("#>>");
-						} else {
-							sbItem.append("#>");
-						}
-						sbItem.append("'{" + jsonSel.getValue().replace(".", ",") + "}'");
-						if (clauseOrValueToken.is("number") || clauseOrValueToken.hasOnlyChildrenOf("number")) {
-							sbItem.insert(0, "(");
-							sbItem.append(")::double precision");
-						}
-					}
-					sbFull.append(whereClauseItem(column, alias, operator, clauseOrValueToken));
+					sbFull.append(whereClauseItem(column, alias, operator, clauseOrValueToken, jsonSel));
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
@@ -503,11 +488,23 @@ public class SelectExpansion {
 		whereSQL = sbFull.toString();
 	}
 
-	private String whereClauseItem(String column, String alias, String operator, Token clauseValueToken) {
+	private String whereClauseItem(String column, String alias, String operator, Token clauseValueToken, Token jsonSel) {
+		operator = operator.toUpperCase();
+
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
-		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
+		StringJoiner operatorID = new StringJoiner("/");
+		if (jsonSel != null) {
+			operatorID.add("JSON");
+		}
+		operatorID.add(clauseValueToken.getName());
+		String listElementTypes = clauseValueToken.getChildrenType();
+		if (listElementTypes != null) {
+			operatorID.add(listElementTypes.toUpperCase());
+		}
+
+		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(operatorID.toString() + "/" + operator);
 		if (whereClauseOperator == null) {
-			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
+			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, operatorID);
 		}
 
 		/* Build the value, or error out if the value type does not exist */
@@ -550,8 +547,37 @@ public class SelectExpansion {
 		}
 
 		value = (value == null) ? "null" : ":" + paramName;
+		String sqlSnippet = whereClauseOperator.getSqlSnippet();
+		StringBuffer result = new StringBuffer();
+		int i = 0;
+		while(i < sqlSnippet.length()) {
+		   char c = sqlSnippet.charAt(i);
+		   if (c == '%' && i < sqlSnippet.length() - 1) {
+			   switch (sqlSnippet.charAt(i + 1)) {
+			   case 'v':
+				   result.append(value);
+				   i++;
+				   break;
+			   case 'c':
+				   result.append(column);
+				   i++;
+				   break;
+			   case 'j':
+				   result.append(jsonSel.getValue().replace(".", ","));
+				   i++;
+				   break;
+			   case '%':
+				   result.append('%');
+				   i++;
+				   break;
+			   }
+		   } else {
+			   result.append(c);
+		   }
+		   i++;
+		}
 
-		return whereClauseOperator.getSqlSnippet().replaceAll("%v", value.toString()).replaceAll("%c", column);
+		return result.toString();
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -773,9 +799,17 @@ public class SelectExpansion {
 
 //		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
 
-		se.addOperator("boolean", "eq", "%c = %v");
-		se.setWhereClause("a.eq.true");
+//		se.addOperator("boolean", "eq", "%c = %v");
+//		se.setWhereClause("a.eq.true");
+//		se.expand("h", "A", "C", "B");
+
+		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
+		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
+		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
+//		se.setWhereClause("a.b.c.eq.-.2");
+		se.setWhereClause("a.b.c.eq.1");
 		se.expand("h", "A", "C", "B");
+
 //		System.out.println(se.getExpansion());
 //		System.out.println(se.getUsedAliases());
 //		System.out.println(se.getUsedDefNames());
