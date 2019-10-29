@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import it.bz.idm.bdp.ninja.config.SelectExpansionConfig;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion.ErrorCode;
 import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
@@ -19,6 +20,7 @@ public class SelectExpansionTests {
 	SelectExpansion seFlat;
 	SelectExpansion seNestedBig;
 	SelectExpansion seMinimal;
+	SelectExpansion seOpenDataHub;
 
 	@Before
 	public void setup() {
@@ -104,6 +106,8 @@ public class SelectExpansionTests {
 
 		seFlat.addOperator("null", "eq", "%c is %v");
 		seFlat.addOperator("number", "eq", "%c = %v");
+
+		seOpenDataHub = new SelectExpansionConfig().getSelectExpansion();
 	}
 
 	@Test
@@ -123,7 +127,22 @@ public class SelectExpansionTests {
 			assertEquals(ErrorCode.KEY_NOT_INSIDE_DEFLIST, e.getId());
 			assertEquals("x", e.getData().get("alias"));
 		}
+	}
 
+	@Test
+	public void testOpenDataHubConfigJSON() {
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.()");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(null)");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(null,null)");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(null,x,null)");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(1,2,3)");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(1,hallo)");
+		seOpenDataHub.expand("smetadata", "station");
 	}
 
 	@Test
