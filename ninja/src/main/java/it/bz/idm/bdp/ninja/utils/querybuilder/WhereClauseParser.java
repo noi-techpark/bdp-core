@@ -148,12 +148,12 @@ public class WhereClauseParser extends MiniParser {
 		});
 
 		Object typedValue = null;
-		if (res.valueIs(null)) {
-			res.setName("string");
-			res.setValue("");
-		} else if (quoted) {
+		if (quoted) {
 			expectConsume('"');
 			res.setName("string");
+		} else if (res.valueIs(null)) {
+			res.setName("string");
+			res.setValue("");
 		} else if (res.valueIs("null")) {
 			res.setName("null");
 			res.setValue(null);

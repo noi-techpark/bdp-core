@@ -130,7 +130,7 @@ public class SelectExpansionTests {
 	}
 
 	@Test
-	public void testOpenDataHubConfigJSON() {
+	public void testOpenDataHubConfigJSONList() {
 		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.()");
 		seOpenDataHub.expand("smetadata", "station");
 		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(null)");
@@ -142,6 +142,22 @@ public class SelectExpansionTests {
 		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(1,2,3)");
 		seOpenDataHub.expand("smetadata", "station");
 		seOpenDataHub.setWhereClause("smetadata.aa.bbb.in.(1,hallo)");
+		seOpenDataHub.expand("smetadata", "station");
+	}
+
+	@Test
+	public void testOpenDataHubConfigJSON() {
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.\"\"");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.null");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.-1");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.hallo");
+		seOpenDataHub.expand("smetadata", "station");
+		seOpenDataHub.setWhereClause("smetadata.aa.bbb.eq.\".......\"");
 		seOpenDataHub.expand("smetadata", "station");
 	}
 

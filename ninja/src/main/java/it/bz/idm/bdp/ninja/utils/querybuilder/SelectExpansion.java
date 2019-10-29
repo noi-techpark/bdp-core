@@ -803,11 +803,12 @@ public class SelectExpansion {
 //		se.setWhereClause("a.eq.true");
 //		se.expand("h", "A", "C", "B");
 
+		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
 		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
 		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
 		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
 //		se.setWhereClause("a.b.c.eq.-.2");
-		se.setWhereClause("a.b.c.eq.1");
+		se.setWhereClause("a.b.c.eq.\"\"");
 		se.expand("h", "A", "C", "B");
 
 //		System.out.println(se.getExpansion());
