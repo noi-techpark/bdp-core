@@ -26,7 +26,6 @@ pipeline {
     stages {
         stage('Configure') {
             steps {
-                // Configure NINJA - API v2
                 sh '''
                     cp "${NINJA_ROOT_PATH}/src/main/resources/application.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/application.properties"
                     sed -i -e "s%\\(logging.file\\s*=\\).*\\$%\\1${NINJA_LOGGING_FILE}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
