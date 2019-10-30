@@ -36,7 +36,6 @@ pipeline {
                     echo "    </servers>" >> ~/.m2/settings.xml
                     echo "</settings>" >> ~/.m2/settings.xml
 
-                    // Configure NINJA - API v2
                     cp "${NINJA_ROOT_PATH}/src/main/resources/application.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/application.properties"
                     sed -i -e "s%\\(logging.file\\s*=\\).*\\$%\\1${NINJA_LOGGING_FILE}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
