@@ -92,7 +92,8 @@ public class SelectExpansion {
 		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
-		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'");
+		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'"),
+		SELECT_FUNC_NOJSON("It is currently not possible to use GROUPING with JSON fields. Remove '%s' from your SELECT, if you want to use functions.");
 
 		private final String msg;
 
@@ -319,6 +320,9 @@ public class SelectExpansion {
 					alias = aliasOrFunc.substring(idx + 1, aliasOrFunc.length() - 1);
 				} else {
 					alias = aliasOrFunc;
+					if (alias.contains(".")) {
+						throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON, alias);
+					}
 					groupByCandidates.add(alias);
 				}
 				if (!alias.matches(ALIAS_VALIDATION)) {
@@ -364,13 +368,11 @@ public class SelectExpansion {
 				if (aliasToJSONPath.containsKey(alias)) {
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
 						List<String> functions = functionsAndGroups.get(alias + "." + jsonSelector);
-						if (functions == null) {
+						if (functions == null ) {
 							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.getColumn(alias), jsonSelector.replace(".", ","), alias, jsonSelector));
 						} else {
-							for (String func : functions) {
-								sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.getColumn(alias), jsonSelector.replace(".", ","), func, alias, jsonSelector));
-							}
-							functionsAndGroups.put(alias + "." + jsonSelector, null);
+							String func = functions.remove(0);
+							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.getColumn(alias), jsonSelector.replace(".", ","), func, alias, jsonSelector));
 						}
 					}
 				} else { /* Regular column */
