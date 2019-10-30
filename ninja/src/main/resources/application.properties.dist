@@ -5,6 +5,7 @@ server.port = 8081
 logging.level.root = INFO
 logging.level.org.springframework.jdbc.core = TRACE
 logging.level.it.bz.idm.bdp.ninja = INFO
+logging.file=ninja.log
 
 # Compression
 server.compression.enabled = true
