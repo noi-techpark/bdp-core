@@ -3,6 +3,7 @@ package it.bz.idm.bdp.ninja.utils.querybuilder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -272,6 +273,18 @@ public class QueryBuilder {
 		addSqlIfNotNull(" and " + sqlWhere, sqlWhere);
 		if (se.getWhereParameters() != null) {
 			parameters.putAll(se.getWhereParameters());
+		}
+		return this;
+	}
+
+	public QueryBuilder expandGroupBy() {
+		List<String> groupByColumns = se.getGroupByColumns();
+		if (! groupByColumns.isEmpty()) {
+			StringJoiner sj = new StringJoiner(",");
+			for (String col : groupByColumns) {
+				sj.add(se.getDefinitionByAlias(col).getColumn(col)); //FIXME is this not double circular?
+			}
+			addSql("group by " + sj);
 		}
 		return this;
 	}

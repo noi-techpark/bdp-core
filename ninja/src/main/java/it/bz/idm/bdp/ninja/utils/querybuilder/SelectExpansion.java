@@ -112,6 +112,8 @@ public class SelectExpansion {
 	private Map<String, String> pointers = new TreeMap<String, String>();
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedJSONAliases = new TreeSet<String>();
+	private Map<String, List<String>> functionsAndGroups = new TreeMap<String, List<String>>();
+	private List<String> groupByCandidates = new ArrayList<String>();
 	private Set<String> usedJSONDefNames = new TreeSet<String>();
 	private Map<String, List<Token>> usedJSONAliasesInWhere = new TreeMap<String, List<Token>>();
 	private Map<String, WhereClauseOperator> whereClauseOperatorMap = new TreeMap<String, WhereClauseOperator>();
@@ -295,6 +297,8 @@ public class SelectExpansion {
 		usedJSONDefNames.clear();
 		expandedSelects.clear();
 		usedJSONAliasesInWhere.clear();
+		functionsAndGroups.clear();
+		groupByCandidates.clear();
 
 		/*
 		 * We cannot use a HashSet here, because we need a get by position within the while loop.
@@ -306,10 +310,21 @@ public class SelectExpansion {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
 		} else {
 			candidateAliases = new ArrayList<String>();
-			for (String alias : aliases) {
+			for (String aliasOrFunc : aliases) {
+				String func = null;
+				String alias = null;
+				if (aliasOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
+					int idx = aliasOrFunc.indexOf('(');
+					func = aliasOrFunc.substring(0, idx);
+					alias = aliasOrFunc.substring(idx + 1, aliasOrFunc.length() - 1);
+				} else {
+					alias = aliasOrFunc;
+					groupByCandidates.add(alias);
+				}
 				if (!alias.matches(ALIAS_VALIDATION)) {
 					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
 				}
+				_addFunctions(alias, func);
 				int index = alias.indexOf('.');
 				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
 				if (!candidateAliases.contains(mainAlias)) {
@@ -341,24 +356,35 @@ public class SelectExpansion {
 
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
 
+				String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
+				String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+				StringJoiner sj = new StringJoiner(", ");
+
 				/* Look, if it is a JSON selector */
 				if (aliasToJSONPath.containsKey(alias)) {
-					StringJoiner sj = new StringJoiner(", ");
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
-						sj.add(String.format("%s#>'{%s}' as \"%s.%s\"",
-											 def.getColumn(alias),
-											 jsonSelector.replace(".", ","),
-											 alias,
-											 jsonSelector));
+						List<String> functions = functionsAndGroups.get(alias + "." + jsonSelector);
+						if (functions == null) {
+							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.getColumn(alias), jsonSelector.replace(".", ","), alias, jsonSelector));
+						} else {
+							for (String func : functions) {
+								sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.getColumn(alias), jsonSelector.replace(".", ","), func, alias, jsonSelector));
+							}
+							functionsAndGroups.put(alias + "." + jsonSelector, null);
+						}
 					}
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj);
 				} else { /* Regular column */
-					String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
-					String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
-					String middle = def.getColumn(alias) + " as " + alias;
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + middle + after);
+					List<String> functions = functionsAndGroups.get(alias);
+					if (functions == null) {
+						sj.add(String.format("%s as %s", def.getColumn(alias), alias));
+					} else {
+						for (String func : functions) {
+							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, def.getColumn(alias), func, alias));
+						}
+						functionsAndGroups.put(alias, null);
+					}
 				}
-
+				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else {
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
@@ -398,6 +424,19 @@ public class SelectExpansion {
 		List<Token> tokens = usedJSONAliasesInWhere.getOrDefault(alias, new ArrayList<Token>());
 		tokens.add(token);
 		usedJSONAliasesInWhere.put(alias, tokens);
+	}
+
+	private void _addFunctions(final String alias, String func) {
+		if (func == null || func.isEmpty()) {
+			return;
+		}
+		List<String> functions = functionsAndGroups.getOrDefault(alias, new ArrayList<String>());
+		functions.add(func);
+		functionsAndGroups.put(alias, functions);
+	}
+
+	public boolean hasFunctions() {
+		return functionsAndGroups.size() > 0;
 	}
 
 	private void _expandWhere(String where) {
@@ -589,6 +628,13 @@ public class SelectExpansion {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return new ArrayList<String>(usedJSONAliases);
+	}
+
+	public List<String> getGroupByColumns() {
+		if (dirty) {
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
+		}
+		return groupByCandidates;
 	}
 
 	public Map<String, List<Token>> getUsedAliasesInWhere() {
@@ -803,19 +849,21 @@ public class SelectExpansion {
 //		se.setWhereClause("a.eq.true");
 //		se.expand("h", "A", "C", "B");
 
-		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
-		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
-		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
-		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
+//		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
+//		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
+//		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
+//		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
 //		se.setWhereClause("a.b.c.eq.-.2");
-		se.setWhereClause("a.b.c.eq.\"\"");
-		se.expand("h", "A", "C", "B");
+//		se.setWhereClause("a.b.c.eq.\"\"");
+//		se.expand("min(h.a.b),max(h.a.b),h.a,h", "A", "C", "B");
+		se.expand("min(h.a),max(h.a),min(x),h.a,h.a,count(h.a),y,a.b.c.d,x", "A", "C", "B");
 
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 		System.out.println(se.getWhereParameters());
+		System.out.println(se.getGroupByColumns());
 
 		// se.setWhereClause("");
 		// se.expand("mvalue", "A", "D", "B");
