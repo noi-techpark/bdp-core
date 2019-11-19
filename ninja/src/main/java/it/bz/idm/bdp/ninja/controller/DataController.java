@@ -54,7 +54,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
  * @author Peter Moser
  */
 @RestController
-@RequestMapping(value = "api")
+@RequestMapping(value = "api/v2")
 @Api(value = "Data", produces = "application/json")
 public class DataController {
 
