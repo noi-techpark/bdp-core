@@ -92,7 +92,8 @@ public class SelectExpansion {
 		WHERE_SYNTAX_ERROR("Syntax Error in WHERE clause: %s"),
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
-		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'");
+		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'"),
+		SELECT_FUNC_NOJSON("It is currently not possible to use GROUPING with JSON fields. Remove '%s' from your SELECT, if you want to use functions.");
 
 		private final String msg;
 
@@ -112,6 +113,8 @@ public class SelectExpansion {
 	private Map<String, String> pointers = new TreeMap<String, String>();
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedJSONAliases = new TreeSet<String>();
+	private Map<String, List<String>> functionsAndGroups = new TreeMap<String, List<String>>();
+	private List<String> groupByCandidates = new ArrayList<String>();
 	private Set<String> usedJSONDefNames = new TreeSet<String>();
 	private Map<String, List<Token>> usedJSONAliasesInWhere = new TreeMap<String, List<Token>>();
 	private Map<String, WhereClauseOperator> whereClauseOperatorMap = new TreeMap<String, WhereClauseOperator>();
@@ -126,7 +129,7 @@ public class SelectExpansion {
 	}
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet, Consumer check) {
-		String opName = tokenType.toUpperCase() + "_" + operator;
+		String opName = tokenType.toUpperCase() + "/" + operator.toUpperCase();
 		whereClauseOperatorMap.put(opName, new WhereClauseOperator(opName, sqlSnippet, check));
 	}
 
@@ -295,6 +298,8 @@ public class SelectExpansion {
 		usedJSONDefNames.clear();
 		expandedSelects.clear();
 		usedJSONAliasesInWhere.clear();
+		functionsAndGroups.clear();
+		groupByCandidates.clear();
 
 		/*
 		 * We cannot use a HashSet here, because we need a get by position within the while loop.
@@ -306,10 +311,24 @@ public class SelectExpansion {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
 		} else {
 			candidateAliases = new ArrayList<String>();
-			for (String alias : aliases) {
+			for (String aliasOrFunc : aliases) {
+				String func = null;
+				String alias = null;
+				if (aliasOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
+					int idx = aliasOrFunc.indexOf('(');
+					func = aliasOrFunc.substring(0, idx);
+					alias = aliasOrFunc.substring(idx + 1, aliasOrFunc.length() - 1);
+				} else {
+					alias = aliasOrFunc;
+					if (alias.contains(".")) {
+						throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON, alias);
+					}
+					groupByCandidates.add(alias);
+				}
 				if (!alias.matches(ALIAS_VALIDATION)) {
 					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
 				}
+				_addFunctions(alias, func);
 				int index = alias.indexOf('.');
 				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
 				if (!candidateAliases.contains(mainAlias)) {
@@ -341,24 +360,33 @@ public class SelectExpansion {
 
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
 
+				String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
+				String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+				StringJoiner sj = new StringJoiner(", ");
+
 				/* Look, if it is a JSON selector */
 				if (aliasToJSONPath.containsKey(alias)) {
-					StringJoiner sj = new StringJoiner(", ");
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
-						sj.add(String.format("%s#>'{%s}' as \"%s.%s\"",
-											 def.getColumn(alias),
-											 jsonSelector.replace(".", ","),
-											 alias,
-											 jsonSelector));
+						List<String> functions = functionsAndGroups.get(alias + "." + jsonSelector);
+						if (functions == null ) {
+							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.getColumn(alias), jsonSelector.replace(".", ","), alias, jsonSelector));
+						} else {
+							String func = functions.remove(0);
+							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.getColumn(alias), jsonSelector.replace(".", ","), func, alias, jsonSelector));
+						}
 					}
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + sj);
 				} else { /* Regular column */
-					String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
-					String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
-					String middle = def.getColumn(alias) + " as " + alias;
-					expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + middle + after);
+					List<String> functions = functionsAndGroups.get(alias);
+					if (functions == null) {
+						sj.add(String.format("%s as %s", def.getColumn(alias), alias));
+					} else {
+						for (String func : functions) {
+							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, def.getColumn(alias), func, alias));
+						}
+						functionsAndGroups.put(alias, null);
+					}
 				}
-
+				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else {
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
@@ -398,6 +426,19 @@ public class SelectExpansion {
 		List<Token> tokens = usedJSONAliasesInWhere.getOrDefault(alias, new ArrayList<Token>());
 		tokens.add(token);
 		usedJSONAliasesInWhere.put(alias, tokens);
+	}
+
+	private void _addFunctions(final String alias, String func) {
+		if (func == null || func.isEmpty()) {
+			return;
+		}
+		List<String> functions = functionsAndGroups.getOrDefault(alias, new ArrayList<String>());
+		functions.add(func);
+		functionsAndGroups.put(alias, functions);
+	}
+
+	public boolean hasFunctions() {
+		return functionsAndGroups.size() > 0;
 	}
 
 	private void _expandWhere(String where) {
@@ -454,24 +495,7 @@ public class SelectExpansion {
 					Token jsonSel = t.getChild("JSONSEL");
 					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
 					_addAliasesInWhere(alias, clauseOrValueToken);
-
-					StringBuffer sbItem = new StringBuffer();
-					sbItem.append(column);
-					if (jsonSel != null) {
-						if (clauseOrValueToken.is("string")) {
-							sbItem.append("#>>");
-						} else {
-							sbItem.append("#>");
-						}
-						sbItem.append("'{" + jsonSel.getValue().replace(".", ",") + "}'");
-						if (clauseOrValueToken.is("number") || clauseOrValueToken.hasOnlyChildrenOf("number")) {
-							sbItem.insert(0, "(");
-							sbItem.append(")::double precision");
-						}
-					}
-					sbItem.append(" ");
-					sbItem.append(whereClauseItem(alias, operator, clauseOrValueToken));
-					sbFull.append(sbItem);
+					sbFull.append(whereClauseItem(column, alias, operator, clauseOrValueToken, jsonSel));
 					ctx = context.getFirst();
 					ctx.clauseCnt--;
 					if (ctx.clauseCnt > 0)
@@ -505,11 +529,23 @@ public class SelectExpansion {
 		whereSQL = sbFull.toString();
 	}
 
-	private String whereClauseItem(String alias, String operator, Token clauseValueToken) {
+	private String whereClauseItem(String column, String alias, String operator, Token clauseValueToken, Token jsonSel) {
+		operator = operator.toUpperCase();
+
 		/* Search for a definition of this operator for a the given value input type (list, null or values) */
-		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(clauseValueToken.getName() + "_" + operator);
+		StringJoiner operatorID = new StringJoiner("/");
+		if (jsonSel != null) {
+			operatorID.add("JSON");
+		}
+		operatorID.add(clauseValueToken.getName());
+		String listElementTypes = clauseValueToken.getChildrenType();
+		if (listElementTypes != null) {
+			operatorID.add(listElementTypes.toUpperCase());
+		}
+
+		WhereClauseOperator whereClauseOperator = whereClauseOperatorMap.get(operatorID.toString() + "/" + operator);
 		if (whereClauseOperator == null) {
-			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, clauseValueToken.getName());
+			throw new SimpleException(ErrorCode.WHERE_OPERATOR_NOT_FOUND, operator, operatorID);
 		}
 
 		/* Build the value, or error out if the value type does not exist */
@@ -547,12 +583,42 @@ public class SelectExpansion {
 		 */
 		if (whereClauseOperator.getOperatorCheck() != null) {
 			if (!whereClauseOperator.getOperatorCheck().middle(clauseValueToken)) {
-				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(),
-						value);
+				throw new SimpleException(ErrorCode.WHERE_ALIAS_VALUE_ERROR, operator, clauseValueToken.getName(), value);
 			}
 		}
 
-		return String.format(whereClauseOperator.getSqlSnippet(), value == null ? "null" : ":" + paramName);
+		value = (value == null) ? "null" : ":" + paramName;
+		String sqlSnippet = whereClauseOperator.getSqlSnippet();
+		StringBuffer result = new StringBuffer();
+		int i = 0;
+		while(i < sqlSnippet.length()) {
+		   char c = sqlSnippet.charAt(i);
+		   if (c == '%' && i < sqlSnippet.length() - 1) {
+			   switch (sqlSnippet.charAt(i + 1)) {
+			   case 'v':
+				   result.append(value);
+				   i++;
+				   break;
+			   case 'c':
+				   result.append(column);
+				   i++;
+				   break;
+			   case 'j':
+				   result.append(jsonSel.getValue().replace(".", ","));
+				   i++;
+				   break;
+			   case '%':
+				   result.append('%');
+				   i++;
+				   break;
+			   }
+		   } else {
+			   result.append(c);
+		   }
+		   i++;
+		}
+
+		return result.toString();
 	}
 
 	public void expand(final String aliases, String... defNames) {
@@ -564,6 +630,13 @@ public class SelectExpansion {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
 		return new ArrayList<String>(usedJSONAliases);
+	}
+
+	public List<String> getGroupByColumns() {
+		if (dirty) {
+			throw new SimpleException(ErrorCode.DIRTY_STATE);
+		}
+		return groupByCandidates;
 	}
 
 	public Map<String, List<Token>> getUsedAliasesInWhere() {
@@ -761,25 +834,38 @@ public class SelectExpansion {
 		// System.out.println(se.getUsedAliases());
 		// System.out.println(se.getUsedDefNames());
 		//
-		se.addOperator("number", "gt", "> %s");
-		se.addOperator("string", "eq", "= %s");
-		se.addOperator("string", "neq", "<> %s");
-		se.addOperator("number", "eq", "= %s");
-		se.addOperator("boolean", "eq", "= %s");
-		se.addOperator("number", "neq", "<> %s");
-		se.addOperator("null", "eq", "is null");
-		se.addOperator("null", "neq", "is not null");
-		se.addOperator("list", "in", "in (%s)");
-		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+//		se.addOperator("number", "gt", "> %s");
+//		se.addOperator("string", "eq", "= %s");
+//		se.addOperator("string", "neq", "<> %s");
+//		se.addOperator("number", "eq", "= %s");
+//		se.addOperator("boolean", "eq", "= %s");
+//		se.addOperator("number", "neq", "<> %s");
+//		se.addOperator("null", "eq", "is null");
+//		se.addOperator("null", "neq", "is not null");
+//		se.addOperator("list", "in", "in (%s)");
+//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
 
 //		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-//		// se.setWhereClause("a.eq.true");
+
+//		se.addOperator("boolean", "eq", "%c = %v");
+//		se.setWhereClause("a.eq.true");
 //		se.expand("h", "A", "C", "B");
-//		System.out.println(se.getExpansion());
-//		System.out.println(se.getUsedAliases());
-//		System.out.println(se.getUsedDefNames());
-//		System.out.println(se.getWhereSql());
-//		System.out.println(se.getWhereParameters());
+
+//		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
+//		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
+//		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
+//		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
+//		se.setWhereClause("a.b.c.eq.-.2");
+//		se.setWhereClause("a.b.c.eq.\"\"");
+//		se.expand("min(h.a.b),max(h.a.b),h.a,h", "A", "C", "B");
+		se.expand("min(h.a),max(h.a),min(x),h.a,h.a,count(h.a),y,a.b.c.d,x", "A", "C", "B");
+
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+		System.out.println(se.getWhereSql());
+		System.out.println(se.getWhereParameters());
+		System.out.println(se.getGroupByColumns());
 
 		// se.setWhereClause("");
 		// se.expand("mvalue", "A", "D", "B");

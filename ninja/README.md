@@ -194,6 +194,20 @@ the ordering inside the list is left-x, left-y, right-x, right-y and SRID
 NB: Currently it is not possible to distinguish between a JSON field containing `null`
 or a non-existing JSON field.
 
+## Functions / Aggregation / Grouping
+You can use any SQL function within **select**, which takes only a single
+numeric value. All selected aliases, that are not within a function are used for
+grouping.
+
+Example: I want to have the `min`, `max`, `avg` and `count` of all data types of
+e-charging stations.
+
+```
+GET /flat/EChargingStation/*?select=tname,min(mvalue),max(mvalue),avg(mvalue),count(mvalue)
+```
+
+NB: Currently only numeric functions are possible, we will not select anything
+from our string measurements.
 
 ### I want to see only station names, data type names and the value of the measurement
 ```

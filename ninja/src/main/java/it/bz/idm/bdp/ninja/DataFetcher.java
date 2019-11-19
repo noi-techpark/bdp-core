@@ -70,6 +70,7 @@ public class DataFetcher {
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.expandWhere()
+				.expandGroupBy()
 				.addSqlIf("order by _stationtype, _stationcode", !flat)
 				.addLimit(limit)
 				.addOffset(offset);
@@ -130,6 +131,7 @@ public class DataFetcher {
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
 		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
 		boolean mvalueExists = mvalueToken != null;
+		boolean hasFunctions = query.getSelectExpansion().hasFunctions();
 
 		if (!mvalueExists || mvalueToken.is("number") || mvalueToken.is("null")) {
 			query.addSql("select")
@@ -155,14 +157,15 @@ public class DataFetcher {
 				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
 				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
-				 .expandWhere();
+				 .expandWhere()
+				 .expandGroupBy();
 		}
 
-		if (!mvalueExists || mvalueToken.is("null")) {
+		if (!hasFunctions && (!mvalueExists || mvalueToken.is("null"))) {
 			query.addSql("union all");
 		}
 
-		if (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null")) {
+		if (!hasFunctions && (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null"))) {
 			query.reset(selectString, whereString, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
@@ -187,7 +190,8 @@ public class DataFetcher {
 				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
 				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
-				 .expandWhere();
+				 .expandWhere()
+				 .expandGroupBy();
 		}
 
 		if (mvalueExists && !mvalueToken.is("string")

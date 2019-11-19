@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
 
-public class NominatimLookupTest {
+public class NominatimLookupIT {
 
 	private NominatimLocationLookupUtil util = new NominatimLocationLookupUtil();
 

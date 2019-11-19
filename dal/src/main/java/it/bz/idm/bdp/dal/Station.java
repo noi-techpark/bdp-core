@@ -573,7 +573,7 @@ public class Station {
 					.init(em)
 					.addSql("SELECT station FROM Station station",
 							"WHERE station.active = :active AND station.stationtype = :type")
-					.setParameterIfNotNull("origin", origin, "AND origin = :origin")
+					.setParameterIf("origin", origin, "AND origin = :origin", origin!=null && !origin.isEmpty())
 					.setParameter("active", true)
 					.setParameter("type", stationType)
 					.buildResultList(Station.class);

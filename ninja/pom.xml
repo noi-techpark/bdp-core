@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<finalName>v2</finalName>
+		<finalName>ninja</finalName>
 	</properties>
 
 	<dependencies>

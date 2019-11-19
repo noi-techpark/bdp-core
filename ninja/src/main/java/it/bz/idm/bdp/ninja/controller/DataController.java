@@ -54,7 +54,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
  * @author Peter Moser
  */
 @RestController
-@RequestMapping(value = "api")
+@RequestMapping(value = "api/v2")
 @Api(value = "Data", produces = "application/json")
 public class DataController {
 
@@ -78,7 +78,7 @@ public class DataController {
 	private static final String DOC_DATATYPES = "Data types. Multiple types possible as comma-separated-values. All types with <code>*</code>.";
 	private static final String DOC_LIMIT = "The limit of the response. Set it to -1 to disable it.";
 	private static final String DOC_OFFSET = "The offset of the response list. To simulate pagination, together with limit.";
-	private static final String DOC_SELECT = "Select JSON keys (a.k.a. column-aliases), which will be used to build the response. Multiple aliases possible as comma-separated-values. All of them start with a single character prefix, ex., <code>sname</code>.";
+	private static final String DOC_SELECT = "Select <code>aliases</code>, which will be used to build the response. Multiple aliases possible as comma-separated-values. Example: <code>sname</code> or <code>smetadata.city.cap</code> for JSON. Functions can be set as <code>func(alias)</code>";
 	private static final String DOC_WHERE = "Filter the result with filter-triples, like <code>alias.operator.value_or_list</code>" +
 			"\n\n<code>values_or_list</code>\n" +
 			" -   value: Whatever you want, also a regular expression. However, you need to escape <code>,'\"</code> with a <code>\\\\</code>. Use url-encoded values, if your tool does not support certain characters.\n" +

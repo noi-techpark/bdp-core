@@ -199,6 +199,20 @@ public class Token {
 		return true;
 	}
 
+	public String getChildrenType() {
+		if (children.isEmpty()) {
+			return null;
+		}
+		Token firstChild = children.get(0);
+		for (int i = 1; i < children.size(); i++) {
+			if (! firstChild.is(children.get(i).getName())) {
+				return "MIXED";
+			}
+		}
+		return firstChild.getName();
+	}
+
+
 	public void addPayload(String key, Object value) {
 		if (payload == null) {
 			payload = new HashMap<String, Object>();

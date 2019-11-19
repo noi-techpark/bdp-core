@@ -60,7 +60,7 @@ pipeline {
         }
         stage('Deploy - Ninja API (v2)') {
             steps {
-                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
+                sh 'cd ${NINJA_ROOT_PATH} && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer -Dmaven.tomcat.path=/v2'
             }
         }
     }

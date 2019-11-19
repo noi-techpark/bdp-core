@@ -1,42 +1,17 @@
 package it.bz.idm.bdp.ninja.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
-
-import com.jsoniter.output.JsonStream;
-
-import it.bz.idm.bdp.ninja.utils.jsonserializer.JsonIterPostgresSupport;
-import it.bz.idm.bdp.ninja.utils.jsonserializer.JsonIterSqlTimestampSupport;
-import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.ninja.utils.miniparser.Consumer;
+import it.bz.idm.bdp.ninja.utils.miniparser.Token;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.ninja.utils.queryexecutor.ColumnMapRowMapper;
-import it.bz.idm.bdp.ninja.utils.queryexecutor.QueryExecutor;
 
+public class SelectExpansionConfig {
 
-@Component
-public class SelectExpansionConfig implements ApplicationListener<ContextRefreshedEvent> {
+	private SelectExpansion se;
 
-	@Autowired
-    NamedParameterJdbcTemplate jdbcTemplate;
+	public SelectExpansionConfig() {
+		super();
 
-	@Value("${server.compression.enabled:true}")
-	private boolean enableCompression4JSON;
-
-    private boolean alreadySetup = false;
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent arg0) {
-		if (alreadySetup) {
-            return;
-        }
-
-		boolean ignoreNull = true;
-
-		SelectExpansion se = new SelectExpansion();
+		se = new SelectExpansion();
 
 		se.addColumn("measurement", "mvalidtime", "me.timestamp");
 		se.addColumn("measurement", "mtransactiontime", "me.created_on");
@@ -76,53 +51,82 @@ public class SelectExpansionConfig implements ApplicationListener<ContextRefresh
 		 * checks of their values or list items. These can be defined with Lambda
 		 * functions.
 		 */
-		se.addOperator("NULL", "eq", "is %s");
-		se.addOperator("NULL", "neq", "is not %s");
 
-		se.addOperator("BOOLEAN", "eq", "= %s");
-		se.addOperator("BOOLEAN", "neq", "<> %s");
+		/* Primitive operators */
+		se.addOperator("NULL", "eq", "%c is %v");
+		se.addOperator("NULL", "neq", "%c is not %v");
 
-		se.addOperator("NUMBER", "eq", "= %s");
-		se.addOperator("NUMBER", "neq", "<> %s");
-		se.addOperator("NUMBER", "lt", "< %s");
-		se.addOperator("NUMBER", "gt", "> %s");
-		se.addOperator("NUMBER", "lteq", "=< %s");
-		se.addOperator("NUMBER", "gteq", ">= %s");
+		se.addOperator("BOOLEAN", "eq", "%c = %v");
+		se.addOperator("BOOLEAN", "neq", "%c <> %v");
 
-		se.addOperator("STRING", "eq", "= %s");
-		se.addOperator("STRING", "neq", "<> %s");
-		se.addOperator("STRING", "re", "~ %s");
-		se.addOperator("STRING", "ire", "~* %s");
-		se.addOperator("STRING", "nre", "!~ %s");
-		se.addOperator("STRING", "nire", "!~* %s");
+		se.addOperator("NUMBER", "eq", "%c = %v");
+		se.addOperator("NUMBER", "neq", "%c <> %v");
+		se.addOperator("NUMBER", "lt", "%c < %v");
+		se.addOperator("NUMBER", "gt", "%c > %v");
+		se.addOperator("NUMBER", "lteq", "%c =< %v");
+		se.addOperator("NUMBER", "gteq", "%c >= %v");
 
-		se.addOperator("LIST", "in", "in (%s)", t -> {
-			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
-		});
-		se.addOperator("LIST", "nin", "not in (%s)", t -> {
-			return !(t.getChildCount() == 1 && t.getChild("VALUE").getValue() == null);
-		});
-		se.addOperator("LIST", "bbi", "&& ST_MakeEnvelope(%s)", t -> {
-			return t.getChildCount() == 4 || t.getChildCount() == 5;
-		});
-		se.addOperator("LIST", "bbc", "@ ST_MakeEnvelope(%s)", t -> {
-			return t.getChildCount() == 4 || t.getChildCount() == 5;
-		});
+		se.addOperator("STRING", "eq", "%c = %v");
+		se.addOperator("STRING", "neq", "%c <> %v");
+		se.addOperator("STRING", "re", "%c ~ %v");
+		se.addOperator("STRING", "ire", "%c ~* %v");
+		se.addOperator("STRING", "nre", "%c !~ %v");
+		se.addOperator("STRING", "nire", "%c !~* %v");
 
-		/* Set the query builder, JDBC template's row mapper and JSON parser up */
-		QueryBuilder.setup(se);
-		QueryExecutor.setup(jdbcTemplate);
+		/* JSON operators */
+		se.addOperator("JSON/NULL", "eq", "%c#>'{%j}' is %v");
+		se.addOperator("JSON/NULL", "neq", "%c#>'{%j}' is not %v");
 
-		// The API should have a flag to remove null values (what should be default? <-- true)
-		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
+		se.addOperator("JSON/BOOLEAN", "eq", "%c#>'{%j}' = %v");
+		se.addOperator("JSON/BOOLEAN", "neq", "%c#>'{%j}' <> %v");
 
-		if (!enableCompression4JSON) {
-			JsonStream.setIndentionStep(4);
-		}
-//		JsonIterUnicodeSupport.enable();
-		JsonIterSqlTimestampSupport.enable("yyyy-MM-dd HH:mm:ss.SSSZ");
-		JsonIterPostgresSupport.enable();
+		se.addOperator("JSON/NUMBER", "eq", "(%c#>'{%j}')::double precision = %v");
+		se.addOperator("JSON/NUMBER", "neq", "(%c#>'{%j}')::double precision <> %v");
+		se.addOperator("JSON/NUMBER", "lt", "(%c#>'{%j}')::double precision < %v");
+		se.addOperator("JSON/NUMBER", "gt", "(%c#>'{%j}')::double precision > %v");
+		se.addOperator("JSON/NUMBER", "lteq", "(%c#>'{%j}')::double precision =< %v");
+		se.addOperator("JSON/NUMBER", "gteq", "(%c#>'{%j}')::double precision >= %v");
+
+		se.addOperator("JSON/STRING", "eq", "%c#>>'{%j}' = %v");
+		se.addOperator("JSON/STRING", "neq", "%c#>>'{%j}' <> %v");
+		se.addOperator("JSON/STRING", "re", "%c#>>'{%j}' ~ %v");
+		se.addOperator("JSON/STRING", "ire", "%c#>>'{%j}' ~* %v");
+		se.addOperator("JSON/STRING", "nre", "%c#>>'{%j}' !~ %v");
+		se.addOperator("JSON/STRING", "nire", "%c#>>'{%j}' !~* %v");
+
+		/* LIST operators */
+		se.addOperator("LIST/NUMBER", "in", "%c in (%v)");
+		se.addOperator("LIST/STRING", "in", "%c in (%v)");
+		se.addOperator("LIST/NULL", "in", "%c in (%v)");
+
+		se.addOperator("LIST/NUMBER", "nin", "%c not in (%v)");
+		se.addOperator("LIST/STRING", "nin", "%c not in (%v)");
+		se.addOperator("LIST/NULL", "nin", "%c not in (%v)");
+
+		Consumer checkMakeEnvelope = new Consumer() {
+			@Override
+			public boolean middle(Token t) {
+				return t.getChildCount() == 4 || t.getChildCount() == 5;
+			}
+		};
+
+		se.addOperator("LIST/NUMBER", "bbi", "%c && ST_MakeEnvelope(%v)", checkMakeEnvelope);
+		se.addOperator("LIST/NUMBER", "bbc", "%c @ ST_MakeEnvelope(%v)", checkMakeEnvelope);
+
+		/* JSON/LIST operators */
+		se.addOperator("JSON/LIST/STRING", "in", "%c#>>'{%j}' in (%v)");
+		se.addOperator("JSON/LIST/NUMBER", "in", "(%c#>'{%j}')::double precision in (%v)");
+		se.addOperator("JSON/LIST/NULL", "in", "%c#>'{%j}' in (%v)");
+		se.addOperator("JSON/LIST/MIXED", "in", "%c#>'{%j}' in (%v)");
+
+		se.addOperator("JSON/LIST/STRING", "nin", "%c#>>'{%j}' not in (%v)");
+		se.addOperator("JSON/LIST/NUMBER", "nin", "(%c#>'{%j}')::double precision not in (%v)");
+		se.addOperator("JSON/LIST/NULL", "nin", "%c#>'{%j}' not in (%v)");
+		se.addOperator("JSON/LIST/MIXED", "nin", "%c#>'{%j}' not in (%v)");
+	}
+
+	public SelectExpansion getSelectExpansion() {
+		return se;
 	}
 
 }
-

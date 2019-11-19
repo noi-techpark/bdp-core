@@ -51,8 +51,8 @@ pipeline {
         }
         stage('Archive') {
             steps {
-                sh 'cp ${NINJA_ROOT_PATH}/target/v2.war v2.war'
-                archiveArtifacts artifacts: 'v2.war', onlyIfSuccessful: true
+                sh 'cp ${NINJA_ROOT_PATH}/target/ninja.war ninja.war'
+                archiveArtifacts artifacts: 'ninja.war', onlyIfSuccessful: true
             }
         }
     }
