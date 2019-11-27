@@ -9,18 +9,18 @@ pipeline {
     environment {
         NINJA_ROOT_PATH = "ninja"
         NINJA_LOGGING_FILE = "/var/log/opendatahub/ninja.log"
-        NINJA_SWAGGER_READMEURL = "https://github.com/noi-techpark/bdp-core/blob/master/ninja/README.md"
+        NINJA_SWAGGER_READMEURL = "https://github.com/noi-techpark/bdp-core/blob/development/ninja/README.md"
         NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
         NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
         NINJA_OAUTH_SCOPES = "api1"
         NINJA_OAUTH_AUDIEN = "https://ipchannels.integreen-life.bz.it/ninja"
 
         BDP_DATABASE_SCHEMA = "intimev2"
-        BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
         BDP_DATABASE_NAME = "bdp"
         BDP_DATABASE_READ_USER = "bdp_readonly"
-        BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
+        BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-test-database-read-password')
     }
 
     stages {
