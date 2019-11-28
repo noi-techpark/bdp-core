@@ -9,9 +9,6 @@ test "$TYPE" = "release" -o "$TYPE" = "snapshot" || {
     exit 1
 }
 
-# UPDATING pom.xml files...
-test "$TYPE" = "snapshot" && VERSION="$VERSION-SNAPSHOT"
-
 ### Configuration
 REP="maven-repo.opendatahub.bz.it"
 REP_ID="$REP-$TYPE"
@@ -20,6 +17,13 @@ XMLNS=http://maven.apache.org/POM/4.0.0
 CMD="xmlstarlet ed -P -L -N pom=$XMLNS"
 DTO_VERSION_FOR_WS="3.1.0"
 
+# Add -SNAPSHOT to each version tag
+test "$TYPE" = "snapshot" && {
+    VERSION="$VERSION-SNAPSHOT"
+    DTO_VERSION_FOR_WS="$DTO_VERSION_FOR_WS-SNAPSHOT"
+}
+
+# UPDATE pom.xml files
 for FOLDER in dto dal reader writer dc-interface ws-interface
 do
     $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:url" -v $REP_URL $FOLDER/pom.xml
