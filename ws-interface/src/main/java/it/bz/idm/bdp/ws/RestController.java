@@ -71,6 +71,7 @@ public abstract class RestController {
 	@ApiOperation(value="Request a new authorisation token to access protected data.",
 			notes="If you need to access protected, closed data and you have been given a username and password, invoke this method to receive a new token.")
 	@RequestMapping(value = "refresh-token", method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody JwtTokenDto getToken(
 			@ApiParam(value=USER_PARAM, required=true) @RequestParam(value="user",required=true) String user,
 			@ApiParam(value=PW_PARAM, required=true) @RequestParam(value="pw",required=true)String pw) {
@@ -79,24 +80,28 @@ public abstract class RestController {
 
 	@ApiOperation(value="Request a new access token", notes="This method would give you a new token to access protected data.")
 	@RequestMapping(value = "access-token", method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody AccessTokenDto getAccessToken(@RequestHeader(required=true,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY, required=true) String refreshToken) {
 		return retriever.fetchAccessToken(refreshToken);
 	}
 
 	@ApiOperation(value="Retrieve all stations in the dataset.", notes="This method returns all the ID of the stations listed in the dataset.")
 	@RequestMapping(value = "get-stations", method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody String[] getStationIds() {
 		return retriever.fetchStations();
 	}
 
 	@ApiOperation(value="Retrieve all information about all stations.", notes="This method returns the list of all stations in the dataset, including all available information about them.")
 	@RequestMapping(value = "get-station-details", method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody List<StationDto> getStationDetails() {
 		return retriever.fetchStationDetails(null);
 	}
 
 	@ApiOperation(value="Return the available data types for that station.", notes="")
 	@RequestMapping(value = {"get-data-types"}, method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody List<List<String>> getDataTypes(
 			@ApiParam(STATION_PARAM) @RequestParam(value = "station", required = false) String station) {
 		return retriever.fetchDataTypes(station);
@@ -104,6 +109,7 @@ public abstract class RestController {
 
 	@ApiOperation(value="Returns all the data in the last given seconds.",notes="")
 	@RequestMapping(value = {"get-records"}, method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody List<SlimRecordDto> getRecords(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
 			@ApiParam(value=TYPE_PARAM, required=true) @RequestParam("name") String cname,
@@ -117,6 +123,7 @@ public abstract class RestController {
 
 	@ApiOperation(value="Return for a given station the data acquired in a given interval.", notes="Show all the data recorded in the given interval. Remeber to convert any date into milliseconds from epoch.")
 	@RequestMapping(value = {"get-records-in-timeframe"}, method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody List<SlimRecordDto> getRecordsInTimeFrame(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
 			@ApiParam(value=TYPE_PARAM, required=true) @RequestParam("name") String cname,
@@ -131,6 +138,7 @@ public abstract class RestController {
 
 	@ApiOperation(value="Return the timestamp of the latest recorded action for that station.", notes="")
 	@RequestMapping(value = {"get-date-of-last-record"}, method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody Date getDateOfLastRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
 			@ApiParam(TYPE_PARAM) @RequestParam(value="type",required=false) String type,
@@ -141,6 +149,7 @@ public abstract class RestController {
 
 	@ApiOperation(value="Return the timestamp and value of the latest recorded data.", notes="")
 	@RequestMapping(value = {"get-newest-record"}, method = RequestMethod.GET)
+	@Deprecated
 	public @ResponseBody SlimRecordDto getNewestRecord(@RequestHeader(required=false,value=HttpHeaders.AUTHORIZATION)@ApiParam(value=TOKEN_POLICY) String accessToken,
 			@ApiParam(value=STATION_PARAM, required=true) @RequestParam("station") String station,
 			@ApiParam(TYPE_PARAM) @RequestParam(value="type",required=false) String type,

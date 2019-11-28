@@ -64,13 +64,12 @@ public class SwaggerConfig{
 		@SuppressWarnings("rawtypes")
 		Collection<VendorExtension> extensions = new ArrayList<VendorExtension>();
 			ApiInfo apiInfo = new ApiInfo(
-	            "Big Data Platform REST API",
-	            "This page contains the documentation about the API REST calls of the Big Data Platform, the core component of the ODH Project.\n"
-	            + "More information about the project in its homepage: http://opendatahub.bz.it/ \n"
-	            + "Tutorials and technical documentation can be found at http://opendatahub.readthedocs.io/en/latest/index.html\n\n",
-	            "v1",
+	            "Open Data Hub Mobility API (deprecated)",
+	            "<b>WARNING: This API is deprecated</b>. Please use our <a href=\"https://mobility.api.opendatahub.bz.it/v2\">Open Data Hub Mobility API V2</a>.\n"
+	            + "More information about the project: <a href=\"http://opendatahub.readthedocs.io/en/latest/index.html\">Tutorials and technical documentation</a>\n",
+	            "V1",
 	            "http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
-	            new Contact("","",""),
+	            new Contact("Open Data Hub Team","https://opendatahub.bz.it","help@opendatahub.bz.it"),
 	            "API License",
 	            "http://opendatahub.readthedocs.io/en/latest/licenses.html", extensions
 	        );
