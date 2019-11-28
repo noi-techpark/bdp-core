@@ -35,15 +35,13 @@ public class SwaggerConfig {
 
 	private ApiInfo apiInfo() {
 		return new ApiInfo(
-				"Big Data Platform REST API",
-				"This page contains the documentation about the API REST calls of the Big Data Platform, the core component of the ODH Project.\n"
-	            + "More information about the project in its homepage: http://opendatahub.bz.it/ \n"
-	            + "Tutorials and technical documentation can be found at " + readmeURL,
-				"v2",
-				"http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
-				new Contact("","",""),
+				"Open Data Hub Mobility API",
+	            "More information about the project: <a href=\"" + readmeURL + "\">Tutorials and technical documentation</a>\n",
+				"V2",
+				"https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
+				new Contact("Open Data Hub","https://opendatahub.bz.it","help@opendatahub.bz.it"),
 				"API License",
-	            "http://opendatahub.readthedocs.io/en/latest/licenses.html",
+				"https://opendatahub.readthedocs.io/en/latest/licenses.html",
 				Collections.emptyList());
 	}
 

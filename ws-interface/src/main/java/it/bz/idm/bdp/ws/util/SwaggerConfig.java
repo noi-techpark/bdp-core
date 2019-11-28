@@ -22,8 +22,7 @@
  */
 package it.bz.idm.bdp.ws.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +31,6 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
-import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.DocExpansion;
@@ -61,19 +59,17 @@ public class SwaggerConfig{
 	    }
 
 	    private ApiInfo apiInfo() {
-		@SuppressWarnings("rawtypes")
-		Collection<VendorExtension> extensions = new ArrayList<VendorExtension>();
-			ApiInfo apiInfo = new ApiInfo(
+			return new ApiInfo(
 	            "Open Data Hub Mobility API (deprecated)",
 	            "<b>WARNING: This API is deprecated</b>. Please use our <a href=\"https://mobility.api.opendatahub.bz.it/v2\">Open Data Hub Mobility API V2</a>.\n"
 	            + "More information about the project: <a href=\"http://opendatahub.readthedocs.io/en/latest/index.html\">Tutorials and technical documentation</a>\n",
 	            "V1",
-	            "http://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
-	            new Contact("Open Data Hub Team","https://opendatahub.bz.it","help@opendatahub.bz.it"),
+	            "https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
+	            new Contact("Open Data Hub","https://opendatahub.bz.it","help@opendatahub.bz.it"),
 	            "API License",
-	            "http://opendatahub.readthedocs.io/en/latest/licenses.html", extensions
+	            "https://opendatahub.readthedocs.io/en/latest/licenses.html",
+	            Collections.emptyList()
 	        );
-	        return apiInfo;
 	    }
 	    @Bean
 	    UiConfiguration uiConfig() {
