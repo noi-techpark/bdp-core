@@ -93,7 +93,7 @@ public class SelectExpansion {
 		DIRTY_STATE("We are in a dirty state. Run expand() to clean up"),
 		EXPAND_INVALID_DATA("Provide valid alias and definition sets!"),
 		ALIAS_INVALID("The given alias '%s' is not valid. Only the following characters are allowed: 'a-z', 'A-Z', '0-9', '_' and '.'"),
-		SELECT_FUNC_NOJSON("It is currently not possible to use GROUPING with JSON fields. Remove '%s' from your SELECT, if you want to use functions.");
+		SELECT_FUNC_NOJSON("It is currently not possible to use GROUPING with JSON fields. Remove any JSON selectors from your SELECT, if you want to use functions.");
 
 		private final String msg;
 
@@ -301,6 +301,8 @@ public class SelectExpansion {
 		functionsAndGroups.clear();
 		groupByCandidates.clear();
 
+		boolean hasJSONSelectors = false;
+
 		/*
 		 * We cannot use a HashSet here, because we need a get by position within the while loop.
 		 * This is, because we cannot use an iterator here, since we add elements to it while processing.
@@ -321,9 +323,10 @@ public class SelectExpansion {
 				} else {
 					alias = aliasOrFunc;
 					if (alias.contains(".")) {
-						throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON, alias);
+						hasJSONSelectors = true;
+					} else {
+						groupByCandidates.add(alias);
 					}
-					groupByCandidates.add(alias);
 				}
 				if (!alias.matches(ALIAS_VALIDATION)) {
 					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
@@ -331,9 +334,7 @@ public class SelectExpansion {
 				_addFunctions(alias, func);
 				int index = alias.indexOf('.');
 				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
-				if (!candidateAliases.contains(mainAlias)) {
-					candidateAliases.add(mainAlias);
-				}
+				candidateAliases.add(mainAlias);
 
 				if (index > 0) {
 					List<String> aliasList = aliasToJSONPath.getOrDefault(mainAlias, new ArrayList<String>());
@@ -342,6 +343,14 @@ public class SelectExpansion {
 				}
 			}
 		}
+
+		/*
+		 * Currently it is not possible to use functions together with JSON selectors.
+		 */
+		if (! functionsAndGroups.isEmpty() && hasJSONSelectors) {
+			throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON);
+		}
+
 		Collections.sort(candidateAliases);
 		int curPos = 0;
 		while (curPos < candidateAliases.size()) {
@@ -368,7 +377,7 @@ public class SelectExpansion {
 				if (aliasToJSONPath.containsKey(alias)) {
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
 						List<String> functions = functionsAndGroups.get(alias + "." + jsonSelector);
-						if (functions == null ) {
+						if (functions == null) {
 							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.getColumn(alias), jsonSelector.replace(".", ","), alias, jsonSelector));
 						} else {
 							String func = functions.remove(0);
@@ -387,7 +396,7 @@ public class SelectExpansion {
 					}
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
-			} else {
+			} else { /* the current alias is not a column, but a pointer to another table */
 				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
 					usedJSONAliases.add(alias);

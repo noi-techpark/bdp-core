@@ -278,6 +278,9 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandGroupBy() {
+		if (! se.hasFunctions()) {
+			return this;
+		}
 		List<String> groupByColumns = se.getGroupByColumns();
 		if (! groupByColumns.isEmpty()) {
 			StringJoiner sj = new StringJoiner(",");
