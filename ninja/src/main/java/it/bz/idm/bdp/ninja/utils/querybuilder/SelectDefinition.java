@@ -69,16 +69,6 @@ public class SelectDefinition {
 		return targetEntryMap.keySet();
 	}
 
-	public void addPointer(final String targetEntryName, final SelectDefinition selectDefinition) {
-		if (targetEntryName == null || targetEntryName.isEmpty() || selectDefinition == null) {
-			throw new RuntimeException("A select definition's pointer must have a name and a valid sub-definition!");
-		}
-		if (targetEntryMap.containsKey(targetEntryName)) {
-			throw new RuntimeException("TargetEntry with name '" + targetEntryName + "' already exists!");
-		}
-		targetEntryMap.put(targetEntryName, new TargetEntry(targetEntryName, selectDefinition));
-	}
-
 	public SelectDefinition getSelectDefinition(final String targetEntryName) {
 		return targetEntryMap.get(targetEntryName).getSelectDefinition();
 	}

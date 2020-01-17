@@ -165,17 +165,6 @@ public class SelectExpansion {
 		return this;
 	}
 
-	public void addSubDef(final String name, final String alias, final String subName) {
-		SelectDefinition subSelDef = getSelectDefinition(subName);
-		if (subSelDef == null) {
-			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, subName);
-		}
-		SelectDefinition selDef = getSelectDefinitionOrNew(name);
-		selDef.addPointer(alias, subSelDef);
-		schema.put(name, selDef);
-		dirty = true;
-	}
-
 	public Map<String, String> getAliasMap() {
 		if (dirty) {
 			aliases.clear();
