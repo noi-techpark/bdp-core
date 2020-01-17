@@ -59,6 +59,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 @Api(value = "Data", produces = "application/json")
 public class DataController {
 
+	/* Do not forget to update DOC_TIME, when changing this */
 	private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]][Z]";
 
 	public static enum ErrorCode implements ErrorCodeInterface {
@@ -102,7 +103,7 @@ public class DataController {
 			+ "\nMultiple conditions possible as comma-separated-values. <code>value</code>s will be casted to Double precision or <code>null</code>, if possible. Put them inside double quotes, if you want to prevent that.\n\n"
 			+ " Example-syntax for bbi/bbc could be <code>coordinate.bbi.(11,46,12,47,4326)</code>, where the ordering inside the list is left-x, left-y, right-x, right-y and SRID (optional).";
 	private static final String DOC_SHOWNULL = "Should JSON keys with null-values be returned, or removed from the response-JSON.";
-	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>" + DATETIME_FORMAT_PATTERN.toString().replace("'", "") + "</code>, where [] denotes optionality.";
+	private static final String DOC_TIME = "Date or date-time format, that forms a half-open interval [from, to). The format is <code>yyyy-MM-dd[T[HH][:mm][:ss][.SSS]][Z]</code>, where [] denotes optionality. Z is the timezone, for instance, +0200.";
 
 	private static final String DEFAULT_LIMIT = "200";
 	private static final String DEFAULT_OFFSET = "0";
