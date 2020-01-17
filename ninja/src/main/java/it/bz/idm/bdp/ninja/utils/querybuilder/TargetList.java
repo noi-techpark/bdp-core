@@ -20,7 +20,7 @@ import java.util.Set;
  *
  * @author Peter Moser <p.moser@noi.bz.it>
  */
-public class SelectDefinition {
+public class TargetList {
 
 	private final String name;
 
@@ -35,22 +35,22 @@ public class SelectDefinition {
 	 */
 	private Map<String, TargetEntry> targetEntryMap = new HashMap<String, TargetEntry>();
 
-	public SelectDefinition(final String name) {
+	public TargetList(final String name) {
 		if (name == null || name.isEmpty()) {
 			throw new RuntimeException("A select definition's name must be set!");
 		}
 		this.name = name;
 	}
 
-	public static SelectDefinition init(final String name) {
-		return new SelectDefinition(name);
+	public static TargetList init(final String name) {
+		return new TargetList(name);
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public SelectDefinition addTargetEntry(final TargetEntry targetEntry) {
+	public TargetList add(final TargetEntry targetEntry) {
 		if (targetEntry == null) {
 			throw new RuntimeException("TargetEntry must be non-null");
 		}
@@ -61,36 +61,25 @@ public class SelectDefinition {
 		return this;
 	}
 
-	public Map<String,TargetEntry> getTargetEntryMap() {
+	public Map<String,TargetEntry> getAll() {
 		return this.targetEntryMap;
 	}
 
-	public Set<String> getTargetEntryNames() {
+	public TargetEntry get(final String targetEntryName) {
+		return this.targetEntryMap.get(targetEntryName);
+	}
+
+
+	public Set<String> getNames() {
 		return targetEntryMap.keySet();
-	}
-
-	public SelectDefinition getSelectDefinition(final String targetEntryName) {
-		return targetEntryMap.get(targetEntryName).getSelectDefinition();
-	}
-
-	public String getColumn(final String targetEntryName) {
-		return targetEntryMap.get(targetEntryName).getColumn();
 	}
 
 	public boolean exists(final String targetEntryName) {
 		return targetEntryMap.containsKey(targetEntryName);
 	}
 
-	public boolean isSelectDefinition(final String targetEntryName) {
-		return targetEntryMap.get(targetEntryName).isSelectDefinition();
-	}
-
-	public boolean isColumn(final String targetEntryName) {
-		return targetEntryMap.get(targetEntryName).isColumn();
-	}
-
-	public Map<String, SelectDefinition> getSelectDefinitionsOnly() {
-		Map<String, SelectDefinition> result = new HashMap<>();
+	public Map<String, TargetList> getSelectDefinitionsOnly() {
+		Map<String, TargetList> result = new HashMap<>();
 		for (TargetEntry targetEntry : targetEntryMap.values()) {
 			if (targetEntry.isSelectDefinition()) {
 				result.put(targetEntry.getName(), targetEntry.getSelectDefinition());

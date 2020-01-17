@@ -25,7 +25,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
 /**
  * <pre>
- * A select expansion starts from a {@link SelectDefinition} and finds out which
+ * A select expansion starts from a {@link TargetList} and finds out which
  * tables or columns must be used, given a select targetlist and where clauses.
  * It is also a mapping from aliases to column names.
  *
@@ -108,7 +108,7 @@ public class SelectExpansion {
 	}
 
 	/* We use tree sets and maps here, because we want to have elements naturally sorted */
-	private Map<String, SelectDefinition> schema = new TreeMap<String, SelectDefinition>();
+	private Map<String, TargetList> schema = new TreeMap<String, TargetList>();
 	private Map<String, String> aliases = new TreeMap<String, String>();
 	private Map<String, String> pointers = new TreeMap<String, String>();
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
@@ -133,7 +133,7 @@ public class SelectExpansion {
 		whereClauseOperatorMap.put(opName, new WhereClauseOperator(opName, sqlSnippet, check));
 	}
 
-	public void add(final String name, final SelectDefinition selDef) {
+	public void add(final String name, final TargetList selDef) {
 		if (name == null || name.isEmpty() || selDef == null) {
 			throw new SimpleException(ErrorCode.ADD_INVALID_DATA);
 		}
@@ -141,25 +141,25 @@ public class SelectExpansion {
 		dirty = true;
 	}
 
-	public SelectExpansion add(final SelectDefinition selectDefinition) {
+	public SelectExpansion add(final TargetList selectDefinition) {
 		add(selectDefinition.getName(), selectDefinition);
 		return this;
 	}
 
-	public SelectDefinition getSelectDefinition(final String name) {
+	public TargetList getSelectDefinition(final String name) {
 		return schema.get(name);
 	}
 
-	public SelectDefinition getSelectDefinitionOrNew(final String name) {
-		SelectDefinition res = schema.get(name);
+	public TargetList getSelectDefinitionOrNew(final String name) {
+		TargetList res = schema.get(name);
 		if (res == null)
-			return new SelectDefinition(name);
+			return new TargetList(name);
 		return res;
 	}
 
 	public SelectExpansion addTargetEntry(final String selectDefinitionName, final TargetEntry targetEntry) {
-		SelectDefinition selectDefinition = getSelectDefinitionOrNew(selectDefinitionName);
-		selectDefinition.addTargetEntry(targetEntry);
+		TargetList selectDefinition = getSelectDefinitionOrNew(selectDefinitionName);
+		selectDefinition.add(targetEntry);
 		schema.put(selectDefinitionName, selectDefinition);
 		dirty = true;
 		return this;
@@ -168,8 +168,8 @@ public class SelectExpansion {
 	public Map<String, String> getAliasMap() {
 		if (dirty) {
 			aliases.clear();
-			for (SelectDefinition defs : schema.values()) {
-				for (String alias : defs.getTargetEntryNames()) {
+			for (TargetList defs : schema.values()) {
+				for (String alias : defs.getNames()) {
 					aliases.put(alias, defs.getName());
 				}
 			}
@@ -180,7 +180,7 @@ public class SelectExpansion {
 	public Map<String, String> getPointerMap() {
 		if (dirty) {
 			pointers.clear();
-			for (SelectDefinition defs : schema.values()) {
+			for (TargetList defs : schema.values()) {
 				for (String alias : defs.getSelectDefinitionsOnly().keySet()) {
 					pointers.put(alias, defs.getName());
 				}
@@ -189,49 +189,49 @@ public class SelectExpansion {
 		return pointers;
 	}
 
-	public Set<String> getAliases(Set<String> defNames) {
-		Set<String> res = new HashSet<String>();
-		for (SelectDefinition def : getDefinitions(defNames)) {
-			res.addAll(def.getTargetEntryNames());
+	public Set<String> getTargetListNames(Set<String> targetListNames) {
+		Set<String> result = new HashSet<String>();
+		for (TargetList targetList : getTargetLists(targetListNames)) {
+			result.addAll(targetList.getNames());
 		}
-		return res;
+		return result;
 	}
 
-	public SelectDefinition getDefinitionByAlias(final String alias, Set<String> defNames) {
-		for (SelectDefinition def : getDefinitions(defNames)) {
-			if (def.getTargetEntryNames().contains(alias))
-				return def;
-		}
-		return null;
-	}
-
-	public SelectDefinition getDefinitionByAlias(final String alias) {
-		for (SelectDefinition def : schema.values()) {
-			if (def.getTargetEntryNames().contains(alias))
-				return def;
+	public TargetList getTargetListByAlias(final String alias, Set<String> targetListNames) {
+		for (TargetList targetList : getTargetLists(targetListNames)) {
+			if (targetList.getNames().contains(alias))
+				return targetList;
 		}
 		return null;
 	}
 
-	public SelectDefinition getDefinition(final String defName) {
-		SelectDefinition def = schema.get(defName);
-		if (def == null) {
+	public TargetList getTargetListByAlias(final String alias) {
+		for (TargetList targetList : schema.values()) {
+			if (targetList.getNames().contains(alias))
+				return targetList;
+		}
+		return null;
+	}
+
+	public TargetList getTargetList(final String defName) {
+		TargetList targetList = schema.get(defName);
+		if (targetList == null) {
 			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
 		}
-		return def;
+		return targetList;
 	}
 
-	public SelectDefinition getParentDefinition(final String defName, Set<String> defNames) {
-		for (SelectDefinition def : getDefinitions(defNames)) {
-			for (SelectDefinition child : def.getSelectDefinitionsOnly().values()) {
-				if (child.getName().equals(defName))
+	public TargetList getParentDefinition(final String targetListName, Set<String> targetListNames) {
+		for (TargetList def : getTargetLists(targetListNames)) {
+			for (TargetList child : def.getSelectDefinitionsOnly().values()) {
+				if (child.getName().equals(targetListName))
 					return def;
 			}
 		}
 		return null;
 	}
 
-	public SelectDefinition getParentDefinition(final String defName) {
+	public TargetList getParentDefinition(final String defName) {
 		return getParentDefinition(defName, null);
 	}
 
@@ -240,11 +240,11 @@ public class SelectExpansion {
 	}
 
 	public String getParentAlias(final String defName, Set<String> defNames) {
-		SelectDefinition parent = getParentDefinition(defName, defNames);
+		TargetList parent = getParentDefinition(defName, defNames);
 		if (parent == null) {
 			return null;
 		}
-		for (Entry<String, SelectDefinition> child : parent.getSelectDefinitionsOnly().entrySet()) {
+		for (Entry<String, TargetList> child : parent.getSelectDefinitionsOnly().entrySet()) {
 			if (child.getValue().getName().equals(defName)) {
 				return child.getKey();
 			}
@@ -252,17 +252,17 @@ public class SelectExpansion {
 		return null;
 	}
 
-	public Set<SelectDefinition> getDefinitions() {
-		return new HashSet<SelectDefinition>(schema.values());
+	public Set<TargetList> getDefinitions() {
+		return new HashSet<TargetList>(schema.values());
 	}
 
-	public Set<SelectDefinition> getDefinitions(Set<String> defNames) {
+	public Set<TargetList> getTargetLists(Set<String> defNames) {
 		if (defNames == null) {
 			return getDefinitions();
 		}
-		Set<SelectDefinition> res = new HashSet<SelectDefinition>();
+		Set<TargetList> res = new HashSet<TargetList>();
 		for (String defName : defNames) {
-			SelectDefinition def = schema.get(defName);
+			TargetList def = schema.get(defName);
 			if (def == null) {
 				throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
 			}
@@ -301,7 +301,7 @@ public class SelectExpansion {
 		List<String> candidateAliases = null;
 		Map<String, List<String>> aliasToJSONPath = new TreeMap<String, List<String>>();
 		if (targetEntries.size() == 1 && targetEntries.contains("*")) {
-			candidateAliases = new ArrayList<String>(getAliases(defNames));
+			candidateAliases = new ArrayList<String>(getTargetListNames(defNames));
 		} else {
 			candidateAliases = new ArrayList<String>();
 			for (String targetEntryOrFunc : targetEntries) {
@@ -346,22 +346,22 @@ public class SelectExpansion {
 		int curPos = 0;
 		while (curPos < candidateAliases.size()) {
 			String alias = candidateAliases.get(curPos);
-			SelectDefinition def = getDefinitionByAlias(alias, defNames);
+			TargetList def = getTargetListByAlias(alias, defNames);
 			if (def == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, alias, defNames);
 				se.addData("alias", alias);
 				throw se;
 			}
 
-			if (def.isColumn(alias)) {
+			if (def.get(alias).isColumn()) {
 				usedJSONAliases.add(alias);
 				String defName = getAliasMap().get(alias);
 				usedJSONDefNames.add(defName);
 
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
 
-				String before = def.getTargetEntryMap().get(alias).getSqlBefore() == null ? "" : def.getTargetEntryMap().get(alias).getSqlBefore() + ", ";
-				String after = def.getTargetEntryMap().get(alias).getSqlAfter() == null ? "" : ", " + def.getTargetEntryMap().get(alias).getSqlAfter();
+				String before = def.getAll().get(alias).getSqlBefore() == null ? "" : def.getAll().get(alias).getSqlBefore() + ", ";
+				String after = def.getAll().get(alias).getSqlAfter() == null ? "" : ", " + def.getAll().get(alias).getSqlAfter();
 				StringJoiner sj = new StringJoiner(", ");
 
 				/* Look, if it is a JSON selector */
@@ -369,30 +369,30 @@ public class SelectExpansion {
 					for (String jsonSelector : aliasToJSONPath.get(alias)) {
 						List<String> functions = functionsAndGroups.get(alias + "." + jsonSelector);
 						if (functions == null) {
-							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.getColumn(alias), jsonSelector.replace(".", ","), alias, jsonSelector));
+							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", def.get(alias).getColumn(), jsonSelector.replace(".", ","), alias, jsonSelector));
 						} else {
 							String func = functions.remove(0);
-							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.getColumn(alias), jsonSelector.replace(".", ","), func, alias, jsonSelector));
+							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, def.get(alias).getColumn(), jsonSelector.replace(".", ","), func, alias, jsonSelector));
 						}
 					}
 				} else { /* Regular column */
 					List<String> functions = functionsAndGroups.get(alias);
 					if (functions == null) {
-						sj.add(String.format("%s as %s", def.getColumn(alias), alias));
+						sj.add(String.format("%s as %s", def.get(alias).getColumn(), alias));
 					} else {
 						for (String func : functions) {
-							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, def.getColumn(alias), func, alias));
+							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, def.get(alias).getColumn(), func, alias));
 						}
 						functionsAndGroups.put(alias, null);
 					}
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else { /* the current alias is not a column, but a pointer to another table */
-				SelectDefinition pointsTo = def.getSelectDefinitionsOnly().get(alias);
+				TargetList pointsTo = def.getSelectDefinitionsOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
 					usedJSONAliases.add(alias);
 					usedJSONDefNames.add(getAliasMap().get(alias));
-					for (String subAlias : pointsTo.getTargetEntryNames()) {
+					for (String subAlias : pointsTo.getNames()) {
 						if (!candidateAliases.contains(subAlias)) {
 							candidateAliases.add(subAlias);
 						}
@@ -665,10 +665,10 @@ public class SelectExpansion {
 	}
 
 	public String getColumn(String alias) {
-		SelectDefinition definition = getDefinitionByAlias(alias);
+		TargetList definition = getTargetListByAlias(alias);
 		if (definition == null)
 			return null;
-		return definition.getColumn(alias);
+		return definition.get(alias).getColumn();
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {
@@ -732,9 +732,9 @@ public class SelectExpansion {
 	}
 
 	public Map<String, Object> makeObj(Map<String, Object> record, String defName, boolean ignoreNull) {
-		SelectDefinition def = getDefinition(defName);
+		TargetList def = getTargetList(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
-		for (String alias : def.getTargetEntryNames()) {
+		for (String alias : def.getNames()) {
 			Object value = record.get(alias);
 			if (ignoreNull && value == null)
 				continue;
@@ -763,9 +763,9 @@ public class SelectExpansion {
 		}
 
 		for (String alias : usedAliases) {
-			SelectDefinition def = getDefinitionByAlias(alias);
+			TargetList def = getTargetListByAlias(alias);
 			Map<String, Object> curMap = result.get(def.getName());
-			if (def.isColumn(alias)) {
+			if (def.get(alias).isColumn()) {
 				/*
 				 * record.get cannot distinguish between "not-found" and "found-but-null", therefore
 				 * we need to use containsKey here

@@ -10,7 +10,7 @@ package it.bz.idm.bdp.ninja.utils.querybuilder;
  */
 public class TargetEntry {
 	private final String name;
-	private final SelectDefinition selectDefinition;
+	private final TargetList selectDefinition;
 	private final String column;
 	private String sqlBefore;
 	private String sqlAfter;
@@ -25,7 +25,7 @@ public class TargetEntry {
 		this.selectDefinition = null;
 	}
 
-	public TargetEntry(final String name, final SelectDefinition selectDefinition) {
+	public TargetEntry(final String name, final TargetList selectDefinition) {
 		if (name == null || name.isEmpty() || selectDefinition == null) {
 			throw new RuntimeException("A TargetEntry must have non-empty name and a non-null pointer to a SelectDefinition");
 		}
@@ -38,7 +38,7 @@ public class TargetEntry {
 		return column;
 	}
 
-	public SelectDefinition getSelectDefinition() {
+	public TargetList getSelectDefinition() {
 		return this.selectDefinition;
 	}
 

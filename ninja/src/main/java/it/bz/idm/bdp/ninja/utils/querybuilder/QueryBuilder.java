@@ -285,7 +285,7 @@ public class QueryBuilder {
 		if (! groupByColumns.isEmpty()) {
 			StringJoiner sj = new StringJoiner(",");
 			for (String col : groupByColumns) {
-				sj.add(se.getDefinitionByAlias(col).getColumn(col)); //FIXME is this not double circular?
+				sj.add(se.getTargetListByAlias(col).get(col).getColumn()); //FIXME is this not double circular?
 			}
 			addSql("group by " + sj);
 		}

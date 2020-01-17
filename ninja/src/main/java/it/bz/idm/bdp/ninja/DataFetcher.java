@@ -15,7 +15,7 @@ import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.ninja.utils.miniparser.Token;
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
-import it.bz.idm.bdp.ninja.utils.querybuilder.SelectDefinition;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetList;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.ColumnMapRowMapper;
@@ -266,59 +266,59 @@ public class DataFetcher {
 		SelectExpansion se = new SelectExpansion();
 		se = new SelectExpansion();
 
-		SelectDefinition measurement = SelectDefinition.init("measurement")
-				.addTargetEntry(new TargetEntry("mvalidtime", "me.timestamp"))
-				.addTargetEntry(new TargetEntry("mtransactiontime", "me.created_on"))
-				.addTargetEntry(new TargetEntry("mperiod", "me.period"));
+		TargetList measurement = TargetList.init("measurement")
+				.add(new TargetEntry("mvalidtime", "me.timestamp"))
+				.add(new TargetEntry("mtransactiontime", "me.created_on"))
+				.add(new TargetEntry("mperiod", "me.period"));
 
 		se.add(measurement);
 
-		SelectDefinition measurementdouble = SelectDefinition.init("measurementdouble")
-				.addTargetEntry(new TargetEntry("mvalue_double", "me.double_value")
+		TargetList measurementdouble = TargetList.init("measurementdouble")
+				.add(new TargetEntry("mvalue_double", "me.double_value")
 						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
 
 		se.add(measurementdouble);
 
-		SelectDefinition measurementstring = SelectDefinition.init("measurementstring")
-				.addTargetEntry(new TargetEntry("mvalue_string", "me.string_value")
+		TargetList measurementstring = TargetList.init("measurementstring")
+				.add(new TargetEntry("mvalue_string", "me.string_value")
 						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
 
 		se.add(measurementstring);
 
-		SelectDefinition datatype = SelectDefinition.init("datatype")
-				.addTargetEntry(new TargetEntry("tname", "t.cname")).addTargetEntry(new TargetEntry("tunit", "t.cunit"))
-				.addTargetEntry(new TargetEntry("ttype", "t.rtype"))
-				.addTargetEntry(new TargetEntry("tdescription", "t.description"))
-				.addTargetEntry(new TargetEntry("tmeasurements", measurement));
+		TargetList datatype = TargetList.init("datatype")
+				.add(new TargetEntry("tname", "t.cname")).add(new TargetEntry("tunit", "t.cunit"))
+				.add(new TargetEntry("ttype", "t.rtype"))
+				.add(new TargetEntry("tdescription", "t.description"))
+				.add(new TargetEntry("tmeasurements", measurement));
 
 		se.add(datatype);
 
-		SelectDefinition parent = SelectDefinition.init("parent").addTargetEntry(new TargetEntry("pname", "p.name"))
-				.addTargetEntry(new TargetEntry("ptype", "p.stationtype"))
-				.addTargetEntry(new TargetEntry("pcode", "p.stationcode"))
-				.addTargetEntry(new TargetEntry("porigin", "p.origin"))
-				.addTargetEntry(new TargetEntry("pactive", "p.active"))
-				.addTargetEntry(new TargetEntry("pavailable", "p.available"))
-				.addTargetEntry(new TargetEntry("pcoordinate", "p.pointprojection"))
-				.addTargetEntry(new TargetEntry("pmetadata", "pm.json"));
+		TargetList parent = TargetList.init("parent").add(new TargetEntry("pname", "p.name"))
+				.add(new TargetEntry("ptype", "p.stationtype"))
+				.add(new TargetEntry("pcode", "p.stationcode"))
+				.add(new TargetEntry("porigin", "p.origin"))
+				.add(new TargetEntry("pactive", "p.active"))
+				.add(new TargetEntry("pavailable", "p.available"))
+				.add(new TargetEntry("pcoordinate", "p.pointprojection"))
+				.add(new TargetEntry("pmetadata", "pm.json"));
 
 		se.add(parent);
 
-		SelectDefinition station = SelectDefinition.init("station").addTargetEntry(new TargetEntry("sname", "s.name"))
-				.addTargetEntry(new TargetEntry("stype", "s.stationtype"))
-				.addTargetEntry(new TargetEntry("scode", "s.stationcode"))
-				.addTargetEntry(new TargetEntry("sorigin", "s.origin"))
-				.addTargetEntry(new TargetEntry("sactive", "s.active"))
-				.addTargetEntry(new TargetEntry("savailable", "s.available"))
-				.addTargetEntry(new TargetEntry("scoordinate", "s.pointprojection"))
-				.addTargetEntry(new TargetEntry("smetadata", "m.json"))
-				.addTargetEntry(new TargetEntry("sparent", parent))
-				.addTargetEntry(new TargetEntry("sdatatypes", datatype));
+		TargetList station = TargetList.init("station").add(new TargetEntry("sname", "s.name"))
+				.add(new TargetEntry("stype", "s.stationtype"))
+				.add(new TargetEntry("scode", "s.stationcode"))
+				.add(new TargetEntry("sorigin", "s.origin"))
+				.add(new TargetEntry("sactive", "s.active"))
+				.add(new TargetEntry("savailable", "s.available"))
+				.add(new TargetEntry("scoordinate", "s.pointprojection"))
+				.add(new TargetEntry("smetadata", "m.json"))
+				.add(new TargetEntry("sparent", parent))
+				.add(new TargetEntry("sdatatypes", datatype));
 
 		se.add(station);
 
-		SelectDefinition stationtype = SelectDefinition.init("stationtype")
-				.addTargetEntry(new TargetEntry("stations", station));
+		TargetList stationtype = TargetList.init("stationtype")
+				.add(new TargetEntry("stations", station));
 
 		se.add(stationtype);
 

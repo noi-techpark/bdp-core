@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
-import it.bz.idm.bdp.ninja.utils.querybuilder.SelectDefinition;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetList;
 
 public class QueryBuilderTests {
 
@@ -53,15 +53,15 @@ public class QueryBuilderTests {
 	@Before
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		SelectDefinition defC = SelectDefinition.init("C")
-				.addTargetEntry(new TargetEntry("d", "C.d"));
-		SelectDefinition defB = SelectDefinition.init("B")
-				.addTargetEntry(new TargetEntry("x", "B.x"))
-				.addTargetEntry(new TargetEntry("y", defC));
-		SelectDefinition defA = SelectDefinition.init("A")
-				.addTargetEntry(new TargetEntry("a", "A.a"))
-				.addTargetEntry(new TargetEntry("b", defB))
-				.addTargetEntry(new TargetEntry("c", "A.c"));
+		TargetList defC = TargetList.init("C")
+				.add(new TargetEntry("d", "C.d"));
+		TargetList defB = TargetList.init("B")
+				.add(new TargetEntry("x", "B.x"))
+				.add(new TargetEntry("y", defC));
+		TargetList defA = TargetList.init("A")
+				.add(new TargetEntry("a", "A.a"))
+				.add(new TargetEntry("b", defB))
+				.add(new TargetEntry("c", "A.c"));
 		se.add(defA);
 		se.add(defB);
 		se.add(defC);
