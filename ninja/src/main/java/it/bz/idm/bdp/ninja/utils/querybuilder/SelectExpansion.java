@@ -141,34 +141,36 @@ public class SelectExpansion {
 		dirty = true;
 	}
 
-	public SelectDefinition get(final String name) {
+	public SelectExpansion add(final SelectDefinition selectDefinition) {
+		add(selectDefinition.getName(), selectDefinition);
+		return this;
+	}
+
+	public SelectDefinition getSelectDefinition(final String name) {
 		return schema.get(name);
 	}
 
-	public SelectDefinition getOrNew(final String name) {
+	public SelectDefinition getSelectDefinitionOrNew(final String name) {
 		SelectDefinition res = schema.get(name);
 		if (res == null)
 			return new SelectDefinition(name);
 		return res;
 	}
 
-	public void addColumn(final String name, final String alias, final String column, final String sqlBefore, final String sqlAfter) {
-		SelectDefinition selDef = getOrNew(name);
-		selDef.addAlias(alias, column, sqlBefore, sqlAfter);
-		schema.put(name, selDef);
+	public SelectExpansion addTargetEntry(final String selectDefinitionName, final TargetEntry targetEntry) {
+		SelectDefinition selectDefinition = getSelectDefinitionOrNew(selectDefinitionName);
+		selectDefinition.addTargetEntry(targetEntry);
+		schema.put(selectDefinitionName, selectDefinition);
 		dirty = true;
-	}
-
-	public void addColumn(final String name, final String alias, final String column) {
-		addColumn(name, alias, column, null, null);
+		return this;
 	}
 
 	public void addSubDef(final String name, final String alias, final String subName) {
-		SelectDefinition subSelDef = get(subName);
+		SelectDefinition subSelDef = getSelectDefinition(subName);
 		if (subSelDef == null) {
 			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, subName);
 		}
-		SelectDefinition selDef = getOrNew(name);
+		SelectDefinition selDef = getSelectDefinitionOrNew(name);
 		selDef.addPointer(alias, subSelDef);
 		schema.put(name, selDef);
 		dirty = true;
@@ -178,7 +180,7 @@ public class SelectExpansion {
 		if (dirty) {
 			aliases.clear();
 			for (SelectDefinition defs : schema.values()) {
-				for (String alias : defs.getAliases()) {
+				for (String alias : defs.getTargetEntryNames()) {
 					aliases.put(alias, defs.getName());
 				}
 			}
@@ -190,7 +192,7 @@ public class SelectExpansion {
 		if (dirty) {
 			pointers.clear();
 			for (SelectDefinition defs : schema.values()) {
-				for (String alias : defs.getPointersOnly().keySet()) {
+				for (String alias : defs.getSelectDefinitionsOnly().keySet()) {
 					pointers.put(alias, defs.getName());
 				}
 			}
@@ -201,14 +203,14 @@ public class SelectExpansion {
 	public Set<String> getAliases(Set<String> defNames) {
 		Set<String> res = new HashSet<String>();
 		for (SelectDefinition def : getDefinitions(defNames)) {
-			res.addAll(def.getAliases());
+			res.addAll(def.getTargetEntryNames());
 		}
 		return res;
 	}
 
 	public SelectDefinition getDefinitionByAlias(final String alias, Set<String> defNames) {
 		for (SelectDefinition def : getDefinitions(defNames)) {
-			if (def.getAliases().contains(alias))
+			if (def.getTargetEntryNames().contains(alias))
 				return def;
 		}
 		return null;
@@ -216,7 +218,7 @@ public class SelectExpansion {
 
 	public SelectDefinition getDefinitionByAlias(final String alias) {
 		for (SelectDefinition def : schema.values()) {
-			if (def.getAliases().contains(alias))
+			if (def.getTargetEntryNames().contains(alias))
 				return def;
 		}
 		return null;
@@ -232,7 +234,7 @@ public class SelectExpansion {
 
 	public SelectDefinition getParentDefinition(final String defName, Set<String> defNames) {
 		for (SelectDefinition def : getDefinitions(defNames)) {
-			for (SelectDefinition child : def.getPointersOnly().values()) {
+			for (SelectDefinition child : def.getSelectDefinitionsOnly().values()) {
 				if (child.getName().equals(defName))
 					return def;
 			}
@@ -253,7 +255,7 @@ public class SelectExpansion {
 		if (parent == null) {
 			return null;
 		}
-		for (Entry<String, SelectDefinition> child : parent.getPointersOnly().entrySet()) {
+		for (Entry<String, SelectDefinition> child : parent.getSelectDefinitionsOnly().entrySet()) {
 			if (child.getValue().getName().equals(defName)) {
 				return child.getKey();
 			}
@@ -287,8 +289,8 @@ public class SelectExpansion {
 		dirty = false;
 	}
 
-	public void expand(final Set<String> aliases, final Set<String> defNames) {
-		if (aliases == null || aliases.isEmpty() || defNames == null || defNames.isEmpty()) {
+	public void expand(final Set<String> targetEntries, final Set<String> defNames) {
+		if (targetEntries == null || targetEntries.isEmpty() || defNames == null || defNames.isEmpty()) {
 			throw new SimpleException(ErrorCode.EXPAND_INVALID_DATA);
 		}
 		if (dirty) {
@@ -309,36 +311,36 @@ public class SelectExpansion {
 		 */
 		List<String> candidateAliases = null;
 		Map<String, List<String>> aliasToJSONPath = new TreeMap<String, List<String>>();
-		if (aliases.size() == 1 && aliases.contains("*")) {
+		if (targetEntries.size() == 1 && targetEntries.contains("*")) {
 			candidateAliases = new ArrayList<String>(getAliases(defNames));
 		} else {
 			candidateAliases = new ArrayList<String>();
-			for (String aliasOrFunc : aliases) {
+			for (String targetEntryOrFunc : targetEntries) {
 				String func = null;
-				String alias = null;
-				if (aliasOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
-					int idx = aliasOrFunc.indexOf('(');
-					func = aliasOrFunc.substring(0, idx);
-					alias = aliasOrFunc.substring(idx + 1, aliasOrFunc.length() - 1);
+				String targetEntry = null;
+				if (targetEntryOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
+					int idx = targetEntryOrFunc.indexOf('(');
+					func = targetEntryOrFunc.substring(0, idx);
+					targetEntry = targetEntryOrFunc.substring(idx + 1, targetEntryOrFunc.length() - 1);
 				} else {
-					alias = aliasOrFunc;
-					if (alias.contains(".")) {
+					targetEntry = targetEntryOrFunc;
+					if (targetEntry.contains(".")) {
 						hasJSONSelectors = true;
 					} else {
-						groupByCandidates.add(alias);
+						groupByCandidates.add(targetEntry);
 					}
 				}
-				if (!alias.matches(ALIAS_VALIDATION)) {
-					throw new SimpleException(ErrorCode.ALIAS_INVALID, alias);
+				if (!targetEntry.matches(ALIAS_VALIDATION)) {
+					throw new SimpleException(ErrorCode.ALIAS_INVALID, targetEntry);
 				}
-				_addFunctions(alias, func);
-				int index = alias.indexOf('.');
-				String mainAlias = index > 0 ? alias.substring(0, index) : alias;
+				_addFunctions(targetEntry, func);
+				int index = targetEntry.indexOf('.');
+				String mainAlias = index > 0 ? targetEntry.substring(0, index) : targetEntry;
 				candidateAliases.add(mainAlias);
 
 				if (index > 0) {
 					List<String> aliasList = aliasToJSONPath.getOrDefault(mainAlias, new ArrayList<String>());
-					aliasList.add(alias.substring(index + 1));
+					aliasList.add(targetEntry.substring(index + 1));
 					aliasToJSONPath.putIfAbsent(mainAlias, aliasList);
 				}
 			}
@@ -369,8 +371,8 @@ public class SelectExpansion {
 
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
 
-				String before = def.getSqlBefore(alias) == null ? "" : def.getSqlBefore(alias) + ", ";
-				String after = def.getSqlAfter(alias) == null ? "" : ", " + def.getSqlAfter(alias);
+				String before = def.getTargetEntryMap().get(alias).getSqlBefore() == null ? "" : def.getTargetEntryMap().get(alias).getSqlBefore() + ", ";
+				String after = def.getTargetEntryMap().get(alias).getSqlAfter() == null ? "" : ", " + def.getTargetEntryMap().get(alias).getSqlAfter();
 				StringJoiner sj = new StringJoiner(", ");
 
 				/* Look, if it is a JSON selector */
@@ -397,11 +399,11 @@ public class SelectExpansion {
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else { /* the current alias is not a column, but a pointer to another table */
-				SelectDefinition pointsTo = def.getPointersOnly().get(alias);
+				SelectDefinition pointsTo = def.getSelectDefinitionsOnly().get(alias);
 				if (defNames.contains(pointsTo.getName())) {
 					usedJSONAliases.add(alias);
 					usedJSONDefNames.add(getAliasMap().get(alias));
-					for (String subAlias : pointsTo.getAliases()) {
+					for (String subAlias : pointsTo.getTargetEntryNames()) {
 						if (!candidateAliases.contains(subAlias)) {
 							candidateAliases.add(subAlias);
 						}
@@ -743,7 +745,7 @@ public class SelectExpansion {
 	public Map<String, Object> makeObj(Map<String, Object> record, String defName, boolean ignoreNull) {
 		SelectDefinition def = getDefinition(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
-		for (String alias : def.getAliases()) {
+		for (String alias : def.getTargetEntryNames()) {
 			Object value = record.get(alias);
 			if (ignoreNull && value == null)
 				continue;
@@ -788,7 +790,7 @@ public class SelectExpansion {
 				}
 				curMap.put(alias, value);
 			} else {
-				String pointingTo = def.getPointersOnly().get(alias).getName();
+				String pointingTo = def.getSelectDefinitionsOnly().get(alias).getName();
 				rootDefinition.remove(pointingTo);
 				curMap.put(alias, result.get(pointingTo));
 			}
@@ -807,14 +809,24 @@ public class SelectExpansion {
 
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addColumn("C", "h", "C.h", "before", null);
-		se.addColumn("D", "d", "D.d", null, "after");
-		se.addColumn("B", "x", "B.x");
-		se.addSubDef("B", "y", "C");
-		se.addColumn("A", "a", "A.a");
-		se.addColumn("A", "b", "A.b");
-		se.addSubDef("A", "c", "B");
-		se.addSubDef("main", "t", "A");
+		se.addTargetEntry("C", new TargetEntry("h", "C.h").sqlBefore("before"));
+		// se.addColumn("C", "h", "C.h", "before", null);
+		se.addTargetEntry("C", new TargetEntry("h", "C.h").sqlBefore("before"));
+		//se.addColumn("D", "d", "D.d", null, "after");
+		se.addTargetEntry("D", new TargetEntry("d", "D.d").sqlAfter("after"));
+		//se.addColumn("B", "x", "B.x");
+		//se.addReplacement("B", "x", "x_replaced");
+		se.addTargetEntry("B", new TargetEntry("x", "B.x").alias("x_replaced"));
+		//se.addSubDef("B", "y", "C");
+		se.addTargetEntry("B", new TargetEntry("y", se.getSelectDefinition("C")));
+		//se.addColumn("A", "a", "A.a");
+		se.addTargetEntry("A", new TargetEntry("a", "A.a"));
+		//se.addColumn("A", "b", "A.b");
+		se.addTargetEntry("A", new TargetEntry("b", "A.b"));
+		//se.addSubDef("A", "c", "B");
+		se.addTargetEntry("A", new TargetEntry("c", se.getSelectDefinition("B")));
+		//se.addSubDef("main", "t", "A");
+		se.addTargetEntry("main", new TargetEntry("t", se.getSelectDefinition("A")));
 
 		// se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
 		// se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");
@@ -827,54 +839,57 @@ public class SelectExpansion {
 		// System.out.println(se.getUsedAliases());
 		// System.out.println(se.getUsedDefNames());
 		//
-		//// {B=B.x as x}
-		//// [x]
-		//// [B]
-		// se.expand("x, y", "B");
-		// System.out.println(se.getExpansion());
-		// System.out.println(se.getUsedAliases());
-		// System.out.println(se.getUsedDefNames());
-		//
-		//// {A=A.a as a, A.b as b, B=B.x as x}
-		//// [a, b, c, x]
-		//// [A, B]
-		// se.expand("a, b, c", "A", "B");
-		// System.out.println(se.getExpansion());
-		// System.out.println(se.getUsedAliases());
-		// System.out.println(se.getUsedDefNames());
-		//
-//		se.addOperator("number", "gt", "> %s");
-//		se.addOperator("string", "eq", "= %s");
-//		se.addOperator("string", "neq", "<> %s");
-//		se.addOperator("number", "eq", "= %s");
-//		se.addOperator("boolean", "eq", "= %s");
-//		se.addOperator("number", "neq", "<> %s");
-//		se.addOperator("null", "eq", "is null");
-//		se.addOperator("null", "neq", "is not null");
-//		se.addOperator("list", "in", "in (%s)");
-//		se.addOperator("list", "bbi", "&& st_envelope(%s)");
-
-//		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
-
-//		se.addOperator("boolean", "eq", "%c = %v");
-//		se.setWhereClause("a.eq.true");
-//		se.expand("h", "A", "C", "B");
-
-//		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
-//		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
-//		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
-//		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
-//		se.setWhereClause("a.b.c.eq.-.2");
-//		se.setWhereClause("a.b.c.eq.\"\"");
-//		se.expand("min(h.a.b),max(h.a.b),h.a,h", "A", "C", "B");
-		se.expand("min(h.a),max(h.a),min(x),h.a,h.a,count(h.a),y,a.b.c.d,x", "A", "C", "B");
-
+		// {B=B.x as x}
+		// [x]
+		// [B]
+		se.expand("x, y", "B");
 		System.out.println(se.getExpansion());
 		System.out.println(se.getUsedAliases());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 		System.out.println(se.getWhereParameters());
 		System.out.println(se.getGroupByColumns());
+		//
+		//// {A=A.a as a, A.b as b, B=B.x as x}
+		//// [a, b, c, x]
+		//// [A, B]
+		se.expand("a, b, c", "A", "B");
+		System.out.println(se.getExpansion());
+		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedDefNames());
+
+		se.addOperator("number", "gt", "> %s");
+		se.addOperator("string", "eq", "= %s");
+		se.addOperator("string", "neq", "<> %s");
+		se.addOperator("number", "eq", "= %s");
+		se.addOperator("boolean", "eq", "= %s");
+		se.addOperator("number", "neq", "<> %s");
+		se.addOperator("null", "eq", "is null");
+		se.addOperator("null", "neq", "is not null");
+		se.addOperator("list", "in", "in (%s)");
+		se.addOperator("list", "bbi", "&& st_envelope(%s)");
+
+		se.setWhereClause("b.eq.true,and(or(a.eq.null,b.eq.5),a.bbi.(1,2,3,4),b.in.(lo,la,xx))");
+
+		se.addOperator("boolean", "eq", "%c = %v");
+		se.setWhereClause("a.eq.true");
+		se.expand("h", "A", "C", "B");
+
+		se.addOperator("json/string", "eq", "%c#>>'{%j}' = %v");
+		se.addOperator("json/boolean", "eq", "%c#>'{%j}' = %v");
+		se.addOperator("json/number", "eq", "(%c#>'{%j}')::double precision = %%v");
+		se.addOperator("json/list/number", "eq", "(%c#>'{%j}')::double precision = %v");
+		se.setWhereClause("a.b.c.eq.-.2");
+		se.setWhereClause("a.b.c.eq.\"\"");
+		// se.expand("min(h.a.b),max(h.a.b),h.a,h", "A", "C", "B");
+		// se.expand("min(h.a),max(h.a),min(x),h.a,h.a,count(h.a),y,a.b.c.d,x", "A", "C", "B");
+
+		// System.out.println(se.getExpansion());
+		// System.out.println(se.getUsedAliases());
+		// System.out.println(se.getUsedDefNames());
+		// System.out.println(se.getWhereSql());
+		// System.out.println(se.getWhereParameters());
+		// System.out.println(se.getGroupByColumns());
 
 		// se.setWhereClause("");
 		// se.expand("mvalue", "A", "D", "B");
@@ -926,4 +941,5 @@ public class SelectExpansion {
 		// System.out.println(se.getUsedDefNames());
 
 	}
+
 }

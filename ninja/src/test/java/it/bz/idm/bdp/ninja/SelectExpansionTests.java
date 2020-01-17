@@ -10,7 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.config.SelectExpansionConfig;
+import it.bz.idm.bdp.ninja.utils.querybuilder.SelectDefinition;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion.ErrorCode;
 import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
@@ -25,31 +27,50 @@ public class SelectExpansionTests {
 	@Before
 	public void setup() {
 		seNested = new SelectExpansion();
-		seNested.addColumn("C", "h", "C.h");
-		seNested.addColumn("A", "a", "A.a");
-		seNested.addColumn("A", "b", "A.b");
-		seNested.addSubDef("A", "c", "C");
-		seNested.addColumn("B", "x", "B.x");
-		seNested.addSubDef("B", "y", "A");
+		SelectDefinition seNestedC = SelectDefinition.init("C")
+				.addTargetEntry(new TargetEntry("h", "C.h"));
+		SelectDefinition seNestedA = SelectDefinition.init("A")
+				.addTargetEntry(new TargetEntry("a", "A.a"))
+				.addTargetEntry(new TargetEntry("b", "A.b"))
+				.addTargetEntry(new TargetEntry("c", seNestedC));
+		SelectDefinition seNestedB = SelectDefinition.init("B")
+				.addTargetEntry(new TargetEntry("x", "B.x"))
+				.addTargetEntry(new TargetEntry("y", seNestedA));
+		seNested.add(seNestedA);
+		seNested.add(seNestedB);
+		seNested.add(seNestedC);
 
 		seFlat = new SelectExpansion();
-		seFlat.addColumn("A", "a", "A.a");
-		seFlat.addColumn("A", "b", "A.b");
-		seFlat.addColumn("B", "x", "B.x");
-		seFlat.addColumn("C", "i", "C.i");
+		SelectDefinition seFlatA = SelectDefinition.init("A")
+				.addTargetEntry(new TargetEntry("a", "A.a"))
+				.addTargetEntry(new TargetEntry("b", "A.b"));
+		SelectDefinition seFlatB = SelectDefinition.init("B")
+				.addTargetEntry(new TargetEntry("x", "B.x"));
+		SelectDefinition seFlatC = SelectDefinition.init("C")
+				.addTargetEntry(new TargetEntry("i", "C.i"));
+		seFlat.add(seFlatA);
+		seFlat.add(seFlatB);
+		seFlat.add(seFlatC);
 
 		seNestedBig = new SelectExpansion();
-		seNestedBig.addColumn("A", "a", "A.a");
-		seNestedBig.addColumn("A", "b", "A.b");
-		seNestedBig.addColumn("B", "x", "B.x");
-		seNestedBig.addSubDef("B", "y", "A");
-		seNestedBig.addColumn("C", "i", "C.i");
-		seNestedBig.addSubDef("C", "j", "B");
-		seNestedBig.addSubDef("E", "j", "B");
-		seNestedBig.addSubDef("A", "j", "A");
+		SelectDefinition seNestedBigA = SelectDefinition.init("A")
+				.addTargetEntry(new TargetEntry("a", "A.a"))
+				.addTargetEntry(new TargetEntry("b", "A.b"));
+		SelectDefinition seNestedBigB = SelectDefinition.init("B")
+				.addTargetEntry(new TargetEntry("x", "B.x"))
+				.addTargetEntry(new TargetEntry("y", seNestedBigA));
+		SelectDefinition seNestedBigC = SelectDefinition.init("C")
+				.addTargetEntry(new TargetEntry("i", "C.i"))
+				.addTargetEntry(new TargetEntry("j", seNestedBigB));
+		SelectDefinition seNestedBigE = SelectDefinition.init("E")
+				.addTargetEntry(new TargetEntry("j", seNestedBigB));
+		seNestedBig.add(seNestedBigA);
+		seNestedBig.add(seNestedBigB);
+		seNestedBig.add(seNestedBigC);
+		seNestedBig.add(seNestedBigE);
 
 		seMinimal = new SelectExpansion();
-		seMinimal.addColumn("A", "a", "A.a");
+		seMinimal.add(new SelectDefinition("A").addTargetEntry(new TargetEntry("a", "A.a")));
 
 		seMinimal.addOperator("string", "eq", "%c = %v");
 		seMinimal.addOperator("string", "neq", "%c <> %v");

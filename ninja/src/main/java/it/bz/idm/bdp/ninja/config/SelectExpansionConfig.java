@@ -2,7 +2,9 @@ package it.bz.idm.bdp.ninja.config;
 
 import it.bz.idm.bdp.ninja.utils.miniparser.Consumer;
 import it.bz.idm.bdp.ninja.utils.miniparser.Token;
+import it.bz.idm.bdp.ninja.utils.querybuilder.SelectDefinition;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
 
 public class SelectExpansionConfig {
 
@@ -13,38 +15,64 @@ public class SelectExpansionConfig {
 
 		se = new SelectExpansion();
 
-		se.addColumn("measurement", "mvalidtime", "me.timestamp");
-		se.addColumn("measurement", "mtransactiontime", "me.created_on");
-		se.addColumn("measurement", "mperiod", "me.period");
+		SelectDefinition measurement = SelectDefinition.init("measurement")
+				.addTargetEntry(new TargetEntry("mvalidtime", "me.timestamp"))
+				.addTargetEntry(new TargetEntry("mtransactiontime", "me.created_on"))
+				.addTargetEntry(new TargetEntry("mperiod", "me.period"));
 
-		se.addColumn("measurementdouble", "mvalue_double", "me.double_value", null, "null::character varying as mvalue_string");
-		se.addColumn("measurementstring", "mvalue_string", "me.string_value", "null::double precision as mvalue_double", null);
+		se.add(measurement);
 
-		se.addColumn("datatype", "tname", "t.cname");
-		se.addColumn("datatype", "tunit", "t.cunit");
-		se.addColumn("datatype", "ttype", "t.rtype");
-		se.addColumn("datatype", "tdescription", "t.description");
-		se.addSubDef("datatype", "tmeasurements", "measurement");
+		SelectDefinition measurementdouble = SelectDefinition.init("measurementdouble")
+				.addTargetEntry(new TargetEntry("mvalue_double", "me.double_value")
+						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
 
-		se.addColumn("parent", "pname", "p.name");
-		se.addColumn("parent", "ptype", "p.stationtype");
-		se.addColumn("parent", "pcoordinate", "p.pointprojection");
-		se.addColumn("parent", "pcode", "p.stationcode");
-		se.addColumn("parent", "porigin", "p.origin");
-		se.addColumn("parent", "pmetadata", "pm.json");
+		se.add(measurementdouble);
 
-		se.addColumn("station", "sname", "s.name");
-		se.addColumn("station", "stype", "s.stationtype");
-		se.addColumn("station", "scode", "s.stationcode");
-		se.addColumn("station", "sorigin", "s.origin");
-		se.addColumn("station", "sactive", "s.active");
-		se.addColumn("station", "savailable", "s.available");
-		se.addColumn("station", "scoordinate", "s.pointprojection");
-		se.addColumn("station", "smetadata", "m.json");
-		se.addSubDef("station", "sparent", "parent");
-		se.addSubDef("station", "sdatatypes", "datatype");
+		SelectDefinition measurementstring = SelectDefinition.init("measurementstring")
+				.addTargetEntry(new TargetEntry("mvalue_string", "me.string_value")
+						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
 
-		se.addSubDef("stationtype", "stations", "station");
+		se.add(measurementstring);
+
+		SelectDefinition datatype = SelectDefinition.init("datatype")
+				.addTargetEntry(new TargetEntry("tname", "t.cname"))
+				.addTargetEntry(new TargetEntry("tunit", "t.cunit"))
+				.addTargetEntry(new TargetEntry("ttype", "t.rtype"))
+				.addTargetEntry(new TargetEntry("tdescription", "t.description"))
+				.addTargetEntry(new TargetEntry("tmeasurements", measurement));
+
+		se.add(datatype);
+
+		SelectDefinition parent = SelectDefinition.init("parent")
+				.addTargetEntry(new TargetEntry("pname", "p.name"))
+				.addTargetEntry(new TargetEntry("ptype", "p.stationtype"))
+				.addTargetEntry(new TargetEntry("pcode", "p.stationcode"))
+				.addTargetEntry(new TargetEntry("porigin", "p.origin"))
+				.addTargetEntry(new TargetEntry("pactive", "p.active"))
+				.addTargetEntry(new TargetEntry("pavailable", "p.available"))
+				.addTargetEntry(new TargetEntry("pcoordinate", "p.pointprojection"))
+				.addTargetEntry(new TargetEntry("pmetadata", "pm.json"));
+
+		se.add(parent);
+
+		SelectDefinition station = SelectDefinition.init("station")
+				.addTargetEntry(new TargetEntry("sname", "s.name"))
+				.addTargetEntry(new TargetEntry("stype", "s.stationtype"))
+				.addTargetEntry(new TargetEntry("scode", "s.stationcode"))
+				.addTargetEntry(new TargetEntry("sorigin", "s.origin"))
+				.addTargetEntry(new TargetEntry("sactive", "s.active"))
+				.addTargetEntry(new TargetEntry("savailable", "s.available"))
+				.addTargetEntry(new TargetEntry("scoordinate", "s.pointprojection"))
+				.addTargetEntry(new TargetEntry("smetadata", "m.json"))
+				.addTargetEntry(new TargetEntry("sparent", parent))
+				.addTargetEntry(new TargetEntry("sdatatypes", datatype));
+
+		se.add(station);
+
+		SelectDefinition stationtype = SelectDefinition.init("stationtype")
+				.addTargetEntry(new TargetEntry("stations", station));
+
+		se.add(stationtype);
 
 		/*
 		 * Define where-clause items and their mappings to SQL. Some operators need
