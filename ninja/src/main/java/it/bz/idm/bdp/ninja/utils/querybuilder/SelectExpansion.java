@@ -202,17 +202,17 @@ public class SelectExpansion {
 		return result;
 	}
 
-	public TargetList getTargetListByTargetEntryName(final String targetEntryName, Set<String> targetListNames) {
+	public TargetList getTargetListByTargetName(final String targetName, Set<String> targetListNames) {
 		for (TargetList targetList : getTargetLists(targetListNames)) {
-			if (targetList.getNames().contains(targetEntryName))
+			if (targetList.getNames().contains(targetName))
 				return targetList;
 		}
 		return null;
 	}
 
-	public TargetList getTargetListByTargetEntryName(final String targetEntryName) {
+	public TargetList getTargetListByTargetName(final String targetName) {
 		for (TargetList targetList : schema.values()) {
-			if (targetList.getNames().contains(targetEntryName))
+			if (targetList.getNames().contains(targetName))
 				return targetList;
 		}
 		return null;
@@ -301,32 +301,32 @@ public class SelectExpansion {
 			candidateTargetNames = new ArrayList<String>(getTargetListNames(targetListNames));
 		} else {
 			candidateTargetNames = new ArrayList<String>();
-			for (String targetEntryOrFunc : targetEntries) {
+			for (String targetOrFunc : targetEntries) {
 				String func = null;
-				String targetEntry = null;
-				if (targetEntryOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
-					int idx = targetEntryOrFunc.indexOf('(');
-					func = targetEntryOrFunc.substring(0, idx);
-					targetEntry = targetEntryOrFunc.substring(idx + 1, targetEntryOrFunc.length() - 1);
+				String targetName = null;
+				if (targetOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
+					int idx = targetOrFunc.indexOf('(');
+					func = targetOrFunc.substring(0, idx);
+					targetName = targetOrFunc.substring(idx + 1, targetOrFunc.length() - 1);
 				} else {
-					targetEntry = targetEntryOrFunc;
-					if (targetEntry.contains(".")) {
+					targetName = targetOrFunc;
+					if (targetName.contains(".")) {
 						hasJSONSelectors = true;
 					} else {
-						groupByCandidates.add(targetEntry);
+						groupByCandidates.add(targetName);
 					}
 				}
-				if (!targetEntry.matches(ALIAS_VALIDATION)) {
-					throw new SimpleException(ErrorCode.ALIAS_INVALID, targetEntry);
+				if (!targetName.matches(ALIAS_VALIDATION)) {
+					throw new SimpleException(ErrorCode.ALIAS_INVALID, targetName);
 				}
-				_addFunctions(targetEntry, func);
-				int index = targetEntry.indexOf('.');
-				String mainAlias = index > 0 ? targetEntry.substring(0, index) : targetEntry;
+				_addFunctions(targetName, func);
+				int index = targetName.indexOf('.');
+				String mainAlias = index > 0 ? targetName.substring(0, index) : targetName;
 				candidateTargetNames.add(mainAlias);
 
 				if (index > 0) {
 					List<String> aliasList = aliasToJSONPath.getOrDefault(mainAlias, new ArrayList<String>());
-					aliasList.add(targetEntry.substring(index + 1));
+					aliasList.add(targetName.substring(index + 1));
 					aliasToJSONPath.putIfAbsent(mainAlias, aliasList);
 				}
 			}
@@ -343,7 +343,7 @@ public class SelectExpansion {
 		int curPos = 0;
 		while (curPos < candidateTargetNames.size()) {
 			String targetName = candidateTargetNames.get(curPos);
-			TargetList targetList = getTargetListByTargetEntryName(targetName, targetListNames);
+			TargetList targetList = getTargetListByTargetName(targetName, targetListNames);
 			if (targetList == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, targetName, targetListNames);
 				se.addData("targetName", targetName);
@@ -631,7 +631,7 @@ public class SelectExpansion {
 		return new ArrayList<String>(usedJSONAliases);
 	}
 
-	public List<String> getGroupByColumns() {
+	public List<String> getGroupByTargetNames() {
 		if (dirty) {
 			throw new SimpleException(ErrorCode.DIRTY_STATE);
 		}
@@ -664,7 +664,7 @@ public class SelectExpansion {
 	}
 
 	public String getColumn(String alias) {
-		TargetList definition = getTargetListByTargetEntryName(alias);
+		TargetList definition = getTargetListByTargetName(alias);
 		if (definition == null)
 			return null;
 		return definition.get(alias).getColumn();
@@ -762,7 +762,7 @@ public class SelectExpansion {
 		}
 
 		for (String alias : usedAliases) {
-			TargetList def = getTargetListByTargetEntryName(alias);
+			TargetList def = getTargetListByTargetName(alias);
 			Map<String, Object> curMap = result.get(def.getName());
 			if (def.get(alias).hasColumn()) {
 				/*
@@ -836,7 +836,7 @@ public class SelectExpansion {
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 		System.out.println(se.getWhereParameters());
-		System.out.println(se.getGroupByColumns());
+		System.out.println(se.getGroupByTargetNames());
 		//
 		//// {A=A.a as a, A.b as b, B=B.x as x}
 		//// [a, b, c, x]

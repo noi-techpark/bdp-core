@@ -281,11 +281,11 @@ public class QueryBuilder {
 		if (! se.hasFunctions()) {
 			return this;
 		}
-		List<String> groupByColumns = se.getGroupByColumns();
-		if (! groupByColumns.isEmpty()) {
+		List<String> groupByTargetNames = se.getGroupByTargetNames();
+		if (! groupByTargetNames.isEmpty()) {
 			StringJoiner sj = new StringJoiner(",");
-			for (String col : groupByColumns) {
-				sj.add(se.getTargetListByTargetEntryName(col).get(col).getColumn()); //FIXME is this not double circular? TO BE TESTED WITH JUNIT!!!!
+			for (String targetName : groupByTargetNames) {
+				sj.add(se.getTargetListByTargetName(targetName).get(targetName).getColumn()); //FIXME is this not double circular? TO BE TESTED WITH JUNIT!!!!
 			}
 			addSql("group by " + sj);
 		}
