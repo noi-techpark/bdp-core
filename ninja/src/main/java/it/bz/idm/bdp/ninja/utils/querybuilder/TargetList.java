@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * <pre>
- * A select definition is a hierarchy of definition names (categories), aliases
+ * A TargetList is a hierarchy of definition names (categories), aliases
  * and table/columns.
  *
  * Example:
@@ -16,6 +16,7 @@ import java.util.Set;
  *
  * Here definitions are EMPLOYEE and MANAGER, aliases are ename, emanager and
  * mname, and table/column binaries are emp.fullname and mgr.fullname.
+ * TODO rewrite this to match target/targetlist
  * </pre>
  *
  * @author Peter Moser <p.moser@noi.bz.it>
@@ -33,7 +34,7 @@ public class TargetList {
 	 * This could be rewritten into: "measurements.double_value AS mvalue"
 	 * </pre>
 	 */
-	private Map<String, TargetEntry> targetEntryMap = new HashMap<String, TargetEntry>();
+	private Map<String, Target> targetMap = new HashMap<String, Target>();
 
 	public TargetList(final String name) {
 		if (name == null || name.isEmpty()) {
@@ -50,39 +51,39 @@ public class TargetList {
 		return name;
 	}
 
-	public TargetList add(final TargetEntry targetEntry) {
-		if (targetEntry == null) {
-			throw new RuntimeException("TargetEntry must be non-null");
+	public TargetList add(final Target target) {
+		if (target == null) {
+			throw new RuntimeException("Target must be non-null");
 		}
-		if (targetEntryMap.containsKey(targetEntry.getName())) {
-			throw new RuntimeException("TargetEntry '" + targetEntry.getName() + "' already exists");
+		if (targetMap.containsKey(target.getName())) {
+			throw new RuntimeException("Target '" + target.getName() + "' already exists");
 		}
-		targetEntryMap.put(targetEntry.getName(), targetEntry);
+		targetMap.put(target.getName(), target);
 		return this;
 	}
 
-	public Map<String,TargetEntry> getAll() {
-		return this.targetEntryMap;
+	public Map<String,Target> getAll() {
+		return this.targetMap;
 	}
 
-	public TargetEntry get(final String targetEntryName) {
-		return this.targetEntryMap.get(targetEntryName);
+	public Target get(final String targetName) {
+		return this.targetMap.get(targetName);
 	}
 
 
 	public Set<String> getNames() {
-		return targetEntryMap.keySet();
+		return targetMap.keySet();
 	}
 
-	public boolean exists(final String targetEntryName) {
-		return targetEntryMap.containsKey(targetEntryName);
+	public boolean exists(final String targetName) {
+		return targetMap.containsKey(targetName);
 	}
 
-	public Map<String, TargetList> getSelectDefinitionsOnly() {
+	public Map<String, TargetList> getTargetListsOnly() {
 		Map<String, TargetList> result = new HashMap<>();
-		for (TargetEntry targetEntry : targetEntryMap.values()) {
-			if (targetEntry.isSelectDefinition()) {
-				result.put(targetEntry.getName(), targetEntry.getSelectDefinition());
+		for (Target target : targetMap.values()) {
+			if (target.hasTargetList()) {
+				result.put(target.getName(), target.getTargetList());
 			}
 		}
 		return result;
@@ -90,7 +91,7 @@ public class TargetList {
 
 	@Override
 	public String toString() {
-		return "SelectDefinition [name=" + name + ", targetEntries=" + targetEntryMap.toString() + "]";
+		return "TargetList [name=" + name + ", targets=" + targetMap.toString() + "]";
 	}
 
 }

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Target;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetList;
 
 public class QueryBuilderTests {
@@ -54,14 +54,14 @@ public class QueryBuilderTests {
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
 		TargetList defC = TargetList.init("C")
-				.add(new TargetEntry("d", "C.d"));
+				.add(new Target("d", "C.d"));
 		TargetList defB = TargetList.init("B")
-				.add(new TargetEntry("x", "B.x"))
-				.add(new TargetEntry("y", defC));
+				.add(new Target("x", "B.x"))
+				.add(new Target("y", defC));
 		TargetList defA = TargetList.init("A")
-				.add(new TargetEntry("a", "A.a"))
-				.add(new TargetEntry("b", defB))
-				.add(new TargetEntry("c", "A.c"));
+				.add(new Target("a", "A.a"))
+				.add(new Target("b", defB))
+				.add(new Target("c", "A.c"));
 		se.add(defA);
 		se.add(defB);
 		se.add(defC);

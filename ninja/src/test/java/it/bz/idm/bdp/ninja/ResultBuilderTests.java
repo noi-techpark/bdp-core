@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetList;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.ninja.utils.querybuilder.TargetEntry;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Target;
 import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
 
 @SuppressWarnings("serial")
@@ -26,59 +26,59 @@ public class ResultBuilderTests {
 	public void setUpBefore() throws Exception {
 		se = new SelectExpansion();
 		TargetList measurement = TargetList.init("measurement")
-				.add(new TargetEntry("mvalidtime", "me.timestamp"))
-				.add(new TargetEntry("mtransactiontime", "me.created_on"))
-				.add(new TargetEntry("mperiod", "me.period"));
+				.add(new Target("mvalidtime", "me.timestamp"))
+				.add(new Target("mtransactiontime", "me.created_on"))
+				.add(new Target("mperiod", "me.period"));
 
 		se.add(measurement);
 
 		TargetList measurementdouble = TargetList.init("measurementdouble")
-				.add(new TargetEntry("mvalue_double", "me.double_value")
+				.add(new Target("mvalue_double", "me.double_value")
 						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
 
 		se.add(measurementdouble);
 
 		TargetList measurementstring = TargetList.init("measurementstring")
-				.add(new TargetEntry("mvalue_string", "me.string_value")
+				.add(new Target("mvalue_string", "me.string_value")
 						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
 
 		se.add(measurementstring);
 
 		TargetList datatype = TargetList.init("datatype")
-				.add(new TargetEntry("tname", "t.cname")).add(new TargetEntry("tunit", "t.cunit"))
-				.add(new TargetEntry("ttype", "t.rtype"))
-				.add(new TargetEntry("tdescription", "t.description"))
-				.add(new TargetEntry("tmeasurements", measurement));
+				.add(new Target("tname", "t.cname")).add(new Target("tunit", "t.cunit"))
+				.add(new Target("ttype", "t.rtype"))
+				.add(new Target("tdescription", "t.description"))
+				.add(new Target("tmeasurements", measurement));
 
 		se.add(datatype);
 
-		TargetList parent = TargetList.init("parent").add(new TargetEntry("pname", "p.name"))
-				.add(new TargetEntry("ptype", "p.stationtype"))
-				.add(new TargetEntry("pcode", "p.stationcode"))
-				.add(new TargetEntry("porigin", "p.origin"))
-				.add(new TargetEntry("pactive", "p.active"))
-				.add(new TargetEntry("pavailable", "p.available"))
-				.add(new TargetEntry("pcoordinate", "p.pointprojection"))
-				.add(new TargetEntry("pmetadata", "pm.json"));
+		TargetList parent = TargetList.init("parent").add(new Target("pname", "p.name"))
+				.add(new Target("ptype", "p.stationtype"))
+				.add(new Target("pcode", "p.stationcode"))
+				.add(new Target("porigin", "p.origin"))
+				.add(new Target("pactive", "p.active"))
+				.add(new Target("pavailable", "p.available"))
+				.add(new Target("pcoordinate", "p.pointprojection"))
+				.add(new Target("pmetadata", "pm.json"));
 
 		se.add(parent);
 
 		TargetList station = TargetList.init("station")
-				.add(new TargetEntry("sname", "s.name"))
-				.add(new TargetEntry("stype", "s.stationtype"))
-				.add(new TargetEntry("scode", "s.stationcode"))
-				.add(new TargetEntry("sorigin", "s.origin"))
-				.add(new TargetEntry("sactive", "s.active"))
-				.add(new TargetEntry("savailable", "s.available"))
-				.add(new TargetEntry("scoordinate", "s.pointprojection"))
-				.add(new TargetEntry("smetadata", "m.json"))
-				.add(new TargetEntry("sparent", parent))
-				.add(new TargetEntry("sdatatypes", datatype));
+				.add(new Target("sname", "s.name"))
+				.add(new Target("stype", "s.stationtype"))
+				.add(new Target("scode", "s.stationcode"))
+				.add(new Target("sorigin", "s.origin"))
+				.add(new Target("sactive", "s.active"))
+				.add(new Target("savailable", "s.available"))
+				.add(new Target("scoordinate", "s.pointprojection"))
+				.add(new Target("smetadata", "m.json"))
+				.add(new Target("sparent", parent))
+				.add(new Target("sdatatypes", datatype));
 
 		se.add(station);
 
 		TargetList stationtype = TargetList.init("stationtype")
-				.add(new TargetEntry("stations", station));
+				.add(new Target("stations", station));
 
 		se.add(stationtype);
 
