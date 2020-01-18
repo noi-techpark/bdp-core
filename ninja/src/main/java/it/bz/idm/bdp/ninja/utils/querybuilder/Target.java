@@ -3,10 +3,8 @@ package it.bz.idm.bdp.ninja.utils.querybuilder;
 /**
  * Target
  *
- * An API consumer uses a Target to select columns or a pointer that creates ,
- * if he wants to select a certain column, or a set of columns. So, if the
- * Target has no column set, it is just a pointer to a TargetList, which
- * contains addtional sets of columns.
+ * An API consumer uses a Target to select columns or a set of columns. So, if
+ * the Target has no column, it is a pointer to a TargetList instead.
  */
 public class Target {
 	private final String name;
