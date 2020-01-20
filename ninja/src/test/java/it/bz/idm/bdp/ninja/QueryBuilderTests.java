@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
@@ -53,6 +54,7 @@ public class QueryBuilderTests {
 	@Before
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
+		Schema schema = new Schema();
 		TargetDefList defC = TargetDefList.init("C")
 				.add(new TargetDef("d", "C.d"));
 		TargetDefList defB = TargetDefList.init("B")
@@ -62,9 +64,10 @@ public class QueryBuilderTests {
 				.add(new TargetDef("a", "A.a"))
 				.add(new TargetDef("b", defB))
 				.add(new TargetDef("c", "A.c"));
-		se.add(defA);
-		se.add(defB);
-		se.add(defC);
+		schema.add(defA);
+		schema.add(defB);
+		schema.add(defC);
+		se.setSchema(schema);
 		QueryBuilder.setup(se);
 	}
 

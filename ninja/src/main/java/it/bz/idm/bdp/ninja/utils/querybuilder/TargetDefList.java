@@ -34,11 +34,11 @@ public class TargetDefList {
 	 * This could be rewritten into: "measurements.double_value AS mvalue"
 	 * </pre>
 	 */
-	private Map<String, TargetDef> targetMap = new HashMap<String, TargetDef>();
+	private Map<String, TargetDef> targetDefMap = new HashMap<String, TargetDef>();
 
 	public TargetDefList(final String name) {
 		if (name == null || name.isEmpty()) {
-			throw new RuntimeException("A TargetDefList's name must be set!");
+			throw new RuntimeException("A TargetDefList must have a non-empty name!");
 		}
 		this.name = name;
 	}
@@ -55,35 +55,35 @@ public class TargetDefList {
 		if (TargetDef == null) {
 			throw new RuntimeException("TargetDef must be non-null");
 		}
-		if (targetMap.containsKey(TargetDef.getName())) {
+		if (targetDefMap.containsKey(TargetDef.getName())) {
 			throw new RuntimeException("TargetDef '" + TargetDef.getName() + "' already exists");
 		}
-		targetMap.put(TargetDef.getName(), TargetDef);
+		targetDefMap.put(TargetDef.getName(), TargetDef);
 		return this;
 	}
 
 	public Map<String,TargetDef> getAll() {
-		return this.targetMap;
+		return this.targetDefMap;
 	}
 
 	public TargetDef get(final String targetName) {
-		return this.targetMap.get(targetName);
+		return this.targetDefMap.get(targetName);
 	}
 
 
 	public Set<String> getNames() {
-		return targetMap.keySet();
+		return targetDefMap.keySet();
 	}
 
 	public boolean exists(final String targetName) {
-		return targetMap.containsKey(targetName);
+		return targetDefMap.containsKey(targetName);
 	}
 
-	public Map<String, TargetDefList> getTargetListsOnly() {
+	public Map<String, TargetDefList> getTargetDefListsOnly() {
 		Map<String, TargetDefList> result = new HashMap<>();
-		for (TargetDef TargetDef : targetMap.values()) {
-			if (TargetDef.hasTargetDefList()) {
-				result.put(TargetDef.getName(), TargetDef.getTargetList());
+		for (TargetDef targetDef : targetDefMap.values()) {
+			if (targetDef.hasTargetDefList()) {
+				result.put(targetDef.getName(), targetDef.getTargetList());
 			}
 		}
 		return result;
@@ -91,7 +91,7 @@ public class TargetDefList {
 
 	@Override
 	public String toString() {
-		return "TargetList [name=" + name + ", targets=" + targetMap.toString() + "]";
+		return "TargetList [name=" + name + ", targets=" + targetDefMap.toString() + "]";
 	}
 
 }

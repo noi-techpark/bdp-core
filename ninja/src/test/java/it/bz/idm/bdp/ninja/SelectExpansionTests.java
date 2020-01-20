@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.config.SelectExpansionConfig;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion.ErrorCode;
@@ -26,6 +27,7 @@ public class SelectExpansionTests {
 
 	@Before
 	public void setup() {
+		Schema schemaNested = new Schema();
 		seNested = new SelectExpansion();
 		TargetDefList seNestedC = TargetDefList.init("C")
 				.add(new TargetDef("h", "C.h"));
@@ -36,10 +38,12 @@ public class SelectExpansionTests {
 		TargetDefList seNestedB = TargetDefList.init("B")
 				.add(new TargetDef("x", "B.x"))
 				.add(new TargetDef("y", seNestedA));
-		seNested.add(seNestedA);
-		seNested.add(seNestedB);
-		seNested.add(seNestedC);
+		schemaNested.add(seNestedA);
+		schemaNested.add(seNestedB);
+		schemaNested.add(seNestedC);
+		seNested.setSchema(schemaNested);
 
+		Schema schemaFlat = new Schema();
 		seFlat = new SelectExpansion();
 		TargetDefList seFlatA = TargetDefList.init("A")
 				.add(new TargetDef("a", "A.a"))
@@ -48,10 +52,12 @@ public class SelectExpansionTests {
 				.add(new TargetDef("x", "B.x"));
 		TargetDefList seFlatC = TargetDefList.init("C")
 				.add(new TargetDef("i", "C.i"));
-		seFlat.add(seFlatA);
-		seFlat.add(seFlatB);
-		seFlat.add(seFlatC);
+		schemaFlat.add(seFlatA);
+		schemaFlat.add(seFlatB);
+		schemaFlat.add(seFlatC);
+		seFlat.setSchema(schemaFlat);
 
+		Schema schemaNestedBig = new Schema();
 		seNestedBig = new SelectExpansion();
 		TargetDefList seNestedBigA = TargetDefList.init("A")
 				.add(new TargetDef("a", "A.a"))
@@ -64,13 +70,16 @@ public class SelectExpansionTests {
 				.add(new TargetDef("j", seNestedBigB));
 		TargetDefList seNestedBigE = TargetDefList.init("E")
 				.add(new TargetDef("j", seNestedBigB));
-		seNestedBig.add(seNestedBigA);
-		seNestedBig.add(seNestedBigB);
-		seNestedBig.add(seNestedBigC);
-		seNestedBig.add(seNestedBigE);
+		schemaNestedBig.add(seNestedBigA);
+		schemaNestedBig.add(seNestedBigB);
+		schemaNestedBig.add(seNestedBigC);
+		schemaNestedBig.add(seNestedBigE);
+		seNestedBig.setSchema(schemaNestedBig);
 
+		Schema schemaMinimal = new Schema();
 		seMinimal = new SelectExpansion();
-		seMinimal.add(new TargetDefList("A").add(new TargetDef("a", "A.a")));
+		schemaMinimal.add(new TargetDefList("A").add(new TargetDef("a", "A.a")));
+		seMinimal.setSchema(schemaMinimal);
 
 		seMinimal.addOperator("string", "eq", "%c = %v");
 		seMinimal.addOperator("string", "neq", "%c <> %v");
@@ -146,7 +155,7 @@ public class SelectExpansionTests {
 			fail("Exception expected");
 		} catch (SimpleException e) {
 			assertEquals(ErrorCode.KEY_NOT_INSIDE_DEFLIST, e.getId());
-			assertEquals("x", e.getData().get("alias"));
+			assertEquals("x", e.getData().get("targetName"));
 		}
 	}
 

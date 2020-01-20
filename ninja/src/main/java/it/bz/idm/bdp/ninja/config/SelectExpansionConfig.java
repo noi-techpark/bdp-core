@@ -3,6 +3,7 @@ package it.bz.idm.bdp.ninja.config;
 import it.bz.idm.bdp.ninja.utils.miniparser.Consumer;
 import it.bz.idm.bdp.ninja.utils.miniparser.Token;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 
@@ -13,66 +14,54 @@ public class SelectExpansionConfig {
 	public SelectExpansionConfig() {
 		super();
 
-		se = new SelectExpansion();
+		Schema schema = new Schema();
 
-		TargetDefList measurement = TargetDefList.init("measurement")
-				.add(new TargetDef("mvalidtime", "me.timestamp"))
-				.add(new TargetDef("mtransactiontime", "me.created_on"))
-				.add(new TargetDef("mperiod", "me.period"));
+		TargetDefList measurement = TargetDefList.init("measurement").add(new TargetDef("mvalidtime", "me.timestamp"))
+				.add(new TargetDef("mtransactiontime", "me.created_on")).add(new TargetDef("mperiod", "me.period"));
 
-		se.add(measurement);
+		schema.add(measurement);
 
 		TargetDefList measurementdouble = TargetDefList.init("measurementdouble")
 				.add(new TargetDef("mvalue_double", "me.double_value")
 						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
 
-		se.add(measurementdouble);
+		schema.add(measurementdouble);
 
 		TargetDefList measurementstring = TargetDefList.init("measurementstring")
 				.add(new TargetDef("mvalue_string", "me.string_value")
 						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
 
-		se.add(measurementstring);
+		schema.add(measurementstring);
 
-		TargetDefList datatype = TargetDefList.init("datatype")
-				.add(new TargetDef("tname", "t.cname"))
-				.add(new TargetDef("tunit", "t.cunit"))
-				.add(new TargetDef("ttype", "t.rtype"))
-				.add(new TargetDef("tdescription", "t.description"))
-				.add(new TargetDef("tmeasurements", measurement));
+		TargetDefList datatype = TargetDefList.init("datatype").add(new TargetDef("tname", "t.cname"))
+				.add(new TargetDef("tunit", "t.cunit")).add(new TargetDef("ttype", "t.rtype"))
+				.add(new TargetDef("tdescription", "t.description")).add(new TargetDef("tmeasurements", measurement));
 
-		se.add(datatype);
+		schema.add(datatype);
 
-		TargetDefList parent = TargetDefList.init("parent")
-				.add(new TargetDef("pname", "p.name"))
-				.add(new TargetDef("ptype", "p.stationtype"))
-				.add(new TargetDef("pcode", "p.stationcode"))
-				.add(new TargetDef("porigin", "p.origin"))
-				.add(new TargetDef("pactive", "p.active"))
-				.add(new TargetDef("pavailable", "p.available"))
-				.add(new TargetDef("pcoordinate", "p.pointprojection"))
+		TargetDefList parent = TargetDefList.init("parent").add(new TargetDef("pname", "p.name"))
+				.add(new TargetDef("ptype", "p.stationtype")).add(new TargetDef("pcode", "p.stationcode"))
+				.add(new TargetDef("porigin", "p.origin")).add(new TargetDef("pactive", "p.active"))
+				.add(new TargetDef("pavailable", "p.available")).add(new TargetDef("pcoordinate", "p.pointprojection"))
 				.add(new TargetDef("pmetadata", "pm.json"));
 
-		se.add(parent);
+		schema.add(parent);
 
-		TargetDefList station = TargetDefList.init("station")
-				.add(new TargetDef("sname", "s.name"))
-				.add(new TargetDef("stype", "s.stationtype"))
-				.add(new TargetDef("scode", "s.stationcode"))
-				.add(new TargetDef("sorigin", "s.origin"))
-				.add(new TargetDef("sactive", "s.active"))
-				.add(new TargetDef("savailable", "s.available"))
-				.add(new TargetDef("scoordinate", "s.pointprojection"))
-				.add(new TargetDef("smetadata", "m.json"))
-				.add(new TargetDef("sparent", parent))
+		TargetDefList station = TargetDefList.init("station").add(new TargetDef("sname", "s.name"))
+				.add(new TargetDef("stype", "s.stationtype")).add(new TargetDef("scode", "s.stationcode"))
+				.add(new TargetDef("sorigin", "s.origin")).add(new TargetDef("sactive", "s.active"))
+				.add(new TargetDef("savailable", "s.available")).add(new TargetDef("scoordinate", "s.pointprojection"))
+				.add(new TargetDef("smetadata", "m.json")).add(new TargetDef("sparent", parent))
 				.add(new TargetDef("sdatatypes", datatype));
 
-		se.add(station);
+		schema.add(station);
 
-		TargetDefList stationtype = TargetDefList.init("stationtype")
-				.add(new TargetDef("stations", station));
+		TargetDefList stationtype = TargetDefList.init("stationtype").add(new TargetDef("stations", station));
 
-		se.add(stationtype);
+		schema.add(stationtype);
+
+		se = new SelectExpansion();
+		se.setSchema(schema);
 
 		/*
 		 * Define where-clause items and their mappings to SQL. Some operators need
