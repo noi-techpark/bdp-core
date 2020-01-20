@@ -16,12 +16,12 @@ import java.util.Set;
  *
  * Here definitions are EMPLOYEE and MANAGER, aliases are ename, emanager and
  * mname, and table/column binaries are emp.fullname and mgr.fullname.
- * TODO rewrite this to match target/targetlist
+ * TODO rewrite this to match TargetDef/targetlist
  * </pre>
  *
  * @author Peter Moser <p.moser@noi.bz.it>
  */
-public class TargetList {
+public class TargetDefList {
 
 	private final String name;
 
@@ -34,39 +34,39 @@ public class TargetList {
 	 * This could be rewritten into: "measurements.double_value AS mvalue"
 	 * </pre>
 	 */
-	private Map<String, Target> targetMap = new HashMap<String, Target>();
+	private Map<String, TargetDef> targetMap = new HashMap<String, TargetDef>();
 
-	public TargetList(final String name) {
+	public TargetDefList(final String name) {
 		if (name == null || name.isEmpty()) {
-			throw new RuntimeException("A select definition's name must be set!");
+			throw new RuntimeException("A TargetDefList's name must be set!");
 		}
 		this.name = name;
 	}
 
-	public static TargetList init(final String name) {
-		return new TargetList(name);
+	public static TargetDefList init(final String name) {
+		return new TargetDefList(name);
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public TargetList add(final Target target) {
-		if (target == null) {
-			throw new RuntimeException("Target must be non-null");
+	public TargetDefList add(final TargetDef TargetDef) {
+		if (TargetDef == null) {
+			throw new RuntimeException("TargetDef must be non-null");
 		}
-		if (targetMap.containsKey(target.getName())) {
-			throw new RuntimeException("Target '" + target.getName() + "' already exists");
+		if (targetMap.containsKey(TargetDef.getName())) {
+			throw new RuntimeException("TargetDef '" + TargetDef.getName() + "' already exists");
 		}
-		targetMap.put(target.getName(), target);
+		targetMap.put(TargetDef.getName(), TargetDef);
 		return this;
 	}
 
-	public Map<String,Target> getAll() {
+	public Map<String,TargetDef> getAll() {
 		return this.targetMap;
 	}
 
-	public Target get(final String targetName) {
+	public TargetDef get(final String targetName) {
 		return this.targetMap.get(targetName);
 	}
 
@@ -79,11 +79,11 @@ public class TargetList {
 		return targetMap.containsKey(targetName);
 	}
 
-	public Map<String, TargetList> getTargetListsOnly() {
-		Map<String, TargetList> result = new HashMap<>();
-		for (Target target : targetMap.values()) {
-			if (target.hasTargetList()) {
-				result.put(target.getName(), target.getTargetList());
+	public Map<String, TargetDefList> getTargetListsOnly() {
+		Map<String, TargetDefList> result = new HashMap<>();
+		for (TargetDef TargetDef : targetMap.values()) {
+			if (TargetDef.hasTargetDefList()) {
+				result.put(TargetDef.getName(), TargetDef.getTargetList());
 			}
 		}
 		return result;

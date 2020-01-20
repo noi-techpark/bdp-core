@@ -25,7 +25,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
 /**
  * <pre>
- * A select expansion starts from a {@link TargetList} and finds out which
+ * A select expansion starts from a {@link TargetDefList} and finds out which
  * tables or columns must be used, given a select targetlist and where clauses.
  * It is also a mapping from aliases to column names.
  *
@@ -108,7 +108,7 @@ public class SelectExpansion {
 	}
 
 	/* We use tree sets and maps here, because we want to have elements naturally sorted */
-	private Map<String, TargetList> schema = new TreeMap<String, TargetList>();
+	private Map<String, TargetDefList> schema = new TreeMap<String, TargetDefList>();
 	private Map<String, String> aliases = new TreeMap<String, String>();
 	private Map<String, String> pointers = new TreeMap<String, String>();
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
@@ -134,7 +134,7 @@ public class SelectExpansion {
 	}
 
 	// TODO create a Schema class and put these methods there
-	public void add(final String targetListName, final TargetList targetList) {
+	public void add(final String targetListName, final TargetDefList targetList) {
 		if (targetListName == null || targetListName.isEmpty() || targetList == null) {
 			throw new SimpleException(ErrorCode.ADD_INVALID_DATA);
 		}
@@ -142,28 +142,28 @@ public class SelectExpansion {
 		dirty = true;
 	}
 
-	public SelectExpansion add(final TargetList targetList) {
+	public SelectExpansion add(final TargetDefList targetList) {
 		add(targetList.getName(), targetList);
 		return this;
 	}
 
-	public TargetList getTargetList(final String targetListName) {
-		TargetList targetList = schema.get(targetListName);
+	public TargetDefList getTargetList(final String targetListName) {
+		TargetDefList targetList = schema.get(targetListName);
 		if (targetList == null) {
 			throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, targetListName);
 		}
 		return targetList;
 	}
 
-	public TargetList getTargetListOrNew(final String name) {
-		TargetList res = schema.get(name);
+	public TargetDefList getTargetListOrNew(final String name) {
+		TargetDefList res = schema.get(name);
 		if (res == null)
-			return new TargetList(name);
+			return new TargetDefList(name);
 		return res;
 	}
 
-	public SelectExpansion addTarget(final String selectDefinitionName, final Target targetEntry) {
-		TargetList selectDefinition = getTargetListOrNew(selectDefinitionName);
+	public SelectExpansion addTarget(final String selectDefinitionName, final TargetDef targetEntry) {
+		TargetDefList selectDefinition = getTargetListOrNew(selectDefinitionName);
 		selectDefinition.add(targetEntry);
 		schema.put(selectDefinitionName, selectDefinition);
 		dirty = true;
@@ -173,7 +173,7 @@ public class SelectExpansion {
 	public Map<String, String> getAliasMap() {
 		if (dirty) {
 			aliases.clear();
-			for (TargetList defs : schema.values()) {
+			for (TargetDefList defs : schema.values()) {
 				for (String alias : defs.getNames()) {
 					aliases.put(alias, defs.getName());
 				}
@@ -185,7 +185,7 @@ public class SelectExpansion {
 	public Map<String, String> getPointerMap() {
 		if (dirty) {
 			pointers.clear();
-			for (TargetList defs : schema.values()) {
+			for (TargetDefList defs : schema.values()) {
 				for (String alias : defs.getTargetListsOnly().keySet()) {
 					pointers.put(alias, defs.getName());
 				}
@@ -196,31 +196,31 @@ public class SelectExpansion {
 
 	public Set<String> getTargetListNames(Set<String> targetListNames) {
 		Set<String> result = new HashSet<String>();
-		for (TargetList targetList : getTargetLists(targetListNames)) {
+		for (TargetDefList targetList : getTargetLists(targetListNames)) {
 			result.addAll(targetList.getNames());
 		}
 		return result;
 	}
 
-	public TargetList getTargetListByTargetName(final String targetName, Set<String> targetListNames) {
-		for (TargetList targetList : getTargetLists(targetListNames)) {
+	public TargetDefList getTargetListByTargetName(final String targetName, Set<String> targetListNames) {
+		for (TargetDefList targetList : getTargetLists(targetListNames)) {
 			if (targetList.getNames().contains(targetName))
 				return targetList;
 		}
 		return null;
 	}
 
-	public TargetList getTargetListByTargetName(final String targetName) {
-		for (TargetList targetList : schema.values()) {
+	public TargetDefList getTargetListByTargetName(final String targetName) {
+		for (TargetDefList targetList : schema.values()) {
 			if (targetList.getNames().contains(targetName))
 				return targetList;
 		}
 		return null;
 	}
 
-	public TargetList getParentDefinition(final String targetListName, Set<String> targetListNames) {
-		for (TargetList def : getTargetLists(targetListNames)) {
-			for (TargetList child : def.getTargetListsOnly().values()) {
+	public TargetDefList getParentDefinition(final String targetListName, Set<String> targetListNames) {
+		for (TargetDefList def : getTargetLists(targetListNames)) {
+			for (TargetDefList child : def.getTargetListsOnly().values()) {
 				if (child.getName().equals(targetListName))
 					return def;
 			}
@@ -228,7 +228,7 @@ public class SelectExpansion {
 		return null;
 	}
 
-	public TargetList getParentDefinition(final String defName) {
+	public TargetDefList getParentDefinition(final String defName) {
 		return getParentDefinition(defName, null);
 	}
 
@@ -237,11 +237,11 @@ public class SelectExpansion {
 	}
 
 	public String getParentAlias(final String defName, Set<String> defNames) {
-		TargetList parent = getParentDefinition(defName, defNames);
+		TargetDefList parent = getParentDefinition(defName, defNames);
 		if (parent == null) {
 			return null;
 		}
-		for (Entry<String, TargetList> child : parent.getTargetListsOnly().entrySet()) {
+		for (Entry<String, TargetDefList> child : parent.getTargetListsOnly().entrySet()) {
 			if (child.getValue().getName().equals(defName)) {
 				return child.getKey();
 			}
@@ -249,17 +249,17 @@ public class SelectExpansion {
 		return null;
 	}
 
-	public Set<TargetList> getDefinitions() {
-		return new HashSet<TargetList>(schema.values());
+	public Set<TargetDefList> getDefinitions() {
+		return new HashSet<TargetDefList>(schema.values());
 	}
 
-	public Set<TargetList> getTargetLists(Set<String> defNames) {
+	public Set<TargetDefList> getTargetLists(Set<String> defNames) {
 		if (defNames == null) {
 			return getDefinitions();
 		}
-		Set<TargetList> res = new HashSet<TargetList>();
+		Set<TargetDefList> res = new HashSet<TargetDefList>();
 		for (String defName : defNames) {
-			TargetList def = schema.get(defName);
+			TargetDefList def = schema.get(defName);
 			if (def == null) {
 				throw new SimpleException(ErrorCode.DEFINITION_NOT_FOUND, defName);
 			}
@@ -343,14 +343,14 @@ public class SelectExpansion {
 		int curPos = 0;
 		while (curPos < candidateTargetNames.size()) {
 			String targetName = candidateTargetNames.get(curPos);
-			TargetList targetList = getTargetListByTargetName(targetName, targetListNames);
+			TargetDefList targetList = getTargetListByTargetName(targetName, targetListNames);
 			if (targetList == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, targetName, targetListNames);
 				se.addData("targetName", targetName);
 				throw se;
 			}
 
-			Target target = targetList.get(targetName);
+			TargetDef target = targetList.get(targetName);
 
 			if (target.hasColumn()) {
 				usedJSONAliases.add(targetName);
@@ -387,7 +387,7 @@ public class SelectExpansion {
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else { /* the current alias is not a column, but a pointer to another targetList */
-				TargetList pointsTo = targetList.getTargetListsOnly().get(targetName);
+				TargetDefList pointsTo = targetList.getTargetListsOnly().get(targetName);
 				if (targetListNames.contains(pointsTo.getName())) {
 					usedJSONAliases.add(targetName);
 					usedJSONDefNames.add(getAliasMap().get(targetName));
@@ -664,7 +664,7 @@ public class SelectExpansion {
 	}
 
 	public String getColumn(String alias) {
-		TargetList definition = getTargetListByTargetName(alias);
+		TargetDefList definition = getTargetListByTargetName(alias);
 		if (definition == null)
 			return null;
 		return definition.get(alias).getColumn();
@@ -731,7 +731,7 @@ public class SelectExpansion {
 	}
 
 	public Map<String, Object> makeObj(Map<String, Object> record, String defName, boolean ignoreNull) {
-		TargetList def = getTargetList(defName);
+		TargetDefList def = getTargetList(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
 		for (String alias : def.getNames()) {
 			Object value = record.get(alias);
@@ -762,7 +762,7 @@ public class SelectExpansion {
 		}
 
 		for (String alias : usedAliases) {
-			TargetList def = getTargetListByTargetName(alias);
+			TargetDefList def = getTargetListByTargetName(alias);
 			Map<String, Object> curMap = result.get(def.getName());
 			if (def.get(alias).hasColumn()) {
 				/*
@@ -797,24 +797,24 @@ public class SelectExpansion {
 
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addTarget("C", new Target("h", "C.h").sqlBefore("before"));
+		se.addTarget("C", new TargetDef("h", "C.h").sqlBefore("before"));
 		// se.addColumn("C", "h", "C.h", "before", null);
-		se.addTarget("C", new Target("h", "C.h").sqlBefore("before"));
+		se.addTarget("C", new TargetDef("h", "C.h").sqlBefore("before"));
 		//se.addColumn("D", "d", "D.d", null, "after");
-		se.addTarget("D", new Target("d", "D.d").sqlAfter("after"));
+		se.addTarget("D", new TargetDef("d", "D.d").sqlAfter("after"));
 		//se.addColumn("B", "x", "B.x");
 		//se.addReplacement("B", "x", "x_replaced");
-		se.addTarget("B", new Target("x", "B.x").alias("x_replaced"));
+		se.addTarget("B", new TargetDef("x", "B.x").alias("x_replaced"));
 		//se.addSubDef("B", "y", "C");
-		se.addTarget("B", new Target("y", se.getTargetList("C")));
+		se.addTarget("B", new TargetDef("y", se.getTargetList("C")));
 		//se.addColumn("A", "a", "A.a");
-		se.addTarget("A", new Target("a", "A.a"));
+		se.addTarget("A", new TargetDef("a", "A.a"));
 		//se.addColumn("A", "b", "A.b");
-		se.addTarget("A", new Target("b", "A.b"));
+		se.addTarget("A", new TargetDef("b", "A.b"));
 		//se.addSubDef("A", "c", "B");
-		se.addTarget("A", new Target("c", se.getTargetList("B")));
+		se.addTarget("A", new TargetDef("c", se.getTargetList("B")));
 		//se.addSubDef("main", "t", "A");
-		se.addTarget("main", new Target("t", se.getTargetList("A")));
+		se.addTarget("main", new TargetDef("t", se.getTargetList("A")));
 
 		// se.addRewrite("measurement", "mvalue", "measurementdouble", "mvalue_double");
 		// se.addRewrite("measurement", "mvalue", "measurementstring", "mvalue_string");

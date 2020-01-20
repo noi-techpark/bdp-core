@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.config.SelectExpansionConfig;
-import it.bz.idm.bdp.ninja.utils.querybuilder.TargetList;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
-import it.bz.idm.bdp.ninja.utils.querybuilder.Target;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion.ErrorCode;
 import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
@@ -27,50 +27,50 @@ public class SelectExpansionTests {
 	@Before
 	public void setup() {
 		seNested = new SelectExpansion();
-		TargetList seNestedC = TargetList.init("C")
-				.add(new Target("h", "C.h"));
-		TargetList seNestedA = TargetList.init("A")
-				.add(new Target("a", "A.a"))
-				.add(new Target("b", "A.b"))
-				.add(new Target("c", seNestedC));
-		TargetList seNestedB = TargetList.init("B")
-				.add(new Target("x", "B.x"))
-				.add(new Target("y", seNestedA));
+		TargetDefList seNestedC = TargetDefList.init("C")
+				.add(new TargetDef("h", "C.h"));
+		TargetDefList seNestedA = TargetDefList.init("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", "A.b"))
+				.add(new TargetDef("c", seNestedC));
+		TargetDefList seNestedB = TargetDefList.init("B")
+				.add(new TargetDef("x", "B.x"))
+				.add(new TargetDef("y", seNestedA));
 		seNested.add(seNestedA);
 		seNested.add(seNestedB);
 		seNested.add(seNestedC);
 
 		seFlat = new SelectExpansion();
-		TargetList seFlatA = TargetList.init("A")
-				.add(new Target("a", "A.a"))
-				.add(new Target("b", "A.b"));
-		TargetList seFlatB = TargetList.init("B")
-				.add(new Target("x", "B.x"));
-		TargetList seFlatC = TargetList.init("C")
-				.add(new Target("i", "C.i"));
+		TargetDefList seFlatA = TargetDefList.init("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", "A.b"));
+		TargetDefList seFlatB = TargetDefList.init("B")
+				.add(new TargetDef("x", "B.x"));
+		TargetDefList seFlatC = TargetDefList.init("C")
+				.add(new TargetDef("i", "C.i"));
 		seFlat.add(seFlatA);
 		seFlat.add(seFlatB);
 		seFlat.add(seFlatC);
 
 		seNestedBig = new SelectExpansion();
-		TargetList seNestedBigA = TargetList.init("A")
-				.add(new Target("a", "A.a"))
-				.add(new Target("b", "A.b"));
-		TargetList seNestedBigB = TargetList.init("B")
-				.add(new Target("x", "B.x"))
-				.add(new Target("y", seNestedBigA));
-		TargetList seNestedBigC = TargetList.init("C")
-				.add(new Target("i", "C.i"))
-				.add(new Target("j", seNestedBigB));
-		TargetList seNestedBigE = TargetList.init("E")
-				.add(new Target("j", seNestedBigB));
+		TargetDefList seNestedBigA = TargetDefList.init("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", "A.b"));
+		TargetDefList seNestedBigB = TargetDefList.init("B")
+				.add(new TargetDef("x", "B.x"))
+				.add(new TargetDef("y", seNestedBigA));
+		TargetDefList seNestedBigC = TargetDefList.init("C")
+				.add(new TargetDef("i", "C.i"))
+				.add(new TargetDef("j", seNestedBigB));
+		TargetDefList seNestedBigE = TargetDefList.init("E")
+				.add(new TargetDef("j", seNestedBigB));
 		seNestedBig.add(seNestedBigA);
 		seNestedBig.add(seNestedBigB);
 		seNestedBig.add(seNestedBigC);
 		seNestedBig.add(seNestedBigE);
 
 		seMinimal = new SelectExpansion();
-		seMinimal.add(new TargetList("A").add(new Target("a", "A.a")));
+		seMinimal.add(new TargetDefList("A").add(new TargetDef("a", "A.a")));
 
 		seMinimal.addOperator("string", "eq", "%c = %v");
 		seMinimal.addOperator("string", "neq", "%c <> %v");
