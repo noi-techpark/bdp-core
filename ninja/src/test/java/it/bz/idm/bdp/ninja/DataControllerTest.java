@@ -3,6 +3,8 @@ package it.bz.idm.bdp.ninja;
 import static org.junit.Assert.assertEquals;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalField;
 
 import org.junit.Test;
 
@@ -12,7 +14,7 @@ public class DataControllerTest extends DataController {
 
 	@Test
 	public void testDate() {
-		LocalDateTime dt = getDateTime("2019-11-02");
+		ZonedDateTime dt = getDateTime("2019-11-02");
 		assertEquals(2019, dt.getYear());
 		assertEquals(11, dt.getMonthValue());
 		assertEquals(2, dt.getDayOfMonth());
@@ -23,7 +25,7 @@ public class DataControllerTest extends DataController {
 
 	@Test
 	public void testDateHour() {
-		LocalDateTime dt = getDateTime("2019-11-02T15");
+		ZonedDateTime dt = getDateTime("2019-11-02T15");
 		assertEquals(2019, dt.getYear());
 		assertEquals(11, dt.getMonthValue());
 		assertEquals(2, dt.getDayOfMonth());
@@ -35,7 +37,7 @@ public class DataControllerTest extends DataController {
 
 	@Test
 	public void testDateTimeHourMinuteSecond() {
-		LocalDateTime dt = getDateTime("2019-11-02T15:30:03");
+		ZonedDateTime dt = getDateTime("2019-11-02T15:30:03");
 		assertEquals(2019, dt.getYear());
 		assertEquals(11, dt.getMonthValue());
 		assertEquals(2, dt.getDayOfMonth());
@@ -46,8 +48,30 @@ public class DataControllerTest extends DataController {
 	}
 
 	@Test
-	public void testDateTimeFull() {
-		LocalDateTime dt = getDateTime("2019-11-02T15:30:33.123");
+	public void testDateTimeHourMinuteSecondNano() {
+		ZonedDateTime dt = getDateTime("2019-11-02T15:30:03.127");
+		assertEquals(2019, dt.getYear());
+		assertEquals(11, dt.getMonthValue());
+		assertEquals(2, dt.getDayOfMonth());
+		assertEquals(15, dt.getHour());
+		assertEquals(30, dt.getMinute());
+		assertEquals(3, dt.getSecond());
+		assertEquals(127000000, dt.getNano());
+	}
+	@Test
+	public void testDateTimeWithZone() {
+		ZonedDateTime dt = getDateTime("2019-11-02T15:30:33.123+0200");
+		assertEquals(2019, dt.getYear());
+		assertEquals(11, dt.getMonthValue());
+		assertEquals(2, dt.getDayOfMonth());
+		assertEquals(15, dt.getHour());
+		assertEquals(30, dt.getMinute());
+		assertEquals(33, dt.getSecond());
+		assertEquals(123000000, dt.getNano());
+	}
+	@Test
+	public void testDateTimeZone2() {
+		ZonedDateTime dt = getDateTime("2019-11-02T15:30:33.123Z");
 		assertEquals(2019, dt.getYear());
 		assertEquals(11, dt.getMonthValue());
 		assertEquals(2, dt.getDayOfMonth());

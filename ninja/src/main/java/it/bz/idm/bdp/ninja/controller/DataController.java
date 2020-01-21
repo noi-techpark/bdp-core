@@ -22,11 +22,17 @@
  */
 package it.bz.idm.bdp.ninja.controller;
 
+import java.text.DateFormat;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +66,7 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class DataController {
 
 	/* Do not forget to update DOC_TIME, when changing this */
-	private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]][Z]";
+	private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]][Z][z]";
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		WRONG_REPRESENTATION("Please choose 'flat' or 'tree' as representation. '%s' is not allowed."),
@@ -132,9 +138,14 @@ public class DataController {
 			.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
 			.toFormatter();
 
-	protected static LocalDateTime getDateTime(final String dateString) {
+	protected static ZonedDateTime getDateTime(final String dateString) {
 		try {
-			return LocalDateTime.from(DATE_FORMAT.parse(dateString));
+			try {
+				return ZonedDateTime.from(DATE_FORMAT.parse(dateString));
+			}
+			catch(DateTimeException e) {
+				return LocalDateTime.from(DATE_FORMAT.parse(dateString)).atZone(ZoneId.of("Z") );
+			}
 		} catch (final DateTimeParseException e) {
 			throw new SimpleException(ErrorCode.DATE_PARSE_ERROR, DATETIME_FORMAT_PATTERN.toString().replace("'", ""),
 					e.getMessage());
@@ -170,7 +181,6 @@ public class DataController {
 		dataFetcher.setWhere(where);
 		dataFetcher.setSelect(select);
 		dataFetcher.setDistinct(distinct);
-
 		final List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
 		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_PARTIAL);
 		return DataFetcher.serializeJSON(result);
@@ -226,8 +236,8 @@ public class DataController {
 
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		final LocalDateTime dateTimeFrom = getDateTime(from);
-		final LocalDateTime dateTimeTo = getDateTime(to);
+		final ZonedDateTime dateTimeFrom = getDateTime(from);
+		final ZonedDateTime dateTimeTo = getDateTime(to);
 
 		dataFetcher.setIgnoreNull(!showNull);
 		dataFetcher.setLimit(limit);
