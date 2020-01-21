@@ -61,7 +61,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select == null ? "*" : select, where, "station", "parent")
+				.init(select, where, "station", "parent")
 				.addSql("select")
 				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode", !flat)
@@ -112,23 +112,9 @@ public class DataFetcher {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
-		/*
-		 * FIXME This needs to be done as "replacement" within select expansion, otherwise
-		 * wrong values could be replaced and error messages show renamed aliases, which
-		 * is confusing for users.
-		 */
-		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
-		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
-		String whereDouble = null;
-		String whereString = null;
-		if (where != null) {
-			whereDouble = where.replace("mvalue", "mvalue_double");
-			whereString = where.replace("mvalue", "mvalue_string");
-		}
-
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(selectDouble, whereDouble, "station", "parent", "measurementdouble", "measurement", "datatype");
+				.init(select, where, "station", "parent", "measurementdouble", "measurement", "datatype");
 
 		// FIXME Consider all possibilities and build a query with both mvalue types if strings and numbers are present
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
@@ -169,7 +155,7 @@ public class DataFetcher {
 		}
 
 		if (!hasFunctions && (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null"))) {
-			query.reset(selectString, whereString, "station", "parent", "measurementstring", "measurement", "datatype")
+			query.reset(select, where, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
@@ -252,6 +238,9 @@ public class DataFetcher {
 	}
 
 	public void setSelect(String select) {
+		/* No need to check for null, since the QueryBuilder
+		 * will handle this with a "SELECT * ..."
+		 */
 		this.select = select;
 	}
 

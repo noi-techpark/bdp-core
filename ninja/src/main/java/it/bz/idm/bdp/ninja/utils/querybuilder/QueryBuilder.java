@@ -28,9 +28,6 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder reset(final String select, final String where, String... selectDefNames) {
-		if (select == null || select.isEmpty()) {
-			throw new RuntimeException("No alias list defined. For example: \"name, age, gender\".");
-		}
 		se.setWhereClause(where);
 		se.expand(select, selectDefNames);
 		return this;

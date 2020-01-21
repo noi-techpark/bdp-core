@@ -99,6 +99,14 @@ public class TargetDefList {
 		return result;
 	}
 
+	public TargetDef getByAlias(final String alias) {
+		for (TargetDef targetDef : targetDefMap.values()) {
+			if (alias.equals(targetDef.getAlias())) {
+				return targetDef;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public String toString() {

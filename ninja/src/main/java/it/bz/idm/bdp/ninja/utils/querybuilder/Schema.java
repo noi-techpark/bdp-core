@@ -37,10 +37,27 @@ public class Schema {
 
 	public TargetDefList findOrNull(final String targetDefName) {
 		for (TargetDefList targetDefList : schema.values()) {
-			TargetDef targetDef = targetDefList.get(targetDefName);
+			if (targetDefList.get(targetDefName) != null) {
+				return targetDefList;
+			}
+		}
+		return null;
+	}
+
+	public TargetDefList findByAliasOrNull(final String alias) {
+		for (TargetDefList targetDefList : schema.values()) {
+			TargetDef targetDef = targetDefList.getByAlias(alias);
 			if (targetDef != null) {
 				return targetDefList;
 			}
+		}
+		return null;
+	}
+
+	public TargetDefList findByAliasOrNull(final String alias, Set<String> targetDefListNames) {
+		TargetDefList targetDefList = findByAliasOrNull(alias);
+		if (targetDefList != null && targetDefListNames.contains(targetDefList.getName())) {
+			return targetDefList;
 		}
 		return null;
 	}
@@ -55,7 +72,7 @@ public class Schema {
 
 	public TargetDefList findOrNull(final String targetDefName, Set<String> targetDefListNames) {
 		TargetDefList targetDefList = findOrNull(targetDefName);
-		if (targetDefListNames.contains(targetDefList.getName())) {
+		if (targetDefList != null && targetDefListNames.contains(targetDefList.getName())) {
 			return targetDefList;
 		}
 		return null;

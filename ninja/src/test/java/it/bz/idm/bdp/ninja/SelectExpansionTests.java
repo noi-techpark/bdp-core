@@ -66,7 +66,7 @@ public class SelectExpansionTests {
 				.add(new TargetDef("a", "A.a"))
 				.add(new TargetDef("b", "A.b"));
 		TargetDefList seNestedBigB = TargetDefList.init("B")
-				.add(new TargetDef("x", "B.x"))
+				.add(new TargetDef("x", "B.x").alias("x_replaced"))
 				.add(new TargetDef("y", seNestedBigA));
 		TargetDefList seNestedBigC = TargetDefList.init("C")
 				.add(new TargetDef("i", "C.i"))
@@ -189,7 +189,14 @@ public class SelectExpansionTests {
 		List<String> res = seNestedBig.getUsedTargetNames();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
+	}
 
+	@Test
+	public void testAlias() {
+		seNestedBig.expand("x", "B");
+		List<String> res = seNestedBig.getUsedTargetNames();
+		assertEquals("x", res.get(0));
+		assertTrue(res.size() == 1);
 	}
 
 	@Test
