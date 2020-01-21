@@ -101,7 +101,7 @@ public class DataFetcher {
 		return serialize;
 	}
 
-	public List<Map<String, Object>> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, ZonedDateTime from, ZonedDateTime to, boolean flat) {
+	public List<Map<String, Object>> fetchStationsTypesAndMeasurementHistory(String stationTypeList, String dataTypeList, LocalDateTime from, LocalDateTime to, boolean flat) {
 		if (from == null && to == null) {
 			log.debug("FETCHING FROM MEASUREMENT");
 		} else {
@@ -155,8 +155,8 @@ public class DataFetcher {
 						 "where true")
 				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
-				 .setParameterIfNotNull("from", from.toLocalDateTime(), "and timestamp >= :from")
-				 .setParameterIfNotNull("to", to.toLocalDateTime(), "and timestamp < :to")
+				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
+				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
 				 .expandWhere()
 				 .expandGroupBy();
@@ -188,8 +188,8 @@ public class DataFetcher {
 						 "where true")
 				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
-				 .setParameterIfNotNull("from", from.toLocalDateTime(), "and timestamp >= :from")
-				 .setParameterIfNotNull("to", to.toLocalDateTime(), "and timestamp < :to")
+				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
+				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
 				 .expandWhere()
 				 .expandGroupBy();

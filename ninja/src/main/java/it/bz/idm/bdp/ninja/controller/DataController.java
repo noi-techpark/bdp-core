@@ -248,7 +248,7 @@ public class DataController {
 		dataFetcher.setDistinct(distinct);
 
 		final List<Map<String, Object>> queryResult = dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes,
-				dataTypes, dateTimeFrom, dateTimeTo, flat);
+				dataTypes, dateTimeFrom.toLocalDateTime(), dateTimeTo.toLocalDateTime(), flat);
 		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
 		return DataFetcher.serializeJSON(result);
 	}
