@@ -79,7 +79,7 @@ public class TargetDefList {
 		return targetDefMap.containsKey(targetName);
 	}
 
-	public Map<String, TargetDefList> getTargetDefListsOnly() {
+	public Map<String, TargetDefList> getPointerTargets() {
 		Map<String, TargetDefList> result = new HashMap<>();
 		for (TargetDef targetDef : targetDefMap.values()) {
 			if (targetDef.hasTargetDefList()) {
@@ -88,6 +88,17 @@ public class TargetDefList {
 		}
 		return result;
 	}
+
+	public Map<String, TargetDefList> getColumnTargets() {
+		Map<String, TargetDefList> result = new HashMap<>();
+		for (TargetDef targetDef : targetDefMap.values()) {
+			if (targetDef.hasColumn()) {
+				result.put(targetDef.getName(), targetDef.getTargetList());
+			}
+		}
+		return result;
+	}
+
 
 	@Override
 	public String toString() {

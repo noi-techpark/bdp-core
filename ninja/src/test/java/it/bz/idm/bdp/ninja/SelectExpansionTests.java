@@ -22,6 +22,7 @@ public class SelectExpansionTests {
 	SelectExpansion seNested;
 	SelectExpansion seFlat;
 	SelectExpansion seNestedBig;
+	SelectExpansion seNestedMain;
 	SelectExpansion seMinimal;
 	SelectExpansion seOpenDataHub;
 
@@ -55,6 +56,8 @@ public class SelectExpansionTests {
 		schemaFlat.add(seFlatA);
 		schemaFlat.add(seFlatB);
 		schemaFlat.add(seFlatC);
+		seFlat.addOperator("null", "eq", "%c is %v");
+		seFlat.addOperator("number", "eq", "%c = %v");
 		seFlat.setSchema(schemaFlat);
 
 		Schema schemaNestedBig = new Schema();
@@ -80,7 +83,6 @@ public class SelectExpansionTests {
 		seMinimal = new SelectExpansion();
 		schemaMinimal.add(new TargetDefList("A").add(new TargetDef("a", "A.a")));
 		seMinimal.setSchema(schemaMinimal);
-
 		seMinimal.addOperator("string", "eq", "%c = %v");
 		seMinimal.addOperator("string", "neq", "%c <> %v");
 		seMinimal.addOperator("number", "eq", "%c = %v");
@@ -126,17 +128,6 @@ public class SelectExpansionTests {
 			return t.getChildCount() == 4 || t.getChildCount() == 5;
 		});
 
-		seMinimal.setWhereClause("a.bbi.(1,2,3,4,5,6)");
-		try {
-			seMinimal.expand("a", "A");
-			fail("Exception expected; where clause bbi.<list> must have 4 or 5 elements");
-		} catch (SimpleException e) {
-			// nothing to do
-		}
-
-		seFlat.addOperator("null", "eq", "%c is %v");
-		seFlat.addOperator("number", "eq", "%c = %v");
-
 		seOpenDataHub = new SelectExpansionConfig().getSelectExpansion();
 	}
 
@@ -145,7 +136,7 @@ public class SelectExpansionTests {
 		seFlat.expand("a", "A", "C");
 
 		// More select definitions than aliases
-		List<String> res = seFlat.getUsedAliases();
+		List<String> res = seFlat.getUsedTargetNames();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
 
@@ -195,7 +186,7 @@ public class SelectExpansionTests {
 	public void testNestedStructure() {
 		// Select definitions inside a sub-expansion
 		seNestedBig.expand("a", "A", "C");
-		List<String> res = seNestedBig.getUsedAliases();
+		List<String> res = seNestedBig.getUsedTargetNames();
 		assertEquals("a", res.get(0));
 		assertTrue(res.size() == 1);
 
@@ -213,10 +204,10 @@ public class SelectExpansionTests {
 	@Test
 	public void testExpansion() throws Exception {
 		seNested.expand("a", "A");
-		assertEquals("a", seNested.getUsedAliases().get(0));
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
 		assertEquals("A.a as a", seNested.getExpansion().get("A"));
-		assertTrue(seNested.getUsedAliases().size() == 1);
+		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
 
@@ -228,30 +219,52 @@ public class SelectExpansionTests {
 		}
 
 		seNested.expand("a, b", "A", "B");
-		assertEquals("a", seNested.getUsedAliases().get(0));
-		assertEquals("b", seNested.getUsedAliases().get(1));
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
+		assertEquals("b", seNested.getUsedTargetNames().get(1));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
 		assertEquals("A.a as a, A.b as b", seNested.getExpansion().get("A"));
-		assertTrue(seNested.getUsedAliases().size() == 2);
+		assertTrue(seNested.getUsedTargetNames().size() == 2);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
 
 		seNested.expand("x, y", "A", "B", "C");
-		assertEquals("a", seNested.getUsedAliases().get(0));
-		assertEquals("b", seNested.getUsedAliases().get(1));
-		assertEquals("c", seNested.getUsedAliases().get(2));
-		assertEquals("h", seNested.getUsedAliases().get(3));
-		assertEquals("x", seNested.getUsedAliases().get(4));
-		assertEquals("y", seNested.getUsedAliases().get(5));
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
+		assertEquals("b", seNested.getUsedTargetNames().get(1));
+		assertEquals("c", seNested.getUsedTargetNames().get(2));
+		assertEquals("h", seNested.getUsedTargetNames().get(3));
+		assertEquals("x", seNested.getUsedTargetNames().get(4));
+		assertEquals("y", seNested.getUsedTargetNames().get(5));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
 		assertEquals("B", seNested.getUsedDefNames().get(1));
 		assertEquals("C", seNested.getUsedDefNames().get(2));
 		assertEquals("A.a as a, A.b as b", seNested.getExpansion().get("A"));
 		assertEquals("B.x as x", seNested.getExpansion().get("B"));
 		assertEquals("C.h as h", seNested.getExpansion().get("C"));
-		assertEquals(6, seNested.getUsedAliases().size());
+		assertEquals(6, seNested.getUsedTargetNames().size());
 		assertEquals(3, seNested.getUsedDefNames().size());
 		assertEquals(3, seNested.getExpansion().size());
+	}
+
+	@Test
+	public void testExpansionWithFunctionsAndTargets() throws Exception {
+		seNested.expand("a, min(a), max(a)", "A");
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
+		assertEquals("A", seNested.getUsedDefNames().get(0));
+		assertEquals("max(A.a) as \"max(a)\", min(A.a) as \"min(a)\", A.a as a", seNested.getExpansion().get("A"));
+		assertTrue(seNested.getUsedTargetNames().size() == 1);
+		assertTrue(seNested.getUsedDefNames().size() == 1);
+		assertTrue(seNested.getExpansion().size() == 1);
+	}
+
+	@Test
+	public void testExpansionWithFunctionsOnly() throws Exception {
+		seNested.expand("min(a), max(a)", "A");
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
+		assertEquals("A", seNested.getUsedDefNames().get(0));
+		assertEquals("max(A.a) as \"max(a)\", min(A.a) as \"min(a)\"", seNested.getExpansion().get("A"));
+		assertTrue(seNested.getUsedTargetNames().size() == 1);
+		assertTrue(seNested.getUsedDefNames().size() == 1);
+		assertTrue(seNested.getExpansion().size() == 1);
 	}
 
 	@Test
@@ -315,11 +328,6 @@ public class SelectExpansionTests {
 		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(2).getPayload("typedvalue") instanceof Double);
 		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(3).getPayload("typedvalue") instanceof String);
 		assertTrue(seMinimal.getUsedAliasesInWhere().get("a").get(4).getPayload("typedvalue") == null);
-	}
-
-	@Test
-	public void testMakeObject() {
-
 	}
 
 }

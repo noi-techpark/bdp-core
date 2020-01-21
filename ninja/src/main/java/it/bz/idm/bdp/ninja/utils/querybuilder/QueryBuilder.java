@@ -156,7 +156,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfAlias(String sqlPart, String alias) {
-		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedAliases().contains(alias)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedTargetNames().contains(alias)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -283,9 +283,9 @@ public class QueryBuilder {
 		}
 		List<String> groupByTargetNames = se.getGroupByTargetNames();
 		if (! groupByTargetNames.isEmpty()) {
-			StringJoiner sj = new StringJoiner(",");
+			StringJoiner sj = new StringJoiner(", ");
 			for (String targetName : groupByTargetNames) {
-				sj.add(se.getSchema().getOrNull(targetName).get(targetName).getColumn()); //FIXME is this not double circular? TO BE TESTED WITH JUNIT!!!!
+				sj.add(se.getSchema().find(targetName).get(targetName).getColumn()); //FIXME is this not double circular? TO BE TESTED WITH JUNIT!!!!
 			}
 			addSql("group by " + sj);
 		}

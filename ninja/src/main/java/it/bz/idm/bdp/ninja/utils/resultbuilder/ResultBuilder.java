@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
 
+// TODO Make this generic, create a makeObjRecursive method
 public class ResultBuilder {
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> build(boolean ignoreNull, List<Map<String, Object>> queryResult, SelectExpansion se, List<String> hierarchy) {
+	public static Map<String, Object> build(boolean ignoreNull, List<Map<String, Object>> queryResult, Schema schema, List<String> hierarchy) {
 
 		if (queryResult == null || queryResult.isEmpty()) {
 			return new HashMap<String, Object>();
@@ -55,17 +59,17 @@ public class ResultBuilder {
 
 			switch (renewLevel) {
 				case 0:
-					stationType = se.makeObj(rec, "stationtype", false);
+					stationType = makeObj(schema, rec, "stationtype", false);
 				case 1:
-					station = se.makeObj(rec, "station", ignoreNull);
-					parent = se.makeObj(rec, "parent", ignoreNull);
+					station = makeObj(schema, rec, "station", ignoreNull);
+					parent = makeObj(schema, rec, "parent", ignoreNull);
 				case 2:
 					if (hierarchy.size() > 2) {
-						datatype = se.makeObj(rec, "datatype", ignoreNull);
+						datatype = makeObj(schema, rec, "datatype", ignoreNull);
 					}
 				default:
 					if (hierarchy.size() > 2) {
-						measurement = se.makeObj(rec, "measurement", ignoreNull);
+						measurement = makeObj(schema, rec, "measurement", ignoreNull);
 
 						/*
 						 * Depending whether we get a string or double measurement, we have different
@@ -119,6 +123,55 @@ public class ResultBuilder {
 			prevValues.addAll(currValues);
 		}
 		return stationTypes;
+	}
+
+	public static Map<String, Object> makeObj(Schema schema, Map<String, Object> record, String defName, boolean ignoreNull) {
+		TargetDefList def = schema.getOrNull(defName);
+		Map<String, Object> result = new TreeMap<String, Object>();
+		for (String alias : def.getNames()) {
+			Object value = record.get(alias);
+			if (ignoreNull && value == null)
+				continue;
+			result.put(alias, value);
+		}
+		return result;
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		Schema schema = new Schema();
+		TargetDefList defListC = new TargetDefList("C")
+				.add(new TargetDef("h", "C.h").sqlBefore("before"));
+		TargetDefList defListD = new TargetDefList("D")
+				.add(new TargetDef("d", "D.d").sqlAfter("after"));
+		TargetDefList defListB = new TargetDefList("B")
+				.add(new TargetDef("x", "B.x").alias("x_replaced"))
+				.add(new TargetDef("y", defListC));
+		TargetDefList defListA = new TargetDefList("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", "A.b"))
+				.add(new TargetDef("c", defListB));
+		TargetDefList defListMain = new TargetDefList("main")
+				.add(new TargetDef("t", defListA));
+		schema.add(defListA);
+		schema.add(defListB);
+		schema.add(defListC);
+		schema.add(defListD);
+		schema.add(defListMain);
+
+		Map<String, Object> rec = new HashMap<String, Object>();
+		rec.put("a", "3");
+		rec.put("b", "7");
+		rec.put("x", "0");
+		rec.put("h", "v");
+		System.out.println(makeObj(schema, rec, "A", false).toString());
+		System.out.println(makeObj(schema, rec, "A", true).toString());
+		System.out.println();
+		System.out.println(makeObj(schema, rec, "B", false).toString());
+		System.out.println(makeObj(schema, rec, "B", true).toString());
+		System.out.println();
+		System.out.println(makeObj(schema, rec, "C", false).toString());
+		System.out.println(makeObj(schema, rec, "C", true).toString());
 	}
 
 }

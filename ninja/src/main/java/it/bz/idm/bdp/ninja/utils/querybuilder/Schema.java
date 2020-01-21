@@ -109,7 +109,7 @@ public class Schema {
 
 	public TargetDefList getTargetDefListParent(final String childTargetDefListName, Set<String> targetListNames) {
 		for (TargetDefList def : getAll(targetListNames)) {
-			for (TargetDefList child : def.getTargetDefListsOnly().values()) {
+			for (TargetDefList child : def.getPointerTargets().values()) {
 				if (child.getName().equals(childTargetDefListName))
 					return def;
 			}
@@ -117,4 +117,12 @@ public class Schema {
 		return null;
 	}
 
+	// XXX do we need dirty flags here for performance needed?
+	// private void _build() {
+	// 	if (schema == null) {
+	// 		throw new SimpleException(ErrorCode.SCHEMA_NULL);
+	// 	}
+	// 	dirty = true;
+	// 	dirty = false;
+	// }
 }

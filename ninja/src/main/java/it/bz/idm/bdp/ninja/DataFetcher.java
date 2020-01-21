@@ -327,14 +327,14 @@ public class DataFetcher {
 
 		se.expand("*", "station", "parent", "measurementdouble");
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
 		se.setWhereClause("");
 		se.expand("*", "station", "parent", "measurementstring");
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
@@ -362,7 +362,7 @@ public class DataFetcher {
 		queryResult.add(rec2);
 
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
@@ -373,7 +373,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		System.out.println(JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
+		System.out.println(JsonStream.serialize(ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy)));
 	}
 
 }

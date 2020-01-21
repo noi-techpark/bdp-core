@@ -22,6 +22,7 @@ public class ResultBuilderTests {
 	SelectExpansion se;
 	List<String> hierarchy;
 	List<Map<String, Object>> queryResult;
+	private SelectExpansion seNestedMain;
 
 	@Before
 	public void setUpBefore() throws Exception {
@@ -93,10 +94,32 @@ public class ResultBuilderTests {
 		hierarchy.add("_stationtype");
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
+
+		seNestedMain = new SelectExpansion();
+		Schema schemaNestedMain = new Schema();
+		TargetDefList defListC = new TargetDefList("C")
+				.add(new TargetDef("h", "C.h").sqlBefore("before"));
+		TargetDefList defListD = new TargetDefList("D")
+				.add(new TargetDef("d", "D.d").sqlAfter("after"));
+		TargetDefList defListB = new TargetDefList("B")
+				.add(new TargetDef("x", "B.x").alias("x_replaced"))
+				.add(new TargetDef("y", defListC));
+		TargetDefList defListA = new TargetDefList("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", "A.b"))
+				.add(new TargetDef("c", defListB));
+		TargetDefList defListMain = new TargetDefList("main")
+				.add(new TargetDef("t", defListA));
+		schemaNestedMain.add(defListA);
+		schemaNestedMain.add(defListB);
+		schemaNestedMain.add(defListC);
+		schemaNestedMain.add(defListD);
+		schemaNestedMain.add(defListMain);
+		seNestedMain.setSchema(schemaNestedMain);
 	}
 
 	@Test
-	public void test() {
+	public void testOpenDataHubMobility() {
 		se.expand("tname", "datatype");
 
 		queryResult.add(new HashMap<String, Object>() {
@@ -109,7 +132,7 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
 
 		queryResult.add(new HashMap<String, Object>() {
 			{
@@ -121,7 +144,7 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
 
 		queryResult.add(new HashMap<String, Object>() {
 			{
@@ -133,8 +156,66 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ2={tname=x}, occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se, hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
 
+	}
+
+	@Test
+	public void testMakeObject() {
+		seNestedMain.expand("*", "main", "A", "B", "C", "D");
+		Map<String, Object> rec = new HashMap<String, Object>();
+		rec.put("a", "3");
+		rec.put("b", "7");
+		rec.put("d", "DDD");
+		rec.put("x", "0");
+		rec.put("h", "v");
+
+		assertEquals("a", seNestedMain.getUsedTargetNames().get(0));
+		assertEquals("b", seNestedMain.getUsedTargetNames().get(1));
+		assertEquals("c", seNestedMain.getUsedTargetNames().get(2));
+		assertEquals("d", seNestedMain.getUsedTargetNames().get(3));
+		assertEquals("h", seNestedMain.getUsedTargetNames().get(4));
+		assertEquals("t", seNestedMain.getUsedTargetNames().get(5));
+		assertEquals("x", seNestedMain.getUsedTargetNames().get(6));
+		assertEquals("y", seNestedMain.getUsedTargetNames().get(7));
+
+		assertEquals("A", seNestedMain.getUsedDefNames().get(0));
+		assertEquals("B", seNestedMain.getUsedDefNames().get(1));
+		assertEquals("C", seNestedMain.getUsedDefNames().get(2));
+		assertEquals("D", seNestedMain.getUsedDefNames().get(3));
+		assertEquals("main", seNestedMain.getUsedDefNames().get(4));
+
+		assertEquals("A.a as a, A.b as b", seNestedMain.getExpansion().get("A"));
+		assertEquals("B.x as x_replaced", seNestedMain.getExpansion().get("B"));
+		assertEquals("before, C.h as h", seNestedMain.getExpansion().get("C"));
+		assertEquals("D.d as d, after", seNestedMain.getExpansion().get("D"));
+
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", false).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", true).toString());
+		System.out.println();
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", true).toString());
+		System.out.println();
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", false).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", true).toString());
+		System.out.println();
+	}
+
+	@Test
+	public void testMakeObjectJSON() {
+		seNestedMain.expand("x.address.cap, x.address.city", "A", "B");
+		Map<String, Object> rec = new HashMap<String, Object>();
+		rec.put("x.address.cap", 39100);
+		rec.put("x.address.city", "BZ");
+
+		assertEquals("x", seNestedMain.getUsedTargetNames().get(0));
+		assertEquals("B", seNestedMain.getUsedDefNames().get(0));
+
+		assertEquals(
+				"B.x#>'{address,city}' as \"x_replaced.address.city\", B.x#>'{address,cap}' as \"x_replaced.address.cap\"",
+				seNestedMain.getExpansion().get("B")
+				);
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false).toString());
 	}
 
 }
