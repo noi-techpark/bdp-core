@@ -188,8 +188,8 @@ public class DataFetcher {
 						 "where true")
 				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
-				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
-				 .setParameterIfNotNull("to", to, "and timestamp < :to")
+				 .setParameterIfNotNull("from", from.toLocalDateTime(), "and timestamp >= :from")
+				 .setParameterIfNotNull("to", to.toLocalDateTime(), "and timestamp < :to")
 				 .setParameter("roles", roles)
 				 .expandWhere()
 				 .expandGroupBy();
