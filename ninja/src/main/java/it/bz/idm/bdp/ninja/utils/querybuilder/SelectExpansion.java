@@ -371,13 +371,31 @@ public class SelectExpansion {
 		return result.toString();
 	}
 
-	public void expand(final String aliases, String... defNames) {
-		Set<String> targetEntries = _targetStringToSet(aliases);
-		Set<String> targetListNames = new HashSet<String>(Arrays.asList(defNames));
+	public void expand(final String selectString, String... targetDefListNames) {
+		Set<String> targetListNames = new HashSet<String>(Arrays.asList(targetDefListNames));
 
-		if (targetEntries == null || targetEntries.isEmpty() || targetListNames == null || targetListNames.isEmpty()) {
+		if (targetListNames == null || targetListNames.isEmpty()) {
 			throw new SimpleException(ErrorCode.EXPAND_INVALID_DATA);
 		}
+
+		boolean isStarExpansion = false;
+		Set<Target> targets = new HashSet<Target>();
+		if (selectString == null) {
+			targets.add(new Target("*"));
+			isStarExpansion = true;
+		} else {
+			for (String value : selectString.split(",")) {
+				value = value.trim();
+				if (value.equals("*")) {
+					isStarExpansion = true;
+					targets.clear();
+					targets.add(new Target("*"));
+					break;
+				}
+				targets.add(new Target(value));
+			}
+		}
+
 		if (dirty) {
 			_build();
 		}
@@ -395,36 +413,21 @@ public class SelectExpansion {
 		 * This is, because we cannot use an iterator here, since we add elements to it while processing.
 		 */
 		List<String> candidateTargetNamesOrAliases = null;
-		Map<String, List<String>> aliasToJSONPath = new TreeMap<String, List<String>>();
-		if (targetEntries.size() == 1 && targetEntries.contains("*")) {
+		Map<String, List<String>> targetJsonMap = new TreeMap<String, List<String>>();
+		if (isStarExpansion) {
 			candidateTargetNamesOrAliases = schema.getListNames(targetListNames);
 		} else {
 			candidateTargetNamesOrAliases = new ArrayList<String>();
-			for (String targetOrFunc : targetEntries) {
-				String func = null;
-				String targetName = null;
-				if (targetOrFunc.matches("[a-zA-Z_]+\\(" + ALIAS_VALIDATION + "\\)")) {
-					int idx = targetOrFunc.indexOf('(');
-					func = targetOrFunc.substring(0, idx);
-					targetName = targetOrFunc.substring(idx + 1, targetOrFunc.length() - 1);
-				} else {
-					targetName = targetOrFunc;
-					if (targetName.contains(".")) {
+			for (Target target : targets) {
+				_addFunctions(target.getName(), target.getFunc());
+				candidateTargetNamesOrAliases.add(target.getName());
+				if (target.hasJson()) {
+					List<String> jsonList = targetJsonMap.getOrDefault(target.getName(), new ArrayList<String>());
+					jsonList.add(target.getJson());
+					targetJsonMap.putIfAbsent(target.getName(), jsonList);
+					if (! target.hasFunction()) {
 						hasJSONSelectors = true;
 					}
-				}
-				if (!targetName.matches(ALIAS_VALIDATION)) {
-					throw new SimpleException(ErrorCode.ALIAS_INVALID, targetName);
-				}
-				_addFunctions(targetName, func);
-				int index = targetName.indexOf('.');
-				String mainAlias = index > 0 ? targetName.substring(0, index) : targetName;
-				candidateTargetNamesOrAliases.add(mainAlias);
-
-				if (index > 0) {
-					List<String> aliasList = aliasToJSONPath.getOrDefault(mainAlias, new ArrayList<String>());
-					aliasList.add(targetName.substring(index + 1));
-					aliasToJSONPath.putIfAbsent(mainAlias, aliasList);
 				}
 			}
 		}
@@ -440,19 +443,19 @@ public class SelectExpansion {
 		int curPos = 0;
 		while (curPos < candidateTargetNamesOrAliases.size()) {
 			String targetNameOrAlias = candidateTargetNamesOrAliases.get(curPos);
-			TargetDefList targetList = schema.findOrNull(targetNameOrAlias, targetListNames);
-			if (targetList == null) {
-				targetList = schema.findByAliasOrNull(targetNameOrAlias, targetListNames);
+			TargetDefList targetDefList = schema.findOrNull(targetNameOrAlias, targetListNames);
+			if (targetDefList == null) {
+				targetDefList = schema.findByAliasOrNull(targetNameOrAlias, targetListNames);
 			}
-			if (targetList == null) {
+			if (targetDefList == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, targetNameOrAlias, targetListNames);
 				se.addData("targetName", targetNameOrAlias);
 				throw se;
 			}
 
-			TargetDef target = targetList.get(targetNameOrAlias);
-			if (target == null) {
-				target = targetList.getByAlias(targetNameOrAlias);
+			TargetDef targetDef = targetDefList.get(targetNameOrAlias);
+			if (targetDef == null) {
+				targetDef = targetDefList.getByAlias(targetNameOrAlias);
 			}
 
 			/* We cannot be sure, if targetNameOrAlias is an alias or name, hence we use
@@ -460,62 +463,62 @@ public class SelectExpansion {
 			 */
 			targetNameOrAlias = null;
 
-			usedTargetDefListNames.add(targetList.getName());
+			usedTargetDefListNames.add(targetDefList.getName());
 
 			/* It is a column target */
-			if (target.hasColumn()) {
-				usedTargetDefs.add(target.getName());
-				String defName = targetList.getName();
+			if (targetDef.hasColumn()) {
+				usedTargetDefs.add(targetDef.getName());
+				String defName = targetDefList.getName();
 				usedTargetDefListNames.add(defName);
 
 				String sqlSelect = expandedSelects.getOrDefault(defName, null);
-				String before = target.hasSqlBefore() ? target.getSqlBefore() + ", " : "";
-				String after = target.hasSqlAfter() ? ", " + target.getSqlAfter() : "";
+				String before = targetDef.hasSqlBefore() ? targetDef.getSqlBefore() + ", " : "";
+				String after = targetDef.hasSqlAfter() ? ", " + targetDef.getSqlAfter() : "";
 
 				StringJoiner sj = new StringJoiner(", ");
 
 				/* Three types for column-targets exist:
 				 * (1) Target with a JSON selector (ex., address.city)
 				 * (2) Regular column (ex., name)
-				 * (3) Function (ex., min(value))
+				 * (3) Function (ex., min(value) or min(values.x.double))
 				 */
 
 				/* (1) Target with a JSON selector */
-				if (aliasToJSONPath.containsKey(target.getName())) {
-					for (String jsonSelector : aliasToJSONPath.get(target.getName())) {
-						List<String> functions = functionsAndGroups.get(target.getName() + "." + jsonSelector);
+				if (targetJsonMap.containsKey(targetDef.getName())) {
+					for (String jsonSelector : targetJsonMap.get(targetDef.getName())) {
+						List<String> functions = functionsAndGroups.get(targetDef.getName() + "." + jsonSelector);
 						if (functions == null) {
-							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", target.getColumn(), jsonSelector.replace(".", ","), target.getFinalName(), jsonSelector));
+							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", targetDef.getColumn(), jsonSelector.replace(".", ","), targetDef.getFinalName(), jsonSelector));
 							candidateTargetNamesOrAliases.remove(0);
 							curPos--;
 						} else {
 							String func = functions.remove(0);
-							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, target.getColumn(), jsonSelector.replace(".", ","), func, target.getFinalName(), jsonSelector));
+							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, targetDef.getColumn(), jsonSelector.replace(".", ","), func, targetDef.getFinalName(), jsonSelector));
 						}
 					}
 				} else {
-					List<String> functions = functionsAndGroups.get(target.getFinalName());
+					List<String> functions = functionsAndGroups.get(targetDef.getFinalName());
 
 					/* (2) Regular column */
 					if (functions == null) {
-						sj.add(String.format("%s as %s", target.getColumn(), target.getFinalName()));
-						if (! groupByCandidates.contains(target.getName())) {
-							groupByCandidates.add(target.getName());
+						sj.add(String.format("%s as %s", targetDef.getColumn(), targetDef.getFinalName()));
+						if (! groupByCandidates.contains(targetDef.getName())) {
+							groupByCandidates.add(targetDef.getName());
 						}
 					} else { /* (3) Function */
 						for (String func : functions) {
-							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, target.getColumn(), func, target.getFinalName()));
+							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, targetDef.getColumn(), func, targetDef.getFinalName()));
 							candidateTargetNamesOrAliases.remove(0);
 							curPos--;
 						}
-						functionsAndGroups.put(target.getFinalName(), null);
+						functionsAndGroups.put(targetDef.getFinalName(), null);
 					}
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
 			} else { /* the current target is not a column, but a pointer to a targetList */
-				TargetDefList pointsTo = target.getTargetList();
+				TargetDefList pointsTo = targetDef.getTargetList();
 				if (targetListNames.contains(pointsTo.getName())) {
-					usedTargetDefs.add(target.getName());
+					usedTargetDefs.add(targetDef.getName());
 					usedTargetDefListNames.add(pointsTo.getName());
 					for (String subAlias : pointsTo.getNames()) {
 						if (!candidateTargetNamesOrAliases.contains(subAlias)) {

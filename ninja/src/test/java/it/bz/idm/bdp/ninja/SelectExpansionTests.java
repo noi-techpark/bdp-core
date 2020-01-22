@@ -272,6 +272,14 @@ public class SelectExpansionTests {
 		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
+
+		seNested.expand("min(a.b.c), max(a.b.d)", "A");
+		assertEquals("a", seNested.getUsedTargetNames().get(0));
+		assertEquals("A", seNested.getUsedDefNames().get(0));
+		assertEquals("min(A.a.b.c) as \"min(a.b.c)\", max(A.a.b.d) as \"max(a.b.d)\"", seNested.getExpansion().get("A"));
+		assertTrue(seNested.getUsedTargetNames().size() == 1);
+		assertTrue(seNested.getUsedDefNames().size() == 1);
+		assertTrue(seNested.getExpansion().size() == 1);
 	}
 
 	@Test
