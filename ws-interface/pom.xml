@@ -33,8 +33,7 @@
     <description>Web Service Interface for the Big Data Platform</description>
 
     <properties>
-        <xmlrpc.version>3.1.2</xmlrpc.version>
-        <spring.version>5.0.10.RELEASE</spring.version>
+        <spring.version>5.2.3.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
@@ -49,12 +48,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13</version>
         </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
-            <version>1.6</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -110,17 +109,17 @@
         <dependency>
             <groupId>io.projectreactor.ipc</groupId>
             <artifactId>reactor-netty</artifactId>
-            <version>0.7.7.RELEASE</version>
+            <version>0.7.15.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-unix-common</artifactId>
-            <version>4.1.20.Final</version>
+            <version>4.1.45.Final</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>3.1.7.RELEASE</version>
+            <version>3.3.2.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
