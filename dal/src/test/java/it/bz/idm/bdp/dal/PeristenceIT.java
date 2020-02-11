@@ -22,6 +22,35 @@
  */
 package it.bz.idm.bdp.dal;
 
-public class PeristenceTests {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import javax.persistence.EntityManager;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import it.bz.idm.bdp.dal.util.JPAUtil;
+
+public class PeristenceIT {
+	private EntityManager em = JPAUtil.createEntityManager();
+	private Map<String,Object> map = new HashMap<String, Object>();
+
+	@Before
+	public void setup() {
+		map.put("He", new Integer(4));
+	}
+
+	@Test
+	public void testSyncTypes() {
+		DataType type = new DataType("customType-2","customUnit","customDescription","customRType");
+		DataTypeMetaData metadata = new DataTypeMetaData(type,map);
+		type.setMetaData(metadata);
+		type.getMetaDataHistory().add(metadata);
+		em.persist(type);
+		List<DataType> types = new ArrayList<DataType>();
+		types.add(type);
+	}
 }

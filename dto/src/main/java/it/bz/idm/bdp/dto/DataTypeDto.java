@@ -23,6 +23,8 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -62,6 +64,10 @@ public class DataTypeDto implements Serializable {
 	@JsonPropertyDescription("Interval on how often a measurement with this data type gets collected (seconds)")
 	private Integer period;
 
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("detail information about given datatype")
+	private Map<String,Object> metaData = new HashMap<String, Object>();
+
 	public DataTypeDto() {
 		super();
 	}
@@ -90,6 +96,10 @@ public class DataTypeDto implements Serializable {
 	public DataTypeDto(String name, String unit, String description, String rtype, Integer period) {
 		this(name, unit, description, rtype);
 		this.period = period;
+	}
+	public DataTypeDto(String name, String unit, String description, String rtype, Integer period,Map<String,Object> metaData) {
+		this(name, unit, description, rtype,period);
+		this.metaData = metaData;
 	}
 	public String getName() {
 		return name;
@@ -121,6 +131,13 @@ public class DataTypeDto implements Serializable {
 	public void setPeriod(Integer period) {
 		this.period = period;
 	}
+	public Map<String, Object> getMetaData() {
+		return metaData;
+	}
+	public void setMetaData(Map<String, Object> metaData) {
+		this.metaData = metaData;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DataTypeDto){

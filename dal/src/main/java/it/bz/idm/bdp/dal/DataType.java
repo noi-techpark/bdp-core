@@ -23,6 +23,7 @@
 package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,12 +31,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -80,6 +85,12 @@ public class DataType {
 	private String description;
 	private String rtype;
 
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type", fetch = FetchType.LAZY)
+	private Collection<DataTypeMetaData> metaDataHistory = new ArrayList<DataTypeMetaData>();
+
+	@OneToOne(cascade = CascadeType.PERSIST)
+	private DataTypeMetaData metaData;
+
 	public DataType() {
 		setCreated_on(new Date());
 	}
@@ -95,6 +106,11 @@ public class DataType {
 		setCunit(cunit);
 		setDescription(description);
 		setRtype(rtype);
+	}
+
+	public DataType(String dataType, String cunit, String description, String rtype, DataTypeMetaData metaData) {
+		this(dataType,cunit,description,rtype);
+		setMetaData(metaData);
 	}
 
 	/**
@@ -139,6 +155,18 @@ public class DataType {
 	}
 	public void setRtype(String rtype) {
 		this.rtype = rtype;
+	}
+	public Collection<DataTypeMetaData> getMetaDataHistory() {
+		return metaDataHistory;
+	}
+	public void setMetaDataHistory(Collection<DataTypeMetaData> metaDataHistory) {
+		this.metaDataHistory = metaDataHistory;
+	}
+	public DataTypeMetaData getMetaData() {
+		return metaData;
+	}
+	public void setMetaData(DataTypeMetaData metaData) {
+		this.metaData = metaData;
 	}
 
 	/**
@@ -284,14 +312,16 @@ public class DataType {
 				}
 
 				DataType type = DataType.findByCname(em,dto.getName());
+				DataTypeMetaData metaData = new DataTypeMetaData(type,dto.getMetaData());
 				if (type != null){
-					if (dto.getDescription() != null)
-						type.setDescription(dto.getDescription());
+					type.setDescription(dto.getDescription());
 					type.setRtype(dto.getRtype());
 					type.setCunit(dto.getUnit());
+					if (! type.getMetaData().equals(metaData))
+						type.setMetaData(metaData);
 					em.merge(type);
 				}else{
-					type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype());
+					type = new DataType(dto.getName(), dto.getUnit(), dto.getDescription(), dto.getRtype(), metaData);
 					em.persist(type);
 				}
 			}
