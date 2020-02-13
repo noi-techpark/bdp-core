@@ -28,7 +28,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dc-interface</artifactId>
-    <version>3.3.5</version>
+    <version>4.0.1</version>
     <inceptionYear>2019</inceptionYear>
     <description>Data Collector Interface for the Big Data Platform</description>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dto</artifactId>
-            <version>3.3.5</version>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>

@@ -28,7 +28,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>reader</artifactId>
-    <version>3.3.5</version>
+    <version>4.0.1</version>
     <packaging>war</packaging>
     <name>reader</name>
     <url>http://maven.apache.org</url>
@@ -52,7 +52,7 @@
         <dependency>
             <groupId>it.bz.idm.bdp</groupId>
             <artifactId>dal</artifactId>
-            <version>3.3.5</version>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
