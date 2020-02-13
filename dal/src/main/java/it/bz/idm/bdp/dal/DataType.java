@@ -317,7 +317,7 @@ public class DataType {
 					type.setDescription(dto.getDescription());
 					type.setRtype(dto.getRtype());
 					type.setCunit(dto.getUnit());
-					if (! type.getMetaData().equals(metaData))
+					if (type.getMetaData() == null||!type.getMetaData().equals(metaData))
 						type.setMetaData(metaData);
 					em.merge(type);
 				}else{
