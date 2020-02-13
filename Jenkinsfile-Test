@@ -22,7 +22,7 @@ pipeline {
     }
     parameters{
         string(name:'bdp_version',defaultValue:'x.y.z',description:'version of dependencies to use in test deployment(must be released)');
-        choice(name:'bdp_type',defaultValue:'snapshot',choices:['snapshot','release'],description:'use production ready releases or snapshots')
+        choice(name:'bdp_type',choices:['snapshot','release'],description:'use production ready releases or snapshots')
     }
     stages {
         stage('Configure') {
