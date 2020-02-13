@@ -20,7 +20,10 @@ pipeline {
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
     }
-
+    parameters{
+        string(name:'bdp_version',defaultValue:'x.y.z',description:'version of dependencies to use in test deployment(must be released)');
+        choice(name:'bdp_type',defaultValue:'snapshot',choices:['snapshot','release'],description:'use production ready releases or snapshots')
+    }
     stages {
         stage('Configure') {
             steps {
@@ -46,6 +49,7 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" dal/src/main/resources/log4j.properties'
+                sh './quickrelease.sh "${params.bdp_type}" "${params.version}"'
             }
         }
         stage('Install') {
