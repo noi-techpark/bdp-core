@@ -49,7 +49,7 @@ pipeline {
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" reader/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" writer/src/main/resources/log4j.properties'
                 sh 'sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1DEBUG,R%" dal/src/main/resources/log4j.properties'
-                sh './quickrelease.sh "${params.bdp_type}" "${params.version}"'
+                sh './quickrelease.sh "${params.bdp_type}" "${params.bdp_version}"'
             }
         }
         stage('Install') {
