@@ -178,13 +178,13 @@ public class SelectExpansion {
 		usedJSONAliasesInWhere.put(alias, tokens);
 	}
 
-	private void _addFunctions(final String alias, String func) {
-		if (func == null || func.isEmpty()) {
+	private void _addFunctions(final Target target) {
+		if (! target.hasFunction()) {
 			return;
 		}
-		List<String> functions = functionsAndGroups.getOrDefault(alias, new ArrayList<String>());
-		functions.add(func);
-		functionsAndGroups.put(alias, functions);
+		List<String> functions = functionsAndGroups.getOrDefault(target.getFullName(), new ArrayList<String>());
+		functions.add(target.getFunc());
+		functionsAndGroups.put(target.getFullName(), functions);
 	}
 
 	public boolean hasFunctions() {
@@ -412,15 +412,19 @@ public class SelectExpansion {
 		 * We cannot use a HashSet here, because we need a get by position within the while loop.
 		 * This is, because we cannot use an iterator here, since we add elements to it while processing.
 		 */
+		// TODO Use List<Target> instead, make it sort alphabetically
 		List<String> candidateTargetNamesOrAliases = null;
+		List<Target> candidateTargets = null;
 		Map<String, List<String>> targetJsonMap = new TreeMap<String, List<String>>();
 		if (isStarExpansion) {
 			candidateTargetNamesOrAliases = schema.getListNames(targetListNames);
 		} else {
 			candidateTargetNamesOrAliases = new ArrayList<String>();
+			candidateTargets = new ArrayList<Target>();
 			for (Target target : targets) {
-				_addFunctions(target.getName(), target.getFunc());
+				_addFunctions(target);
 				candidateTargetNamesOrAliases.add(target.getName());
+				candidateTargets.add(target);
 				if (target.hasJson()) {
 					List<String> jsonList = targetJsonMap.getOrDefault(target.getName(), new ArrayList<String>());
 					jsonList.add(target.getJson());
@@ -440,9 +444,15 @@ public class SelectExpansion {
 		}
 
 		Collections.sort(candidateTargetNamesOrAliases);
+		// Collections.sort(candidateTargets);
+
+		// System.out.println(candidateTargetNamesOrAliases);
+		// System.out.println(candidateTargets);
+
 		int curPos = 0;
 		while (curPos < candidateTargetNamesOrAliases.size()) {
 			String targetNameOrAlias = candidateTargetNamesOrAliases.get(curPos);
+			// Target target = candidateTargets.get(curPos);
 			TargetDefList targetDefList = schema.findOrNull(targetNameOrAlias, targetListNames);
 			if (targetDefList == null) {
 				targetDefList = schema.findByAliasOrNull(targetNameOrAlias, targetListNames);
@@ -487,31 +497,33 @@ public class SelectExpansion {
 				if (targetJsonMap.containsKey(targetDef.getName())) {
 					for (String jsonSelector : targetJsonMap.get(targetDef.getName())) {
 						List<String> functions = functionsAndGroups.get(targetDef.getName() + "." + jsonSelector);
-						if (functions == null) {
+						if (functions == null || functions.isEmpty()) {
 							sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", targetDef.getColumn(), jsonSelector.replace(".", ","), targetDef.getFinalName(), jsonSelector));
-							candidateTargetNamesOrAliases.remove(0);
-							curPos--;
 						} else {
 							String func = functions.remove(0);
 							sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", func, targetDef.getColumn(), jsonSelector.replace(".", ","), func, targetDef.getFinalName(), jsonSelector));
 						}
+						candidateTargetNamesOrAliases.remove(0);
+						curPos--;
 					}
 				} else {
 					List<String> functions = functionsAndGroups.get(targetDef.getFinalName());
 
 					/* (2) Regular column */
-					if (functions == null) {
+					if (functions == null || functions.isEmpty()) {
 						sj.add(String.format("%s as %s", targetDef.getColumn(), targetDef.getFinalName()));
 						if (! groupByCandidates.contains(targetDef.getName())) {
 							groupByCandidates.add(targetDef.getName());
 						}
 					} else { /* (3) Function */
-						for (String func : functions) {
+						while (0 != functions.size()) {
+							String func = functions.get(0);
 							sj.add(String.format("%s(%s) as \"%s(%s)\"", func, targetDef.getColumn(), func, targetDef.getFinalName()));
 							candidateTargetNamesOrAliases.remove(0);
+							functions.remove(0);
 							curPos--;
 						}
-						functionsAndGroups.put(targetDef.getFinalName(), null);
+						// functionsAndGroups.put(targetDef.getFinalName(), null);
 					}
 				}
 				expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);

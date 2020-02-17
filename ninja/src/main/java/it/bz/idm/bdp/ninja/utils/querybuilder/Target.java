@@ -4,7 +4,7 @@ package it.bz.idm.bdp.ninja.utils.querybuilder;
 /**
  * Target
  */
-public class Target {
+public class Target implements Comparable<Target> {
 	// Do not forget to update ErrorCode.ALIAS_INVALID in SelectExpansion
 	private static final String TARGET_FQN_VALIDATION = "[0-9a-zA-Z\\._]+";
 
@@ -61,12 +61,24 @@ public class Target {
 		return name;
 	}
 
+	public String getFullName() {
+		if (hasJson()) {
+			return name + "." + json;
+		}
+		return name;
+	}
+
 	public boolean hasFunction() {
 		return func != null;
 	}
 
 	public boolean hasJson() {
 		return json != null;
+	}
+
+	@Override
+	public int compareTo(Target o) {
+		return name.compareTo(o.getName());
 	}
 
 }

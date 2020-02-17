@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -255,9 +257,14 @@ public class SelectExpansionTests {
 	@Test
 	public void testExpansionWithFunctionsAndTargets() throws Exception {
 		seNested.expand("a, min(a), max(a)", "A");
+
 		assertEquals("a", seNested.getUsedTargetNames().get(0));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
-		assertEquals("max(A.a) as \"max(a)\", min(A.a) as \"min(a)\", A.a as a", seNested.getExpansion().get("A"));
+
+		List<String> expA = Arrays.asList(seNested.getExpansion().get("A").split(", "));
+		assertTrue(expA.contains("max(A.a) as \"max(a)\""));
+		assertTrue(expA.contains("min(A.a) as \"min(a)\""));
+		assertTrue(expA.contains("A.a as a"));
 		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
@@ -268,15 +275,26 @@ public class SelectExpansionTests {
 		seNested.expand("min(a), max(a)", "A");
 		assertEquals("a", seNested.getUsedTargetNames().get(0));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
-		assertEquals("max(A.a) as \"max(a)\", min(A.a) as \"min(a)\"", seNested.getExpansion().get("A"));
+
+		List<String> expA = Arrays.asList(seNested.getExpansion().get("A").split(", "));
+		assertTrue(expA.contains("max(A.a) as \"max(a)\""));
+		assertTrue(expA.contains("min(A.a) as \"min(a)\""));
+
 		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
+	}
 
+	@Test
+	public void testExpansionWithFunctionsAndJSON() throws Exception {
 		seNested.expand("min(a.b.c), max(a.b.d)", "A");
 		assertEquals("a", seNested.getUsedTargetNames().get(0));
 		assertEquals("A", seNested.getUsedDefNames().get(0));
-		assertEquals("min(A.a.b.c) as \"min(a.b.c)\", max(A.a.b.d) as \"max(a.b.d)\"", seNested.getExpansion().get("A"));
+
+		List<String> expA = Arrays.asList(seNested.getExpansion().get("A").split(", "));
+		assertTrue(expA.contains("max((A.a#>'{b,d}')::double precision) as \"max(a.b.d)\""));
+		assertTrue(expA.contains("min((A.a#>'{b,c}')::double precision) as \"min(a.b.c)\""));
+
 		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
