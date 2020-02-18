@@ -114,7 +114,6 @@ public class SelectExpansion {
 	private Map<String, String> expandedSelects = new TreeMap<String, String>();
 	private Set<String> usedTargetDefNames = new TreeSet<String>();
 	private List<TargetDef> usedTargetDefs = new ArrayList<TargetDef>();
-	private Map<String, List<String>> functionsAndGroups = new TreeMap<String, List<String>>();
 	private List<String> groupByCandidates = new ArrayList<String>();
 	private Set<String> usedTargetDefListNames = new TreeSet<String>();
 	private Map<String, List<Token>> usedJSONAliasesInWhere = new TreeMap<String, List<Token>>();
@@ -124,6 +123,7 @@ public class SelectExpansion {
 	private String whereSQL = null;
 	private String whereClause = null;
 	private boolean dirty = true;
+	private boolean hasFunctions = false;
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet) {
 		addOperator(tokenType, operator, sqlSnippet, null);
@@ -151,6 +151,7 @@ public class SelectExpansion {
 		if (schema == null) {
 			throw new SimpleException(ErrorCode.SCHEMA_NULL);
 		}
+		hasFunctions = false;
 		// TODO Move dirty flags to Schema, or do we need it also here?
 		dirty = true;
 		dirty = false;
@@ -180,7 +181,7 @@ public class SelectExpansion {
 	}
 
 	public boolean hasFunctions() {
-		return functionsAndGroups.size() > 0;
+		return hasFunctions;
 	}
 
 	private void _expandWhere(String where) {
@@ -400,17 +401,9 @@ public class SelectExpansion {
 		usedTargetDefListNames.clear();
 		expandedSelects.clear();
 		usedJSONAliasesInWhere.clear();
-		functionsAndGroups.clear();
 		groupByCandidates.clear();
 
 		boolean hasJSONSelectors = false;
-
-		/*
-		 * Currently it is not possible to use functions together with JSON selectors.
-		 */
-		if (! functionsAndGroups.isEmpty() && hasJSONSelectors) {
-			throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON);
-		}
 
 		Collections.sort(targets);
 
@@ -484,10 +477,13 @@ public class SelectExpansion {
 			if (target.hasJson()) {
 				if (target.hasFunction()) {
 					sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", target.getFunc(), targetDef.getColumn(), target.getJson().replace(".", ","), target.getFunc(), targetDef.getFinalName(), target.getJson()));
+					hasFunctions = true;
 				} else {
 					sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", targetDef.getColumn(), target.getJson().replace(".", ","), targetDef.getFinalName(), target.getJson()));
+					hasJSONSelectors = true;
 				}
 			} else if (target.hasFunction()) { /* (2) Function */
+				hasFunctions = true;
 				sj.add(String.format("%s(%s) as \"%s(%s)\"", target.getFunc(), targetDef.getColumn(), target.getFunc(), targetDef.getFinalName()));
 			} else { /* (3) Regular column */
 				sj.add(String.format("%s as %s", targetDef.getColumn(), targetDef.getFinalName()));
@@ -496,6 +492,13 @@ public class SelectExpansion {
 				}
 			}
 			expandedSelects.put(defName, (sqlSelect == null ? "" : sqlSelect + ", ") + before + sj + after);
+		}
+
+		/*
+		 * Currently it is not possible to use functions together with JSON selectors.
+		 */
+		if (hasFunctions && hasJSONSelectors) {
+			throw new SimpleException(ErrorCode.SELECT_FUNC_NOJSON);
 		}
 
 		usedTargetDefNames.clear();

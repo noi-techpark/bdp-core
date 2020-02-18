@@ -267,6 +267,7 @@ public class SelectExpansionTests {
 		assertTrue(seNested.getUsedTargetNames().size() == 1);
 		assertTrue(seNested.getUsedDefNames().size() == 1);
 		assertTrue(seNested.getExpansion().size() == 1);
+		assertEquals("a", seNested.getGroupByTargetNames().get(0));
 	}
 
 	@Test
