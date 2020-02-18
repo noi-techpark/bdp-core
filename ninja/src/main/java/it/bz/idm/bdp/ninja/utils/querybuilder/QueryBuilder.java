@@ -28,9 +28,6 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder reset(final String select, final String where, String... selectDefNames) {
-		if (select == null || select.isEmpty()) {
-			throw new RuntimeException("No alias list defined. For example: \"name, age, gender\".");
-		}
 		se.setWhereClause(where);
 		se.expand(select, selectDefNames);
 		return this;
@@ -156,7 +153,7 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder addSqlIfAlias(String sqlPart, String alias) {
-		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedAliases().contains(alias)) {
+		if (sqlPart != null && !sqlPart.isEmpty() && se.getUsedTargetNames().contains(alias)) {
 			sql.append(" ");
 			sql.append(sqlPart);
 		}
@@ -281,11 +278,11 @@ public class QueryBuilder {
 		if (! se.hasFunctions()) {
 			return this;
 		}
-		List<String> groupByColumns = se.getGroupByColumns();
-		if (! groupByColumns.isEmpty()) {
-			StringJoiner sj = new StringJoiner(",");
-			for (String col : groupByColumns) {
-				sj.add(se.getDefinitionByAlias(col).getColumn(col)); //FIXME is this not double circular?
+		List<String> groupByTargetNames = se.getGroupByTargetNames();
+		if (! groupByTargetNames.isEmpty()) {
+			StringJoiner sj = new StringJoiner(", ");
+			for (String targetName : groupByTargetNames) {
+				sj.add(se.getSchema().find(targetName).get(targetName).getColumn()); //FIXME is this not double circular? TO BE TESTED WITH JUNIT!!!!
 			}
 			addSql("group by " + sj);
 		}

@@ -16,7 +16,10 @@ import com.jsoniter.output.JsonStream;
 
 import it.bz.idm.bdp.ninja.utils.miniparser.Token;
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.ColumnMapRowMapper;
 import it.bz.idm.bdp.ninja.utils.queryexecutor.QueryExecutor;
 import it.bz.idm.bdp.ninja.utils.resultbuilder.ResultBuilder;
@@ -59,7 +62,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select == null ? "*" : select, where, "station", "parent")
+				.init(select, where, "station", "parent")
 				.addSql("select")
 				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode", !flat)
@@ -110,23 +113,9 @@ public class DataFetcher {
 		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
 		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
 
-		/*
-		 * FIXME This needs to be done as "replacement" within select expansion, otherwise
-		 * wrong values could be replaced and error messages show renamed aliases, which
-		 * is confusing for users.
-		 */
-		String selectDouble = select == null ? "*" : select.replace("mvalue", "mvalue_double");
-		String selectString = select == null ? "*" : select.replace("mvalue", "mvalue_string");
-		String whereDouble = null;
-		String whereString = null;
-		if (where != null) {
-			whereDouble = where.replace("mvalue", "mvalue_double");
-			whereString = where.replace("mvalue", "mvalue_string");
-		}
-
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(selectDouble, whereDouble, "station", "parent", "measurementdouble", "measurement", "datatype");
+				.init(select, where, "station", "parent", "measurementdouble", "measurement", "datatype");
 
 		// FIXME Consider all possibilities and build a query with both mvalue types if strings and numbers are present
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
@@ -167,7 +156,7 @@ public class DataFetcher {
 		}
 
 		if (!hasFunctions && (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null"))) {
-			query.reset(selectString, whereString, "station", "parent", "measurementstring", "measurement", "datatype")
+			query.reset(select, where, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
@@ -250,6 +239,9 @@ public class DataFetcher {
 	}
 
 	public void setSelect(String select) {
+		/* No need to check for null, since the QueryBuilder
+		 * will handle this with a "SELECT * ..."
+		 */
 		this.select = select;
 	}
 
@@ -263,57 +255,76 @@ public class DataFetcher {
 
 	public static void main(String[] args) throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addColumn("measurement", "mvalidtime", "me.timestamp");
-		se.addColumn("measurement", "mtransactiontime", "me.created_on");
-		se.addColumn("measurement", "mperiod", "me.period");
-		se.addColumn("measurement", "mvalue", "me.double_value");
+		Schema schema = new Schema();
 
-		se.addColumn("measurementdouble", "mvalidtime", "me.timestamp");
-		se.addColumn("measurementdouble", "mtransactiontime", "me.created_on");
-		se.addColumn("measurementdouble", "mperiod", "me.period");
-		se.addColumn("measurementdouble", "mvalue_double", "me.double_value", null, "null::character varying as mvalue_string");
+		TargetDefList measurement = TargetDefList.init("measurement")
+				.add(new TargetDef("mvalidtime", "me.timestamp"))
+				.add(new TargetDef("mtransactiontime", "me.created_on"))
+				.add(new TargetDef("mperiod", "me.period"));
 
-		se.addColumn("measurementstring", "mvalidtime", "me.timestamp");
-		se.addColumn("measurementstring", "mtransactiontime", "me.created_on");
-		se.addColumn("measurementstring", "mperiod", "me.period");
-		se.addColumn("measurementstring", "mvalue_string", "me.string_value", "null::double precision as mvalue_double", null);
+		schema.add(measurement);
 
-		se.addColumn("datatype", "tname", "t.cname");
-		se.addColumn("datatype", "tunit", "t.cunit");
-		se.addColumn("datatype", "ttype", "t.rtype");
-		se.addColumn("datatype", "tdescription", "t.description");
-		se.addSubDef("datatype", "tmeasurements", "measurement");
+		TargetDefList measurementdouble = TargetDefList.init("measurementdouble")
+				.add(new TargetDef("mvalue_double", "me.double_value")
+						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
 
-		se.addColumn("parent", "pname", "p.name");
-		se.addColumn("parent", "ptype", "p.stationtype");
-		se.addColumn("parent", "pcoordinate", "p.pointprojection");
-		se.addColumn("parent", "pcode", "p.stationcode");
-		se.addColumn("parent", "porigin", "p.origin");
-		se.addColumn("parent", "pmetadata", "pm.json");
+		schema.add(measurementdouble);
 
-		se.addColumn("station", "sname", "s.name");
-		se.addColumn("station", "stype", "s.stationtype");
-		se.addColumn("station", "scode", "s.stationcode");
-		se.addColumn("station", "sorigin", "s.origin");
-		se.addColumn("station", "sactive", "s.active");
-		se.addColumn("station", "savailable", "s.available");
-		se.addColumn("station", "scoordinate", "s.pointprojection");
-		se.addColumn("station", "smetadata", "m.json");
-		se.addSubDef("station", "sparent", "parent");
-		se.addSubDef("station", "sdatatypes", "datatype");
+		TargetDefList measurementstring = TargetDefList.init("measurementstring")
+				.add(new TargetDef("mvalue_string", "me.string_value")
+						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
 
-		se.addSubDef("stationtype", "stations", "station");
+		schema.add(measurementstring);
+
+		TargetDefList datatype = TargetDefList.init("datatype")
+				.add(new TargetDef("tname", "t.cname")).add(new TargetDef("tunit", "t.cunit"))
+				.add(new TargetDef("ttype", "t.rtype"))
+				.add(new TargetDef("tdescription", "t.description"))
+				.add(new TargetDef("tmeasurements", measurement));
+
+		schema.add(datatype);
+
+		TargetDefList parent = TargetDefList.init("parent").add(new TargetDef("pname", "p.name"))
+				.add(new TargetDef("ptype", "p.stationtype"))
+				.add(new TargetDef("pcode", "p.stationcode"))
+				.add(new TargetDef("porigin", "p.origin"))
+				.add(new TargetDef("pactive", "p.active"))
+				.add(new TargetDef("pavailable", "p.available"))
+				.add(new TargetDef("pcoordinate", "p.pointprojection"))
+				.add(new TargetDef("pmetadata", "pm.json"));
+
+		schema.add(parent);
+
+		TargetDefList station = TargetDefList.init("station").add(new TargetDef("sname", "s.name"))
+				.add(new TargetDef("stype", "s.stationtype"))
+				.add(new TargetDef("scode", "s.stationcode"))
+				.add(new TargetDef("sorigin", "s.origin"))
+				.add(new TargetDef("sactive", "s.active"))
+				.add(new TargetDef("savailable", "s.available"))
+				.add(new TargetDef("scoordinate", "s.pointprojection"))
+				.add(new TargetDef("smetadata", "m.json"))
+				.add(new TargetDef("sparent", parent))
+				.add(new TargetDef("sdatatypes", datatype));
+
+		schema.add(station);
+
+		TargetDefList stationtype = TargetDefList.init("stationtype")
+				.add(new TargetDef("stations", station));
+
+		schema.add(stationtype);
+
+		se.setSchema(schema);
 
 		se.expand("*", "station", "parent", "measurementdouble");
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
 		se.setWhereClause("");
 		se.expand("*", "station", "parent", "measurementstring");
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
@@ -341,7 +352,7 @@ public class DataFetcher {
 		queryResult.add(rec2);
 
 		System.out.println(se.getExpansion());
-		System.out.println(se.getUsedAliases());
+		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 
@@ -352,7 +363,7 @@ public class DataFetcher {
 		hierarchy.add("_stationcode");
 		hierarchy.add("_datatypename");
 
-		System.out.println(JsonStream.serialize(ResultBuilder.build(true, queryResult, se, hierarchy)));
+		System.out.println(JsonStream.serialize(ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy)));
 	}
 
 }

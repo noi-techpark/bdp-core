@@ -2,7 +2,10 @@ package it.bz.idm.bdp.ninja.config;
 
 import it.bz.idm.bdp.ninja.utils.miniparser.Consumer;
 import it.bz.idm.bdp.ninja.utils.miniparser.Token;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 
 public class SelectExpansionConfig {
 
@@ -11,40 +14,54 @@ public class SelectExpansionConfig {
 	public SelectExpansionConfig() {
 		super();
 
+		Schema schema = new Schema();
+
+		TargetDefList measurement = TargetDefList.init("measurement").add(new TargetDef("mvalidtime", "me.timestamp"))
+				.add(new TargetDef("mtransactiontime", "me.created_on")).add(new TargetDef("mperiod", "me.period"));
+
+		schema.add(measurement);
+
+		TargetDefList measurementdouble = TargetDefList.init("measurementdouble")
+				.add(new TargetDef("mvalue_double", "me.double_value")
+						.sqlAfter("null::character varying as mvalue_string").alias("mvalue"));
+
+		schema.add(measurementdouble);
+
+		TargetDefList measurementstring = TargetDefList.init("measurementstring")
+				.add(new TargetDef("mvalue_string", "me.string_value")
+						.sqlBefore("null::double precision as mvalue_double").alias("mvalue"));
+
+		schema.add(measurementstring);
+
+		TargetDefList datatype = TargetDefList.init("datatype").add(new TargetDef("tname", "t.cname"))
+				.add(new TargetDef("tunit", "t.cunit")).add(new TargetDef("ttype", "t.rtype"))
+				.add(new TargetDef("tdescription", "t.description")).add(new TargetDef("tmeasurements", measurement));
+
+		schema.add(datatype);
+
+		TargetDefList parent = TargetDefList.init("parent").add(new TargetDef("pname", "p.name"))
+				.add(new TargetDef("ptype", "p.stationtype")).add(new TargetDef("pcode", "p.stationcode"))
+				.add(new TargetDef("porigin", "p.origin")).add(new TargetDef("pactive", "p.active"))
+				.add(new TargetDef("pavailable", "p.available")).add(new TargetDef("pcoordinate", "p.pointprojection"))
+				.add(new TargetDef("pmetadata", "pm.json"));
+
+		schema.add(parent);
+
+		TargetDefList station = TargetDefList.init("station").add(new TargetDef("sname", "s.name"))
+				.add(new TargetDef("stype", "s.stationtype")).add(new TargetDef("scode", "s.stationcode"))
+				.add(new TargetDef("sorigin", "s.origin")).add(new TargetDef("sactive", "s.active"))
+				.add(new TargetDef("savailable", "s.available")).add(new TargetDef("scoordinate", "s.pointprojection"))
+				.add(new TargetDef("smetadata", "m.json")).add(new TargetDef("sparent", parent))
+				.add(new TargetDef("sdatatypes", datatype));
+
+		schema.add(station);
+
+		TargetDefList stationtype = TargetDefList.init("stationtype").add(new TargetDef("stations", station));
+
+		schema.add(stationtype);
+
 		se = new SelectExpansion();
-
-		se.addColumn("measurement", "mvalidtime", "me.timestamp");
-		se.addColumn("measurement", "mtransactiontime", "me.created_on");
-		se.addColumn("measurement", "mperiod", "me.period");
-
-		se.addColumn("measurementdouble", "mvalue_double", "me.double_value", null, "null::character varying as mvalue_string");
-		se.addColumn("measurementstring", "mvalue_string", "me.string_value", "null::double precision as mvalue_double", null);
-
-		se.addColumn("datatype", "tname", "t.cname");
-		se.addColumn("datatype", "tunit", "t.cunit");
-		se.addColumn("datatype", "ttype", "t.rtype");
-		se.addColumn("datatype", "tdescription", "t.description");
-		se.addSubDef("datatype", "tmeasurements", "measurement");
-
-		se.addColumn("parent", "pname", "p.name");
-		se.addColumn("parent", "ptype", "p.stationtype");
-		se.addColumn("parent", "pcoordinate", "p.pointprojection");
-		se.addColumn("parent", "pcode", "p.stationcode");
-		se.addColumn("parent", "porigin", "p.origin");
-		se.addColumn("parent", "pmetadata", "pm.json");
-
-		se.addColumn("station", "sname", "s.name");
-		se.addColumn("station", "stype", "s.stationtype");
-		se.addColumn("station", "scode", "s.stationcode");
-		se.addColumn("station", "sorigin", "s.origin");
-		se.addColumn("station", "sactive", "s.active");
-		se.addColumn("station", "savailable", "s.available");
-		se.addColumn("station", "scoordinate", "s.pointprojection");
-		se.addColumn("station", "smetadata", "m.json");
-		se.addSubDef("station", "sparent", "parent");
-		se.addSubDef("station", "sdatatypes", "datatype");
-
-		se.addSubDef("stationtype", "stations", "station");
+		se.setSchema(schema);
 
 		/*
 		 * Define where-clause items and their mappings to SQL. Some operators need

@@ -6,7 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.QueryBuilder;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.SelectExpansion;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
+import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
 
 public class QueryBuilderTests {
 
@@ -51,12 +54,20 @@ public class QueryBuilderTests {
 	@Before
 	public void setUpBefore() throws Exception {
 		SelectExpansion se = new SelectExpansion();
-		se.addColumn("C", "d", "C.d");
-		se.addColumn("B", "x", "B.x");
-		se.addSubDef("B", "y", "C");
-		se.addColumn("A", "a", "A.a");
-		se.addSubDef("A", "b", "B");
-		se.addColumn("A", "c", "A.c");
+		Schema schema = new Schema();
+		TargetDefList defC = TargetDefList.init("C")
+				.add(new TargetDef("d", "C.d"));
+		TargetDefList defB = TargetDefList.init("B")
+				.add(new TargetDef("x", "B.x"))
+				.add(new TargetDef("y", defC));
+		TargetDefList defA = TargetDefList.init("A")
+				.add(new TargetDef("a", "A.a"))
+				.add(new TargetDef("b", defB))
+				.add(new TargetDef("c", "A.c"));
+		schema.add(defA);
+		schema.add(defB);
+		schema.add(defC);
+		se.setSchema(schema);
 		QueryBuilder.setup(se);
 	}
 
