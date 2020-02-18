@@ -1,8 +1,10 @@
 package it.bz.idm.bdp.ninja;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -211,10 +213,10 @@ public class ResultBuilderTests {
 		assertEquals("x", seNestedMain.getUsedTargetNames().get(0));
 		assertEquals("B", seNestedMain.getUsedDefNames().get(0));
 
-		assertEquals(
-				"B.x#>'{address,city}' as \"x_replaced.address.city\", B.x#>'{address,cap}' as \"x_replaced.address.cap\"",
-				seNestedMain.getExpansion().get("B")
-				);
+		List<String> expB = Arrays.asList(seNestedMain.getExpansion().get("B").split(", "));
+		assertTrue(expB.contains("B.x#>'{address,city}' as \"x_replaced.address.city\""));
+		assertTrue(expB.contains("B.x#>'{address,cap}' as \"x_replaced.address.cap\""));
+
 		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false).toString());
 	}
 

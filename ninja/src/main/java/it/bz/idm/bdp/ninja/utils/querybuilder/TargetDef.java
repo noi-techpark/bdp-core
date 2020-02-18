@@ -113,4 +113,12 @@ public class TargetDef {
 	public boolean hasColumn() {
 		return column != null;
 	}
+
+	@Override
+	public String toString() {
+		return "{" +
+			"name = " + name +
+			(hasColumn() ? (", column = " + column) : (", pointer = " + targetDefList.getName())) +
+			"}";
+	}
 }

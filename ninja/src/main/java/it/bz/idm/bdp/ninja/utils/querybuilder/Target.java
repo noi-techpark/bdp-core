@@ -11,6 +11,8 @@ public class Target implements Comparable<Target> {
 	private String name;
 	private String func;
 	private String json;
+	private TargetDef targetDef;
+	private String defListName;
 
 	public Target(final String plainText) {
 		func = null;
@@ -76,9 +78,37 @@ public class Target implements Comparable<Target> {
 		return json != null;
 	}
 
+	public void setTargetDef(TargetDef targetDef) {
+		this.targetDef = targetDef;
+	}
+
+	public TargetDef getTargetDef() {
+		return targetDef;
+	}
+
+	public void setTargetDefListName(String name) {
+		this.defListName = name;
+	}
+
+	public String getTargetDefListName() {
+		return defListName;
+	}
+
 	@Override
 	public int compareTo(Target o) {
 		return name.compareTo(o.getName());
 	}
+
+	@Override
+    public boolean equals(Object other)
+    {
+		if (other == null)
+			return false;
+
+		if (this == other)
+			return true;
+
+		return other instanceof Target && name.equals(((Target)other).getName());
+    }
 
 }
