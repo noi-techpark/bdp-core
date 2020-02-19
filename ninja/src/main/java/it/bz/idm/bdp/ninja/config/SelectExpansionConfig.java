@@ -40,6 +40,7 @@ public class SelectExpansionConfig {
 				.add(new TargetDef("tunit", "t.cunit"))
 				.add(new TargetDef("ttype", "t.rtype"))
 				.add(new TargetDef("tdescription", "t.description"))
+				.add(new TargetDef("tmetadata", "tm.json"))
 				.add(new TargetDef("tmeasurements", measurement));
 
 		schema.add(datatype);

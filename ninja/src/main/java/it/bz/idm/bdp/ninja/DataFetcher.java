@@ -140,8 +140,9 @@ public class DataFetcher {
 				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
-				 .addSql("join type t on me.type_id = t.id",
-						 "where true")
+				 .addSql("join type t on me.type_id = t.id")
+				 .addSqlIfAlias("left join type_metadata tm on tm.id = t.meta_data_id", "tmetadata")
+				 .addSql("where true")
 				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
@@ -173,8 +174,9 @@ public class DataFetcher {
 				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
 				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
 				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
-				 .addSql("join type t on me.type_id = t.id",
-						 "where true")
+				 .addSql("join type t on me.type_id = t.id")
+				 .addSqlIfAlias("left join type_metadata tm on tm.id = t.meta_data_id", "tmetadata")
+				 .addSql("where true")
 				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				 .setParameterIfNotNull("from", from, "and timestamp >= :from")
@@ -277,9 +279,11 @@ public class DataFetcher {
 		schema.add(measurementstring);
 
 		TargetDefList datatype = TargetDefList.init("datatype")
-				.add(new TargetDef("tname", "t.cname")).add(new TargetDef("tunit", "t.cunit"))
+				.add(new TargetDef("tname", "t.cname"))
+				.add(new TargetDef("tunit", "t.cunit"))
 				.add(new TargetDef("ttype", "t.rtype"))
 				.add(new TargetDef("tdescription", "t.description"))
+				.add(new TargetDef("tmetadata", "tm.json"))
 				.add(new TargetDef("tmeasurements", measurement));
 
 		schema.add(datatype);
