@@ -55,9 +55,15 @@ public class Schema {
 	}
 
 	public TargetDefList findByAliasOrNull(final String alias, Set<String> targetDefListNames) {
-		TargetDefList targetDefList = findByAliasOrNull(alias);
-		if (targetDefList != null && targetDefListNames.contains(targetDefList.getName())) {
-			return targetDefList;
+		for (String targetDefListName : targetDefListNames) {
+			TargetDefList targetDefList = schema.get(targetDefListName);
+			if (targetDefList == null) {
+				return null;
+			}
+			TargetDef targetDef = targetDefList.getByAlias(alias);
+			if (targetDef != null) {
+				return targetDefList;
+			}
 		}
 		return null;
 	}
