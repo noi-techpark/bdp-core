@@ -23,7 +23,6 @@ keycloak.use-resource-role-mappings=true
 keycloak.credentials.secret=
 keycloak.public-client=false
 keycloak.bearer-only=true
-keycloak.cors=true
 
 # Swagger
 ninja.swagger.readme-url = TODO
