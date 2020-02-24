@@ -64,9 +64,9 @@
 
 3. Client Settings
 
-| Property | Value               |
-| -------- | ------------------- |
-| ClientID | odh-mobility-client |
+| Property    | Value       |
+| ----------- | ----------- |
+| Access Type | bearer-only |
 
 4. Navigate to Roles
 
@@ -98,9 +98,9 @@ Add following roles: BDP_ADMIN, BDP_BLC, BDP_MAD, BDP_CBZ
 
 4. Navigate to Scope
 
-| Property                                          | Value                                |
-| ------------------------------------------------- | ------------------------------------ |
-| Full Scope Allowed                                | Off                                  |
+| Property                                          | Value                                  |
+| ------------------------------------------------- | -------------------------------------- |
+| Full Scope Allowed                                | Off                                    |
 | Client Roles -> odh-mobility-v2 -> Assigned Roles | Move available roles to assigned roles |
 
 5. Generate a new token
