@@ -13,11 +13,17 @@ server.compression.mime-types = text/html,text/xml,text/plain,text/css,text/java
 server.compression.min-response-size = 1024
 
 # Security (base64 encoded, PEM format optional, x5c chain possible)
-ninja.security.oauth2.pubkey =
-ninja.security.oauth2.scopes =
-ninja.security.oauth2.issuer =
-ninja.security.oauth2.audien =
 ninja.security.cors.allowed-origins = *
+
+keycloak.auth-server-url=http://keycloak:8080/auth
+keycloak.ssl-required=external
+keycloak.realm=NOI
+keycloak.resource=odh-mobility-v2
+keycloak.use-resource-role-mappings=true
+keycloak.credentials.secret=
+keycloak.public-client=false
+keycloak.bearer-only=true
+keycloak.cors=true
 
 # Swagger
 ninja.swagger.readme-url = TODO
