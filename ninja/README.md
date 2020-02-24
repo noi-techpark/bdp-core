@@ -41,6 +41,11 @@
 
 ## I want to run the Ninja web-service
 
+### Prerequisites
+- Java JDK 1.8 or higher (e.g. [OpenJDK](https://openjdk.java.net/))
+- [Maven](https://maven.apache.org/) 3.x
+- Run [NOI Authentication server](https://github.com/noi-techpark/authentication-server) locally or connect to test environment
+
 Go to `src/main/resources/` and copy `database.properties.dist` to
 `database.properties` and configure it accordingly. Mostly `jdbcUrl`, `username`
 and `password` are necessary, the rest can be kept as is.
