@@ -2,6 +2,7 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 #### Table of Contents
 
 - [I want to run the Ninja web-service](#i-want-to-run-the-ninja-web-service)
@@ -41,6 +42,80 @@
 
 ## I want to run the Ninja web-service
 
+### Prerequisites
+
+- Java JDK 1.8 or higher (e.g. [OpenJDK](https://openjdk.java.net/))
+- [Maven](https://maven.apache.org/) 3.x
+- Run [NOI Authentication server](https://github.com/noi-techpark/authentication-server) locally or connect to test environment
+
+### How to setup NOI Authentication Server locally?
+
+- [Here](https://github.com/noi-techpark/authentication-server) you can find how to run the server locally
+- Create a new realm following these [steps](https://github.com/noi-techpark/authentication-server/blob/master/docs/noi-authentication-server.md#realm)
+
+#### How to register this application in your local authentication server?
+
+1. Open the previously created realm
+2. Create a new client (Clients -> Create)
+
+| Property | Value           |
+| -------- | --------------- |
+| ClientID | odh-mobility-v2 |
+
+3. Client Settings
+
+| Property    | Value       |
+| ----------- | ----------- |
+| Access Type | bearer-only |
+
+4. Navigate to Roles
+
+Add following roles: BDP_ADMIN, BDP_BLC, BDP_MAD, BDP_CBZ
+
+#### How to create a user or assign a user the necessary roles for this application?
+
+1. Go to users
+2. Create user or select user (View users)
+3. Assign roles: Role Mappings -> Client Roles -> odh-mobility-v2
+
+#### How to create a client to generate tokens for testing purposes?
+
+1. Open the previously created realm
+2. Create a new client (Clients -> Create)
+
+| Property | Value               |
+| -------- | ------------------- |
+| ClientID | odh-mobility-client |
+
+3. Client Settings
+
+| Property                     | Value  |
+| ---------------------------- | ------ |
+| Access Type                  | public |
+| Standard Flow Enabled        | Off    |
+| Implicit Flow Enabled        | Off    |
+| Direct Access Grants Enabled | On     |
+
+4. Navigate to Scope
+
+| Property                                          | Value                                  |
+| ------------------------------------------------- | -------------------------------------- |
+| Full Scope Allowed                                | Off                                    |
+| Client Roles -> odh-mobility-v2 -> Assigned Roles | Move available roles to assigned roles |
+
+5. Generate a new token
+
+```sh
+curl --location --request POST 'http://localhost:8080/auth/realms/NOI/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username={USERNAME}' \
+--data-urlencode 'password={PASSWORD}' \
+--data-urlencode 'client_id=odh-mobility-client'
+```
+
+### How to start local development server?
+
 Go to `src/main/resources/` and copy `database.properties.dist` to
 `database.properties` and configure it accordingly. Mostly `jdbcUrl`, `username`
 and `password` are necessary, the rest can be kept as is.
@@ -53,6 +128,7 @@ Run `mvn spring-boot:run`.
 ## Station Types / Categories
 
 ### I want to get all station types as a list
+
 ```
 GET /
 ```
@@ -65,11 +141,13 @@ or disable it completely](#pagination). The first path variable is the
 compactness, we will use only flat representations throughout this tutorial.
 
 ### I want to get all e-charging stations including details
+
 ```
 GET /flat/EChargingStation
 ```
 
 ### I want to get all e-charging stations and their plugs including details
+
 ```
 GET /flat/EChargingStation,EChargingPlug
 ```
@@ -82,6 +160,7 @@ GET /flat/EChargingPlug
 ```
 
 ### I want to get all stations of any type including details
+
 ```
 GET /flat/*
 ```
@@ -89,11 +168,13 @@ GET /flat/*
 ## Stations, Data Types and most up-to-date Measurements
 
 ### I want to get all most up-to-date measurements of all parking lots
+
 ```
 GET /flat/ParkingStation/*
 ```
 
 ### I want to get all most up-to-date occupancy values of all parking lots
+
 ```
 GET /flat/ParkingStation/occupied
 ```
@@ -106,6 +187,7 @@ have a moving window over a timeline without selecting certain values multiple
 times.
 
 ### I want to get historical occupancy values of all parking lots from a certain period
+
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02
 ```
@@ -153,6 +235,7 @@ inside.
 A `filter` has the form `alias.operator.value_or_list`.
 
 **value_or_list**
+
 - `value`: Whatever you want, also a regular expression. Use double-quotes to
   force string recognition. Alternatively, you can escape characters `,`, `'`
   and `"` with a `\`. Use url-encoding, if your tool does not support certain
@@ -162,6 +245,7 @@ A `filter` has the form `alias.operator.value_or_list`.
 - `list`: `(value,value,value)`
 
 **operator**
+
 - `eq`: Equal
 - `neq`: Not Equal
 - `lt`: Less Than
@@ -182,6 +266,7 @@ A `filter` has the form `alias.operator.value_or_list`.
   Example: `name.nin.(Patrick,Rudi,Peter)`
 
 **logical operations**
+
 - `and(filter,filter,...)`: Conjunction of filters (can be nested)
 - `or(filter,filter,...)`: Disjunction of filters (can be nested)
 
@@ -195,6 +280,7 @@ NB: Currently it is not possible to distinguish between a JSON field containing 
 or a non-existing JSON field.
 
 ## Functions / Aggregation / Grouping
+
 You can use any SQL function within **select**, which takes only a single
 numeric value. All selected aliases, that are not within a function are used for
 grouping.
@@ -210,11 +296,13 @@ NB: Currently only numeric functions are possible, we will not select anything
 from our string measurements.
 
 ### I want to see only station names, data type names and the value of the measurement
+
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?select=sname,tname,mvalue
 ```
 
 ### I want to see only parking stations within a bounding box of a map
+
 ```
 GET /flat/ParkingStation/*?where=scoordinate.bbi.(11.63,46.0,11.65,47.0,4326)
 ```
@@ -227,6 +315,7 @@ GET /flat/ParkingStation/*?where=or(scoordinate.bbi.(11.63,46.0,11.65,47.0,4326)
 ```
 
 ### I want to see all information where the measured value is greater than 100 and the station origin is FAMAS
+
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=mvalue.gt.100,sorigin.eq.FAMAS
 ```
@@ -240,6 +329,7 @@ that is, the String itself, then you must put it into double-quotes, like
 ### I want to see all information where the station code starts with "me" or "rovereto"
 
 We use a key-insensitive regular expression here:
+
 ```
 GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rovereto)
 ```
@@ -247,6 +337,7 @@ GET /flat/ParkingStation/occupied/2019-01-01/2019-01-02?where=scode.ire.(ME|Rove
 ### I want active creative industry stations with their sector and website, but only if the have one
 
 We use a JSON selector and JSON filters here:
+
 ```
 GET /flat/CreativeIndustry?where=sactive.eq.true,smetadata.website.neq.null,smetadata.website.ire."http"&select=sname,smetadata.sector,smetadata.website
 ```
@@ -257,10 +348,10 @@ is not a description telling us, that the website is currently under development
 ### I want all creative industry station names, which do not have a sector assigned
 
 We use a JSON selector and JSON filters here:
+
 ```
 GET /flat/CreativeIndustry?where=smetadata.sector.eq.null&select=sname
 ```
-
 
 ## Null values
 
@@ -278,19 +369,20 @@ represent complex data types, such as `coordinates` and `jsonb`. Only the first
 level can be selected or filtered.
 
 Example with `select=stype,dtype,mvalue,smetadata`:
+
 ```json
 {
-    "data": [
-        {
-            "stype": "ParkingStation",
-            "dtype": "occupied",
-            "mvalue": 300,
-            "smetadata": {
-                "capacity": 1200,
-                "...": "..."
-            }
-        }
-    ]
+  "data": [
+    {
+      "stype": "ParkingStation",
+      "dtype": "occupied",
+      "mvalue": 300,
+      "smetadata": {
+        "capacity": 1200,
+        "...": "..."
+      }
+    }
+  ]
 }
 ```
 
@@ -303,17 +395,17 @@ which do not match inside a hierarchy, this representation is suited for you.
 
 ```json
 {
-    "data": [
-        {
-            "dtype": "ParkingStation"
-        },
-        {
-            "dtype": "VMS"
-        },
-        {
-            "dtype": "EChargingStation"
-        },
-    ]
+  "data": [
+    {
+      "dtype": "ParkingStation"
+    },
+    {
+      "dtype": "VMS"
+    },
+    {
+      "dtype": "EChargingStation"
+    }
+  ]
 }
 ```
 
@@ -356,17 +448,21 @@ currently not support aggregation, like `count` and other statistical methods
 involving `grouping`.
 
 ### show all echarging stations of bolzano
+
 ```
 GET /flat/EChargingStation?where=sactive.eq.true,scoordinate.bbi.(11.27539,46.444913,11.432577,46.530384)
 ```
 
 ### Show number of public, private and private with public access echarging stations
+
 Since we want to count the results later, we need to set `distinct=false`.
+
 ```
 GET /flat/EChargingStation?select=smetadata.accessType&where=sactive.eq.true&distinct=false
 ```
 
 ### Show the total number of plugs and how many are currently available
+
 This means that the measured value `mvalue` must be equal `1`.
 
 ```
@@ -374,22 +470,27 @@ GET /flat/EChargingPlug/*?select=scode&where=sactive.eq.true,tname.eq.echarging-
 ```
 
 ### Filter EchargingPlugs by voltage
+
 ```
 GET /flat/EChargingPlug?where=sactive.eq.true
 ```
 
 ### Filter EchargingStations by payment method
+
 ```
 GET /flat/EChargingStation?where=sactive.eq.true,smetadata.accessType.eq.PUBLIC
 ```
 
 ### Get all possible states of all echarging stations
+
 ```
 GET /flat/EChargingStation?select=smetadata.state
 ```
 
 ### Filter EchargingStations by state
+
 For example filter against `ACTIVE` states.
+
 ```
 GET /flat/EChargingPlug?where=sactive.eq.true,smetadata.state.eq.ACTIVE
 ```

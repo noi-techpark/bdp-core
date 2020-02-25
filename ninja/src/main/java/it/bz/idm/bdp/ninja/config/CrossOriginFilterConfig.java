@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CrossOriginFilterConfig implements WebMvcConfigurer {
 
-    @Value("${security.cors.allowed-origins:*}")
+    @Value("${ninja.security.cors.allowed-origins:*}")
     private String allowedOrigins;
 
 	@Override
