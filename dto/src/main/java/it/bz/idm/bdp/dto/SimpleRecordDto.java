@@ -52,6 +52,7 @@ public class SimpleRecordDto extends RecordDtoImpl {
 	public SimpleRecordDto() {
 		super();
 	}
+	@Deprecated
 	public SimpleRecordDto(Long timestamp, Object value) {
 		this();
 		this.timestamp = timestamp;
