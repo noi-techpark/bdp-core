@@ -183,7 +183,7 @@ public class SelectExpansion {
 		return hasFunctions;
 	}
 
-	private void _expandWhere(String where) {
+	private void _expandWhere(String where, Set<String> allowedTargetDefs) {
 		if (where == null || where.isEmpty()) {
 			whereSQL = null;
 			whereParameters = null;
@@ -226,14 +226,14 @@ public class SelectExpansion {
 				case "CLAUSE": {
 					log.debug("CLAUSE");
 					String alias = t.getChild("ALIAS").getValue();
-					String column = getColumn(alias);
+					String column = getColumn(alias, allowedTargetDefs);
 					if (column == null) {
 						throw new SimpleException(ErrorCode.WHERE_ALIAS_NOT_FOUND, alias);
 					}
 					String operator = t.getChild("OP").getValue();
 
 					usedTargetDefNames.add(alias);
-					usedTargetDefListNames.add(schema.find(alias).getName());
+					usedTargetDefListNames.add(schema.find(alias, allowedTargetDefs).getName());
 					Token jsonSel = t.getChild("JSONSEL");
 					Token clauseOrValueToken = t.getChild(t.getChildCount() - 1);
 					_addAliasesInWhere(alias, clauseOrValueToken);
@@ -499,7 +499,7 @@ public class SelectExpansion {
 			usedTargetDefNames.add(td.getFinalName());
 		}
 
-		_expandWhere(whereClause);
+		_expandWhere(whereClause, targetListNames);
 	}
 
 	public List<String> getUsedTargetNames() {
@@ -541,8 +541,8 @@ public class SelectExpansion {
 		return getExpansion().get(defName);
 	}
 
-	public String getColumn(String aliasOrName) {
-		TargetDefList targetDefList = schema.findOrNull(aliasOrName);
+	public String getColumn(String aliasOrName, Set<String> allowedTargetDefs) {
+		TargetDefList targetDefList = schema.findOrNull(aliasOrName, allowedTargetDefs);
 		if (targetDefList == null)
 			return null;
 		return targetDefList.get(aliasOrName).getColumn();
