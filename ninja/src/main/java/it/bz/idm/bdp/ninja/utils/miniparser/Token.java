@@ -31,6 +31,32 @@ public class Token {
 		return name.equalsIgnoreCase(this.name);
 	}
 
+	/**
+	 * Null-safe version of {@link Token#is}
+	 * @param token
+	 * @param name
+	 * @return
+	 */
+	public static boolean is(Token token, String name) {
+		if (token == null) {
+			return false;
+		}
+		return token.is(name);
+	}
+
+	/**
+	 * Null-safe version of {@link Token#valueIs}
+	 * @param token
+	 * @param name
+	 * @return
+	 */
+	public static boolean valueIs(Token token, String name) {
+		if (token == null) {
+			return false;
+		}
+		return token.valueIs(name);
+	}
+
 	public boolean valueIs(String value) {
 		if (value == null) {
 			if (this.value == null) {

@@ -106,7 +106,7 @@ Add following roles: BDP_ADMIN, BDP_BLC, BDP_MAD, BDP_CBZ
 5. Generate a new token
 
 ```sh
-curl --location --request POST 'http://localhost:8080/auth/realms/NOI/protocol/openid-connect/token' \
+curl --location --request POST 'http://localhost:8080/auth/realms/noi/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'grant_type=password' \
 --data-urlencode 'username={USERNAME}' \

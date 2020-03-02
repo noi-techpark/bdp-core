@@ -2,9 +2,7 @@ package it.bz.idm.bdp.ninja;
 
 import static org.junit.Assert.assertEquals;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalField;
 
 import org.junit.Test;
 

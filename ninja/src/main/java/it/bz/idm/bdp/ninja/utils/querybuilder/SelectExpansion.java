@@ -79,7 +79,6 @@ import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 public class SelectExpansion {
 
 	private static final Logger log = LoggerFactory.getLogger(SelectExpansion.class);
-	private static final String ALIAS_VALIDATION = "[0-9a-zA-Z\\._]+"; // Do not forget to update ErrorCode.ALIAS_INVALID
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		KEY_NOT_FOUND("Key '%s' does not exist"),

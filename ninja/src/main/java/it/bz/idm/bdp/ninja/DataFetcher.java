@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.ninja;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,13 +116,16 @@ public class DataFetcher {
 		query = QueryBuilder
 				.init(select, where, "station", "parent", "measurementdouble", "measurement", "datatype");
 
-		// FIXME Consider all possibilities and build a query with both mvalue types if strings and numbers are present
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
 		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
-		boolean mvalueExists = mvalueToken != null;
-		boolean hasFunctions = query.getSelectExpansion().hasFunctions();
 
-		if (!mvalueExists || mvalueToken.is("number") || mvalueToken.is("null")) {
+		/* We support functions only for double-typed measurements, so do not append a measurement-string query if any
+		 */
+		boolean hasFunctions = query.getSelectExpansion().hasFunctions();
+		boolean useMeasurementDouble = mvalueToken == null || Token.is(mvalueToken, "number") || Token.is(mvalueToken, "null");
+		boolean useMeasurementString = (mvalueToken == null || Token.is(mvalueToken, "string") || Token.is(mvalueToken, "null")) && !hasFunctions;
+
+		if (useMeasurementDouble) {
 			query.addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
@@ -152,11 +154,11 @@ public class DataFetcher {
 				 .expandGroupBy();
 		}
 
-		if (!hasFunctions && (!mvalueExists || mvalueToken.is("null"))) {
+		if (useMeasurementDouble && useMeasurementString) {
 			query.addSql("union all");
 		}
 
-		if (!hasFunctions && (!mvalueExists || mvalueToken.is("string") || mvalueToken.is("null"))) {
+		if (useMeasurementString) {
 			query.reset(select, where, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
@@ -186,9 +188,7 @@ public class DataFetcher {
 				 .expandGroupBy();
 		}
 
-		if (mvalueExists && !mvalueToken.is("string")
-						 && !mvalueToken.is("number")
-						 && !mvalueToken.is("null")) {
+		if (mvalueToken != null && !mvalueToken.is("string") && !mvalueToken.is("number") && !mvalueToken.is("null")) {
 			throw new SimpleException(ErrorCode.WHERE_WRONG_DATA_TYPE, "mvalue", mvalueToken.getName());
 		}
 
