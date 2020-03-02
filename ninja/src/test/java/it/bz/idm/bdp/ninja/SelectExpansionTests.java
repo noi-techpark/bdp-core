@@ -197,7 +197,7 @@ public class SelectExpansionTests {
 	public void testAlias() {
 		seNestedBig.expand("x_replaced", "B");
 		List<String> res = seNestedBig.getUsedTargetNames();
-		assertEquals("x", res.get(0));
+		assertEquals("x_replaced", res.get(0));
 		assertTrue(res.size() == 1);
 	}
 

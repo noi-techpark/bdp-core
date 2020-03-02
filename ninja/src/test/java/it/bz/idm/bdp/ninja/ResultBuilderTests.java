@@ -169,7 +169,7 @@ public class ResultBuilderTests {
 		rec.put("a", "3");
 		rec.put("b", "7");
 		rec.put("d", "DDD");
-		rec.put("x", "0");
+		rec.put("x_replaced", "0");
 		rec.put("h", "v");
 
 		assertEquals("a", seNestedMain.getUsedTargetNames().get(0));
@@ -178,7 +178,7 @@ public class ResultBuilderTests {
 		assertEquals("d", seNestedMain.getUsedTargetNames().get(3));
 		assertEquals("h", seNestedMain.getUsedTargetNames().get(4));
 		assertEquals("t", seNestedMain.getUsedTargetNames().get(5));
-		assertEquals("x", seNestedMain.getUsedTargetNames().get(6));
+		assertEquals("x_replaced", seNestedMain.getUsedTargetNames().get(6));
 		assertEquals("y", seNestedMain.getUsedTargetNames().get(7));
 
 		assertEquals("A", seNestedMain.getUsedDefNames().get(0));
@@ -205,12 +205,12 @@ public class ResultBuilderTests {
 
 	@Test
 	public void testMakeObjectJSON() {
-		seNestedMain.expand("x.address.cap, x.address.city", "A", "B");
+		seNestedMain.expand("x_replaced.address.cap, x_replaced.address.city", "A", "B");
 		Map<String, Object> rec = new HashMap<String, Object>();
-		rec.put("x.address.cap", 39100);
-		rec.put("x.address.city", "BZ");
+		rec.put("x_replaced.address.cap", 39100);
+		rec.put("x_replaced.address.city", "BZ");
 
-		assertEquals("x", seNestedMain.getUsedTargetNames().get(0));
+		assertEquals("x_replaced", seNestedMain.getUsedTargetNames().get(0));
 		assertEquals("B", seNestedMain.getUsedDefNames().get(0));
 
 		List<String> expB = Arrays.asList(seNestedMain.getExpansion().get("B").split(", "));

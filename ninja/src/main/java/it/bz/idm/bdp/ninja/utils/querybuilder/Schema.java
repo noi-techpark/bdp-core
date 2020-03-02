@@ -51,7 +51,7 @@ public class Schema {
 		List<String> result = new ArrayList<String>();
 		for (String targetDefListName : targetDefListNames) {
 			TargetDefList targetDefList = get(targetDefListName);
-			result.addAll(targetDefList.getNames());
+			result.addAll(targetDefList.getFinalNames());
 		}
 		return result;
 	}

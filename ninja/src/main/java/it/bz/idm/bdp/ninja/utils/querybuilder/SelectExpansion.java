@@ -434,7 +434,7 @@ public class SelectExpansion {
 
 			/* It is a pointer to a targetlist, that is, not a regular column */
 			if (targetDef.hasTargetDefList()) {
-				for (String subAlias : targetDef.getTargetList().getNames()) {
+				for (String subAlias : targetDef.getTargetList().getFinalNames()) {
 					Target candTarget = new Target(subAlias); //xxx improve this, create a TargetList class?
 					if (!targets.contains(candTarget)) {
 						candTarget.setTargetDef(targetDef);

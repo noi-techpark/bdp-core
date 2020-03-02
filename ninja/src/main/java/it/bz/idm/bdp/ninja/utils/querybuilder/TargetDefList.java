@@ -85,6 +85,10 @@ public class TargetDefList {
 		return nameMap.keySet();
 	}
 
+	public Set<String> getFinalNames() {
+		return fullNameMap.keySet();
+	}
+
 	public boolean exists(final String targetName) {
 		return nameMap.containsKey(targetName);
 	}
