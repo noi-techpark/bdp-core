@@ -26,15 +26,14 @@ public class TargetDefList {
 	private final String name;
 
 	/**
-	 * <pre>
-	 * Column names in SQL, where the key is the ALIAS and the value is
-	 * the COLUMN name.
+	 * The key of this map is the {@link TargetDef#getName()}.
 	 *
-	 * For example, mvalue -> measurements.double_value
-	 * This could be rewritten into: "measurements.double_value AS mvalue"
-	 * </pre>
+	 * For example, mvalue_double & measurements.double_value
+	 * This will be rewritten to "measurements.double_value AS mvalue_double"
 	 */
-	private Map<String, TargetDef> targetDefMap = new HashMap<String, TargetDef>();
+	private Map<String, TargetDef> nameMap = new HashMap<String, TargetDef>();
+	private Map<String, TargetDef> aliasMap = new HashMap<String, TargetDef>();
+	private Map<String, TargetDef> fullNameMap = new HashMap<String, TargetDef>();
 
 	public TargetDefList(final String name) {
 		if (name == null || name.isEmpty()) {
@@ -51,37 +50,48 @@ public class TargetDefList {
 		return name;
 	}
 
-	public TargetDefList add(final TargetDef TargetDef) {
-		if (TargetDef == null) {
+	public TargetDefList add(final TargetDef targetDef) {
+		if (targetDef == null) {
 			throw new RuntimeException("TargetDef must be non-null");
 		}
-		if (targetDefMap.containsKey(TargetDef.getName())) {
-			throw new RuntimeException("TargetDef '" + TargetDef.getName() + "' already exists");
+		if (fullNameMap.containsKey(targetDef.getFinalName())) {
+			throw new RuntimeException("TargetDef '" + targetDef.getFinalName() + "' already exists. Aliases and names must be unique (also between each other)");
 		}
-		targetDefMap.put(TargetDef.getName(), TargetDef);
+		nameMap.put(targetDef.getName(), targetDef);
+		fullNameMap.put(targetDef.getFinalName(), targetDef);
+		if (targetDef.hasAlias()) {
+			aliasMap.put(targetDef.getAlias(), targetDef);
+		}
 		return this;
 	}
 
 	public Map<String,TargetDef> getAll() {
-		return this.targetDefMap;
+		return this.nameMap;
+	}
+
+	public Map<String,TargetDef> getAllFullNames() {
+		return this.fullNameMap;
 	}
 
 	public TargetDef get(final String targetName) {
-		return this.targetDefMap.get(targetName);
+		return this.nameMap.get(targetName);
 	}
 
+	public TargetDef getByFullName(final String aliasOrName) {
+		return this.fullNameMap.get(aliasOrName);
+	}
 
 	public Set<String> getNames() {
-		return targetDefMap.keySet();
+		return nameMap.keySet();
 	}
 
 	public boolean exists(final String targetName) {
-		return targetDefMap.containsKey(targetName);
+		return nameMap.containsKey(targetName);
 	}
 
 	public Map<String, TargetDefList> getPointerTargets() {
 		Map<String, TargetDefList> result = new HashMap<>();
-		for (TargetDef targetDef : targetDefMap.values()) {
+		for (TargetDef targetDef : nameMap.values()) {
 			if (targetDef.hasTargetDefList()) {
 				result.put(targetDef.getName(), targetDef.getTargetList());
 			}
@@ -91,7 +101,7 @@ public class TargetDefList {
 
 	public Map<String, TargetDefList> getColumnTargets() {
 		Map<String, TargetDefList> result = new HashMap<>();
-		for (TargetDef targetDef : targetDefMap.values()) {
+		for (TargetDef targetDef : nameMap.values()) {
 			if (targetDef.hasColumn()) {
 				result.put(targetDef.getName(), targetDef.getTargetList());
 			}
@@ -100,17 +110,12 @@ public class TargetDefList {
 	}
 
 	public TargetDef getByAlias(final String alias) {
-		for (TargetDef targetDef : targetDefMap.values()) {
-			if (alias.equals(targetDef.getAlias())) {
-				return targetDef;
-			}
-		}
-		return null;
+		return aliasMap.get(alias);
 	}
 
 	@Override
 	public String toString() {
-		return "TargetList [name=" + name + ", targets=" + targetDefMap.toString() + "]";
+		return "TargetList [name=" + name + ", targets=" + nameMap.toString() + "]";
 	}
 
 }

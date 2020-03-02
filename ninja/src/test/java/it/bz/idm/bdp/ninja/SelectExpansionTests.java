@@ -79,6 +79,7 @@ public class SelectExpansionTests {
 		schemaNestedBig.add(seNestedBigC);
 		schemaNestedBig.add(seNestedBigE);
 		seNestedBig.setSchema(schemaNestedBig);
+		seNestedBig.addOperator("null", "eq", "%c is %v");
 
 		Schema schemaMinimal = new Schema();
 		seMinimal = new SelectExpansion();
@@ -194,10 +195,31 @@ public class SelectExpansionTests {
 
 	@Test
 	public void testAlias() {
-		seNestedBig.expand("x", "B");
+		seNestedBig.expand("x_replaced", "B");
 		List<String> res = seNestedBig.getUsedTargetNames();
 		assertEquals("x", res.get(0));
 		assertTrue(res.size() == 1);
+	}
+
+	/* The original name must be replaced, and should therefore no longer be accessible */
+	@Test
+	public void testAliasOrigNameReplaced() {
+		try {
+			seNestedBig.expand("x", "B");
+			fail("Exception expected");
+		} catch (Exception e) {
+			// nothing to do
+		}
+	}
+
+	@Test
+	public void testAliasWithWhereClause() {
+		seNestedBig.setWhereClause("x_replaced.eq.null");
+		seNestedBig.expand("x_replaced", "B");
+		List<String> res = seNestedBig.getUsedTargetNames();
+		assertEquals("x_replaced", res.get(0));
+		assertTrue(res.size() == 1);
+		assertEquals("B.x as x_replaced", seNestedBig.getExpansion("B"));
 	}
 
 	@Test

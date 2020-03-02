@@ -26,72 +26,6 @@ public class Schema {
 		return this;
 	}
 
-	public TargetDefList get(final String targetDefListName) {
-		TargetDefList targetDefList = getOrNull(targetDefListName);
-		if (targetDefList == null) {
-			throw new RuntimeException(String.format(
-					"TargetDefList '%s' not found! It must exist before you can point to it", targetDefListName));
-		}
-		return targetDefList;
-	}
-
-	public TargetDefList findOrNull(final String targetDefName) {
-		for (TargetDefList targetDefList : schema.values()) {
-			if (targetDefList.get(targetDefName) != null) {
-				return targetDefList;
-			}
-		}
-		return null;
-	}
-
-	public TargetDefList findByAliasOrNull(final String alias) {
-		for (TargetDefList targetDefList : schema.values()) {
-			TargetDef targetDef = targetDefList.getByAlias(alias);
-			if (targetDef != null) {
-				return targetDefList;
-			}
-		}
-		return null;
-	}
-
-	public TargetDefList findByAliasOrNull(final String alias, Set<String> targetDefListNames) {
-		for (String targetDefListName : targetDefListNames) {
-			TargetDefList targetDefList = schema.get(targetDefListName);
-			if (targetDefList == null) {
-				return null;
-			}
-			TargetDef targetDef = targetDefList.getByAlias(alias);
-			if (targetDef != null) {
-				return targetDefList;
-			}
-		}
-		return null;
-	}
-
-	public TargetDefList find(final String targetDefName) {
-		TargetDefList result = findOrNull(targetDefName);
-		if (result == null) {
-			throw new RuntimeException(String.format("No TargetDefList that contains TargetDef '%s' found", targetDefName));
-		}
-		return result;
-	}
-
-	public TargetDefList findOrNull(final String targetDefName, Set<String> targetDefListNames) {
-		TargetDefList targetDefList = findOrNull(targetDefName);
-		if (targetDefList != null && targetDefListNames.contains(targetDefList.getName())) {
-			return targetDefList;
-		}
-		return null;
-	}
-
-	public TargetDefList find(final String targetDefName, Set<String> targetDefListNames) {
-		TargetDefList result = findOrNull(targetDefName, targetDefListNames);
-		if (result == null) {
-			throw new RuntimeException(String.format("No TargetDefList in '%s' that contains TargetDef '%s' found", targetDefListNames.toString(), targetDefName));
-		}
-		return result;
-	}
-
 	public Collection<TargetDefList> getAll() {
 		return schema.values();
 	}
@@ -135,6 +69,78 @@ public class Schema {
 			for (TargetDefList child : def.getPointerTargets().values()) {
 				if (child.getName().equals(childTargetDefListName))
 					return def;
+			}
+		}
+		return null;
+	}
+
+	public TargetDefList get(final String targetDefListName) {
+		TargetDefList targetDefList = getOrNull(targetDefListName);
+		if (targetDefList == null) {
+			throw new RuntimeException(String.format(
+					"TargetDefList '%s' not found! It must exist before you can point to it", targetDefListName));
+		}
+		return targetDefList;
+	}
+
+	public TargetDefList findOrNull(final String aliasOrName) {
+		for (TargetDefList targetDefList : schema.values()) {
+			if (targetDefList.getByFullName(aliasOrName) != null) {
+				return targetDefList;
+			}
+		}
+		return null;
+	}
+
+	public TargetDefList find(final String aliasOrName) {
+		TargetDefList result = findOrNull(aliasOrName);
+		if (result == null) {
+			throw new RuntimeException(String.format("No TargetDefList that contains TargetDef with alias or name '%s' found", aliasOrName));
+		}
+		return result;
+	}
+
+	public TargetDefList findOrNull(final String aliasOrName, Set<String> targetDefListNames) {
+		for (String targetDefListName : targetDefListNames) {
+			TargetDefList targetDefList = schema.get(targetDefListName);
+			if (targetDefList == null) {
+				return null;
+			}
+			TargetDef targetDef = targetDefList.getByFullName(aliasOrName);
+			if (targetDef != null) {
+				return targetDefList;
+			}
+		}
+		return null;
+	}
+
+	public TargetDefList find(final String targetDefName, Set<String> targetDefListNames) {
+		TargetDefList result = findOrNull(targetDefName, targetDefListNames);
+		if (result == null) {
+			throw new RuntimeException(String.format("No TargetDefList in '%s' that contains TargetDef '%s' found", targetDefListNames.toString(), targetDefName));
+		}
+		return result;
+	}
+
+	public TargetDefList findByAliasOrNull(final String alias) {
+		for (TargetDefList targetDefList : schema.values()) {
+			TargetDef targetDef = targetDefList.getByAlias(alias);
+			if (targetDef != null) {
+				return targetDefList;
+			}
+		}
+		return null;
+	}
+
+	public TargetDefList findByAliasOrNull(final String alias, Set<String> targetDefListNames) {
+		for (String targetDefListName : targetDefListNames) {
+			TargetDefList targetDefList = schema.get(targetDefListName);
+			if (targetDefList == null) {
+				return null;
+			}
+			TargetDef targetDef = targetDefList.getByAlias(alias);
+			if (targetDef != null) {
+				return targetDefList;
 			}
 		}
 		return null;

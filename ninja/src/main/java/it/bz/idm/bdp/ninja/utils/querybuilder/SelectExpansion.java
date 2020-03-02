@@ -375,13 +375,13 @@ public class SelectExpansion {
 		if (selectString == null) {
 			isStarExpansion = true;
 		} else {
-			for (String value : selectString.split(",")) {
-				value = value.trim();
-				if (value.equals("*")) {
+			for (String targetNameOrAlias : selectString.split(",")) {
+				targetNameOrAlias = targetNameOrAlias.trim();
+				if (targetNameOrAlias.equals("*")) {
 					isStarExpansion = true;
 					break;
 				}
-				targets.add(new Target(value));
+				targets.add(new Target(targetNameOrAlias));
 			}
 		}
 
@@ -412,18 +412,12 @@ public class SelectExpansion {
 			String targetNameOrAlias = target.getName();
 			TargetDefList targetDefList = schema.findOrNull(targetNameOrAlias, targetListNames);
 			if (targetDefList == null) {
-				targetDefList = schema.findByAliasOrNull(targetNameOrAlias, targetListNames);
-			}
-			if (targetDefList == null) {
 				SimpleException se = new SimpleException(ErrorCode.KEY_NOT_INSIDE_DEFLIST, targetNameOrAlias, targetListNames);
 				se.addData("targetName", targetNameOrAlias);
 				throw se;
 			}
 
-			TargetDef targetDef = targetDefList.get(targetNameOrAlias);
-			if (targetDef == null) {
-				targetDef = targetDefList.getByAlias(targetNameOrAlias);
-			}
+			TargetDef targetDef = targetDefList.getByFullName(targetNameOrAlias);
 
 			target.setTargetDef(targetDef);
 			target.setTargetDefListName(targetDefList.getName());
@@ -502,7 +496,7 @@ public class SelectExpansion {
 
 		usedTargetDefNames.clear();
 		for (TargetDef td : usedTargetDefs) {
-			usedTargetDefNames.add(td.getName());
+			usedTargetDefNames.add(td.getFinalName());
 		}
 
 		_expandWhere(whereClause);
@@ -547,11 +541,11 @@ public class SelectExpansion {
 		return getExpansion().get(defName);
 	}
 
-	public String getColumn(String targetDefName) {
-		TargetDefList targetDefList = schema.findOrNull(targetDefName);
+	public String getColumn(String aliasOrName) {
+		TargetDefList targetDefList = schema.findOrNull(aliasOrName);
 		if (targetDefList == null)
 			return null;
-		return targetDefList.get(targetDefName).getColumn();
+		return targetDefList.getByFullName(aliasOrName).getColumn();
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {
