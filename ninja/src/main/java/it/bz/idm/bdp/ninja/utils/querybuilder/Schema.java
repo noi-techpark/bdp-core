@@ -42,14 +42,6 @@ public class Schema {
 		return result;
 	}
 
-	public List<String> getListNames() {
-		List<String> result = new ArrayList<String>();
-		for (TargetDefList targetDefList : schema.values()) {
-			result.addAll(targetDefList.getNames());
-		}
-		return result;
-	}
-
 	public TargetDefList get(final String targetDefListName) {
 		TargetDefList targetDefList = getOrNull(targetDefListName);
 		if (targetDefList == null) {
@@ -61,7 +53,7 @@ public class Schema {
 
 	public TargetDefList findOrNull(final String aliasOrName) {
 		for (TargetDefList targetDefList : schema.values()) {
-			if (targetDefList.getByFullName(aliasOrName) != null) {
+			if (targetDefList.get(aliasOrName) != null) {
 				return targetDefList;
 			}
 		}
@@ -82,7 +74,7 @@ public class Schema {
 			if (targetDefList == null) {
 				return null;
 			}
-			TargetDef targetDef = targetDefList.getByFullName(aliasOrName);
+			TargetDef targetDef = targetDefList.get(aliasOrName);
 			if (targetDef != null) {
 				return targetDefList;
 			}

@@ -417,7 +417,7 @@ public class SelectExpansion {
 				throw se;
 			}
 
-			TargetDef targetDef = targetDefList.getByFullName(targetNameOrAlias);
+			TargetDef targetDef = targetDefList.get(targetNameOrAlias);
 
 			target.setTargetDef(targetDef);
 			target.setTargetDefListName(targetDefList.getName());
@@ -545,7 +545,7 @@ public class SelectExpansion {
 		TargetDefList targetDefList = schema.findOrNull(aliasOrName);
 		if (targetDefList == null)
 			return null;
-		return targetDefList.getByFullName(aliasOrName).getColumn();
+		return targetDefList.get(aliasOrName).getColumn();
 	}
 
 	public Map<String, String> getExpansion(Set<String> defNames) {

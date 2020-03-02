@@ -5,18 +5,28 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <pre>
- * A TargetList is a hierarchy of definition names (categories), aliases
- * and table/columns.
+ * A TargetDefList is a hierarchy of {@link TargetDef}, where a target definition
+ * can either be a simple column, or a pointer to another {@link TargetDefList}.
  *
  * Example:
+ * <pre>
+ *    EMPLOYEE(ename->emp.fullname, emanager)
+ *                                     `-------MANAGER(mname->mgr.fullname, mpos->mgr.position)
+ * </pre>
+ * Here {@link TargetDefList}s are EMPLOYEE and MANAGER, {@link TargetDef} names
+ * are <code>ename</code>, <code>emanager</code> and <code>mname</code>.
  *
- *    EMPLOYEE(ename->emp.fullname,emanager)
- *                                    `-------MANAGER(mname->mgr.fullname)
+ * The final SQL select target lists looks then like this, depending on the choosen
+ * final names:
+ * <pre>
+ * FINAL NAMES = [ename, emanager]
+ * SQL SELECT  = emp.fullname as ename, mgr.fullname as mname, mgr.position as mpos
  *
- * Here definitions are EMPLOYEE and MANAGER, aliases are ename, emanager and
- * mname, and table/column binaries are emp.fullname and mgr.fullname.
- * TODO rewrite this to match TargetDef/targetlist
+ * FINAL NAMES = [ename]
+ * SQL SELECT  = emp.fullname as ename
+ *
+ * FINAL NAMES = [ename, mname]
+ * SQL SELECT  = emp.fullname as ename, mgr.fullname as mname
  * </pre>
  *
  * @author Peter Moser <p.moser@noi.bz.it>
@@ -26,14 +36,12 @@ public class TargetDefList {
 	private final String name;
 
 	/**
-	 * The key of this map is the {@link TargetDef#getName()}.
+	 * The key of this map is the result of {@link TargetDef#getFinalName()}.
 	 *
-	 * For example, mvalue_double & measurements.double_value
+	 * For example, mvalue_double --> measurements.double_value
 	 * This will be rewritten to "measurements.double_value AS mvalue_double"
 	 */
-	private Map<String, TargetDef> nameMap = new HashMap<String, TargetDef>();
-	private Map<String, TargetDef> aliasMap = new HashMap<String, TargetDef>();
-	private Map<String, TargetDef> fullNameMap = new HashMap<String, TargetDef>();
+	private Map<String, TargetDef> finalNameMap = new HashMap<String, TargetDef>();
 
 	public TargetDefList(final String name) {
 		if (name == null || name.isEmpty()) {
@@ -54,48 +62,28 @@ public class TargetDefList {
 		if (targetDef == null) {
 			throw new RuntimeException("TargetDef must be non-null");
 		}
-		if (fullNameMap.containsKey(targetDef.getFinalName())) {
+		if (finalNameMap.containsKey(targetDef.getFinalName())) {
 			throw new RuntimeException("TargetDef '" + targetDef.getFinalName() + "' already exists. Aliases and names must be unique (also between each other)");
 		}
-		nameMap.put(targetDef.getName(), targetDef);
-		fullNameMap.put(targetDef.getFinalName(), targetDef);
-		if (targetDef.hasAlias()) {
-			aliasMap.put(targetDef.getAlias(), targetDef);
-		}
+		finalNameMap.put(targetDef.getFinalName(), targetDef);
 		return this;
 	}
 
-	public Map<String,TargetDef> getAll() {
-		return this.nameMap;
+	public Map<String, TargetDef> getAll() {
+		return this.finalNameMap;
 	}
 
-	public Map<String,TargetDef> getAllFullNames() {
-		return this.fullNameMap;
-	}
-
-	public TargetDef get(final String targetName) {
-		return this.nameMap.get(targetName);
-	}
-
-	public TargetDef getByFullName(final String aliasOrName) {
-		return this.fullNameMap.get(aliasOrName);
-	}
-
-	public Set<String> getNames() {
-		return nameMap.keySet();
+	public TargetDef get(final String aliasOrName) {
+		return this.finalNameMap.get(aliasOrName);
 	}
 
 	public Set<String> getFinalNames() {
-		return fullNameMap.keySet();
-	}
-
-	public TargetDef getByAlias(final String alias) {
-		return aliasMap.get(alias);
+		return finalNameMap.keySet();
 	}
 
 	@Override
 	public String toString() {
-		return "TargetList [name=" + name + ", targets=" + nameMap.toString() + "]";
+		return "TargetDefList [name=" + name + ", targets=" + finalNameMap.toString() + "]";
 	}
 
 }

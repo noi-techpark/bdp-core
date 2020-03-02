@@ -128,7 +128,7 @@ public class ResultBuilder {
 	public static Map<String, Object> makeObj(Schema schema, Map<String, Object> record, String defName, boolean ignoreNull) {
 		TargetDefList def = schema.getOrNull(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
-		for (String alias : def.getNames()) {
+		for (String alias : def.getFinalNames()) {
 			Object value = record.get(alias);
 			if (ignoreNull && value == null)
 				continue;
