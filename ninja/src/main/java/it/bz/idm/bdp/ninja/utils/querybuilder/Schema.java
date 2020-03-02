@@ -1,7 +1,6 @@
 package it.bz.idm.bdp.ninja.utils.querybuilder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,19 +23,6 @@ public class Schema {
 		}
 		schema.put(targetDefList.getName(), targetDefList);
 		return this;
-	}
-
-	public Collection<TargetDefList> getAll() {
-		return schema.values();
-	}
-
-	public List<TargetDefList> getAll(Set<String> targetDefListNames) {
-		List<TargetDefList> result = new ArrayList<TargetDefList>();
-		for (String targetDefListName : targetDefListNames) {
-			TargetDefList targetDefList = get(targetDefListName);
-			result.add(targetDefList);
-		}
-		return result;
 	}
 
 	public TargetDefList getOrNull(final String targetDefListName) {
@@ -62,16 +48,6 @@ public class Schema {
 			result.addAll(targetDefList.getNames());
 		}
 		return result;
-	}
-
-	public TargetDefList getTargetDefListParent(final String childTargetDefListName, Set<String> targetListNames) {
-		for (TargetDefList def : getAll(targetListNames)) {
-			for (TargetDefList child : def.getPointerTargets().values()) {
-				if (child.getName().equals(childTargetDefListName))
-					return def;
-			}
-		}
-		return null;
 	}
 
 	public TargetDefList get(final String targetDefListName) {
@@ -122,36 +98,4 @@ public class Schema {
 		return result;
 	}
 
-	public TargetDefList findByAliasOrNull(final String alias) {
-		for (TargetDefList targetDefList : schema.values()) {
-			TargetDef targetDef = targetDefList.getByAlias(alias);
-			if (targetDef != null) {
-				return targetDefList;
-			}
-		}
-		return null;
-	}
-
-	public TargetDefList findByAliasOrNull(final String alias, Set<String> targetDefListNames) {
-		for (String targetDefListName : targetDefListNames) {
-			TargetDefList targetDefList = schema.get(targetDefListName);
-			if (targetDefList == null) {
-				return null;
-			}
-			TargetDef targetDef = targetDefList.getByAlias(alias);
-			if (targetDef != null) {
-				return targetDefList;
-			}
-		}
-		return null;
-	}
-
-	// XXX do we need dirty flags here for performance needed?
-	// private void _build() {
-	// 	if (schema == null) {
-	// 		throw new SimpleException(ErrorCode.SCHEMA_NULL);
-	// 	}
-	// 	dirty = true;
-	// 	dirty = false;
-	// }
 }

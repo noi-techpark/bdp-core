@@ -89,30 +89,6 @@ public class TargetDefList {
 		return fullNameMap.keySet();
 	}
 
-	public boolean exists(final String targetName) {
-		return nameMap.containsKey(targetName);
-	}
-
-	public Map<String, TargetDefList> getPointerTargets() {
-		Map<String, TargetDefList> result = new HashMap<>();
-		for (TargetDef targetDef : nameMap.values()) {
-			if (targetDef.hasTargetDefList()) {
-				result.put(targetDef.getName(), targetDef.getTargetList());
-			}
-		}
-		return result;
-	}
-
-	public Map<String, TargetDefList> getColumnTargets() {
-		Map<String, TargetDefList> result = new HashMap<>();
-		for (TargetDef targetDef : nameMap.values()) {
-			if (targetDef.hasColumn()) {
-				result.put(targetDef.getName(), targetDef.getTargetList());
-			}
-		}
-		return result;
-	}
-
 	public TargetDef getByAlias(final String alias) {
 		return aliasMap.get(alias);
 	}
