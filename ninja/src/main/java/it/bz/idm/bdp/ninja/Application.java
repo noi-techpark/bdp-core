@@ -14,12 +14,11 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	/*
-	 * To start the application startup data loader to create tables and insert default
-	 * values.
+	 * To start the application startup data loader to create tables and insert
+	 * default values.
 	 */
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
-
 }
