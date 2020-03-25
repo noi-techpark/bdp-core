@@ -1,0 +1,752 @@
+openapi: 3.0.1
+info:
+  title: Open Data Hub Mobility API
+  description: |
+    More information about the project: <a href="https://github.com/noi-techpark/bdp-core/blob/development/ninja/README.md">Tutorials and technical documentation</a>
+  termsOfService: https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service
+  contact:
+    name: Open Data Hub
+    url: https://opendatahub.bz.it
+    email: help@opendatahub.bz.it
+  license:
+    name: API License
+    url: https://opendatahub.readthedocs.io/en/latest/licenses.html
+  version: V1 and V2
+# servers:
+#   - url: https://mobility.api.opendatahub.bz.it/v2
+#   - url: https://tomcatsec.testingmachine.eu/v2
+#   - url: http://tomcat.testingmachine.eu/v2
+#   - url: http://localhost:8082
+tags:
+  - name: Mobility V2
+    description: Generic Data Controller
+paths:
+  /v2:
+    get:
+      # servers: # to override global server settings
+      #   - url: https://mobility.api.opendatahub.bz.it/v2
+      #   - url: https://tomcatsec.testingmachine.eu/v2
+      #   - url: http://tomcat.testingmachine.eu/v2
+      tags:
+        - Mobility V2
+      summary: View a list of all station types (categories)
+      operationId: requestStationTypesUsingGET
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /{representation}/{stationTypes}:
+    get:
+      tags:
+        - Mobility V2
+      summary: View details of all given station types
+      description:
+        You can put multiple station types as comma-seperated list.<br>The
+        response is a tree of <code>station-type / station-name</code>.
+      operationId: requestStationsUsingGET
+      parameters:
+        - $ref: "#/components/parameters/representation"
+        - $ref: "#/components/parameters/stationTypes"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/select"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/shownull"
+        - $ref: "#/components/parameters/distinct"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /{representation}/{stationTypes}/{dataTypes}:
+    get:
+      tags:
+        - Mobility V2
+      summary:
+        View details of all given station types including data types and most-recent
+        measurements
+      description:
+        You can put multiple station or data types as comma-seperated lists.<br>The
+        response is a tree of <code>station-type / station-name / data-type / measurements</code>.
+      operationId: requestDataTypesUsingGET
+      parameters:
+        - $ref: "#/components/parameters/representation"
+        - $ref: "#/components/parameters/stationTypes"
+        - $ref: "#/components/parameters/dataTypes"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/select"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/shownull"
+        - $ref: "#/components/parameters/distinct"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /{representation}/{stationTypes}/{dataTypes}/{from}/{to}:
+    get:
+      tags:
+        - Mobility V2
+      summary:
+        View details of all given station types including data types and historical
+        measurements
+      description:
+        You can put multiple station or data types as comma-seperated lists.<br>The
+        response is a tree of <code>station-type / station-name / data-type / measurements</code>.
+      operationId: requestHistoryUsingGET
+      parameters:
+        - $ref: "#/components/parameters/representation"
+        - $ref: "#/components/parameters/stationTypes"
+        - $ref: "#/components/parameters/dataTypes"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/select"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/shownull"
+        - $ref: "#/components/parameters/distinct"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  # /apispec:
+  #   get:
+  #     tags:
+  #       - Mobility V2
+  #     summary: Get this APIs specifications in OpenAPI v3 YAML format
+  #     responses:
+  #       200:
+  #         description: Successful response
+  #         content:
+  #           application/yaml:
+  #             schema:
+  #               type: string
+
+  /rest/access-token:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Request a new access token
+      description: This method would give you a new token to access protected data.
+      operationId: getAccessTokenUsingGET_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-data-types:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Return the available data types for that station.
+      operationId: getDataTypesUsingGET_1
+      parameters:
+      - name: station
+        in: query
+        description: The unique ID of the station.
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-date-of-last-record:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Return the timestamp of the latest recorded action for that station.
+      operationId: getDateOfLastRecordUsingGET_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).
+        schema:
+          type: string
+      - name: station
+        in: query
+        description: The unique ID of the station.
+        required: true
+        schema:
+          type: string
+      - name: type
+        in: query
+        description: The name of the data-type you are searching for.
+        schema:
+          type: string
+      - name: period
+        in: query
+        description: The interval in time between two successive data acquisitions.
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: date-time
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-newest-record:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Return the timestamp and value of the latest recorded data.
+      operationId: getNewestRecordUsingGET_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).
+        schema:
+          type: string
+      - name: station
+        in: query
+        description: The unique ID of the station.
+        required: true
+        schema:
+          type: string
+      - name: type
+        in: query
+        description: The name of the data-type you are searching for.
+        schema:
+          type: string
+      - name: period
+        in: query
+        description: The interval in time between two successive data acquisitions.
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-records:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Returns all the data in the last given seconds.
+      operationId: getRecordsUsingGET_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).
+        schema:
+          type: string
+      - name: station
+        in: query
+        description: The unique ID of the station.
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The name of the data-type you are searching for.
+        required: true
+        schema:
+          type: string
+      - name: seconds
+        in: query
+        description: How many seconds in the past (from now) the search must be started.
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: period
+        in: query
+        description: The interval in time between two successive data acquisitions.
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-records-in-timeframe:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Return for a given station the data acquired in a given interval.
+      description: Show all the data recorded in the given interval. Remeber to convert
+        any date into milliseconds from epoch.
+      operationId: getRecordsInTimeFrameUsingGET_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: All access token need to start with prefix 'Bearer '(see https://tools.ietf.org/html/rfc6750#section-2.1).
+        schema:
+          type: string
+      - name: station
+        in: query
+        description: The unique ID of the station.
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The name of the data-type you are searching for.
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: The timestamp in milliseconds of the start of the interval.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: to
+        in: query
+        description: The timestamp in milliseconds of the end of the interval.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: period
+        in: query
+        description: The interval in time between two successive data acquisitions.
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-station-details:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Retrieve all information about all stations.
+      description: This method returns the list of all stations in the dataset, including
+        all available information about them.
+      operationId: getStationDetailsUsingGET_1
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/get-stations:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Retrieve all stations in the dataset.
+      description: This method returns all the ID of the stations listed in the dataset.
+      operationId: getStationIdsUsingGET_1
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /rest/refresh-token:
+    servers:
+    - url: https://ipchannels.integreen-life.bz.it/parking
+    get:
+      tags:
+      - Mobility V1 - Parking
+      summary: Request a new authorisation token to access protected data.
+      description: If you need to access protected, closed data and you have been
+        given a username and password, invoke this method to receive a new token.
+      operationId: getTokenUsingGET_1
+      parameters:
+      - name: user
+        in: query
+        description: The username of the user to which to grant the new token.
+        required: true
+        schema:
+          type: string
+      - name: pw
+        in: query
+        description: The password corresponding to the user.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JwtTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+
+components:
+  schemas:
+    AccessTokenDto:
+      title: AccessTokenDto
+      type: object
+      properties:
+        expireDate:
+          type: integer
+          description: The limit of validity of the token.
+          format: int64
+        token:
+          type: string
+          description: The token to be used in API calls needing authentication.
+    JwtTokenDto:
+      title: JwtTokenDto
+      type: object
+      properties:
+        accessToken:
+          $ref: '#/components/schemas/AccessTokenDto'
+        refreshToken:
+          type: string
+    SlimRecordDto:
+      title: SlimRecordDto
+      type: object
+      properties:
+        created_on:
+          type: integer
+          format: int64
+        period:
+          type: integer
+          format: int32
+        timestamp:
+          type: integer
+          format: int64
+        value:
+          type: object
+          properties: {}
+    StationDto:
+      title: StationDto
+      type: object
+      properties:
+        coordinateReferenceSystem:
+          type: string
+        elevation:
+          type: number
+          format: double
+        id:
+          type: string
+          description: The unique ID associated to the station.
+        latitude:
+          type: number
+          description: The latitude where this station is located.
+          format: double
+        longitude:
+          type: number
+          description: The longitude where this station is located.
+          format: double
+        name:
+          type: string
+          description: The name of the station
+        origin:
+          type: string
+        parentStation:
+          type: string
+        stationType:
+          type: string
+          description: The type of station
+  parameters:
+    representation:
+      name: representation
+      in: path
+      description:
+        Do you want to have the result in a <code>tree</code> or <code>flat</code>
+        representation.
+      required: true
+      schema:
+        type: string
+        default: flat
+    stationTypes:
+      name: stationTypes
+      in: path
+      description:
+        Station types or categories. Multiple types possible as comma-separated-values.
+        All types with <code>*</code>.
+      required: true
+      schema:
+        type: string
+        default: "*"
+    dataTypes:
+      name: dataTypes
+      in: path
+      description:
+        Data types. Multiple types possible as comma-separated-values.
+        All types with <code>*</code>.
+      required: true
+      schema:
+        type: string
+        default: "*"
+    from:
+      name: from
+      in: path
+      description:
+        Date or date-time format, that forms a half-open interval [from,
+        to). The format is <code>yyyy-MM-dd[T[HH][:mm][:ss][.SSS]][Z]</code>, where
+        [] denotes optionality. Z is the timezone, for instance, +0200.
+      required: true
+      schema:
+        type: string
+    to:
+      name: to
+      in: path
+      description:
+        Date or date-time format, that forms a half-open interval [from,
+        to). The format is <code>yyyy-MM-dd[T[HH][:mm][:ss][.SSS]][Z]</code>, where
+        [] denotes optionality. Z is the timezone, for instance, +0200.
+      required: true
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: The limit of the response. Set it to -1 to disable it.
+      schema:
+        type: integer
+        format: int64
+        default: 200
+    offset:
+      name: offset
+      in: query
+      description:
+        The offset of the response list. To simulate pagination, together
+        with limit.
+      schema:
+        type: integer
+        format: int64
+        default: 0
+    select:
+      name: select
+      in: query
+      description: >
+        Select <code>aliases</code>, which will be used to build the
+        response. Multiple aliases possible as comma-separated-values. Example:
+        <code>sname</code> or <code>smetadata.city.cap</code> for JSON. Functions
+        can be set as <code>func(alias)</code> (Functions with JSON are not supported
+        yet)
+      schema:
+        type: string
+    where:
+      name: where
+      in: query
+      description: |-
+        Filter the result with filter-triples, like <code>alias.operator.value_or_list</code>
+
+        <code>values_or_list</code>
+         -   value: Whatever you want, also a regular expression. However, you need to escape <code>,'"</code> with a <code>\\</code>. Use url-encoded values, if your tool does not support certain characters.
+         -   list: <code>(value,value,value)</code>
+
+        <code>operator</code>
+         -   eq: Equal
+         -   neq: Not Equal
+         -   lt: Less Than
+         -   gt: Greater Than
+         -   lteq: Less Than Or Equal
+         -   gteq: Greater Than Or Equal
+         -   re: Regular Expression
+         -   ire: Insensitive Regular Expression
+         -   nre: Negated Regular Expression
+         -   nire: Negated Insensitive Regular Expression
+         -   bbi: Bounding box intersecting objects (ex., a street that is only partially covered by the box). Syntax? See below.
+         -   bbc: Bounding box containing objects (ex., a station or street, that is completely covered by the box). Syntax? See below.
+         -   in: True, if the value of the alias can be found within the given list. Example: name.in.(Peter,Patrick,Rudi)
+         -   nin: False, if the value of the alias can be found within the given list. Example: name.nin.(Peter,Patrick,Rudi)
+
+
+        <code>logical operations</code>
+         -   and(alias.operator.value_or_list,...): Conjunction of filters (can be nested)
+         -   or(alias.operator.value_or_list,...): Disjunction of filters (can be nested)
+
+        Multiple conditions possible as comma-separated-values. <code>value</code>s will be casted to Double precision or <code>null</code>, if possible. Put them inside double quotes, if you want to prevent that.
+
+         Example-syntax for bbi/bbc could be <code>coordinate.bbi.(11,46,12,47,4326)</code>, where the ordering inside the list is left-x, left-y, right-x, right-y and SRID (optional).
+      schema:
+        type: string
+    shownull:
+      name: shownull
+      in: query
+      description:
+        Should JSON keys with null-values be returned, or removed from
+        the response-JSON.
+      schema:
+        type: boolean
+        default: false
+    distinct:
+      name: distinct
+      in: query
+      description: Remove duplicate entries.
+      schema:
+        type: boolean
+        default: true
