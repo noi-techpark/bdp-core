@@ -21,7 +21,7 @@ tags:
   - name: Mobility V2
     description: Generic Data Controller
 paths:
-  /v2:
+  /v2/:
     get:
       tags:
         - Mobility V2
