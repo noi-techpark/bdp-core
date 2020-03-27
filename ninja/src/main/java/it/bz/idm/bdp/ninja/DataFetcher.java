@@ -116,7 +116,7 @@ public class DataFetcher {
 		query = QueryBuilder
 				.init(select, where, "station", "parent", "measurementdouble", "measurement", "datatype");
 
-		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue_double");
+		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue");
 		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
 
 		/* We support functions only for double-typed measurements, so do not append a measurement-string query if any
