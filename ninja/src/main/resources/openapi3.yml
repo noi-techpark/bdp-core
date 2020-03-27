@@ -12,21 +12,17 @@ info:
     name: API License
     url: https://opendatahub.readthedocs.io/en/latest/licenses.html
   version: V1 and V2
-# servers:
-#   - url: https://mobility.api.opendatahub.bz.it/v2
-#   - url: https://tomcatsec.testingmachine.eu/v2
-#   - url: http://tomcat.testingmachine.eu/v2
-#   - url: http://localhost:8082
+servers:
+  - url: https://mobility.api.opendatahub.testingmachine.eu
+  - url: https://mobility.api.opendatahub.bz.it
+  - url: https://tomcatsec.testingmachine.eu
+  - url: http://tomcat.testingmachine.eu
 tags:
   - name: Mobility V2
     description: Generic Data Controller
 paths:
   /v2:
     get:
-      # servers: # to override global server settings
-      #   - url: https://mobility.api.opendatahub.bz.it/v2
-      #   - url: https://tomcatsec.testingmachine.eu/v2
-      #   - url: http://tomcat.testingmachine.eu/v2
       tags:
         - Mobility V2
       summary: View a list of all station types (categories)
@@ -49,7 +45,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /{representation}/{stationTypes}:
+  /v2/{representation}/{stationTypes}:
     get:
       tags:
         - Mobility V2
@@ -83,7 +79,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /{representation}/{stationTypes}/{dataTypes}:
+  /v2/{representation}/{stationTypes}/{dataTypes}:
     get:
       tags:
         - Mobility V2
@@ -120,7 +116,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /{representation}/{stationTypes}/{dataTypes}/{from}/{to}:
+  /v2/{representation}/{stationTypes}/{dataTypes}/{from}/{to}:
     get:
       tags:
         - Mobility V2
@@ -172,9 +168,7 @@ paths:
   #             schema:
   #               type: string
 
-  /rest/access-token:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/access-token:
     get:
       tags:
       - Mobility V1 - Parking
@@ -204,9 +198,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-data-types:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-data-types:
     get:
       tags:
       - Mobility V1 - Parking
@@ -238,9 +230,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-date-of-last-record:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-date-of-last-record:
     get:
       tags:
       - Mobility V1 - Parking
@@ -286,9 +276,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-newest-record:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-newest-record:
     get:
       tags:
       - Mobility V1 - Parking
@@ -333,9 +321,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-records:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-records:
     get:
       tags:
       - Mobility V1 - Parking
@@ -390,9 +376,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-records-in-timeframe:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-records-in-timeframe:
     get:
       tags:
       - Mobility V1 - Parking
@@ -456,9 +440,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-station-details:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-station-details:
     get:
       tags:
       - Mobility V1 - Parking
@@ -484,9 +466,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/get-stations:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/get-stations:
     get:
       tags:
       - Mobility V1 - Parking
@@ -511,9 +491,7 @@ paths:
         404:
           description: Not Found
           content: {}
-  /rest/refresh-token:
-    servers:
-    - url: https://ipchannels.integreen-life.bz.it/parking
+  /v1/parking/rest/refresh-token:
     get:
       tags:
       - Mobility V1 - Parking
