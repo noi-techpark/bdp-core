@@ -25,14 +25,22 @@ tags:
     description: New Generic Data Controller to retrieve all kinds of data
   - name: Mobility V1 - Bikesharing
     description: <u>Deprecated</u> Controller for Bikesharing Data
+  - name: Mobility V1 - Bikesharing / Bikes
+    description: <u>Deprecated</u> Controller for Bikesharing / Bikes Data (child entities)
   - name: Mobility V1 - Bluetooth
     description: <u>Deprecated</u> Controller for Bluetooth Data
   - name: Mobility V1 - Carpooling
     description: <u>Deprecated</u> Controller for Carpooling Data
+  - name: Mobility V1 - Carpooling / User
+    description: <u>Deprecated</u> Controller for Carpooling / User Data (child entities)
   - name: Mobility V1 - Carsharing
     description: <u>Deprecated</u> Controller for Carsharing Data
+  - name: Mobility V1 - Carsharing / Cars
+    description: <u>Deprecated</u> Controller for Carsharing / Cars Data (child entities)
   - name: Mobility V1 - Emobility
     description: <u>Deprecated</u> Controller for Emobility Data
+  - name: Mobility V1 - Emobility / Plugs
+    description: <u>Deprecated</u> Controller for Emobility / Plug Data (child entities)
   - name: Mobility V1 - Environment
     description: <u>Deprecated</u> Controller for Environment Data
   - name: Mobility V1 - Meteorology
@@ -697,6 +705,262 @@ paths:
           description: Not Found
           content: {}
 
+  # V1 BIKESHARING / BIKES ----------------------------------------------------------------------
+  /v1/bikesharing/rest/bikes/get-stations:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Retrieve all stations in the dataset.
+      description: This method returns all the ID of the stations listed in the dataset.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-station-details:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Retrieve all information about all stations.
+      description: This method returns the list of all stations in the dataset, including
+        all available information about them.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-data-types:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Return the available data types for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1station"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-date-of-last-record:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Return the timestamp of the latest recorded action for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: date-time
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-newest-record:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Return the timestamp and value of the latest recorded data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-records:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Returns all the data in the last given seconds.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/get-records-in-timeframe:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Return for a given station the data acquired in a given interval.
+      description: Show all the data recorded in the given interval. Remember to convert
+        any date into milliseconds from epoch.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1from"
+        required: true
+      - $ref: "#/components/parameters/v1to"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/access-token:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Request a new access token
+      description: This method would give you a new token to access protected data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/bikesharing/rest/bikes/refresh-token:
+    get:
+      tags:
+      - Mobility V1 - Bikesharing / Bikes
+      summary: Request a new authorisation token to access protected data.
+      description: If you need to access protected, closed data and you have been
+        given a username and password, invoke this method to receive a new token.
+      parameters:
+      - $ref: "#/components/parameters/v1user"
+        required: true
+      - $ref: "#/components/parameters/v1password"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JwtTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+
   # V1 BLUETOOTH -------------------------------------------------------------------------------
   /v1/bluetooth/rest/get-stations:
     get:
@@ -1209,6 +1473,262 @@ paths:
           description: Not Found
           content: {}
 
+  # V1 CARPOOLING / USER ------------------------------------------------------------------------
+  /v1/carpooling/rest/user/get-stations:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Retrieve all stations in the dataset.
+      description: This method returns all the ID of the stations listed in the dataset.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-station-details:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Retrieve all information about all stations.
+      description: This method returns the list of all stations in the dataset, including
+        all available information about them.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-data-types:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Return the available data types for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1station"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-date-of-last-record:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Return the timestamp of the latest recorded action for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: date-time
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-newest-record:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Return the timestamp and value of the latest recorded data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-records:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Returns all the data in the last given seconds.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/get-records-in-timeframe:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Return for a given station the data acquired in a given interval.
+      description: Show all the data recorded in the given interval. Remember to convert
+        any date into milliseconds from epoch.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1from"
+        required: true
+      - $ref: "#/components/parameters/v1to"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/access-token:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Request a new access token
+      description: This method would give you a new token to access protected data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carpooling/rest/user/refresh-token:
+    get:
+      tags:
+      - Mobility V1 - Carpooling / User
+      summary: Request a new authorisation token to access protected data.
+      description: If you need to access protected, closed data and you have been
+        given a username and password, invoke this method to receive a new token.
+      parameters:
+      - $ref: "#/components/parameters/v1user"
+        required: true
+      - $ref: "#/components/parameters/v1password"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JwtTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+
   # V1 CARSHARING ------------------------------------------------------------------------------
   /v1/carsharing/rest/get-stations:
     get:
@@ -1465,6 +1985,262 @@ paths:
           description: Not Found
           content: {}
 
+  # V1 CARSHARING / CARS -------------------------------------------------------------------------
+  /v1/carsharing/rest/cars/get-stations:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Retrieve all stations in the dataset.
+      description: This method returns all the ID of the stations listed in the dataset.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-station-details:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Retrieve all information about all stations.
+      description: This method returns the list of all stations in the dataset, including
+        all available information about them.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-data-types:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Return the available data types for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1station"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-date-of-last-record:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Return the timestamp of the latest recorded action for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: date-time
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-newest-record:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Return the timestamp and value of the latest recorded data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-records:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Returns all the data in the last given seconds.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/get-records-in-timeframe:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Return for a given station the data acquired in a given interval.
+      description: Show all the data recorded in the given interval. Remember to convert
+        any date into milliseconds from epoch.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1from"
+        required: true
+      - $ref: "#/components/parameters/v1to"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/access-token:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Request a new access token
+      description: This method would give you a new token to access protected data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/carsharing/rest/cars/refresh-token:
+    get:
+      tags:
+      - Mobility V1 - Carsharing / Cars
+      summary: Request a new authorisation token to access protected data.
+      description: If you need to access protected, closed data and you have been
+        given a username and password, invoke this method to receive a new token.
+      parameters:
+      - $ref: "#/components/parameters/v1user"
+        required: true
+      - $ref: "#/components/parameters/v1password"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JwtTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+
   # V1 EMOBILITY ------------------------------------------------------------------------------
   /v1/emobility/rest/get-stations:
     get:
@@ -1696,6 +2472,262 @@ paths:
     get:
       tags:
       - Mobility V1 - Emobility
+      summary: Request a new authorisation token to access protected data.
+      description: If you need to access protected, closed data and you have been
+        given a username and password, invoke this method to receive a new token.
+      parameters:
+      - $ref: "#/components/parameters/v1user"
+        required: true
+      - $ref: "#/components/parameters/v1password"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JwtTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+
+  # V1 EMOBILITY - PLUGS ----------------------------------------------------------------------
+  /v1/emobility/rest/plugs/get-stations:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Retrieve all stations in the dataset.
+      description: This method returns all the ID of the stations listed in the dataset.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-station-details:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Retrieve all information about all stations.
+      description: This method returns the list of all stations in the dataset, including
+        all available information about them.
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StationDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-data-types:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Return the available data types for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1station"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-date-of-last-record:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Return the timestamp of the latest recorded action for that station.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: date-time
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-newest-record:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Return the timestamp and value of the latest recorded data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-records:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Returns all the data in the last given seconds.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/get-records-in-timeframe:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Return for a given station the data acquired in a given interval.
+      description: Show all the data recorded in the given interval. Remember to convert
+        any date into milliseconds from epoch.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+      - $ref: "#/components/parameters/v1station"
+        required: true
+      - $ref: "#/components/parameters/v1type"
+        required: true
+      - $ref: "#/components/parameters/v1seconds"
+        required: true
+      - $ref: "#/components/parameters/v1from"
+        required: true
+      - $ref: "#/components/parameters/v1to"
+        required: true
+      - $ref: "#/components/parameters/v1period"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SlimRecordDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/access-token:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
+      summary: Request a new access token
+      description: This method would give you a new token to access protected data.
+      parameters:
+      - $ref: "#/components/parameters/v1authorization"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessTokenDto'
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v1/emobility/rest/plugs/refresh-token:
+    get:
+      tags:
+      - Mobility V1 - Emobility / Plugs
       summary: Request a new authorisation token to access protected data.
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
