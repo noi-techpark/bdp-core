@@ -2,9 +2,16 @@ openapi: 3.0.1
 info:
   title: Open Data Hub Mobility API
   description: >
-    More information about the project: <a
-    href="https://github.com/noi-techpark/bdp-core/blob/development/ninja/README.md">Tutorials
-    and technical documentation</a>
+    Documentation: <a
+    href="https://opendatahub.readthedocs.io/en/latest/datasets.html#datasets-in-the-mobility-domain">Mobility
+    Datasets</a> |
+    <a
+    href="https://opendatahub.readthedocs.io/en/latest/howto/mobility/getstarted.html">Getting
+    started with the API Mobility V2</a> | <a
+    href="https://opendatahub.readthedocs.io/en/latest/howto.html">General
+    Howtos</a> | <a
+    href="https://github.com/noi-techpark/bdp-core">Source Code</a>
+
   termsOfService: >
     https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service
   contact:
