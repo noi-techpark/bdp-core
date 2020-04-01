@@ -12,7 +12,6 @@ pipeline {
 
         NINJA_ROOT_PATH = "ninja"
         NINJA_LOGGING_FILE = "/var/log/opendatahub/ninja.log"
-        NINJA_SWAGGER_READMEURL = "https://github.com/noi-techpark/bdp-core/blob/development/ninja/README.md"
         NINJA_KEYCLOAK_SERVERURL = "https://auth.opendatahub.testingmachine.eu/auth/"
 
         NINJA_DATABASE_SCHEMA = "intimev2"
