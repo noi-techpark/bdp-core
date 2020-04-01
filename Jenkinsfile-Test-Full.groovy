@@ -8,11 +8,11 @@ pipeline {
 
     environment {
         BDP_DATABASE_SCHEMA = "intimev2"
-        BDP_DATABASE_HOST = "test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
         BDP_DATABASE_PORT = "5432"
         BDP_DATABASE_NAME = "bdp"
         BDP_DATABASE_READ_USER = "bdp_readonly"
-        BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-test-database-read-password')
+        BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
