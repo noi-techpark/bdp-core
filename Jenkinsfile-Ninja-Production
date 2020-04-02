@@ -9,18 +9,14 @@ pipeline {
     environment {
         NINJA_ROOT_PATH = "ninja"
         NINJA_LOGGING_FILE = "/var/log/opendatahub/ninja.log"
-        NINJA_SWAGGER_READMEURL = "https://github.com/noi-techpark/bdp-core/blob/master/ninja/README.md"
-        NINJA_OAUTH_PUBKEY = credentials('bdp-core-ninja-pubkey')
-        NINJA_OAUTH_ISSUER = "https://auth.testingmachine.eu"
-        NINJA_OAUTH_SCOPES = "api1"
-        NINJA_OAUTH_AUDIEN = "https://ipchannels.integreen-life.bz.it/ninja"
+        NINJA_KEYCLOAK_SERVERURL = "https://auth.opendatahub.bz.it/auth/"
 
-        BDP_DATABASE_SCHEMA = "intimev2"
-        BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
-        BDP_DATABASE_PORT = "5432"
-        BDP_DATABASE_NAME = "bdp"
-        BDP_DATABASE_READ_USER = "bdp_readonly"
-        BDP_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
+        NINJA_DATABASE_SCHEMA = "intimev2"
+        NINJA_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        NINJA_DATABASE_PORT = "5432"
+        NINJA_DATABASE_NAME = "bdp"
+        NINJA_DATABASE_READ_USER = "bdp_readonly"
+        NINJA_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
     }
 
     stages {
@@ -32,15 +28,12 @@ pipeline {
                     sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1INFO%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(logging.level.org.springframework.jdbc.core\\s*=\\).*\\$%\\1WARN%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(ninja.swagger.readme-url\\s*=\\).*\\$%\\1 ${NINJA_SWAGGER_READMEURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
-                    sed -i -e "s%\\(ninja.security.oauth2.pubkey\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_PUBKEY}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
-                    sed -i -e "s%\\(ninja.security.oauth2.issuer\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_ISSUER}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
-                    sed -i -e "s%\\(ninja.security.oauth2.scopes\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_SCOPES}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
-                    sed -i -e "s%\\(ninja.security.oauth2.audien\\s*=\\).*\\$%\\1 ${NINJA_OAUTH_AUDIEN}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
+                    sed -i -e "s%\\(keycloak.auth-server-url\\s*=\\).*\\$%\\1 ${NINJA_KEYCLOAK_SERVERURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
 
                     cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"
-                    sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
-                    sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${BDP_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
-                    sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${BDP_DATABASE_HOST}:${BDP_DATABASE_PORT}/${BDP_DATABASE_NAME}?currentSchema=${BDP_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
+                    sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${NINJA_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
+                    sed -i -e "s%\\(password\\s*=\\).*\\$%\\1 ${NINJA_DATABASE_READ_PASSWORD}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
+                    sed -i -e "s%\\(jdbcUrl\\s*=\\).*\\$%\\1 jdbc:postgresql://${NINJA_DATABASE_HOST}:${NINJA_DATABASE_PORT}/${NINJA_DATABASE_NAME}?currentSchema=${NINJA_DATABASE_SCHEMA},public%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties
                 '''
             }
         }
