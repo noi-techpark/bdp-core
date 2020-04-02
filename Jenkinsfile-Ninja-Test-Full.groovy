@@ -7,9 +7,6 @@ pipeline {
     }
 
     environment {
-        TESTSERVER_TOMCAT_ENDPOINT = credentials('testserver-tomcat8-url')
-        TESTSERVER_TOMCAT_CREDENTIALS = credentials('testserver-tomcat8-credentials')
-
         NINJA_ROOT_PATH = "ninja"
         NINJA_LOGGING_FILE = "/var/log/opendatahub/ninja.log"
         NINJA_KEYCLOAK_SERVERURL = "https://auth.opendatahub.testingmachine.eu/auth/"
