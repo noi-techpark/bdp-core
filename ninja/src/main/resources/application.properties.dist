@@ -15,7 +15,7 @@ server.compression.min-response-size = 1024
 # Security
 ninja.security.cors.allowed-origins = *
 keycloak.auth-server-url=http://keycloak:8080/auth
-keycloak.ssl-required=external
+keycloak.ssl-required=none
 keycloak.realm=noi
 keycloak.resource=odh-mobility-v2
 keycloak.use-resource-role-mappings=true
