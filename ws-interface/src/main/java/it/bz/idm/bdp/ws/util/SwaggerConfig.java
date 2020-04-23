@@ -61,7 +61,7 @@ public class SwaggerConfig{
 	    private ApiInfo apiInfo() {
 			return new ApiInfo(
 	            "Open Data Hub Mobility API (deprecated)",
-	            "<b>WARNING: This API is deprecated</b>. Please use our <a href=\"https://mobility.api.opendatahub.bz.it/v2\">Open Data Hub Mobility API V2</a>.\n"
+	            "<b>WARNING: This API is deprecated</b>. Please use our <a href=\"https://mobility.api.opendatahub.bz.it\">Open Data Hub Mobility API V2</a>.\n"
 	            + "More information about the project: <a href=\"http://opendatahub.readthedocs.io/en/latest/index.html\">Tutorials and technical documentation</a>\n",
 	            "V1",
 	            "https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service",
