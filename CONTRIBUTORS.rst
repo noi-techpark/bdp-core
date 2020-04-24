@@ -31,6 +31,7 @@
 * dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 * Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
 * Patrick Ohnewein <p.ohnewein@noi.bz.it>
+* PaddyBee <patrick.bertolla@gmail.com>
 * Davide Montesin <d@vide.bz>
 
 *To update the contributors list just run this file with bash. Prefix a name with % in .mailmap to set a contact as preferred*
