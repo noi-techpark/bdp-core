@@ -23,10 +23,7 @@ info:
     url: https://opendatahub.readthedocs.io/en/latest/licenses.html
   version: V1 and V2
 servers:
-  - url: https://mobility.api.opendatahub.testingmachine.eu
   - url: https://mobility.api.opendatahub.bz.it
-  - url: https://tomcatsec.testingmachine.eu
-  - url: http://tomcat.testingmachine.eu
 tags:
   - name: Mobility V2
     description: New Generic Data Controller to retrieve all kinds of data
@@ -284,8 +281,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -312,8 +308,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -339,12 +334,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -373,16 +365,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -409,8 +396,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -435,10 +421,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -540,8 +524,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -568,8 +551,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -595,12 +577,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -629,16 +608,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -665,8 +639,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -691,10 +664,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -796,8 +767,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -824,8 +794,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -851,12 +820,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -885,16 +851,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -921,8 +882,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -947,10 +907,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -1052,8 +1010,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1080,8 +1037,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1107,12 +1063,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1141,16 +1094,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1177,8 +1125,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -1203,10 +1150,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -1308,8 +1253,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1336,8 +1280,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1363,12 +1306,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1397,16 +1337,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1433,8 +1368,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -1459,10 +1393,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -1564,8 +1496,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1592,8 +1523,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1619,12 +1549,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1653,16 +1580,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1689,8 +1611,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -1715,10 +1636,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -1820,8 +1739,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1848,8 +1766,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -1875,12 +1792,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1909,16 +1823,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -1945,8 +1854,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -1971,10 +1879,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -2076,8 +1982,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2104,8 +2009,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2131,12 +2035,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2165,16 +2066,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2201,8 +2097,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -2227,10 +2122,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -2332,8 +2225,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2360,8 +2252,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2387,12 +2278,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2421,16 +2309,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2457,8 +2340,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -2483,10 +2365,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -2588,8 +2468,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2616,8 +2495,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2643,12 +2521,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2677,16 +2552,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2713,8 +2583,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -2739,10 +2608,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -2844,8 +2711,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2872,8 +2738,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -2899,12 +2764,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2933,16 +2795,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -2969,8 +2826,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -2995,10 +2851,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -3100,8 +2954,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3128,8 +2981,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3155,12 +3007,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3189,16 +3038,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3225,8 +3069,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -3251,10 +3094,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -3356,8 +3197,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3384,8 +3224,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3411,12 +3250,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3445,16 +3281,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3481,8 +3312,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -3507,10 +3337,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -3612,8 +3440,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3640,8 +3467,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3667,12 +3493,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3701,16 +3524,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3737,8 +3555,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -3763,10 +3580,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -3868,8 +3683,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3896,8 +3710,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -3923,12 +3736,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3957,16 +3767,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -3993,8 +3798,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -4019,10 +3823,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -4124,8 +3926,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -4152,8 +3953,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -4179,12 +3979,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -4213,16 +4010,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -4249,8 +4041,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -4275,10 +4066,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -4380,8 +4169,7 @@ paths:
       summary: Return the timestamp of the latest recorded action for that station.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -4408,8 +4196,7 @@ paths:
       summary: Return the timestamp and value of the latest recorded data.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
       - $ref: "#/components/parameters/v1type"
       - $ref: "#/components/parameters/v1period"
       responses:
@@ -4435,12 +4222,9 @@ paths:
       summary: Returns all the data in the last given seconds.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -4469,16 +4253,11 @@ paths:
         any date into milliseconds from epoch.
       parameters:
       - $ref: "#/components/parameters/v1authorization"
-      - $ref: "#/components/parameters/v1station"
-        required: true
-      - $ref: "#/components/parameters/v1typename"
-        required: true
-      - $ref: "#/components/parameters/v1seconds"
-        required: true
-      - $ref: "#/components/parameters/v1from"
-        required: true
-      - $ref: "#/components/parameters/v1to"
-        required: true
+      - $ref: "#/components/parameters/v1stationrequired"
+      - $ref: "#/components/parameters/v1typenamerequired"
+      - $ref: "#/components/parameters/v1secondsrequired"
+      - $ref: "#/components/parameters/v1fromrequired"
+      - $ref: "#/components/parameters/v1torequired"
       - $ref: "#/components/parameters/v1period"
       responses:
         200:
@@ -4505,8 +4284,7 @@ paths:
       summary: Request a new access token
       description: This method would give you a new token to access protected data.
       parameters:
-      - $ref: "#/components/parameters/v1authorization"
-        required: true
+      - $ref: "#/components/parameters/v1authorizationrequired"
       responses:
         200:
           description: OK
@@ -4531,10 +4309,8 @@ paths:
       description: If you need to access protected, closed data and you have been
         given a username and password, invoke this method to receive a new token.
       parameters:
-      - $ref: "#/components/parameters/v1user"
-        required: true
-      - $ref: "#/components/parameters/v1password"
-        required: true
+      - $ref: "#/components/parameters/v1userrequired"
+      - $ref: "#/components/parameters/v1passwordrequired"
       responses:
         200:
           description: OK
@@ -4760,6 +4536,13 @@ components:
       description: The unique ID of the station.
       schema:
         type: string
+    v1stationrequired:
+      name: station
+      in: query
+      description: The unique ID of the station.
+      schema:
+        type: string
+      required: true
     v1authorization:
       name: Authorization
       in: header
@@ -4767,18 +4550,27 @@ components:
         (see https://tools.ietf.org/html/rfc6750#section-2.1).
       schema:
         type: string
+    v1authorizationrequired:
+      name: Authorization
+      in: header
+      description: All access token need to start with prefix 'Bearer'
+        (see https://tools.ietf.org/html/rfc6750#section-2.1).
+      schema:
+        type: string
+      required: true
     v1type:
       name: type
       in: query
       description: The name of the data-type you are searching for.
       schema:
         type: string
-    v1typename:
+    v1typenamerequired:
       name: name
       in: query
       description: The name of the data-type you are searching for.
       schema:
         type: string
+      required: true
     v1period:
       name: period
       in: query
@@ -4786,36 +4578,41 @@ components:
       schema:
         type: integer
         format: int32
-    v1seconds:
+    v1secondsrequired:
       name: seconds
       in: query
       description: How many seconds in the past (from now) the search must be started.
       schema:
         type: integer
         format: int32
-    v1from:
+      required: true
+    v1fromrequired:
       name: from
       in: query
       description: The timestamp in milliseconds of the start of the interval.
       schema:
         type: integer
         format: int64
-    v1to:
+      required: true
+    v1torequired:
       name: to
       in: query
       description: The timestamp in milliseconds of the end of the interval.
       schema:
         type: integer
         format: int64
-    v1user:
+      required: true
+    v1userrequired:
       name: user
       in: query
       description: The username of the user to which to grant the new token.
       schema:
         type: string
-    v1password:
+      required: true
+    v1passwordrequired:
       name: pw
       in: query
       description: The password corresponding to the user.
       schema:
         type: string
+      required: true
