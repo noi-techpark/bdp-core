@@ -11,7 +11,7 @@ pipeline {
         gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose either master or development as branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the master branch, if you want to make a SNAPSHOT release use development.'
     }
 
-    // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because we the maven AWS plugin needs them to retrieve meta data
+    // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because the maven AWS plugin needs them to retrieve meta data
     environment {
         AWS_ACCESS_KEY=credentials('s3_repo_username')
         AWS_SECRET_KEY=credentials('s3_repo_password')

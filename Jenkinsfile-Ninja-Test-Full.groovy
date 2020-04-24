@@ -17,6 +17,8 @@ pipeline {
         NINJA_DATABASE_NAME = "bdp"
         NINJA_DATABASE_READ_USER = "bdp_readonly"
         NINJA_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
+
+        NINJA_SWAGGER_SERVER_URL = "https://mobility.api.opendatahub.testingmachine.eu"
     }
 
     stages {
@@ -27,8 +29,9 @@ pipeline {
                     sed -i -e "s%\\(logging.file\\s*=\\).*\\$%\\1${NINJA_LOGGING_FILE}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(logging.level.root\\s*=\\).*\\$%\\1DEBUG%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(logging.level.org.springframework.jdbc.core\\s*=\\).*\\$%\\1TRACE%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
-                    sed -i -e "s%\\(ninja.swagger.readme-url\\s*=\\).*\\$%\\1 ${NINJA_SWAGGER_READMEURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(keycloak.auth-server-url\\s*=\\).*\\$%\\1 ${NINJA_KEYCLOAK_SERVERURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
+
+                    sed -i -e "s%__ODH_SERVER_URL__%${NINJA_SWAGGER_SERVER_URL}%" ${NINJA_ROOT_PATH}/src/main/resources/openapi3.yml
 
                     cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"
                     sed -i -e "s%\\(username\\s*=\\).*\\$%\\1 ${NINJA_DATABASE_READ_USER}%" ${NINJA_ROOT_PATH}/src/main/resources/database.properties

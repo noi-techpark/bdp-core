@@ -22,7 +22,7 @@ info:
     url: https://opendatahub.readthedocs.io/en/latest/licenses.html
   version: V1 and V2
 servers:
-  - url: https://mobility.api.opendatahub.bz.it
+  - url: __ODH_SERVER_URL__
 tags:
   - name: Mobility V2
     description: New Generic Data Controller to retrieve all kinds of data
