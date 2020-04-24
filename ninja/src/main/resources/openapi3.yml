@@ -12,8 +12,7 @@ info:
     Howtos</a> | <a
     href="https://github.com/noi-techpark/bdp-core">Source Code</a>
 
-  termsOfService: >
-    https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service
+  termsOfService: https://opendatahub.readthedocs.io/en/latest/licenses.html#apis-terms-of-service
   contact:
     name: Open Data Hub
     url: https://opendatahub.bz.it
