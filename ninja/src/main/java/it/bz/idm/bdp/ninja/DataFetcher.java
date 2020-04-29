@@ -210,6 +210,92 @@ public class DataFetcher {
 		return queryResult;
 	}
 
+	public List<Map<String, Object>> fetchStationsAndTypes(String stationTypeList, String dataTypeList, boolean flat) {
+		log.debug("FETCHING FROM STATIONS AND TYPES");
+
+		Set<String> stationTypeSet = QueryBuilder.csvToSet(stationTypeList);
+		Set<String> dataTypeSet = QueryBuilder.csvToSet(dataTypeList);
+
+		long nanoTime = System.nanoTime();
+		query = QueryBuilder
+				.init(select, where, "station", "parent", "datatype");
+
+		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue");
+		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
+
+		/* We support functions only for double-typed measurements, so do not append a measurement-string query if any
+		 */
+		boolean hasFunctions = query.getSelectExpansion().hasFunctions();
+		boolean useMeasurementDouble = mvalueToken == null || Token.is(mvalueToken, "number") || Token.is(mvalueToken, "null");
+		boolean useMeasurementString = (mvalueToken == null || Token.is(mvalueToken, "string") || Token.is(mvalueToken, "null")) && !hasFunctions;
+
+		if (useMeasurementDouble) {
+			query.addSql("select")
+				 .addSqlIf("distinct", distinct)
+				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				 .expandSelectPrefix(", ", !flat)
+				 .addSql("from measurement me")
+				 .addSql("join station s on me.station_id = s.id")
+				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
+				 .addSql("join type t on me.type_id = t.id")
+				 .addSqlIfAlias("left join type_metadata tm on tm.id = t.meta_data_id", "tmetadata")
+				 .addSql("where true")
+				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				 .setParameter("roles", roles)
+				 .expandWhere()
+				 .expandGroupBy();
+		}
+
+		if (useMeasurementDouble && useMeasurementString) {
+			query.addSql("union all");
+		}
+
+		if (useMeasurementString) {
+			query.reset(select, where, "station", "parent", "datatype")
+				 .addSql("select")
+				 .addSqlIf("distinct", distinct)
+				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
+				 .expandSelectPrefix(", ", !flat)
+				 .addSql("from measurementstring me")
+				 .addSql("join station s on me.station_id = s.id")
+				 .addSqlIfAlias("left join metadata m on m.id = s.meta_data_id", "smetadata")
+				 .addSqlIfDefinition("left join station p on s.parent_id = p.id", "parent")
+				 .addSqlIfAlias("left join metadata pm on pm.id = p.meta_data_id", "pmetadata")
+				 .addSql("join type t on me.type_id = t.id")
+				 .addSqlIfAlias("left join type_metadata tm on tm.id = t.meta_data_id", "tmetadata")
+				 .addSql("where true")
+				 .setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "and s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
+				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
+				 .setParameter("roles", roles)
+				 .expandWhere()
+				 .expandGroupBy();
+		}
+
+		if (mvalueToken != null && !mvalueToken.is("string") && !mvalueToken.is("number") && !mvalueToken.is("null")) {
+			throw new SimpleException(ErrorCode.WHERE_WRONG_DATA_TYPE, "mvalue", mvalueToken.getName());
+		}
+
+		query.addSqlIf("order by _stationtype, _stationcode, _datatypename", !flat)
+			 .addLimit(limit)
+			 .addOffset(offset);
+
+		log.debug("build query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
+
+		nanoTime = System.nanoTime();
+		List<Map<String, Object>> queryResult = QueryExecutor
+				.init()
+				.addParameters(query.getParameters())
+				.build(query.getSql());
+
+		log.debug("exec query: " + Long.toString((System.nanoTime() - nanoTime) / 1000000));
+
+		return queryResult;
+	}
+
 	public String fetchStationTypes() {
 		return JsonStream.serialize(QueryExecutor
 				.init()

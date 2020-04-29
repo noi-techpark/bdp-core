@@ -90,10 +90,12 @@ paths:
     get:
       tags:
         - Mobility V2
-      summary: View details of all given station types
+      summary: View station details of stations with a given station type
       description:
-        You can put multiple station types as comma-seperated list.<br>The
-        response is a tree of <code>station-type / station-name</code>.
+        You can put multiple stationtypes as comma-seperated lists. The response
+        contains stations (prefix <code>s</code>) and their parent-stations
+        (prefix <code>p</code>). Each JSON attribute is prefixed with the first
+        letter of that object.
       parameters:
         - $ref: "#/components/parameters/representation"
         - $ref: "#/components/parameters/stationTypes"
@@ -124,12 +126,53 @@ paths:
       tags:
         - Mobility V2
       summary:
-        View details of all given station types including data types and most-recent
+        View station details of stations with a given station type including
+        associated data types
+      description:
+        You can put multiple stationtypes or datatypes as comma-seperated lists.
+        The response contains stations (prefix <code>s</code>), their
+        parent-stations (prefix <code>p</code>) and types (prefix
+        <code>t</code>). Each JSON attribute is prefixed with the first letter
+        of that object.
+      parameters:
+        - $ref: "#/components/parameters/representation"
+        - $ref: "#/components/parameters/stationTypes"
+        - $ref: "#/components/parameters/dataTypes"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/select"
+        - $ref: "#/components/parameters/where"
+        - $ref: "#/components/parameters/shownull"
+        - $ref: "#/components/parameters/distinct"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v2/{representation}/{stationTypes}/{dataTypes}/latest:
+    get:
+      tags:
+        - Mobility V2
+      summary:
+        View details of all given station types including data types and most recent
         measurements
       description:
-        You can put multiple station or data types as comma-seperated lists.<br>The
-        response is a tree of <code>station-type / station-name / data-type /
-        measurements</code>.
+        You can put multiple stationtypes or datatypes as comma-seperated lists.
+        The response contains stations (prefix <code>s</code>), their
+        parent-stations (prefix <code>p</code>), types (prefix <code>t</code>)
+        and the latest measurements (prefix <code>m</code>). Each JSON attribute
+        is prefixed with the first letter of that object.
       parameters:
         - $ref: "#/components/parameters/representation"
         - $ref: "#/components/parameters/stationTypes"
@@ -164,9 +207,11 @@ paths:
         View details of all given station types including data types and historical
         measurements
       description:
-        You can put multiple station or data types as comma-seperated
-        lists.<br>The response is a tree of <code>station-type / station-name /
-        data-type / measurements</code>.
+        You can put multiple stationtypes or datatypes as comma-seperated lists.
+        The response contains stations (prefix <code>s</code>), their
+        parent-stations (prefix <code>p</code>), types (prefix <code>t</code>)
+        and historical measurements (prefix <code>m</code>). Each JSON attribute
+        is prefixed with the first letter of that object.
       parameters:
         - $ref: "#/components/parameters/representation"
         - $ref: "#/components/parameters/stationTypes"

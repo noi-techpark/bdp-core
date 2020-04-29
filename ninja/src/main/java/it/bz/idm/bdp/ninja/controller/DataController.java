@@ -182,6 +182,33 @@ public class DataController {
 		dataFetcher.setRoles(SecurityUtils.getRolesFromAuthentication(auth));
 		dataFetcher.setDistinct(distinct);
 
+		final List<Map<String, Object>> queryResult = dataFetcher.fetchStationsAndTypes(stationTypes, dataTypes, flat);
+		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
+		return DataFetcher.serializeJSON(result);
+	}
+
+	@GetMapping(value = "/{representation}/{stationTypes}/{dataTypes}/latest", produces = "application/json")
+	public @ResponseBody String requestMostRecent(@PathVariable final String representation,
+			@PathVariable final String stationTypes, @PathVariable final String dataTypes,
+			@RequestParam(value = "limit", required = false, defaultValue = DEFAULT_LIMIT) final Long limit,
+			@RequestParam(value = "offset", required = false, defaultValue = DEFAULT_OFFSET) final Long offset,
+			@RequestParam(value = "select", required = false) final String select,
+			@RequestParam(value = "where", required = false) final String where,
+			@RequestParam(value = "shownull", required = false, defaultValue = DEFAULT_SHOWNULL) final Boolean showNull,
+			@RequestParam(value = "distinct", required = false, defaultValue = DEFAULT_DISTINCT) final Boolean distinct) {
+
+		final boolean flat = isFlatRepresentation(representation);
+
+		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		dataFetcher.setIgnoreNull(!showNull);
+		dataFetcher.setLimit(limit);
+		dataFetcher.setOffset(offset);
+		dataFetcher.setWhere(where);
+		dataFetcher.setSelect(select);
+		dataFetcher.setRoles(SecurityUtils.getRolesFromAuthentication(auth));
+		dataFetcher.setDistinct(distinct);
+
 		final List<Map<String, Object>> queryResult = dataFetcher.fetchStationsTypesAndMeasurementHistory(stationTypes,
 				dataTypes, null, null, flat);
 		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
