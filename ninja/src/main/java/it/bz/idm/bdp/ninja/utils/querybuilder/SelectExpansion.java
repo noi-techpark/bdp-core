@@ -137,6 +137,8 @@ public class SelectExpansion {
 		if (schema == null) {
 			throw new SimpleException(ErrorCode.SCHEMA_NULL);
 		}
+
+		schema.compile(); // XXX remove this and add a dirty flag to Schema
 		this.schema = schema;
 		dirty = true;
 		return this;

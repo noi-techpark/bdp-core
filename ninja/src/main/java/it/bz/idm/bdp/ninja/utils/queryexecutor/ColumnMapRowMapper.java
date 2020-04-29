@@ -17,9 +17,14 @@ import com.jsoniter.JsonIterator;
 public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 
 	private static boolean ignoreNull = false;
+	private static Map<String, String> targetDefNameToAliasMap = null;
 
 	public static synchronized void setIgnoreNull(boolean ignoreNull) {
 		ColumnMapRowMapper.ignoreNull = ignoreNull;
+	}
+
+	public static synchronized void setTargetDefNameToAliasMap(Map<String, String> map) {
+		ColumnMapRowMapper.targetDefNameToAliasMap = map;
 	}
 
 	@Override
@@ -28,13 +33,25 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 		int columnCount = rsmd.getColumnCount();
 		Map<String, Object> mapOfColumnValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
-			String column = JdbcUtils.lookupColumnName(rsmd, i);
-			Object value = getColumnValue(rs, i);
-
-			if (ColumnMapRowMapper.ignoreNull && value == null)
+			Object newValue = getColumnValue(rs, i);
+			if (ColumnMapRowMapper.ignoreNull && newValue == null)
 				continue;
 
-			mapOfColumnValues.putIfAbsent(getColumnKey(column), value);
+			String column = JdbcUtils.lookupColumnName(rsmd, i);
+			String replacementColumn = targetDefNameToAliasMap.get(column);
+
+			if (replacementColumn == null) {
+				mapOfColumnValues.put(column, newValue);
+			} else {
+				if (mapOfColumnValues.containsKey(replacementColumn)) {
+					Object oldValue = mapOfColumnValues.get(replacementColumn);
+					if (oldValue == null && newValue != null) {
+						mapOfColumnValues.put(replacementColumn, newValue);
+					}
+				} else {
+					mapOfColumnValues.put(replacementColumn, newValue);
+				}
+			}
 		}
 		return mapOfColumnValues.isEmpty() ? null : mapOfColumnValues;
 	}
@@ -49,16 +66,6 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 */
 	protected Map<String, Object> createColumnMap(int columnCount) {
 		return new LinkedCaseInsensitiveMap<>(columnCount);
-	}
-
-	/**
-	 * Determine the key to use for the given column in the column Map.
-	 * @param columnName the column name as returned by the ResultSet
-	 * @return the column key to use
-	 * @see java.sql.ResultSetMetaData#getColumnName
-	 */
-	protected String getColumnKey(String columnName) {
-		return columnName;
 	}
 
 	private static String cleanPostgresType(String type) {
