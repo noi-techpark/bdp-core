@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
@@ -131,11 +132,18 @@ public class ResultBuilder {
 	public static Map<String, Object> makeObj(Schema schema, Map<String, Object> record, String defName, boolean ignoreNull) {
 		TargetDefList def = schema.getOrNull(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
-		for (String alias : def.getFinalNames()) {
-			Object value = record.get(alias);
-			if (ignoreNull && value == null)
+
+		for (Entry<String, Object> entry : record.entrySet()) {
+			if (ignoreNull && entry.getValue() == null)
 				continue;
-			result.put(alias, value);
+			int index = entry.getKey().indexOf(".");
+			String cleanName = entry.getKey();
+			if (index > 0) {
+				cleanName = entry.getKey().substring(0, index);
+			}
+
+			if(def.getFinalNames().contains(cleanName))
+				result.put(entry.getKey(), entry.getValue());
 		}
 		return result;
 	}
@@ -164,8 +172,8 @@ public class ResultBuilder {
 
 		Map<String, Object> rec = new HashMap<String, Object>();
 		rec.put("a", "3");
-		rec.put("b", "7");
-		rec.put("x", "0");
+		rec.put("b", null);
+		rec.put("x.abc", "0");
 		rec.put("h", "v");
 		System.out.println(makeObj(schema, rec, "A", false).toString());
 		System.out.println(makeObj(schema, rec, "A", true).toString());
