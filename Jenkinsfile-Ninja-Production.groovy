@@ -18,7 +18,8 @@ pipeline {
         NINJA_DATABASE_READ_USER = "bdp_readonly"
         NINJA_DATABASE_READ_PASSWORD = credentials('bdp-core-prod-database-read-password')
 
-        NINJA_BASE_URL = "https://mobility.api.opendatahub.bz.it"
+        NINJA_HOST_URL = "https://mobility.api.opendatahub.bz.it"
+		NINJA_BASE_URL = "${NINJA_HOST_URL}/v2"
     }
 
     stages {
@@ -31,7 +32,7 @@ pipeline {
                     sed -i -e "s%\\(logging.level.org.springframework.jdbc.core\\s*=\\).*\\$%\\1WARN%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
                     sed -i -e "s%\\(keycloak.auth-server-url\\s*=\\).*\\$%\\1 ${NINJA_KEYCLOAK_SERVERURL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
 
-                    sed -i -e "s%__ODH_SERVER_URL__%${NINJA_BASE_URL}%" ${NINJA_ROOT_PATH}/src/main/resources/openapi3.yml
+                    sed -i -e "s%__ODH_SERVER_URL__%${NINJA_HOST_URL}%" ${NINJA_ROOT_PATH}/src/main/resources/openapi3.yml
                     sed -i -e "s%\\(ninja.url\\s*=\\).*\\$%\\1 ${NINJA_BASE_URL}%" ${NINJA_ROOT_PATH}/src/main/resources/application.properties
 
                     cp "${NINJA_ROOT_PATH}/src/main/resources/database.properties.dist" "${NINJA_ROOT_PATH}/src/main/resources/database.properties"
