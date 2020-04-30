@@ -67,7 +67,32 @@ paths:
     get:
       tags:
         - Mobility V2
+      summary: View a list of entry points to the Open Data Hub Mobility domain
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not Found
+          content: {}
+  /v2/{representation}:
+    get:
+      tags:
+        - Mobility V2
       summary: View a list of all station types (categories)
+      parameters:
+        - $ref: "#/components/parameters/representation"
       responses:
         200:
           description: Successful response

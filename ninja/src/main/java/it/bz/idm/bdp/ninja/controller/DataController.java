@@ -161,11 +161,17 @@ public class DataController {
 		String url = ninjaBaseUrl + "/" + representation + "/";
 		for (Map<String, Object> row : queryResult) {
 			row.put("description", null);
-			Map<String, Object> selfies = new HashMap<String, Object>();
-			selfies.put("stations", url + row.get("id"));
-			selfies.put("stations+datatypes", url + row.get("id") + "/*");
-			selfies.put("stations+datatypes+measurements", url + row.get("id") + "/*/latest");
-			row.put("self", selfies);
+			if (isFlatRepresentation(representation)) {
+				row.put("self.stations", url + row.get("id"));
+				row.put("self.stations+datatypes", url + row.get("id") + "/*");
+				row.put("self.stations+datatypes+measurements", url + row.get("id") + "/*/latest");
+			} else {
+				Map<String, Object> selfies = new HashMap<String, Object>();
+				selfies.put("stations", url + row.get("id"));
+				selfies.put("stations+datatypes", url + row.get("id") + "/*");
+				selfies.put("stations+datatypes+measurements", url + row.get("id") + "/*/latest");
+				row.put("self", selfies);
+			}
 		}
 		return DataFetcher.serializeJSON(queryResult);
 	}
