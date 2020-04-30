@@ -68,7 +68,7 @@ public class ResultBuilder {
 						datatype = makeObj(schema, rec, "datatype", ignoreNull);
 					}
 				default:
-					if (hierarchy.size() > 2) {
+					if (hierarchy.size() > 3) {
 						measurement = makeObj(schema, rec, "measurement", ignoreNull);
 
 						/*
@@ -76,13 +76,16 @@ public class ResultBuilder {
 						 * columns in our record due to an UNION ALL query. We unify these two fields
 						 * into a single "mvalue" to hide internals from the API consumers.
 						 * XXX This could later maybe be integrated into select expansion or in a generic
-						 * way into the result builder.
+						 * way into the result builder (see queryexecutor/RowMappers...).
 						 */
 						Object value = rec.get("mvalue_string");
 						if (value == null) {
 							value = rec.get("mvalue_double");
 						}
-						if (value != null) {
+						if (value == null) {
+							value = rec.get("mvalue");
+						}
+						if (value != null || !ignoreNull) {
 							measurement.put("mvalue", value);
 						}
 					}

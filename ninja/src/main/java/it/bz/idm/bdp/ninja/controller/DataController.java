@@ -86,7 +86,7 @@ public class DataController {
 	private static final String DEFAULT_SHOWNULL = "false";
 	private static final String DEFAULT_DISTINCT = "true";
 
-	private static final List<String> TREE_PARTIAL = new ArrayList<String>() {
+	private static final List<String> TREE_STATIONS = new ArrayList<String>() {
 		private static final long serialVersionUID = -1699134802805589710L;
 		{
 			add("_stationtype");
@@ -94,10 +94,18 @@ public class DataController {
 		}
 	};
 
-	private static final List<String> TREE_FULL = new ArrayList<String>() {
-		private static final long serialVersionUID = -1699134802805589710L;
+	private static final List<String> TREE_DATATYPE = new ArrayList<String>() {
+		private static final long serialVersionUID = 5080748129639971674L;
 		{
-			addAll(TREE_PARTIAL);
+			addAll(TREE_STATIONS);
+			add("_datatypename");
+		}
+	};
+
+	private static final List<String> TREE_FULL = new ArrayList<String>() {
+		private static final long serialVersionUID = 39536715440489931L;
+		{
+			addAll(TREE_DATATYPE);
 			add("_datatypename");
 		}
 	};
@@ -156,7 +164,7 @@ public class DataController {
 		dataFetcher.setSelect(select);
 		dataFetcher.setDistinct(distinct);
 		final List<Map<String, Object>> queryResult = dataFetcher.fetchStations(stationTypes, flat);
-		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_PARTIAL);
+		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_STATIONS);
 		return DataFetcher.serializeJSON(result);
 	}
 
@@ -183,7 +191,7 @@ public class DataController {
 		dataFetcher.setDistinct(distinct);
 
 		final List<Map<String, Object>> queryResult = dataFetcher.fetchStationsAndTypes(stationTypes, dataTypes, flat);
-		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_FULL);
+		final Map<String, Object> result = buildResult(queryResult, offset, limit, flat, showNull, TREE_DATATYPE);
 		return DataFetcher.serializeJSON(result);
 	}
 
