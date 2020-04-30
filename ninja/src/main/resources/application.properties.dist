@@ -23,5 +23,6 @@ keycloak.credentials.secret=
 keycloak.public-client=false
 keycloak.bearer-only=true
 
-# Swagger
-ninja.swagger.readme-url = TODO
+# Ninja Base URL
+ninja.url = http://localhost:8081
+

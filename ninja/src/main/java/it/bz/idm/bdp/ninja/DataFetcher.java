@@ -296,10 +296,11 @@ public class DataFetcher {
 		return queryResult;
 	}
 
-	public String fetchStationTypes() {
-		return JsonStream.serialize(QueryExecutor
+	public List<Map<String, Object>> fetchStationTypes() {
+		List<Map<String, Object>> queryResult = QueryExecutor
 				.init()
-				.build("select distinct stationtype from station order by 1", String.class));
+				.build("select distinct stationtype as id from station order by 1");
+		return queryResult;
 	}
 
 	public QueryBuilder getQuery() {

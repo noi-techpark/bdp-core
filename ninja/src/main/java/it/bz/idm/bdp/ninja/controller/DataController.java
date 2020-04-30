@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,6 +64,9 @@ public class DataController {
 
 	/* Do not forget to update DOC_TIME, when changing this */
 	private static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd['T'[HH][:mm][:ss][.SSS]][Z][z]";
+
+	@Value("${ninja.url}")
+	private String ninjaBaseUrl;
 
 	public static enum ErrorCode implements ErrorCodeInterface {
 		WRONG_REPRESENTATION("Please choose 'flat' or 'tree' as representation. '%s' is not allowed."),
@@ -132,9 +136,15 @@ public class DataController {
 	DataFetcher dataFetcher;
 
 	@GetMapping(value = "", produces = "application/json")
-	public @ResponseBody String requestStationTypes() {
-		return new DataFetcher().fetchStationTypes();
+	public @ResponseBody String requestRoot() {
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream in = classloader.getResourceAsStream("root.json");
+		try (Scanner scanner = new Scanner(in, StandardCharsets.UTF_8.name())) {
+			String result = scanner.useDelimiter("\\A").next();
+			return result.replaceAll("__URL__", ninjaBaseUrl);
+		}
 	}
+
 
 	@GetMapping(value = "/apispec", produces = "application/yaml")
 	public @ResponseBody String requestOpenApiSpec() {
@@ -143,6 +153,21 @@ public class DataController {
 		try (Scanner scanner = new Scanner(in, StandardCharsets.UTF_8.name())) {
 			return scanner.useDelimiter("\\A").next();
 		}
+	}
+
+	@GetMapping(value = "/{representation}", produces = "application/json")
+	public @ResponseBody String requestStationTypes(@PathVariable final String representation) {
+		final List<Map<String, Object>> queryResult =  new DataFetcher().fetchStationTypes();
+		String url = ninjaBaseUrl + "/" + representation + "/";
+		for (Map<String, Object> row : queryResult) {
+			row.put("description", null);
+			Map<String, Object> selfies = new HashMap<String, Object>();
+			selfies.put("stations", url + row.get("id"));
+			selfies.put("stations+datatypes", url + row.get("id") + "/*");
+			selfies.put("stations+datatypes+measurements", url + row.get("id") + "/*/latest");
+			row.put("self", selfies);
+		}
+		return DataFetcher.serializeJSON(queryResult);
 	}
 
 	@GetMapping(value = "/{representation}/{stationTypes}", produces = "application/json")
