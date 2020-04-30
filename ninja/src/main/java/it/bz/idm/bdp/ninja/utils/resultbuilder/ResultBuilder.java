@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
+import it.bz.idm.bdp.ninja.utils.querybuilder.Target;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
 
@@ -38,6 +39,7 @@ public class ResultBuilder {
 		Map<String, Object> parent = null;
 		Map<String, Object> datatype = null;
 		Map<String, Object> measurement = null;
+		Map<String, Object> mvalueAndFunctions = null;
 
 		for (Map<String, Object> rec : queryResult) {
 
@@ -73,21 +75,18 @@ public class ResultBuilder {
 						measurement = makeObj(schema, rec, "measurement", ignoreNull);
 
 						/*
-						 * Depending whether we get a string or double measurement, we have different
-						 * columns in our record due to an UNION ALL query. We unify these two fields
-						 * into a single "mvalue" to hide internals from the API consumers.
-						 * XXX This could later maybe be integrated into select expansion or in a generic
-						 * way into the result builder (see queryexecutor/RowMappers...).
+						 * We only need one measurement-type here
+						 * ("measurementdouble"), since we look only for final
+						 * names, that is we do not consider mvalue_double and
+						 * mvalue_string here, but reduce both before handling
+						 * to mvalue. See makeObj for details.
 						 */
-						Object value = rec.get("mvalue_string");
-						if (value == null) {
-							value = rec.get("mvalue_double");
-						}
-						if (value == null) {
-							value = rec.get("mvalue");
-						}
-						if (value != null || !ignoreNull) {
-							measurement.put("mvalue", value);
+						mvalueAndFunctions = makeObj(schema, rec, "measurementdouble", ignoreNull);
+
+						for (Entry<String, Object> entry : mvalueAndFunctions.entrySet()) {
+							if (entry.getValue() != null || !ignoreNull) {
+								measurement.put(entry.getKey(), entry.getValue());
+							}
 						}
 					}
 			}
@@ -136,14 +135,21 @@ public class ResultBuilder {
 		for (Entry<String, Object> entry : record.entrySet()) {
 			if (ignoreNull && entry.getValue() == null)
 				continue;
-			int index = entry.getKey().indexOf(".");
-			String cleanName = entry.getKey();
-			if (index > 0) {
-				cleanName = entry.getKey().substring(0, index);
-			}
 
-			if(def.getFinalNames().contains(cleanName))
-				result.put(entry.getKey(), entry.getValue());
+			Target target = new Target(entry.getKey());
+
+			if(def.getFinalNames().contains(target.getName())) {
+				if (target.hasJson()) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> jsonObj = (Map<String, Object>) result.getOrDefault(target.getName(), new TreeMap<String, Object>());
+					jsonObj.put(target.getJson(), entry.getValue());
+					if (jsonObj.size() == 1) {
+						result.put(target.getName(), jsonObj);
+					}
+				} else {
+					result.put(target.getName(), entry.getValue());
+				}
+			}
 		}
 		return result;
 	}

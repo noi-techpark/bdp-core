@@ -73,7 +73,7 @@ public class DataFetcher {
 				.addSql("where true")
 				.setParameterIfNotEmptyAnd("stationtypes", stationTypeSet, "AND s.stationtype in (:stationtypes)", !stationTypeSet.contains("*"))
 				.expandWhere()
-				.expandGroupBy()
+				.expandGroupByIf("_stationtype, _stationcode", !flat)
 				.addSqlIf("order by _stationtype, _stationcode", !flat)
 				.addLimit(limit)
 				.addOffset(offset);
@@ -151,7 +151,7 @@ public class DataFetcher {
 				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
 				 .expandWhere()
-				 .expandGroupBy();
+				 .expandGroupByIf("_stationtype, _stationcode, _datatypename", !flat);
 		}
 
 		if (useMeasurementDouble && useMeasurementString) {
@@ -185,7 +185,7 @@ public class DataFetcher {
 				 .setParameterIfNotNull("to", to, "and timestamp < :to")
 				 .setParameter("roles", roles)
 				 .expandWhere()
-				 .expandGroupBy();
+				 .expandGroupByIf("_stationtype, _stationcode, _datatypename", !flat);
 		}
 
 		if (mvalueToken != null && !mvalueToken.is("string") && !mvalueToken.is("number") && !mvalueToken.is("null")) {
@@ -246,7 +246,7 @@ public class DataFetcher {
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				 .setParameter("roles", roles)
 				 .expandWhere()
-				 .expandGroupBy();
+				 .expandGroupByIf("_stationtype, _stationcode, _datatypename", !flat);
 		}
 
 		if (useMeasurementDouble && useMeasurementString) {
@@ -271,7 +271,7 @@ public class DataFetcher {
 				 .setParameterIfNotEmptyAnd("datatypes", dataTypeSet, "and t.cname in (:datatypes)", !dataTypeSet.contains("*"))
 				 .setParameter("roles", roles)
 				 .expandWhere()
-				 .expandGroupBy();
+				 .expandGroupByIf("_stationtype, _stationcode, _datatypename", !flat);
 		}
 
 		if (mvalueToken != null && !mvalueToken.is("string") && !mvalueToken.is("number") && !mvalueToken.is("null")) {

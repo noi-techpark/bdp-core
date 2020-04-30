@@ -275,15 +275,25 @@ public class QueryBuilder {
 	}
 
 	public QueryBuilder expandGroupBy() {
+		return expandGroupByIf(null, true);
+	}
+
+	public QueryBuilder expandGroupByIf(final String optionalGroupings, boolean condition) {
 		if (! se.hasFunctions()) {
 			return this;
 		}
+		StringJoiner sj = new StringJoiner(", ");
 		List<String> groupByTargetNames = se.getGroupByTargetNames();
 		if (! groupByTargetNames.isEmpty()) {
-			StringJoiner sj = new StringJoiner(", ");
 			for (String targetName : groupByTargetNames) {
-				sj.add(se.getSchema().find(targetName).get(targetName).getColumn());
+				TargetDef targetDef = se.getSchema().getTargetDefs(targetName).get(0);
+				sj.add(targetDef.getColumn());
 			}
+		}
+		if (optionalGroupings != null && condition) {
+			sj.add(optionalGroupings);
+		}
+		if (sj.length() > 0) {
 			addSql("group by " + sj);
 		}
 		return this;
