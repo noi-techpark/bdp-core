@@ -26,3 +26,6 @@ keycloak.bearer-only=true
 # Ninja Base URL
 ninja.url = http://localhost:8081
 
+# Actuator
+management.endpoints.enabled-by-default=false
+management.endpoint.health.enabled=true
