@@ -24,7 +24,7 @@
       <property name="hibernate.hbm2ddl.auto" value="validate"/>
       <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
       <property name="hibernate.hikari.dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>
-      <property name="hibernate.hikari.maximumPoolSize" value="25"/>
+      <property name="hibernate.hikari.maximumPoolSize" value="15"/>
       <property name="hibernate.hikari.dataSource.serverName" value="localhost"/>
       <property name="hibernate.hikari.dataSource.portNumber" value="5432"/>
       <property name="hibernate.hikari.dataSource.databaseName" value="bdptest"/>
