@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+	<springProfile name="local">
+		<include resource="org/springframework/boot/logging/logback/base.xml"/>
+	</springProfile>
+
 	<springProfile name="default">
 		<appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder class="net.logstash.logback.encoder.LogstashEncoder">
