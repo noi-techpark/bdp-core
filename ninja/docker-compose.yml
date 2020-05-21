@@ -1,0 +1,26 @@
+version: "3.4"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+    volumes:
+      - ./:/code
+    working_dir: /code
+    command: ["mvn spring-boot:run"]
+    tty: true
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - internal
+      - authentication
+
+networks:
+  authentication:
+    external: true
+  internal:
+    external: false
