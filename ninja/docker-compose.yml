@@ -27,10 +27,7 @@ services:
       - "${SERVER_PORT}:${SERVER_PORT}"
     networks:
       - internal
-      - authentication
 
 networks:
-  authentication:
-    external: true
   internal:
     external: false

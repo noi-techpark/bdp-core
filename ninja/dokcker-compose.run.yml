@@ -1,0 +1,26 @@
+version: "3.4"
+
+services:
+  app:
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
+    restart: unless-stopped
+    environment:
+        SERVER_PORT: ${SERVER_PORT}
+        NINJA_BASE_URL: ${NINJA_BASE_URL}
+        SECURITY_ALLOWED_ORIGINS: ${SECURITY_ALLOWED_ORIGINS}
+        KEYCLOAK_URL: ${KEYCLOAK_URL}
+        KEYCLOAK_SSL_REQUIRED: ${KEYCLOAK_SSL_REQUIRED}
+        KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+        KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+        KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+        JDBC_URL: ${JDBC_URL}
+        DB_USERNAME: ${DB_USERNAME}
+        DB_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
