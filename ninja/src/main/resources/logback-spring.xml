@@ -9,7 +9,7 @@
 					<logger>[ignore]</logger>
 					<thread>[ignore]</thread>
 				</fieldNames>
-				<customFields>{"application":"${LOG_APPLICATION_NAME:-app}"}"}</customFields>
+				<customFields>{"application":"${LOG_APPLICATION_NAME:-ninja}"}"}</customFields>
 			</encoder>
 		</appender>
 		<root level="INFO">
