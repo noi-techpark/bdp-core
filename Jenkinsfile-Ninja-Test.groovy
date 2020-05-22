@@ -25,7 +25,7 @@ pipeline {
     stages {
         stage('Configure') {
             steps {
-                sh '''
+                sh """
                     cd ninja
                     rm -f .env
                     cp .env.example .env
@@ -43,7 +43,7 @@ pipeline {
                     echo 'JDBC_URL=${JDBC_URL}' >> .env
                     echo 'DB_USERNAME=${DB_USERNAME}' >> .env
                     echo 'DB_PASSWORD=${DB_PASSWORD}' >> .env                    
-                '''
+                """
             }
         }
         stage('Test - Ninja') {
