@@ -6,7 +6,7 @@ pipeline {
         DOCKER_IMAGE = '755952719952.dkr.ecr.eu-west-1.amazonaws.com/ninja'
         DOCKER_TAG = "test-$BUILD_NUMBER"
 
-        SERVER_PORT = "1002"
+        SERVER_PORT = "1004"
         NINJA_HOST_URL = "https://ninja.testingmachine.eu"
         NINJA_BASE_URL = "${NINJA_HOST_URL}/v2"
 
