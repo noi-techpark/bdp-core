@@ -16,35 +16,35 @@ public class QueryBuilderTests {
 	@Test
 	public void testExpandSelect() {
 		String res = QueryBuilder
-				.init("a, x", null, "A", "B")
+				.init("a, x", null, true, "A", "B")
 				.expandSelect()
 				.getSql();
 
 		assertEquals("A.a as a, B.x as x", res.trim());
 
 		res = QueryBuilder
-				.init("y", null, "B", "C")
+				.init("y", null, true, "B", "C")
 				.expandSelect()
 				.getSql();
 
 		assertEquals("C.d as d", res.trim());
 
 		res = QueryBuilder
-				.init("d", null, "C")
+				.init("d", null, true, "C")
 				.expandSelect()
 				.getSql();
 
 		assertEquals("C.d as d", res.trim());
 
 		res = QueryBuilder
-				.init("x, y", null, "A", "B")
+				.init("x, y", null, true, "A", "B")
 				.expandSelect()
 				.getSql();
 
 		assertEquals("B.x as x", res.trim());
 
 		res = QueryBuilder
-				.init("a,b,c", null, "A", "B")
+				.init("a,b,c", null, true, "A", "B")
 				.expandSelect("B")
 				.getSql();
 
