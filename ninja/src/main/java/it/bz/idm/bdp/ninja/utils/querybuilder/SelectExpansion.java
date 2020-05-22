@@ -123,6 +123,7 @@ public class SelectExpansion {
 	private String whereClause = null;
 	private boolean dirty = true;
 	private boolean hasFunctions = false;
+	private boolean isDistinct = false;
 
 	public void addOperator(String tokenType, String operator, String sqlSnippet) {
 		addOperator(tokenType, operator, sqlSnippet, null);
@@ -459,6 +460,7 @@ public class SelectExpansion {
 			String sqlSelect = expandedSelects.getOrDefault(defName, null);
 			String before = targetDef.hasSqlBefore() ? targetDef.getSqlBefore() + ", " : "";
 			String after = targetDef.hasSqlAfter() ? ", " + targetDef.getSqlAfter() : "";
+			String distinct = isDistinct ? "distinct " : "";
 
 			StringJoiner sj = new StringJoiner(", ");
 
@@ -471,7 +473,7 @@ public class SelectExpansion {
 			/* (1) Target with a JSON selector */
 			if (target.hasJson()) {
 				if (target.hasFunction()) {
-					sj.add(String.format("%s((%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", target.getFunc(), targetDef.getColumn(), target.getJson().replace(".", ","), target.getFunc(), targetDef.getFinalName(), target.getJson()));
+					sj.add(String.format("%s(%s(%s#>'{%s}')::double precision) as \"%s(%s.%s)\"", target.getFunc(), distinct, targetDef.getColumn(), target.getJson().replace(".", ","), target.getFunc(), targetDef.getFinalName(), target.getJson()));
 					hasFunctions = true;
 				} else {
 					sj.add(String.format("%s#>'{%s}' as \"%s.%s\"", targetDef.getColumn(), target.getJson().replace(".", ","), targetDef.getFinalName(), target.getJson()));
@@ -479,7 +481,7 @@ public class SelectExpansion {
 				}
 			} else if (target.hasFunction()) { /* (2) Function */
 				hasFunctions = true;
-				sj.add(String.format("%s(%s) as \"%s(%s)\"", target.getFunc(), targetDef.getColumn(), target.getFunc(), targetDef.getFinalName()));
+				sj.add(String.format("%s(%s%s) as \"%s(%s)\"", target.getFunc(), distinct, targetDef.getColumn(), target.getFunc(), targetDef.getFinalName()));
 			} else { /* (3) Regular column */
 				sj.add(String.format("%s as %s", targetDef.getColumn(), targetDef.getFinalName()));
 				if (! groupByCandidates.contains(targetDef.getName())) {
@@ -720,6 +722,10 @@ public class SelectExpansion {
 		System.out.println(se.getUsedTargetNames());
 		System.out.println(se.getUsedDefNames());
 
+	}
+
+	public void setDistinct(boolean isDistinct) {
+		this.isDistinct = isDistinct;
 	}
 
 }

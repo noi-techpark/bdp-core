@@ -61,7 +61,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select, where, "station", "parent")
+				.init(select, where, distinct, "station", "parent")
 				.addSql("select")
 				.addSqlIf("distinct", distinct)
 				.addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode", !flat)
@@ -114,7 +114,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select, where, "station", "parent", "measurementdouble", "measurement", "datatype");
+				.init(select, where, distinct, "station", "parent", "measurementdouble", "measurement", "datatype");
 
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue");
 		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
@@ -159,7 +159,7 @@ public class DataFetcher {
 		}
 
 		if (useMeasurementString) {
-			query.reset(select, where, "station", "parent", "measurementstring", "measurement", "datatype")
+			query.reset(select, where, distinct, "station", "parent", "measurementstring", "measurement", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)
@@ -218,7 +218,7 @@ public class DataFetcher {
 
 		long nanoTime = System.nanoTime();
 		query = QueryBuilder
-				.init(select, where, "station", "parent", "datatype");
+				.init(select, where, distinct, "station", "parent", "datatype");
 
 		List<Token> mvalueTokens = query.getSelectExpansion().getUsedAliasesInWhere().get("mvalue");
 		Token mvalueToken = mvalueTokens == null ? null : mvalueTokens.get(0);
@@ -254,7 +254,7 @@ public class DataFetcher {
 		}
 
 		if (useMeasurementString) {
-			query.reset(select, where, "station", "parent", "datatype")
+			query.reset(select, where, distinct, "station", "parent", "datatype")
 				 .addSql("select")
 				 .addSqlIf("distinct", distinct)
 				 .addSqlIf("s.stationtype as _stationtype, s.stationcode as _stationcode, t.cname as _datatypename", !flat)

@@ -20,15 +20,16 @@ public class QueryBuilder {
 	private static SelectExpansion se;
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 
-	public QueryBuilder(final String select, final String where, String... selectDefNames) {
+	public QueryBuilder(final String select, final String where, final boolean isDistinct, String... selectDefNames) {
 		if (QueryBuilder.se == null) {
 			throw new RuntimeException("Missing Select Expansion. Run QueryBuilder.setup before initialization.");
 		}
-		reset(select, where, selectDefNames);
+		reset(select, where, isDistinct, selectDefNames);
 	}
 
-	public QueryBuilder reset(final String select, final String where, String... selectDefNames) {
+	public QueryBuilder reset(final String select, final String where, final boolean isDistinct, String... selectDefNames) {
 		se.setWhereClause(where);
+		se.setDistinct(isDistinct);
 		se.expand(select, selectDefNames);
 		return this;
 	}
@@ -50,13 +51,13 @@ public class QueryBuilder {
 		QueryBuilder.se = selectExpansion;
 	}
 
-	public static QueryBuilder init(final String select, final String where, String... selectDefNames) {
-		return new QueryBuilder(select, where, selectDefNames);
+	public static QueryBuilder init(final String select, final String where, final boolean isDistinct, String... selectDefNames) {
+		return new QueryBuilder(select, where, isDistinct, selectDefNames);
 	}
 
-	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, final String where, String... selectDefNames) {
+	public static QueryBuilder init(SelectExpansion selectExpansion, final String select, final String where, final boolean isDistinct, String... selectDefNames) {
 		QueryBuilder.setup(selectExpansion);
-		return QueryBuilder.init(select, where, selectDefNames);
+		return QueryBuilder.init(select, where, isDistinct, selectDefNames);
 	}
 
 	/**
