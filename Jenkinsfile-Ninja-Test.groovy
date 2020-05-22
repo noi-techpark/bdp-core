@@ -15,7 +15,7 @@ pipeline {
         KEYCLOAK_SSL_REQUIRED = "none"
         KEYCLOAK_REALM = "noi"
         KEYCLOAK_CLIENT_ID = "odh-mobility-v2"
-        KEYCLOAK_CLIENT_SECRET = 
+        KEYCLOAK_CLIENT_SECRET = credentials('ninja-test-keycloak-client-secret')
 
         JDBC_URL = "jdbc:postgresql://test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com:5432/bdp?currentSchema=intimev2,public"
         DB_USERNAME = "bdp_readonly"
