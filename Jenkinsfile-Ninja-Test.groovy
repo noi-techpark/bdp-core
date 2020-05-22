@@ -26,6 +26,7 @@ pipeline {
         stage('Configure') {
             steps {
                 sh '''
+                    cd ninja
                     rm -f .env
                     cp .env.example .env
                     echo 'COMPOSE_PROJECT_NAME=${DOCKER_PROJECT_NAME}' >> .env
@@ -48,6 +49,7 @@ pipeline {
         stage('Test - Ninja') {
             steps {
                 sh '''
+                    cd ninja
                     docker-compose --no-ansi build --pull --build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins)
                     docker-compose --no-ansi run --rm --no-deps -u $(id -u jenkins):$(id -g jenkins) app mvn clean test
                 '''
@@ -56,6 +58,7 @@ pipeline {
         stage('Build - Ninja') {
             steps {
                 sh '''
+                    cd ninja
                     aws ecr get-login --region eu-west-1 --no-include-email | bash
                     docker-compose --no-ansi -f docker-compose.build.yml build --pull
                     docker-compose --no-ansi -f docker-compose.build.yml push
@@ -66,6 +69,7 @@ pipeline {
             steps {
                sshagent(['jenkins-ssh-key']) {
                     sh """
+                        cd ninja
                         ansible-galaxy install --force -r ansible/requirements.yml
                         ansible-playbook --limit=test ansible/deploy.yml --extra-vars "build_number=${BUILD_NUMBER}"
                     """
