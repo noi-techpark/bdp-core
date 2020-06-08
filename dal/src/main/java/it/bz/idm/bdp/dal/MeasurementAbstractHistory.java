@@ -66,7 +66,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 	@Column(nullable = false)
 	private Date timestamp;
 
-	@ManyToOne(optional = false, cascade = CascadeType.ALL)
+	@ManyToOne(optional = false)
 	private Station station;
 
 	@ManyToOne(optional = false, cascade = CascadeType.PERSIST)
