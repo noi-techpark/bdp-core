@@ -18,7 +18,7 @@ public class WhereClauseParser extends MiniParser {
 				t.add(logicalOpOr());
 			} else {
 				t.add(clause());
-				if (!match(EOL) && !match(',') && !match(')')) {
+				if (clash(',') && clash(')') && clash(EOL)) {
 					expect(",)" + EOL);
 				}
 			}
@@ -29,9 +29,12 @@ public class WhereClauseParser extends MiniParser {
 		});
 	}
 
+	// XXX ALIAS is a terminal and could be describe with a lexer
+	// XXX Use uppercase names for terminals, and lowercase for non-terminal values
+	// XXX It seems that doWhile is about terminals, whereas doSingle is about non-terminals
 	private Token alias() {
 		Token res = doWhile("ALIAS", t -> {
-			if (! (Character.isLetter(c()) || c() == '_')) {
+			if (clashLetter() && clash('_')) {
 				return false;
 			}
 			t.appendValue(c());
@@ -61,7 +64,7 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token jsonSelector() {
 		Token res = doWhile("JSONSEL", t -> {
-			if (!Character.isLetter(c()) && !match('.') && !Character.isDigit(c())) {
+			if (clashLetter() && clash('_') && clash('.') && clashDigit()) {
 				return false;
 			}
 			t.appendValue(c());
@@ -98,7 +101,7 @@ public class WhereClauseParser extends MiniParser {
 
 	private Token operator() {
 		Token res = doWhile("OP", t -> {
-			if (!Character.isLetter(c())) {
+			if (clashLetter()) {
 				return false;
 			}
 			t.appendValue(c());

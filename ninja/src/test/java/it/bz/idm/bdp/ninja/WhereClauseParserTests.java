@@ -43,6 +43,10 @@ public class WhereClauseParserTests {
 		we.setInput("scode.ire.\\(TRENTO|rovereto\\)\\.*,mvalue.neq.0");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=scode}{OP=ire}{STRING=(TRENTO|rovereto).*}}CLAUSE{{ALIAS=mvalue}{OP=neq}{NUMBER=0}}}", ast.format());
+
+		we.setInput("a_b.eq.ABC");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=a_b}{OP=eq}{STRING=ABC}}}", ast.format());
 	}
 
 	@Test
@@ -111,6 +115,10 @@ public class WhereClauseParserTests {
 		we.setInput("smetadata.outlets.0.maxPower.gt.3.7");
 		ast = we.parse();
 		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=outlets.0.maxPower}{OP=gt}{NUMBER=3.7}}}", ast.format());
+
+		we.setInput("smetadata.building_code.eq.A4");
+		ast = we.parse();
+		assertEquals("AND{CLAUSE{{ALIAS=smetadata}{JSONSEL=building_code}{OP=eq}{STRING=A4}}}", ast.format());
 
 		we.setInput("smetadata.outlets.0.maxPower.gt.-3.7");
 		ast = we.parse();
