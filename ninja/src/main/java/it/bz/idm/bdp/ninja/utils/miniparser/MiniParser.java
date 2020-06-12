@@ -47,7 +47,7 @@ public class MiniParser {
 	protected boolean consume() {
 		boolean laExists = get(i + 1);
 		if (laExists) {
-			log.debug("C=" + c);
+			log.trace("C=" + c);
 			c = la;
 			i++;
 		}
@@ -59,7 +59,7 @@ public class MiniParser {
 		if (laExists) {
 			c = la;
 			i -= stepsBack;
-			log.debug("B c={}, stepsBack={}", c, stepsBack);
+			log.trace("B c={}, stepsBack={}", c, stepsBack);
 		}
 		return laExists;
 	}
@@ -139,6 +139,22 @@ public class MiniParser {
 		return match(exp, 0);
 	}
 
+	protected boolean matchLetter() {
+		return Character.isLetter(c());
+	}
+
+	protected boolean matchDigit() {
+		return Character.isDigit(c());
+	}
+
+	protected boolean clashLetter() {
+		return !matchLetter();
+	}
+
+	protected boolean clashDigit() {
+		return !matchDigit();
+	}
+
 	protected boolean match(String exp) {
 		for (int i = 0; i < exp.length(); i++) {
 			if (!match(exp.charAt(i), i)) {
@@ -195,21 +211,21 @@ public class MiniParser {
 
 	protected Token doSingle(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
-		log.debug("S=" + tokenName);
+		log.trace("S=" + tokenName);
 		c.middle(t);
-		log.debug("E=" + tokenName + "; value = " + t.getValue());
+		log.trace("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
 	protected Token doWhile(String tokenName, Consumer c) {
 		Token t = new Token(tokenName);
-		log.debug("S=" + tokenName);
+		log.trace("S=" + tokenName);
 		do {
 			if(!c.middle(t)) {
 				break;
 			}
 		} while (consume());
-		log.debug("E=" + tokenName + "; value = " + t.getValue());
+		log.trace("E=" + tokenName + "; value = " + t.getValue());
 		return t;
 	}
 
