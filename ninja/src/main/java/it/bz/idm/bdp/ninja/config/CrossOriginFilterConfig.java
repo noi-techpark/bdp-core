@@ -20,7 +20,7 @@ public class CrossOriginFilterConfig implements WebMvcConfigurer {
 			.addMapping("/**")
 			.allowedOrigins(allowedOrigins)
 			.allowedHeaders(CorsConfiguration.ALL)
-			.allowedMethods("GET, HEAD, OPTIONS")
+			.allowedMethods("GET", "HEAD", "OPTIONS")
 			.allowCredentials(true);
 	}
 
