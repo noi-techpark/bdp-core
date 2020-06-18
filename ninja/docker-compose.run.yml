@@ -16,6 +16,7 @@ services:
         JDBC_URL: ${JDBC_URL}
         DB_USERNAME: ${DB_USERNAME}
         DB_PASSWORD: ${DB_PASSWORD}
+        _JAVA_OPTIONS: -Xms256m -Xmx2048m -XX:MaxPermSize=128m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/actuator/health"]
       interval: 20s
