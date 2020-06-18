@@ -1,17 +1,17 @@
 [
-    {
-        "id" : "tree",
-        "description" : "Data: Retrieve stations, data types and measurements in a hierarchical form: stationtype/station/datatype/measurement",
-        "self" : "__URL__/tree"
-    },
-    {
-        "id" : "flat",
-        "description" : "Data: Retrieve stations, data types and measurements in a flattened form: Useful for aggregation and retrieval of subsets of data",
-        "self" : "__URL__/flat"
-    },
-    {
-        "id" : "apispec",
-        "description" : "The API specification in an OpenAPI v3 Yaml format",
-        "self" : "__URL__/apispec"
-    }
+  {
+    "id": "tree",
+    "description": "Data: Retrieve stations, data types and measurements in a hierarchical form: stationtype/station/datatype/measurement",
+    "self": "__URL__/tree"
+  },
+  {
+    "id": "flat",
+    "description": "Data: Retrieve stations, data types and measurements in a flattened form: Useful for aggregation and retrieval of subsets of data",
+    "self": "__URL__/flat"
+  },
+  {
+    "id": "apispec",
+    "description": "The API specification in an OpenAPI v3 Yaml format",
+    "self": "__URL__/apispec"
+  }
 ]
