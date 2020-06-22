@@ -9,7 +9,7 @@ pipeline {
         SERVER_PORT = "1004"
         NINJA_HOST_URL = "https://ninja.testingmachine.eu"
         NINJA_BASE_URL = "${NINJA_HOST_URL}"
-        NINJA_QUERY_TIMEOUT_SEC = "120"
+        NINJA_QUERY_TIMEOUT_SEC = "30"
 
         SECURITY_ALLOWED_ORIGINS = "*"
         KEYCLOAK_URL = "https://auth.opendatahub.testingmachine.eu/auth/"

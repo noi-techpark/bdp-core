@@ -26,9 +26,6 @@ public class NinjaConfig implements ApplicationListener<ContextRefreshedEvent> {
 	@Value("${server.compression.enabled:true}")
 	private boolean enableCompression4JSON;
 
-	@Value("${ninja.query.timeout:-1}")
-	private int queryTimeout;
-
     private boolean alreadySetup = false;
 
 	@Override
@@ -42,7 +39,6 @@ public class NinjaConfig implements ApplicationListener<ContextRefreshedEvent> {
 
 		/* Set the query builder, JDBC template's row mapper and JSON parser up */
 		QueryBuilder.setup(se);
-		jdbcTemplate.getJdbcTemplate().setQueryTimeout(queryTimeout);
 		QueryExecutor.setup(jdbcTemplate);
 
 		ColumnMapRowMapper.setIgnoreNull(ignoreNull);
