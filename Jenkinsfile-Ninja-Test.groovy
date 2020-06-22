@@ -9,6 +9,7 @@ pipeline {
         SERVER_PORT = "1004"
         NINJA_HOST_URL = "https://ninja.testingmachine.eu"
         NINJA_BASE_URL = "${NINJA_HOST_URL}"
+        NINJA_QUERY_TIMEOUT_SEC = "120"
 
         SECURITY_ALLOWED_ORIGINS = "*"
         KEYCLOAK_URL = "https://auth.opendatahub.testingmachine.eu/auth/"
@@ -34,6 +35,7 @@ pipeline {
                     echo 'DOCKER_TAG=${DOCKER_TAG}' >> .env
                     echo 'SERVER_PORT=${SERVER_PORT}' >> .env
                     echo 'NINJA_BASE_URL=${NINJA_BASE_URL}' >> .env
+                    echo 'NINJA_QUERY_TIMEOUT_SEC=${NINJA_QUERY_TIMEOUT_SEC}' >> .env
                     echo 'SECURITY_ALLOWED_ORIGINS=${SECURITY_ALLOWED_ORIGINS}' >> .env
                     echo 'KEYCLOAK_URL=${KEYCLOAK_URL}' >> .env
                     echo 'KEYCLOAK_SSL_REQUIRED=${KEYCLOAK_SSL_REQUIRED}' >> .env
