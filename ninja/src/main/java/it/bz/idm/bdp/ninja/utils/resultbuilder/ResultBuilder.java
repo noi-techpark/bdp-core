@@ -6,17 +6,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 
 import it.bz.idm.bdp.ninja.utils.querybuilder.Schema;
 import it.bz.idm.bdp.ninja.utils.querybuilder.Target;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDef;
 import it.bz.idm.bdp.ninja.utils.querybuilder.TargetDefList;
+import it.bz.idm.bdp.ninja.utils.simpleexception.ErrorCodeInterface;
+import it.bz.idm.bdp.ninja.utils.simpleexception.SimpleException;
 
 // TODO Make this generic, create a makeObjRecursive method
 public class ResultBuilder {
 
+	public static enum ErrorCode implements ErrorCodeInterface {
+		RESPONSE_SIZE("Response size of %d MB exceeded. Please rephrase your request. Use a flat representation, WHERE, SELECT, LIMIT with OFFSET or a narrow time interval.");
+
+		private final String msg;
+
+		ErrorCode(final String msg) {
+			this.msg = msg;
+		}
+
+		@Override
+		public String getMsg() {
+			return "TREE BUILDING: " + msg;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> build(boolean ignoreNull, List<Map<String, Object>> queryResult, Schema schema, List<String> hierarchy) {
+	public static Map<String, Object> build(boolean ignoreNull, List<Map<String, Object>> queryResult, Schema schema,
+			List<String> hierarchy, int maxAllowedSizeInMB) {
+		AtomicLong size = new AtomicLong(0);
+
+		long maxAllowedSize = maxAllowedSizeInMB > 0 ? maxAllowedSizeInMB * 1000000 : 0;
 
 		if (queryResult == null || queryResult.isEmpty()) {
 			return new HashMap<String, Object>();
@@ -62,26 +84,25 @@ public class ResultBuilder {
 
 			switch (renewLevel) {
 				case 0:
-					stationType = makeObj(schema, rec, "stationtype", false);
+					stationType = makeObj(schema, rec, "stationtype", false, size);
 				case 1:
-					station = makeObj(schema, rec, "station", ignoreNull);
-					parent = makeObj(schema, rec, "parent", ignoreNull);
+					station = makeObj(schema, rec, "station", ignoreNull, size);
+					parent = makeObj(schema, rec, "parent", ignoreNull, size);
 				case 2:
 					if (hierarchy.size() > 2) {
-						datatype = makeObj(schema, rec, "datatype", ignoreNull);
+						datatype = makeObj(schema, rec, "datatype", ignoreNull, size);
 					}
 				default:
 					if (hierarchy.size() > 3) {
-						measurement = makeObj(schema, rec, "measurement", ignoreNull);
+						measurement = makeObj(schema, rec, "measurement", ignoreNull, size);
 
 						/*
-						 * We only need one measurement-type here
-						 * ("measurementdouble"), since we look only for final
-						 * names, that is we do not consider mvalue_double and
-						 * mvalue_string here, but reduce both before handling
-						 * to mvalue. See makeObj for details.
+						 * We only need one measurement-type here ("measurementdouble"), since we look
+						 * only for final names, that is we do not consider mvalue_double and
+						 * mvalue_string here, but reduce both before handling to mvalue. See makeObj
+						 * for details.
 						 */
-						mvalueAndFunctions = makeObj(schema, rec, "measurementdouble", ignoreNull);
+						mvalueAndFunctions = makeObj(schema, rec, "measurementdouble", ignoreNull, size);
 
 						for (Entry<String, Object> entry : mvalueAndFunctions.entrySet()) {
 							if (entry.getValue() != null || !ignoreNull) {
@@ -124,33 +145,43 @@ public class ResultBuilder {
 
 			prevValues.clear();
 			prevValues.addAll(currValues);
+
+			if (maxAllowedSize < size.get()) {
+				throw new SimpleException(ErrorCode.RESPONSE_SIZE, maxAllowedSizeInMB);
+			}
 		}
+		System.out.println(size);
 		return stationTypes;
 	}
 
-	public static Map<String, Object> makeObj(Schema schema, Map<String, Object> record, String defName, boolean ignoreNull) {
+	public static Map<String, Object> makeObj(Schema schema, Map<String, Object> record, String defName, boolean ignoreNull, AtomicLong sizeEstimate) {
 		TargetDefList def = schema.getOrNull(defName);
 		Map<String, Object> result = new TreeMap<String, Object>();
-
+		int size = 0;
 		for (Entry<String, Object> entry : record.entrySet()) {
 			if (ignoreNull && entry.getValue() == null)
 				continue;
 
 			Target target = new Target(entry.getKey());
 
-			if(def.getFinalNames().contains(target.getName())) {
+			if (def.getFinalNames().contains(target.getName())) {
 				if (target.hasJson()) {
 					@SuppressWarnings("unchecked")
 					Map<String, Object> jsonObj = (Map<String, Object>) result.getOrDefault(target.getName(), new TreeMap<String, Object>());
 					jsonObj.put(target.getJson(), entry.getValue());
+					size += target.getJson().length();
 					if (jsonObj.size() == 1) {
 						result.put(target.getName(), jsonObj);
+						size += target.getName().length();
 					}
 				} else {
 					result.put(target.getName(), entry.getValue());
+					size += target.getName().length();
 				}
+				size += entry.getValue() == null ? 0 : entry.getValue().toString().length();
 			}
 		}
+		sizeEstimate.getAndAdd(size);
 		return result;
 	}
 
@@ -176,19 +207,22 @@ public class ResultBuilder {
 		schema.add(defListD);
 		schema.add(defListMain);
 
+		AtomicLong size = new AtomicLong(0);
+
 		Map<String, Object> rec = new HashMap<String, Object>();
 		rec.put("a", "3");
 		rec.put("b", null);
 		rec.put("x.abc", "0");
 		rec.put("h", "v");
-		System.out.println(makeObj(schema, rec, "A", false).toString());
-		System.out.println(makeObj(schema, rec, "A", true).toString());
+		System.out.println(makeObj(schema, rec, "A", false, size).toString());
+		System.out.println(makeObj(schema, rec, "A", true, size).toString());
 		System.out.println();
-		System.out.println(makeObj(schema, rec, "B", false).toString());
-		System.out.println(makeObj(schema, rec, "B", true).toString());
+		System.out.println(makeObj(schema, rec, "B", false, size).toString());
+		System.out.println(makeObj(schema, rec, "B", true, size).toString());
 		System.out.println();
-		System.out.println(makeObj(schema, rec, "C", false).toString());
-		System.out.println(makeObj(schema, rec, "C", true).toString());
+		System.out.println(makeObj(schema, rec, "C", false, size).toString());
+		System.out.println(makeObj(schema, rec, "C", true, size).toString());
+		System.out.println(size);
 	}
 
 }

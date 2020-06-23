@@ -31,9 +31,9 @@
       "description": "Ninja's base URL"
     },
     {
-      "name": "ninja.query.timeout",
-      "type": "java.lang.String",
-      "description": "Query timeout (ie., transaction_timeout in Postgres) in seconds"
+      "name": "ninja.response.max-allowed-size-mb",
+      "type": "java.lang.Integer",
+      "description": "Tree building max allowed size in MB to avoid server out-of-memory issues"
     }
   ]
 }
