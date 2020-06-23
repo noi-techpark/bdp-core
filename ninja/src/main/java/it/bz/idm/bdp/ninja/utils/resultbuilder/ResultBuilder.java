@@ -146,7 +146,7 @@ public class ResultBuilder {
 			prevValues.clear();
 			prevValues.addAll(currValues);
 
-			if (maxAllowedSize < size.get()) {
+			if (maxAllowedSize > 0 && maxAllowedSize < size.get()) {
 				throw new SimpleException(ErrorCode.RESPONSE_SIZE, maxAllowedSizeInMB);
 			}
 		}
