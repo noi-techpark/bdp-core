@@ -28,8 +28,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -55,22 +54,16 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String SYNC_STATIONS = "/syncStations/";
     private static final String PUSH_RECORDS = "/pushRecords/";
     private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
-    private static final String JSON_ENDPOINT = "json_endpoint";
     private static final String STATIONS = "/stations/";
     private static final String PROVENANCE = "/provenance/";
 
+    @Autowired
     protected WebClient client;
-
-    private String url;
 
     @Override
     @PostConstruct
     public void init() {
         super.init();
-        this.url = "http://" + config.getString(HOST_KEY) + ":" + config.getString(PORT_KEY)
-                + config.getString(JSON_ENDPOINT);
-        client = WebClient.builder().baseUrl(this.url)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
     }
 
     @Override
