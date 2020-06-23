@@ -19,12 +19,7 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-test-reader-jwt-secret')
-        ODH_TEST_AUTHORIZATION_URI = credentials('odh-test-authorization-uri')
-        ODH_TEST_TOKEN_URI = credentials('odh-test-token-uri')
-        ODH_TEST_DC_CLIENT_NAME = credentials('odh-test-dc-client-name')
-        ODH_TEST_DC_CLIENT_ID = crendentials('odh-test-dc-client-id')
-        ODH_TEST_DC_CLIENT_SECRET = credentials('odh-test-dc-client-secret')
-        CATALINA_ENVS = " -DauthorizationUri=${ODH_TEST_AUTHORIZATION_URI} -DtokenUri=${ODH_TEST_TOKEN_URI} -DclientName=${ODH_TEST_DC_CLIENT_NAME} -DclientId=${ODH_TEST_DC_CLIENT_ID} -D clientSecret=${ODH_TEST_DC_CLIENT_SECRET}"
+        
         BDP_WRITER_KEYCLOAK_CONFIG = credentials('bigdataplatform-writer-keycloak.json')
     }
     parameters{
@@ -83,7 +78,7 @@ pipeline {
         }
         stage('Deploy - Writer') {
             steps {
-                sh 'cd writer && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer ${CATALINA_ENVS}'
+                sh 'cd writer && mvn -B -DskipTests tomcat:redeploy -Dmaven.tomcat.url=${TESTSERVER_TOMCAT_ENDPOINT} -Dmaven.tomcat.server=testServer'
             }
         }
     }
