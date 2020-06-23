@@ -22,7 +22,7 @@ pipeline {
         ODH_TEST_AUTHORIZATION_URI = credentials('odh-test-authorization-uri')
         ODH_TEST_TOKEN_URI = credentials('odh-test-token-uri')
         ODH_TEST_DC_CLIENT_NAME = credentials('odh-test-dc-client-name')
-        ODH_TEST_DC_CLIENT_ID = credentials('odh-test-dc-client-id')
+        ODH_TEST_DC_CLIENT_ID = crendentials('odh-test-dc-client-id')
         ODH_TEST_DC_CLIENT_SECRET = credentials('odh-test-dc-client-secret')
         CATALINA_ENVS = " -DauthorizationUri=${ODH_TEST_AUTHORIZATION_URI} -DtokenUri=${ODH_TEST_TOKEN_URI} -DclientName=${ODH_TEST_DC_CLIENT_NAME} -DclientId=${ODH_TEST_DC_CLIENT_ID} -D clientSecret=${ODH_TEST_DC_CLIENT_SECRET}"
         BDP_WRITER_KEYCLOAK_CONFIG = credentials('bigdataplatform-writer-keycloak.json')
