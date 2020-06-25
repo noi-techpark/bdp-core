@@ -1,3 +1,44 @@
+----
+
+# DEPRECATED
+The new home of Ninja is https://github.com/noi-techpark/ninja
+
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----
+
+----
+
+----
+
 # API - Version 2
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
