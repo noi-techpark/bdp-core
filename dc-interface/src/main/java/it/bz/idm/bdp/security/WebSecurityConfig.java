@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @EnableWebSecurity
@@ -55,6 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         ClientRegistration.Builder builder = ClientRegistration.withRegistrationId("odh");
         builder
         .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
+        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
         .scope(env.getProperty("oauth.scope"))
         .authorizationUri(env.getProperty("oauth.authorizationUri"))
         .tokenUri(env.getProperty("oauth.tokenUri"))
