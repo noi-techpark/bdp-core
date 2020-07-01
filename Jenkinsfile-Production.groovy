@@ -16,6 +16,8 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-prod-database-write-password')
         BDP_READER_JWT_SECRET = credentials('bdp-core-prod-reader-jwt-secret')
+        BDP_WRITER_KEYCLOAK_PROD_CONFIG = credentials('bigdataplatform-writer-prod-keycloak.json')
+
     }
 
     stages {
@@ -37,6 +39,7 @@ pipeline {
                     sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties
                     sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" dal/src/main/resources/log4j.properties
                 '''
+                sh 'cat ${BDP_WRITER_KEYCLOAK_CONFIG} > writer/src/main/resources/keycloak.json'
             }
         }
         stage('Install') {
