@@ -1,9 +1,9 @@
 *.class
 *.orig
 persistence.xml
+application-local.properties
 database.properties
-application.properties
-
+.env
 
 # Taken from https://github.com/spring-projects/spring-boot/blob/master/.gitignore
 *#

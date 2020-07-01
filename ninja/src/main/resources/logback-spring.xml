@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<springProfile name="local">
+		<include resource="org/springframework/boot/logging/logback/base.xml"/>
+	</springProfile>
+
+	<springProfile name="default">
+		<appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+			<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+				<fieldNames>
+					<version>[ignore]</version>
+					<logger>[ignore]</logger>
+					<thread>[ignore]</thread>
+				</fieldNames>
+				<customFields>{"application":"${LOG_APPLICATION_NAME:-ninja}"}"}</customFields>
+			</encoder>
+		</appender>
+		<root level="INFO">
+			<appender-ref ref="jsonConsoleAppender"/>
+		</root>
+	</springProfile>
+
+	<logger name="org.springframework.web.filter.CommonsRequestLoggingFilter">
+		<level value="DEBUG"/>
+	</logger>
+
+</configuration>

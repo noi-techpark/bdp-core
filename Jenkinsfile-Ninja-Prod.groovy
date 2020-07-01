@@ -4,24 +4,24 @@ pipeline {
     environment {
         DOCKER_PROJECT_NAME = "ninja"
         DOCKER_IMAGE = '755952719952.dkr.ecr.eu-west-1.amazonaws.com/ninja'
-        DOCKER_TAG = "test-$BUILD_NUMBER"
+        DOCKER_TAG = "prod-$BUILD_NUMBER"
 
         SERVER_PORT = "1004"
-        NINJA_HOST_URL = "https://ninja.testingmachine.eu"
-        NINJA_BASE_URL = "${NINJA_HOST_URL}"
+        NINJA_HOST_URL = "https://mobility.api.opendatahub.bz.it"
+        NINJA_BASE_URL = "${NINJA_HOST_URL}/v2"
         NINJA_QUERY_TIMEOUT_SEC = "30"
         NINJA_RESPONSE_MAX_SIZE_MB = "100"
 
         SECURITY_ALLOWED_ORIGINS = "*"
-        KEYCLOAK_URL = "https://auth.opendatahub.testingmachine.eu/auth/"
+        KEYCLOAK_URL = "https://auth.opendatahub.opendatahub.bz.it/auth/"
         KEYCLOAK_SSL_REQUIRED = "none"
         KEYCLOAK_REALM = "noi"
         KEYCLOAK_CLIENT_ID = "odh-mobility-v2"
-        KEYCLOAK_CLIENT_SECRET = credentials('ninja-test-keycloak-client-secret')
+        KEYCLOAK_CLIENT_SECRET = credentials('ninja-prod-keycloak-client-secret')
 
-        JDBC_URL = "jdbc:postgresql://test-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com:5432/bdp?currentSchema=intimev2,public"
+        JDBC_URL = "jdbc:postgresql://prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com:5432/bdp?currentSchema=intimev2,public"
         DB_USERNAME = "bdp_readonly"
-        DB_PASSWORD = credentials('bdp-core-test-database-read-password')
+        DB_PASSWORD = credentials('bdp-core-prod-database-read-password')
     }
 
     stages {
@@ -75,7 +75,7 @@ pipeline {
                     sh """
                         cd ninja
                         ansible-galaxy install --force -r ansible/requirements.yml
-                        ansible-playbook --limit=test ansible/deploy.yml --extra-vars "build_number=${BUILD_NUMBER}"
+                        ansible-playbook --limit=prod ansible/deploy.yml --extra-vars "build_number=${BUILD_NUMBER}"
                     """
                 }
             }

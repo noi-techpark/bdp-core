@@ -68,6 +68,9 @@ public class DataController {
 	@Value("${ninja.url}")
 	private String ninjaBaseUrl;
 
+	@Value("${ninja.response.max-allowed-size-mb}")
+	private int maxAllowedSizeInMB;
+
 	public static enum ErrorCode implements ErrorCodeInterface {
 		WRONG_REPRESENTATION("Please choose 'flat' or 'tree' as representation. '%s' is not allowed."),
 		DATE_PARSE_ERROR(
@@ -306,7 +309,7 @@ public class DataController {
 			result.put("data", queryResult);
 		} else {
 			result.put("data", ResultBuilder.build(!showNull, queryResult,
-					dataFetcher.getQuery().getSelectExpansion().getSchema(), tree));
+					dataFetcher.getQuery().getSelectExpansion().getSchema(), tree, maxAllowedSizeInMB));
 		}
 		return result;
 	}

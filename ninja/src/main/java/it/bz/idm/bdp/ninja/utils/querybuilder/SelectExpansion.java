@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -599,6 +600,7 @@ public class SelectExpansion {
 	}
 
 	public static void main(String[] args) throws Exception {
+		AtomicLong size = new AtomicLong(0);
 		SelectExpansion se = new SelectExpansion();
 		Schema schema = new Schema();
 		TargetDefList defListC = new TargetDefList("C")
@@ -705,14 +707,14 @@ public class SelectExpansion {
 		System.out.println(se.getUsedDefNames());
 		System.out.println(se.getWhereSql());
 		System.out.println();
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "A", false).toString());
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "A", true).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "A", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "A", true, size).toString());
 		System.out.println();
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "B", false).toString());
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "B", true).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "B", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "B", true, size).toString());
 		System.out.println();
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "C", false).toString());
-		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "C", true).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "C", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(se.getSchema(), rec, "C", true, size).toString());
 
 		//// {A=A.a as a, A.b as b, B=B.x as x, X=X.h as h}
 		//// [a, b, c, x, h, y]

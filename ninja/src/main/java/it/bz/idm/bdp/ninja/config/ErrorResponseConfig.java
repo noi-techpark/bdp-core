@@ -82,6 +82,18 @@ public class ErrorResponseConfig extends ResponseEntityExceptionHandler {
 			if (se.getData() != null && !se.getData().isEmpty()) {
 				map.put("info", se.getData());
 			}
+		} else if (exception instanceof PSQLException) {
+			PSQLException cause = (PSQLException) exception;
+			switch(cause.getSQLState()) {
+				case "57014":
+					map.put("description", "Query timed out");
+					map.put("hint", "Query for smaller response chunks. Use SELECT, WHERE, LIMIT with OFFSET, or a narrow time interval.");
+					break;
+				default:
+					map.put("message", message.replaceAll("\\n", ""));
+					map.put("description", "Error from the database backend");
+			}
+
 		}
 
 		if (log.isDebugEnabled()) {

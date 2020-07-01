@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <context:component-scan base-package="org.keycloak.adapters.springsecurity" />
+	<security:global-method-security pre-post-annotations="enabled"/>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="keycloakAuthenticationProvider" />
+    </security:authentication-manager>
+
+    <bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean">
+        <constructor-arg value="classpath:/keycloak.json" />
+    </bean>
+
+    <bean id="keycloakAuthenticationEntryPoint" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationEntryPoint">
+    	<constructor-arg ref="adapterDeploymentContext"/>
+    </bean>
+    <bean id="keycloakAuthenticationProvider" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider" />
+    <bean id="keycloakPreAuthActionsFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter" />
+    <bean id="keycloakAuthenticationProcessingFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter">
+        <constructor-arg name="authenticationManager" ref="authenticationManager" />
+    </bean>
+
+    <security:http auto-config="false" entry-point-ref="keycloakAuthenticationEntryPoint" pattern="/**" >
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="keycloakPreAuthActionsFilter" before="LOGOUT_FILTER" />
+        <security:custom-filter ref="keycloakAuthenticationProcessingFilter" before="FORM_LOGIN_FILTER" />
+        <security:intercept-url pattern="/**" access="hasRole('ADMIN')" />
+    </security:http>
+</beans>

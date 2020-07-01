@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -134,7 +135,7 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy, 0).toString());
 
 		queryResult.add(new HashMap<String, Object>() {
 			{
@@ -146,7 +147,7 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy, 0).toString());
 
 		queryResult.add(new HashMap<String, Object>() {
 			{
@@ -158,12 +159,13 @@ public class ResultBuilderTests {
 		});
 
 		assertEquals("{parking={stations={walther={sdatatypes={occ2={tname=x}, occ1={tname=o}}}}}}",
-				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy).toString());
+				ResultBuilder.build(true, queryResult, se.getSchema(), hierarchy, 0).toString());
 
 	}
 
 	@Test
 	public void testMakeObject() {
+		AtomicLong size = new AtomicLong(0);
 		seNestedMain.expand("*", "main", "A", "B", "C", "D");
 		Map<String, Object> rec = new HashMap<String, Object>();
 		rec.put("a", "3");
@@ -192,19 +194,20 @@ public class ResultBuilderTests {
 		assertEquals("before, C.h as h", seNestedMain.getExpansion().get("C"));
 		assertEquals("D.d as d, after", seNestedMain.getExpansion().get("D"));
 
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", false).toString());
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", true).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "A", true, size).toString());
 		System.out.println();
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false).toString());
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", true).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", true, size).toString());
 		System.out.println();
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", false).toString());
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", true).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", false, size).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "C", true, size).toString());
 		System.out.println();
 	}
 
 	@Test
 	public void testMakeObjectJSON() {
+		AtomicLong size = new AtomicLong(0);
 		seNestedMain.expand("x_replaced.address.cap, x_replaced.address.city", "A", "B");
 		Map<String, Object> rec = new HashMap<String, Object>();
 		rec.put("x_replaced.address.cap", 39100);
@@ -217,7 +220,7 @@ public class ResultBuilderTests {
 		assertTrue(expB.contains("B.x#>'{address,city}' as \"x_replaced.address.city\""));
 		assertTrue(expB.contains("B.x#>'{address,cap}' as \"x_replaced.address.cap\""));
 
-		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false).toString());
+		System.out.println(ResultBuilder.makeObj(seNestedMain.getSchema(), rec, "B", false, size).toString());
 	}
 
 }

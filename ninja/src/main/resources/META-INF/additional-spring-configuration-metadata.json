@@ -1,27 +1,39 @@
-{"properties": [
-  {
-    "name": "ninja.security.oauth2.issuer",
-    "type": "java.lang.String",
-    "description": "JWT verification: Issuer"
-  },
-  {
-    "name": "ninja.security.oauth2.pubkey",
-    "type": "java.lang.String",
-    "description": "JWT verification: Public Key"
-  },
-  {
-    "name": "ninja.security.oauth2.scopes",
-    "type": "java.lang.String",
-    "description": "JWT verification: Scopes as CSV"
-  },
-  {
-    "name": "ninja.security.cors.allowed-origins",
-    "type": "java.lang.String",
-    "description": "CORS: Allowed origins or * for all"
-  },
-  {
-    "name": "ninja.security.oauth2.audien",
-    "type": "java.lang.String",
-    "description": "Oauth audience CSV. Which resource server (API) can access?"
-  }
-]}
+{
+  "properties": [
+    {
+      "name": "ninja.security.oauth2.issuer",
+      "type": "java.lang.String",
+      "description": "JWT verification: Issuer"
+    },
+    {
+      "name": "ninja.security.oauth2.pubkey",
+      "type": "java.lang.String",
+      "description": "JWT verification: Public Key"
+    },
+    {
+      "name": "ninja.security.oauth2.scopes",
+      "type": "java.lang.String",
+      "description": "JWT verification: Scopes as CSV"
+    },
+    {
+      "name": "ninja.security.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "CORS: Allowed origins or * for all"
+    },
+    {
+      "name": "ninja.security.oauth2.audien",
+      "type": "java.lang.String",
+      "description": "Oauth audience CSV. Which resource server (API) can access?"
+    },
+    {
+      "name": "ninja.url",
+      "type": "java.lang.String",
+      "description": "Ninja's base URL"
+    },
+    {
+      "name": "ninja.response.max-allowed-size-mb",
+      "type": "java.lang.Integer",
+      "description": "Tree building max allowed size in MB to avoid server out-of-memory issues"
+    }
+  ]
+}

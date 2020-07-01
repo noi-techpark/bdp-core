@@ -1,3 +1,44 @@
+----
+
+# DEPRECATED
+The new home of Ninja is https://github.com/noi-techpark/ninja
+
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----
+
+----
+
+----
+
 # API - Version 2
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -116,14 +157,24 @@ curl --location --request POST 'http://localhost:8080/auth/realms/noi/protocol/o
 
 ### How to start local development server?
 
-Go to `src/main/resources/` and copy `database.properties.dist` to
-`database.properties` and configure it accordingly. Mostly `jdbcUrl`, `username`
-and `password` are necessary, the rest can be kept as is.
+Create `local` application properties profile.
 
-Within the same directory, open `application.properties` and set the server port
-and log levels.
+```bash
+cd src/main/resources
+touch application-local.properties
+```
 
-Run `mvn spring-boot:run`.
+Configure at least the mandatory properties in the newly created `application-local.properties` file, such as:
+
+- spring.datasource.password
+
+Now you can start the application with:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+The server will startup and listen on `http://localhost:8081`.
 
 ## Station Types / Categories
 
