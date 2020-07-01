@@ -39,7 +39,7 @@ pipeline {
                     sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" writer/src/main/resources/log4j.properties
                     sed -i -e "s%\\(log4j.rootLogger\\s*=\\).*\\$%\\1INFO,R%" dal/src/main/resources/log4j.properties
                 '''
-                sh 'cat ${BDP_WRITER_KEYCLOAK_CONFIG} > writer/src/main/resources/keycloak.json'
+                sh 'cat ${BDP_WRITER_KEYCLOAK_PROD_CONFIG} > writer/src/main/resources/keycloak.json'
             }
         }
         stage('Install') {
