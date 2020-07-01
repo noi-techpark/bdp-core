@@ -26,8 +26,8 @@
 * Patrick Bertolla <p.bertolla@noi.bz.it>
 * Alex Lanz <alex@krumer.it>
 * Jenkins automated commits <no-reply@opendatahub.bz.it>
-* Stefano David <stefano.david.bz@gmail.com>
 * Martin Malfertheiner <martin.malfertheiner@gmail.com>
+* Stefano David <stefano.david.bz@gmail.com>
 * dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 * Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
 * Patrick Ohnewein <p.ohnewein@noi.bz.it>
