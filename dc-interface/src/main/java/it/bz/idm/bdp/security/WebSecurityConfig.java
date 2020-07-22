@@ -43,12 +43,16 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 @PropertySource(value = "classpath:application.properties")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
-    @Autowired
     private Environment env;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().oauth2Client().clientRegistrationRepository(clientRegistrationRepository());
+    }
+    @Autowired
+    public WebSecurityConfig(Environment env) {
+        super();
+        this.env= env;
     }
 
     @Bean

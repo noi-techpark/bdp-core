@@ -22,9 +22,10 @@
  */
 package it.bz.idm.bdp.security;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
@@ -39,8 +40,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class OAuth2ClientCredentialsFlowConfig {
 
-    @Value("${odh.base-uri}")
-    private String host;
+    private Environment env;
+
+    @Autowired
+    public OAuth2ClientCredentialsFlowConfig(Environment env) {
+        super();
+        this.env = env;
+    }
 
     @Bean
     WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
@@ -50,7 +56,7 @@ public class OAuth2ClientCredentialsFlowConfig {
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
                 .apply(oauth2Client.oauth2Configuration())
-                .baseUrl(host)
+                .baseUrl(env.getProperty("odh.base-uri"))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
