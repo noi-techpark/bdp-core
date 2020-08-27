@@ -35,7 +35,7 @@ pipeline {
                 sh 'docker context rm -f remote'
                 sh 'docker context create remote --docker "host=ssh://jenkins@63.33.73.203"'
                 sh 'docker context use remote'
-                sh 'docker-compose up -d --context remote'
+                sh 'docker-compose up --context remote -d'
             }
         }
     }
