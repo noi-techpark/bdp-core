@@ -32,9 +32,10 @@ pipeline {
         }
         stage('Build / Deploy') {
             steps {
+                sh 'docker context rm remote"'
                 sh 'docker context create remote --docker "host=ssh://jenkins@63.33.73.203"'
                 sh 'docker context use remote'
-                sh 'docker-compose ‐‐context remote up -d'
+                sh 'docker-compose up -d --context remote'
             }
         }
     }
