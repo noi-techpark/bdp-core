@@ -37,10 +37,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'docker context rm -f remote'
-                sh 'docker context create remote --docker "host=ssh://jenkins@63.33.73.203"'
-                sh 'docker context use remote'
-                sh 'cd writer && docker-compose --context remote up -d'
+                sh 'cd writer && docker-compose --context test-docker-01 up -d'
             }
         }
     }
