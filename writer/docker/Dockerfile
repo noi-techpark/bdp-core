@@ -15,4 +15,4 @@ RUN cd dal && mvn -B -U -DskipTests install
 RUN cd writer/ && mvn clean package 
 
 FROM tomcat:8.5.57-jdk8-openjdk-buster
-COPY --from=build /code/writer/target/*.war /usr/local/tomcat/webapps
+COPY --from=build /code/writer/target/writer.war /usr/local/tomcat/webapps/ROOT.war
