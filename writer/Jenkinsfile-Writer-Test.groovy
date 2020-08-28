@@ -30,7 +30,12 @@ pipeline {
                 sh 'cat ${BDP_WRITER_KEYCLOAK_CONFIG} > writer/src/main/resources/keycloak.json'
             }
         }
-        stage('Build / Deploy') {
+        stage('Build') {
+            steps {
+                sh 'cd writer && docker-compose build'
+            }
+        }
+        stage('Deploy') {
             steps {
                 sh 'docker context rm -f remote'
                 sh 'docker context create remote --docker "host=ssh://jenkins@63.33.73.203"'
