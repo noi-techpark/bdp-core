@@ -1,13 +1,6 @@
 version: "3.4"
 
 services:
-  maven:
-    build:
-        context: ../
-        dockerfile: writer/docker/Dockerfile
-    volumes: 
-        - ./:/code
-    working_dir: /code
   tomcat:
     build:
       context: ../
