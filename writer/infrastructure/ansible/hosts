@@ -1,0 +1,5 @@
+[test]
+docker02.testingmachine.eu ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[prod]
+docker02.opendatahub.bz.it ansible_ssh_common_args='-o StrictHostKeyChecking=no'

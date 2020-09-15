@@ -4,7 +4,7 @@ services:
   tomcat:
     build:
       context: ../
-      dockerfile: writer/docker/Dockerfile
+      dockerfile: writer/infrastructure/docker/Dockerfile
     volumes: 
         - ./:/code
     ports:
