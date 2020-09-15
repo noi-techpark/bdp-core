@@ -56,7 +56,7 @@ public class OAuth2ClientCredentialsFlowConfig {
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
                 .apply(oauth2Client.oauth2Configuration())
-                .baseUrl(env.getProperty("odh.base-uri"))
+                .baseUrl(env.getProperty("base-uri"))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

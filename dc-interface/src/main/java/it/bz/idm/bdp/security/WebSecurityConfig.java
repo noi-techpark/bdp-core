@@ -40,7 +40,6 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @EnableWebSecurity
 @Configuration
-@PropertySource(value = "classpath:application.properties")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     private Environment env;
@@ -61,12 +60,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         builder
         .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-        .scope(env.getProperty("oauth.scope"))
-        .authorizationUri(env.getProperty("oauth.authorizationUri"))
-        .tokenUri(env.getProperty("oauth.tokenUri"))
-        .clientName(env.getProperty("oauth.clientName"))
-        .clientId(env.getProperty("oauth.clientId"))
-        .clientSecret(env.getProperty("oauth.clientSecret"));
+        .scope(env.getProperty("scope"))
+        .authorizationUri(env.getProperty("authorizationUri"))
+        .tokenUri(env.getProperty("tokenUri"))
+        .clientName(env.getProperty("clientName"))
+        .clientId(env.getProperty("clientId"))
+        .clientSecret(env.getProperty("clientSecret"));
         return new InMemoryClientRegistrationRepository(builder.build());
     }
     @Bean
