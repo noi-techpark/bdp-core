@@ -1,2 +1,0 @@
-- src: git+https://github.com/noi-techpark/ansible-docker-deployment.git
-  version: "1.0"
