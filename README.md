@@ -23,9 +23,10 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 - [CORE](#core)
   - [WRITER](#writer)
+    - [Authentication](#authentication)
     - [dc-interface](#dc-interface)
   - [READER](#reader)
-    - [Authentication](#authentication)
+    - [Authentication](#authentication-1)
     - [Authorization](#authorization)
     - [ws-interface](#ws-interface)
   - [DAL](#dal)
