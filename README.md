@@ -55,7 +55,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 The core of the platform contains all the business logic which handles connections to the database, to the data collectors which provide the data and to the web services which serve the data.
 
-The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services. The new version of the `reader` is called `ninja`. Have a look at the [Ninja README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/master/README.md) for details.
+The core provides two components, the `writer`, that writes data to the database and `reader`, that exposes REST APIs for web services. The new version of the `reader` is called `ninja`, which is stored in another repository. Have a look at the [Ninja README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/master/README.md) for details.
 
 ### WRITER
 The writer is a REST API, which takes JSON DTOs, deserializes and validates them and finally stores them in the database. Additionally, it sets stations to active/inactive according to their presence inside the provided data. The writer itself implements the methods to write data and is therefore the endpoint for all data collectors. It uses the persistence-unit of the DAL which has full permissions on the database.
@@ -63,6 +63,31 @@ The writer is a REST API, which takes JSON DTOs, deserializes and validates them
 The full API description can be found inside [JsonController.java](https://github.com/noi-techpark/bdp-core/blob/master/writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
 
 Finally, we provide an interface to facilitate data collector development under Java. See the next chapter for more details.
+
+#### Authentication
+We use Keycloak to authenticate. That service provides an `access_token` that
+can be used to send POST requests to the writer. See the [Open Data Hub Authentication / Quick Howto](https://opendatahub.readthedocs.io/en/latest/guidelines/authentication.html#quick-howto) for further details.
+
+```sh
+curl -X POST -L "https://auth.opendatahub.bz.it/auth/realms/noi/protocol/openid-connect/token" \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username=my_username' \
+--data-urlencode 'password=my_password' \
+--data-urlencode 'client_id=odh-mobility-datacollector' \
+--data-urlencode 'client_secret=the_client_secret'
+```
+
+With this call you get an `access_token` that can then be used as follows in all
+writer API methods. Here just an example to get all stations:
+
+```sh
+curl -X GET "https://share.mobility.api.opendatahub.bz.it/json/stations" \
+--header 'Content-Type: application/json' \
+--header 'Authorization: bearer your-access-token'
+```
+
+Write an email to help@opendatahub.bz.it, if you want to get the `client_secret` and an Open Data Hub OAuth2 account.
 
 #### dc-interface
 The dc-interface contains the API through which components can communicate with the BDP writer. Just include the `dc-interface` [maven dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project) in your project and use the existing [JSON client implementation](https://github.com/noi-techpark/bdp-core/blob/master/dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
