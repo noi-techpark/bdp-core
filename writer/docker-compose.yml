@@ -5,6 +5,7 @@ services:
     build:
       context: ../
       dockerfile: writer/infrastructure/docker/Dockerfile
+      target: archive
     volumes: 
         - ./:/code
     ports:
