@@ -37,6 +37,7 @@ pipeline {
                     echo 'LOG_LEVEL=DEBUG' >> .env
                     echo 'LOG_FOLDER=writer' >> .env
                     echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
+                    echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
                 """
                 sh 'cat ${BDP_WRITER_KEYCLOAK_CONFIG} > writer/src/main/resources/keycloak.json'
             }

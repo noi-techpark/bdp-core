@@ -1,7 +1,7 @@
 version: "3.4"
 
 services:
-  tomcat:
+  app:
     build:
       context: ../
       dockerfile: writer/infrastructure/docker/Dockerfile
