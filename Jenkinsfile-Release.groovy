@@ -8,7 +8,7 @@ pipeline {
 
     parameters {
         string(name: 'TAG', defaultValue: '1.0.0', description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you if you choose the development branch, so write only a plain version')
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose either master or development as branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the master branch, if you want to make a SNAPSHOT release use development.'
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose either newmaster or development as branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the newmaster branch, if you want to make a SNAPSHOT release use development.'
     }
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because the maven AWS plugin needs them to retrieve meta data
@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
-                sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
+                sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'newmaster' || false"
                 sh "test '${params.BRANCH}' = 'development' || { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true; }"
             }
         }
@@ -61,7 +61,7 @@ pipeline {
             }
         }
         stage('Tag') {
-            when {expression {return "${params.BRANCH}" == "master"}}
+            when {expression {return "${params.BRANCH}" == "newmaster"}}
             steps {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"
