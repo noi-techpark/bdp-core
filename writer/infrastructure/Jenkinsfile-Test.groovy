@@ -7,7 +7,6 @@ pipeline {
         PROJECT_FOLDER = "writer"
         LOG_FOLDER = "/var/log/opendatahub/"
         ARTIFACT_NAME = "writer"
-        KEYCLOAK_CONFIG=credentials('test-authserver-datacollector-client-config')
         DOCKER_IMAGE = '755952719952.dkr.ecr.eu-west-1.amazonaws.com/odh-writer'
         DOCKER_TAG = "test-$BUILD_NUMBER"
         BDP_WRITER_KEYCLOAK_CONFIG = credentials('bigdataplatform-writer-keycloak.json')
