@@ -2,11 +2,8 @@ version: "3.4"
 
 services:
   app:
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     build:
-      context: ../
+      context: ../../
       dockerfile: writer/infrastructure/docker/Dockerfile
       target: archive
-    volumes: 
-        - ./:/code
-    ports:
-      - "1010:8080"

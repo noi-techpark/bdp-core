@@ -1,0 +1,21 @@
+##### VSCODE / REST Client
+# Create a .env file and set the corresponding variables 
+# See all $dotenv fields below
+
+### Get access token use the writer
+# @name login
+POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password
+&username=pmoser
+&password={{$dotenv PASSWORD}}
+&client_id=odh-mobility-datacollector
+&client_secret={{$dotenv CLIENT_SECRET}}
+
+### Post some data to the writer
+@authtoken = {{login.response.body.access_token}}
+
+GET http://tomcat.testingmachine.eu/writer/json/stations
+Authorization: Bearer {{authtoken}}
+
