@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -57,7 +57,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String STATIONS = "/stations/";
     private static final String PROVENANCE = "/provenance/";
 
-    @Autowired
+    @Resource(name = "webClient")
     protected WebClient client;
 
     @Override

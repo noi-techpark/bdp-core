@@ -22,6 +22,9 @@
  */
 package it.bz.idm.bdp.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
+        List<ClientRegistration> clients = new ArrayList<ClientRegistration>();
         ClientRegistration.Builder builder = ClientRegistration.withRegistrationId("odh");
         builder
         .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
@@ -65,7 +69,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         .clientName(env.getProperty("clientName"))
         .clientId(env.getProperty("clientId"))
         .clientSecret(env.getProperty("clientSecret"));
-        return new InMemoryClientRegistrationRepository(builder.build());
+        clients.add(builder.build());
+        String ninjaClient = env.getProperty("NINJA_CLIENT");
+        String ninjaSecret= env.getProperty("NINJA_SECRET");
+        if (ninjaClient != null && !ninjaClient.isEmpty() && ninjaSecret != null && !ninjaSecret.isEmpty()) {
+            ClientRegistration.Builder ninjaBuilder = ClientRegistration.withRegistrationId("ninja");
+            ninjaBuilder.clientAuthenticationMethod(ClientAuthenticationMethod.POST)
+            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+            .scope(env.getProperty("scope"))
+            .authorizationUri(env.getProperty("authorizationUri"))
+            .tokenUri(env.getProperty("tokenUri"))
+            .clientName(ninjaClient)
+            .clientId(ninjaClient)
+            .clientSecret(ninjaSecret);
+            clients.add(ninjaBuilder.build());
+        }
+        return new InMemoryClientRegistrationRepository(clients);
     }
     @Bean
     public OAuth2AuthorizedClientService authorizedClientService() {
