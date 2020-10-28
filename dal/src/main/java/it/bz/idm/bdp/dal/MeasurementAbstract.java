@@ -198,6 +198,7 @@ public abstract class MeasurementAbstract implements Serializable {
 				.addSql("SELECT record FROM " + subClass.getSimpleName() + " record WHERE record.station = :station")
 				.setParameter("station", station)
 				.setParameterIfNotNull("type", type, "AND record.type = :type")
+				.setParameterIfNotNull("period", period, "AND record.period = :period")
 				.addSql("ORDER BY record.timestamp DESC")
 				.buildSingleResultOrNull(subClass);
 	}
