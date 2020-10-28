@@ -17,7 +17,10 @@ pipeline {
         BDP_DATABASE_WRITE_USER = "bdp"
         BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-test-database-write-password')
     }
-
+    parameters{
+        string(name:'bdp_version',defaultValue:'x.y.z',description:'version of dependencies to use in test deployment(must be released)');
+        choice(name:'bdp_type',choices:['snapshot','release'],description:'use production ready releases or snapshots')
+    }
     stages {
         stage('Configure') {
             steps {
@@ -28,6 +31,7 @@ pipeline {
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.databaseName']/@value" -v ${BDP_DATABASE_NAME} dal/src/main/resources/META-INF/persistence.xml'''
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${BDP_DATABASE_WRITE_USER} dal/src/main/resources/META-INF/persistence.xml'''
                 sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${BDP_DATABASE_WRITE_PASSWORD} dal/src/main/resources/META-INF/persistence.xml'''
+                sh "./quickrelease.sh '${params.bdp_type}' '${params.bdp_version}'"
                 sh """
                     cd ${PROJECT_FOLDER}
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
