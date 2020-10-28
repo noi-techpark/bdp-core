@@ -37,6 +37,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
@@ -58,305 +61,307 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class MeasurementAbstractHistory implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final Logger logger = LogManager.getLogger(MeasurementAbstractHistory.class);
 
-	@Column(nullable = false)
-	private Date created_on;
+    private static final long serialVersionUID = 1L;
 
-	@Column(nullable = false)
-	private Date timestamp;
+    @Column(nullable = false)
+    private Date created_on;
 
-	@ManyToOne(optional = false)
-	private Station station;
+    @Column(nullable = false)
+    private Date timestamp;
 
-	@ManyToOne(optional = false, cascade = CascadeType.PERSIST)
-	private DataType type;
+    @ManyToOne(optional = false)
+    private Station station;
 
-	@Column(nullable = false)
-	private Integer period;
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
+    private DataType type;
 
-	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	private Provenance provenance;
+    @Column(nullable = false)
+    private Integer period;
 
-	public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    private Provenance provenance;
 
-	public MeasurementAbstractHistory() {
-		this.created_on = new Date();
-	}
-	/**
-	 * @param station entity the measurement refers to
-	 * @param type entity the measurement refers to
-	 * @param timestamp UTC time of the measurement detection
-	 * @param period standard interval between 2 measurements
-	 */
-	public MeasurementAbstractHistory(Station station, DataType type, Date timestamp, Integer period) {
-		this.station = station;
-		this.type = type;
-		this.timestamp = timestamp;
-		this.period = period;
-		this.created_on = new Date();
-	}
+    public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
 
-	public Date getCreated_on() {
-		return created_on;
-	}
+    public MeasurementAbstractHistory() {
+        this.created_on = new Date();
+    }
+    /**
+     * @param station entity the measurement refers to
+     * @param type entity the measurement refers to
+     * @param timestamp UTC time of the measurement detection
+     * @param period standard interval between 2 measurements
+     */
+    public MeasurementAbstractHistory(Station station, DataType type, Date timestamp, Integer period) {
+        this.station = station;
+        this.type = type;
+        this.timestamp = timestamp;
+        this.period = period;
+        this.created_on = new Date();
+    }
 
-	public void setCreated_on(Date created_on) {
-		this.created_on = created_on;
-	}
+    public Date getCreated_on() {
+        return created_on;
+    }
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
+    public void setCreated_on(Date created_on) {
+        this.created_on = created_on;
+    }
 
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-	public Station getStation() {
-		return station;
-	}
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
-	public void setStation(Station station) {
-		this.station = station;
-	}
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+    public Station getStation() {
+        return station;
+    }
 
-	public DataType getType() {
-		return type;
-	}
+    public void setStation(Station station) {
+        this.station = station;
+    }
 
-	public void setType(DataType type) {
-		this.type = type;
-	}
+    public DataType getType() {
+        return type;
+    }
 
-	public Integer getPeriod() {
-		return period;
-	}
+    public void setType(DataType type) {
+        this.type = type;
+    }
 
-	public void setPeriod(Integer period) {
-		this.period = period;
-	}
+    public Integer getPeriod() {
+        return period;
+    }
 
-	public Provenance getProvenance() {
-		return provenance;
-	}
+    public void setPeriod(Integer period) {
+        this.period = period;
+    }
 
-	public void setProvenance(Provenance provenance) {
-		this.provenance = provenance;
-	}
-	public abstract void setValue(Object value);
-	public abstract Object getValue();
+    public Provenance getProvenance() {
+        return provenance;
+    }
 
-	/**
-	 * <p>
-	 * persists all measurement data send to the writer from data collectors to the database.<br/>
-	 * This method goes down the data tree and persists all new records<br/>
-	 * it also updates the newest measurement in {@link MeasurementAbstract}, if it really is newer
-	 * </p>
-	 * @param em entity manager
-	 * @param stationType typology of the specific station, e.g., MeteoStation, EnvironmentStation
-	 * @param dataMap  container for data send from data collector containing measurements<br/>
-	 * Data is received in a tree structure, containing in the first level the identifier of the correlated station,<br/>
-	 * on the second level the identifier of the correlated data type and on the last level the data itself
-	 * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
-	 */
-	public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
-		boolean givenDataOK = false;
-		boolean stationFound = false;
-		boolean typeFound = false;
-		boolean jsonOK = false;
-		try {
+    public void setProvenance(Provenance provenance) {
+        this.provenance = provenance;
+    }
+    public abstract void setValue(Object value);
+    public abstract Object getValue();
 
-			Provenance provenance = Provenance.findByUuid(em, dataMap.getProvenance());
-			for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
-				Station station = Station.findStation(em, stationType, stationEntry.getKey());
-				if (station == null) {
-					System.err.println("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
-					continue;
-				}
-				stationFound = true;
-				for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
-					try {
-						DataType type = DataType.findByCname(em, typeEntry.getKey());
-						if (type == null) {
-							System.err.println("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
-							continue;
-						}
-						typeFound = true;
-						List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
-						if (dataRecords.isEmpty()) {
-							System.err.println("pushRecords: Empty data set. Skipping...");
-							continue;
-						}
-						em.getTransaction().begin();
+    /**
+     * <p>
+     * persists all measurement data send to the writer from data collectors to the database.<br/>
+     * This method goes down the data tree and persists all new records<br/>
+     * it also updates the newest measurement in {@link MeasurementAbstract}, if it really is newer
+     * </p>
+     * @param em entity manager
+     * @param stationType typology of the specific station, e.g., MeteoStation, EnvironmentStation
+     * @param dataMap  container for data send from data collector containing measurements<br/>
+     * Data is received in a tree structure, containing in the first level the identifier of the correlated station,<br/>
+     * on the second level the identifier of the correlated data type and on the last level the data itself
+     * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
+     */
+    public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
+        boolean givenDataOK = false;
+        boolean stationFound = false;
+        boolean typeFound = false;
+        boolean jsonOK = false;
+        try {
 
-						//TODO: remove period check once it gets removed from database
-						Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
-						if (period == null){
-							System.err.println("pushRecords: No period specified. Skipping...");
-							continue;
-						}
-						MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
-						long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
-						MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
-						long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
+            Provenance provenance = Provenance.findByUuid(em, dataMap.getProvenance());
+            for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
+                Station station = Station.findStation(em, stationType, stationEntry.getKey());
+                if (station == null) {
+                    logger.error("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
+                    continue;
+                }
+                stationFound = true;
+                for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
+                    try {
+                        DataType type = DataType.findByCname(em, typeEntry.getKey());
+                        if (type == null) {
+                            logger.error("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
+                            continue;
+                        }
+                        typeFound = true;
+                        List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
+                        if (dataRecords.isEmpty()) {
+                            logger.error("pushRecords: Empty data set. Skipping...");
+                            continue;
+                        }
+                        em.getTransaction().begin();
 
-						SimpleRecordDto newestStringDto = null;
-						SimpleRecordDto newestNumberDto = null;
-						for (RecordDto recordDto : dataRecords) {
+                        //TODO: remove period check once it gets removed from database
+                        Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
+                        if (period == null){
+                            logger.error("pushRecords: No period specified. Skipping...");
+                            continue;
+                        }
+                        MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
+                        long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
+                        MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
+                        long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
 
-							/*
-							 * XXX We support only SimpleRecordDtos at the moment. This should be removed,
-							 * when we see that we do not need anything else then SimpleRecords
-							 */
-							if (! (recordDto instanceof SimpleRecordDto))
-								continue;
+                        SimpleRecordDto newestStringDto = null;
+                        SimpleRecordDto newestNumberDto = null;
+                        for (RecordDto recordDto : dataRecords) {
 
-							SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
-							Long dateOfMeasurement = simpleRecordDto.getTimestamp();
-							Object valueObj = simpleRecordDto.getValue();
-							if (valueObj instanceof Number) {
-								if (latestNumberMeasurementTime < dateOfMeasurement) {
-									Double value = ((Number)valueObj).doubleValue();
-									MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
-									record.setProvenance(provenance);
-									em.persist(record);
-								}
-								if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
-									newestNumberDto = simpleRecordDto;
-								}
-								givenDataOK = true;
-							} else if (valueObj instanceof String) {
-								if (latestStringMeasurementTime < dateOfMeasurement) {
-									String value = (String) valueObj;
-									MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
-									record.setProvenance(provenance);
-									em.persist(record);
-								}
-								if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
-									newestStringDto = simpleRecordDto;
-								}
-								givenDataOK = true;
-							} else {
-								System.err.println("pushRecords: Unsupported data format for "
-												   + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
-												   + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
-												   + ". Skipping..."));
-							}
-							jsonOK = true;
-						}
+                            /*
+                             * XXX We support only SimpleRecordDtos at the moment. This should be removed,
+                             * when we see that we do not need anything else then SimpleRecords
+                             */
+                            if (! (recordDto instanceof SimpleRecordDto))
+                                continue;
 
-						if (newestNumberDto != null) {
-							Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
-							if (latestNumberMeasurement == null) {
-								latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
-								latestNumberMeasurement.setProvenance(provenance);
-								em.persist(latestNumberMeasurement);
-							} else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
-								latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
-								latestNumberMeasurement.setProvenance(provenance);
-								latestNumberMeasurement.setValue(valueNumber);
-								em.merge(latestNumberMeasurement);
-							}
-						}
+                            SimpleRecordDto simpleRecordDto = (SimpleRecordDto)recordDto;
+                            Long dateOfMeasurement = simpleRecordDto.getTimestamp();
+                            Object valueObj = simpleRecordDto.getValue();
+                            if (valueObj instanceof Number) {
+                                if (latestNumberMeasurementTime < dateOfMeasurement) {
+                                    Double value = ((Number)valueObj).doubleValue();
+                                    MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    record.setProvenance(provenance);
+                                    em.persist(record);
+                                }
+                                if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
+                                    newestNumberDto = simpleRecordDto;
+                                }
+                                givenDataOK = true;
+                            } else if (valueObj instanceof String) {
+                                if (latestStringMeasurementTime < dateOfMeasurement) {
+                                    String value = (String) valueObj;
+                                    MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    record.setProvenance(provenance);
+                                    em.persist(record);
+                                }
+                                if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
+                                    newestStringDto = simpleRecordDto;
+                                }
+                                givenDataOK = true;
+                            } else {
+                                logger.error("pushRecords: Unsupported data format for "
+                                        + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
+                                        + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
+                                                + ". Skipping..."));
+                            }
+                            jsonOK = true;
+                        }
 
-						if (newestStringDto != null) {
-							String valueString = (String) newestStringDto.getValue();
-							if (latestStringMeasurement == null) {
-								latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
-								latestStringMeasurement.setProvenance(provenance);
-								em.persist(latestStringMeasurement);
-							} else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
-								latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
-								latestStringMeasurement.setValue(valueString);
-								latestStringMeasurement.setProvenance(provenance);
-								em.merge(latestStringMeasurement);
-							}
-						}
+                        if (newestNumberDto != null) {
+                            Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
+                            if (latestNumberMeasurement == null) {
+                                latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
+                                latestNumberMeasurement.setProvenance(provenance);
+                                em.persist(latestNumberMeasurement);
+                            } else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
+                                latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
+                                latestNumberMeasurement.setProvenance(provenance);
+                                latestNumberMeasurement.setValue(valueNumber);
+                                em.merge(latestNumberMeasurement);
+                            }
+                        }
 
-						em.getTransaction().commit();
-					} catch(Exception ex) {
-						ex.printStackTrace();
-						if (em.getTransaction().isActive())
-							em.getTransaction().rollback();
-						continue;
-					}
-				}
-			}
+                        if (newestStringDto != null) {
+                            String valueString = (String) newestStringDto.getValue();
+                            if (latestStringMeasurement == null) {
+                                latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+                                latestStringMeasurement.setProvenance(provenance);
+                                em.persist(latestStringMeasurement);
+                            } else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
+                                latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
+                                latestStringMeasurement.setValue(valueString);
+                                latestStringMeasurement.setProvenance(provenance);
+                                em.merge(latestStringMeasurement);
+                            }
+                        }
 
-			if (stationFound == false) {
-				throw new JPAException("No station found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-			}
-			if (typeFound == false) {
-				throw new JPAException("No station/type found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-			}
-			if (givenDataOK == false) {
-				throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
-			}
-			/* FALSE, if no valid data can be found, either because of missing station/type/data combinations, hence invalid JSON */
-			if (jsonOK == false) {
-				throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-			}
+                        em.getTransaction().commit();
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                        if (em.getTransaction().isActive())
+                            em.getTransaction().rollback();
+                        continue;
+                    }
+                }
+            }
 
-		} catch(Exception e) {
-			if (em.getTransaction().isActive())
-				em.getTransaction().rollback();
-			throw JPAException.unnest(e);
-		} finally {
-			em.clear();
-			if (em.isOpen())
-				em.close();
-		}
-	}
+            if (stationFound == false) {
+                throw new JPAException("No station found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+            }
+            if (typeFound == false) {
+                throw new JPAException("No station/type found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+            }
+            if (givenDataOK == false) {
+                throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
+            }
+            /* FALSE, if no valid data can be found, either because of missing station/type/data combinations, hence invalid JSON */
+            if (jsonOK == false) {
+                throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
+            }
 
-	private static List<RecordDto> castToDtos(List<MeasurementAbstractHistory> result, boolean setPeriod) {
-		List<RecordDto> dtos = new ArrayList<>();
-		for (MeasurementAbstractHistory m : result) {
-			SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), setPeriod ? m.getPeriod() : null);
-			dto.setCreated_on(m.getCreated_on().getTime());
-			dtos.add(dto);
-		}
-		return dtos;
-	}
+        } catch(Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            throw JPAException.unnest(e);
+        } finally {
+            em.clear();
+            if (em.isOpen())
+                em.close();
+        }
+    }
 
-	/**
-	 * <p>
-	 * the only method which requests history data from the biggest existing tables in the underlying DB,<br/>
-	 * it's very important that indexes are set correctly to avoid bad performance
-	 * </p>
-	 * @param em entity manager
-	 * @param typology of the specific station, e.g., MeteoStation, EnvironmentStation
-	 * @param identifier unique station identifier, required
-	 * @param cname unique type identifier, required
-	 * @param start time filter start in milliseconds UTC for query, required
-	 * @param end time filter start in milliseconds UTC for query, required
-	 * @param period interval between measurements
-	 * @param role authorization level of the current session
-	 * @param tableObject implementation which calls this method to decide which table to query, required
-	 * @return a list of measurements from history tables
-	 */
-	protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
-		List<MeasurementAbstractHistory> result = QueryBuilder
-				.init(em)
-				.addSql("SELECT record")
-				.addSql("FROM  " + tableObject.getClass().getSimpleName() + " record, BDPPermissions p",
-						"WHERE (record.station = p.station OR p.station = null)",
-						"AND (record.type = p.type OR p.type = null)",
-						"AND (record.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND record.station = (",
-							"SELECT s FROM Station s WHERE s.stationtype = :stationtype AND s.stationcode = :stationcode",
-						")",
-						"AND record.type = (SELECT t FROM DataType t WHERE t.cname = :cname)",
-						"AND record.timestamp between :start AND :end")
-				.setParameterIfNotNull("period", period, "AND record.period = :period")
-				.setParameter("stationtype", stationtype)
-				.setParameter("stationcode", identifier)
-				.setParameter("cname", cname)
-				.setParameter("start", start)
-				.setParameter("end", end)
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
-				.addSql("ORDER BY record.timestamp")
-				.buildResultList(MeasurementAbstractHistory.class);
-		return MeasurementAbstractHistory.castToDtos(result, period == null);
-	}
+    private static List<RecordDto> castToDtos(List<MeasurementAbstractHistory> result, boolean setPeriod) {
+        List<RecordDto> dtos = new ArrayList<>();
+        for (MeasurementAbstractHistory m : result) {
+            SimpleRecordDto dto = new SimpleRecordDto(m.getTimestamp().getTime(), m.getValue(), setPeriod ? m.getPeriod() : null);
+            dto.setCreated_on(m.getCreated_on().getTime());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    /**
+     * <p>
+     * the only method which requests history data from the biggest existing tables in the underlying DB,<br/>
+     * it's very important that indexes are set correctly to avoid bad performance
+     * </p>
+     * @param em entity manager
+     * @param typology of the specific station, e.g., MeteoStation, EnvironmentStation
+     * @param identifier unique station identifier, required
+     * @param cname unique type identifier, required
+     * @param start time filter start in milliseconds UTC for query, required
+     * @param end time filter start in milliseconds UTC for query, required
+     * @param period interval between measurements
+     * @param role authorization level of the current session
+     * @param tableObject implementation which calls this method to decide which table to query, required
+     * @return a list of measurements from history tables
+     */
+    protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
+        List<MeasurementAbstractHistory> result = QueryBuilder
+                .init(em)
+                .addSql("SELECT record")
+                .addSql("FROM  " + tableObject.getClass().getSimpleName() + " record, BDPPermissions p",
+                        "WHERE (record.station = p.station OR p.station = null)",
+                        "AND (record.type = p.type OR p.type = null)",
+                        "AND (record.period = p.period OR p.period = null)",
+                        "AND p.role = :role",
+                        "AND record.station = (",
+                        "SELECT s FROM Station s WHERE s.stationtype = :stationtype AND s.stationcode = :stationcode",
+                        ")",
+                        "AND record.type = (SELECT t FROM DataType t WHERE t.cname = :cname)",
+                        "AND record.timestamp between :start AND :end")
+                .setParameterIfNotNull("period", period, "AND record.period = :period")
+                .setParameter("stationtype", stationtype)
+                .setParameter("stationcode", identifier)
+                .setParameter("cname", cname)
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
+                .addSql("ORDER BY record.timestamp")
+                .buildResultList(MeasurementAbstractHistory.class);
+        return MeasurementAbstractHistory.castToDtos(result, period == null);
+    }
 }
