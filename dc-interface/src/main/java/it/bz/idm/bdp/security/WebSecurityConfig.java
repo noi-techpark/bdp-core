@@ -22,72 +22,30 @@
  */
 package it.bz.idm.bdp.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @EnableWebSecurity
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
-    private Environment env;
+	@Autowired
+	private ClientRegistrationRepository repository;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().oauth2Client().clientRegistrationRepository(clientRegistrationRepository());
-    }
-    @Autowired
-    public WebSecurityConfig(Environment env) {
-        super();
-        this.env= env;
+        http.csrf().disable().oauth2Client().clientRegistrationRepository(repository);
     }
 
     @Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
-        List<ClientRegistration> clients = new ArrayList<ClientRegistration>();
-        ClientRegistration.Builder builder = ClientRegistration.withRegistrationId("odh");
-        builder
-        .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
-        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-        .scope(env.getProperty("scope"))
-        .authorizationUri(env.getProperty("authorizationUri"))
-        .tokenUri(env.getProperty("tokenUri"))
-        .clientName(env.getProperty("clientName"))
-        .clientId(env.getProperty("clientId"))
-        .clientSecret(env.getProperty("clientSecret"));
-        clients.add(builder.build());
-        String ninjaClient = env.getProperty("NINJA_CLIENT");
-        String ninjaSecret= env.getProperty("NINJA_SECRET");
-        if (ninjaClient != null && !ninjaClient.isEmpty() && ninjaSecret != null && !ninjaSecret.isEmpty()) {
-            ClientRegistration.Builder ninjaBuilder = ClientRegistration.withRegistrationId("ninja");
-            ninjaBuilder.clientAuthenticationMethod(ClientAuthenticationMethod.POST)
-            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .scope(env.getProperty("scope"))
-            .authorizationUri(env.getProperty("authorizationUri"))
-            .tokenUri(env.getProperty("tokenUri"))
-            .clientName(ninjaClient)
-            .clientId(ninjaClient)
-            .clientSecret(ninjaSecret);
-            clients.add(ninjaBuilder.build());
-        }
-        return new InMemoryClientRegistrationRepository(clients);
-    }
-    @Bean
     public OAuth2AuthorizedClientService authorizedClientService() {
-        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository());
+        return new InMemoryOAuth2AuthorizedClientService(repository);
     }
 }
