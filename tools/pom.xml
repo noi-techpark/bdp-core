@@ -21,12 +21,12 @@
     SPDX-License-Identifier: GPL-3.0
 
 -->
-<!-- 
-	FIXME This is more or less a copy/paste from ../dal/pom.xml.  
-	There might be a lot of unnecessary dependencies... 
+<!--
+	FIXME This is more or less a copy/paste from ../dal/pom.xml.
+	There might be a lot of unnecessary dependencies...
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -52,7 +52,7 @@
             <id>central</id>
             <name>Maven Repository Switchboard</name>
             <layout>default</layout>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -72,9 +72,14 @@
             <url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
         </repository>
         <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
+            <id>osgeo-alt</id>
+            <name>Open Source Geospatial Foundation Repository Alternative</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+		<repository>
+            <id>geomajas</id>
+            <name>Geomajas Maven Repository</name>
+            <url>http://maven.geomajas.org/(http://maven.geomajas.org/)</url>
         </repository>
     </repositories>
 
@@ -141,7 +146,7 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-52</artifactId>
@@ -208,7 +213,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>         
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
