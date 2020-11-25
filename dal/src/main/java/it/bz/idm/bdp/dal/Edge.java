@@ -47,7 +47,8 @@ import com.vividsolutions.jts.geom.PrecisionModel;
  *
  * <p> An edge is therefore a station-triple like <code>(origin, destination, edge_data)</code>,
  * and some additional information, like directed, which describes if the edge has a direction, and
- * a line-geometry, which describe trajectories on a map.
+ * a line-geometry, which describe trajectories on a map. Some polylines on a map are not connected
+ * to any station, therefore we need to make "origin" and "destination" optional, that is, nullable.
  *
  * @author Peter Moser
  */
@@ -71,10 +72,12 @@ public class Edge {
 	@ColumnDefault(value = "true")
 	protected boolean directed;
 
-	@ManyToOne(optional = false)
+	@Column(nullable = true)
+	@ManyToOne(optional = true)
 	protected Station origin;
 
-	@ManyToOne(optional = false)
+	@Column(nullable = true)
+	@ManyToOne(optional = true)
 	protected Station destination;
 
 	/*
