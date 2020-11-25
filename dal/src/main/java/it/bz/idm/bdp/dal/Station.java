@@ -462,7 +462,7 @@ public class Station {
 			return;
 
 		boolean metaDataExists = (station.getMetaData() != null && station.getMetaData().getJson() != null);
-		if (!metaDataExists || (metaDataExists && !station.getMetaData().getJson().equals(metaData))) {
+		if (!metaDataExists || !station.getMetaData().getJson().equals(metaData)) {
 			station.setMetaData(metaData);
 			em.persist(station.getMetaData());
 		}
