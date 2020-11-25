@@ -78,7 +78,7 @@ import it.bz.idm.bdp.dto.StationDto;
 public class Station {
 
 	public static final String GEOM_CRS = "EPSG:4326";
-	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+	public static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 	@Id
 	@GeneratedValue(generator = "station_gen", strategy = GenerationType.SEQUENCE)
@@ -142,7 +142,7 @@ public class Station {
 	 * @return detail information/meta data of the specified station(s)
 	 */
 	public static List<StationDto> findStationsDetails(EntityManager em, String stationType, Station station){
-		List<Station> resultList = new ArrayList<Station>();
+		List<Station> resultList = new ArrayList<>();
 		if (station == null)
 			resultList = Station.findStations(em, stationType, true);
 		else
@@ -159,7 +159,7 @@ public class Station {
 	 * @return valid StationDto containing serializable informations of the station entity
 	 */
 	public static List<StationDto> convertToDto(List<Station> resultList) {
-		List<StationDto> stationList = new ArrayList<StationDto>();
+		List<StationDto> stationList = new ArrayList<>();
 		for (Station s : resultList) {
 			StationDto dto = convertToDto(s);
 			stationList.add(dto);
@@ -169,7 +169,8 @@ public class Station {
 
 
 	private static StationDto convertToDto(Station s) {
-		Double x = null,y = null;
+		Double x = null;
+		Double y = null;
 		if (s.getPointprojection() != null){
 			y = s.getPointprojection().getY();
 			x = s.getPointprojection().getX();
@@ -350,7 +351,7 @@ public class Station {
 	}
 
 	protected static List<String[]> getDataTypesFromQuery(List<Object[]> resultList){
-		List<String[]> stringlist = new ArrayList<String[]>();
+		List<String[]> stringlist = new ArrayList<>();
 		for(Object[] objects : resultList){
 			String[] stringarray= new String[objects.length];
 			for (int i = 0; i< objects.length;i++){
@@ -363,7 +364,7 @@ public class Station {
 	}
 
 	protected static List<CoordinateDto> parseCoordinate(Coordinate[] coordinates) {
-		List<CoordinateDto> dtos = new ArrayList<CoordinateDto>();
+		List<CoordinateDto> dtos = new ArrayList<>();
 		for (Coordinate coordinate: coordinates){
 			dtos.add(parseCoordinate(coordinate));
 		}
@@ -429,7 +430,7 @@ public class Station {
 				} catch (FactoryException | MismatchedDimensionException | TransformException e) {
 					e.printStackTrace();
 					throw new JPAException("Unable to create a valid coordinate reference system for station " + existingStation.getName(), e);
-					// XXX PEMOSER Continue here: Should an invalid CRS terminate any insertion or continue without?
+					// FIXME Should an invalid CRS terminate any insertion or continue without?
 					// Should we return an message that some station had problems with their CRS, but were nevertheless inserted
 				}
 			}
@@ -494,7 +495,7 @@ public class Station {
 			return;
 		}
 		List<Station> stations = findStationsByOrigin(em, dtos.get(0).getOrigin(),dtos.get(0).getStationType());
-		if (stations == null) {
+		if (stations.isEmpty()) {
 			return;
 		}
 		em.getTransaction().begin();
@@ -520,17 +521,18 @@ public class Station {
 	 * @param origin data collector identifier where the data origins from
 	 * @param stationType typology of a {@link Station}
 	 *
-	 * @return list of station entities filtered by station type and data collector origin
+	 * @return list of station entities filtered by station type and data collector origin; never <code>null</code>
 	 */
 	private static List<Station> findStationsByOrigin(EntityManager em, String origin, String stationType) {
 		if (origin == null || origin.isEmpty()) {
-			return null;
+			return new ArrayList<>();
 		}
 		QueryBuilder builder = QueryBuilder.init(em)
 				.addSql("select station from Station station where station.origin = :origin")
 				.setParameter("origin", origin)
 				.setParameterIfNotNull("stationtype", stationType, " and stationtype=:stationtype");
-		return builder.buildResultList(Station.class);
+		List<Station> result = builder.buildResultList(Station.class);
+		return result == null ? new ArrayList<>() : result;
 	}
 
 	/**
