@@ -5,7 +5,7 @@ VERSION="1.0.0"
 
 echo
 echo "## BIG DATA PLATFORM -- SQL GENERATOR v$VERSION ##"
-echo 
+echo
 echo "NB: This script must be executed from the BDP-CORE root directory!"
 echo
 
@@ -49,7 +49,7 @@ test -f "$GEN" || {
 }
 
 cd dto
-mvn clean package
+mvn clean install
 cd -
 test -f "$DTO" || {
     echo "ERROR: $DTO not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
@@ -58,7 +58,7 @@ test -f "$DTO" || {
 }
 
 cd dal
-mvn clean package
+mvn clean install
 cd -
 test -f "$DAL" || {
     echo "ERROR: $DAL not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
@@ -91,5 +91,5 @@ java -cp "$CLASSPATH" -Dlog4j.configuration=src/main/resources/log4j.properties 
 
 cd -
 
-echo 
+echo
 exit 0

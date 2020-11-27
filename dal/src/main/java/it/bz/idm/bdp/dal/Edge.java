@@ -72,11 +72,9 @@ public class Edge {
 	@ColumnDefault(value = "true")
 	protected boolean directed;
 
-	@Column(nullable = true)
 	@ManyToOne(optional = true)
 	protected Station origin;
 
-	@Column(nullable = true)
 	@ManyToOne(optional = true)
 	protected Station destination;
 
