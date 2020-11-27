@@ -56,7 +56,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 public class Edge {
 
 	public static final String GEOM_CRS = "EPSG:4326";
-	public static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+	public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
 
 	@Id
 	@GeneratedValue(generator = "edge_gen", strategy = GenerationType.SEQUENCE)
