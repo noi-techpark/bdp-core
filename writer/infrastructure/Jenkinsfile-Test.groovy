@@ -5,7 +5,6 @@ pipeline {
         SERVER_PORT="1010"
         PROJECT = "odh-writer"
         PROJECT_FOLDER = "writer"
-        LOG_FOLDER = "/var/log/opendatahub/"
         ARTIFACT_NAME = "writer"
         DOCKER_IMAGE = '755952719952.dkr.ecr.eu-west-1.amazonaws.com/odh-writer'
         DOCKER_TAG = "test-$BUILD_NUMBER"
@@ -37,8 +36,7 @@ pipeline {
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
                     echo 'DOCKER_IMAGE=${DOCKER_IMAGE}' >> .env
                     echo 'DOCKER_TAG=${DOCKER_TAG}' >> .env
-                    echo 'LOG_LEVEL=DEBUG' >> .env
-                    echo 'LOG_FOLDER=writer' >> .env
+                    echo 'LOG_LEVEL=info' >> .env
                     echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
                     echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
                 """
