@@ -111,8 +111,12 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     @Override
     public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-        return client.get().uri(GET_DATE_OF_LAST_RECORD + this.integreenTypology).attribute("stationId", stationCode)
-                .attribute("dataType", dataType).attribute("period", period).retrieve().bodyToMono(Date.class).block();
+        return client.get().uri(uriBuilder -> uriBuilder
+                .path(GET_DATE_OF_LAST_RECORD + this.integreenTypology)
+                .queryParam("stationId", stationCode)
+                .queryParam("typeId", dataType)
+                .queryParam("period", period).build())
+                .retrieve().bodyToMono(Date.class).block();
     }
 
     @Override
