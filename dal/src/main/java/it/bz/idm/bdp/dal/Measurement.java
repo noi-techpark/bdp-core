@@ -111,10 +111,10 @@ public class Measurement extends MeasurementAbstract {
 
 	@Override
 	public void setValue(Object value) {
-		if (value instanceof Number) {
-			this.doubleValue = ((Number) value).doubleValue();
-		} else if (value instanceof Double) {
+		if (value instanceof Double) {
 			this.doubleValue = (Double) value;
+		} else if (value instanceof Number) {
+			this.doubleValue = ((Number) value).doubleValue();
 		}
 	}
 
