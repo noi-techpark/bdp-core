@@ -117,7 +117,8 @@ public class MeasurementStringHistory extends MeasurementAbstractHistory {
 	}
 	@Override
 	public void setValue(Object value) {
-		setValue(value.toString());
+		if (value != null)
+			setValue(value.toString());
 	}
 
 }
