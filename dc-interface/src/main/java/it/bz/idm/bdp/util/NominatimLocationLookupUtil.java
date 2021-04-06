@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -42,6 +43,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class NominatimLocationLookupUtil implements LocationLookup{
 
+	private static final String CONTENT_TYPE = "application/json";
+	private static final String REFERER = "NOI-Techpark";
 	private static final String NOMINATIM_SCHEME = "https";
 	private static final String NOMINATIM_PATH = "/reverse";
 	private static final String NOMINATIM_HOST = "nominatim.openstreetmap.org";
@@ -60,9 +63,10 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 	 * @param longitude in EPSG 4326 projection
 	 * @param latitude in EPSG 4326 projection
 	 * @return municipality of the give coordinate, wit a fallback to hamlet
+	 * @throws NominatimException if nominatim is not available
 	 */
 	@Override
-	public String lookupLocation(Double longitude, Double latitude) {
+	public String lookupLocation(Double longitude, Double latitude) throws NominatimException {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -75,9 +79,9 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		parameters.add("lat", latitude.toString());
 		parameters.addAll(defaultUriVariables);
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("referer", "NOI-Techpark");
-		headers.add("Content-Type", "application/json");
-		headers.add("accept", "application/json");
+		headers.add("referer", REFERER);
+		headers.add("Content-Type", CONTENT_TYPE);
+		headers.add("accept", CONTENT_TYPE);
 		NominatimDto responseType = new NominatimDto();
 		UriComponents uriComponents =
 	            UriComponentsBuilder.newInstance()
@@ -87,6 +91,8 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		RequestEntity<NominatimDto> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
 
 		ResponseEntity<? extends NominatimDto> exchange = restTemplate.exchange(requestEntity,responseType.getClass());
+		if (exchange.getStatusCode().equals(HttpStatus.BAD_GATEWAY))
+			throw new NominatimException("Nominatim got to many request by" + REFERER);
 		NominatimDto body = exchange.getBody();
 		try {
 			Thread.sleep(1000);
@@ -98,9 +104,10 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 	/**
 	 * @param address of the location you would like to find
 	 * @return coordinate pair in the order longitude,latitude in EPSG 4326 projection
+	 * @throws NominatimException
 	 */
 	@Override
-	public Double[] lookupCoordinates(String address) {
+	public Double[] lookupCoordinates(String address) throws NominatimException {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -112,9 +119,9 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		parameters.add("q", address.trim());
 		parameters.addAll(defaultUriVariables);
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("referer", "NOI-Techpark");
-		headers.add("Content-Type", "application/json");
-		headers.add("accept", "application/json");
+		headers.add("referer", REFERER);
+		headers.add("Content-Type", CONTENT_TYPE);
+		headers.add("accept", CONTENT_TYPE);
 		UriComponents uriComponents =
 	            UriComponentsBuilder.newInstance()
 	                .scheme(NOMINATIM_SCHEME).host(NOMINATIM_HOST).path("/").queryParams(parameters)
@@ -123,6 +130,8 @@ public class NominatimLocationLookupUtil implements LocationLookup{
 		RequestEntity<List<NominatimAddressLookupResponseDto>> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
 
 		ResponseEntity<NominatimAddressLookupResponseDto[]> exchange = restTemplate.exchange(requestEntity,NominatimAddressLookupResponseDto[].class);
+		if (exchange.getStatusCode().equals(HttpStatus.BAD_GATEWAY))
+			throw new NominatimException("Nominatim got to many request by" + REFERER);
 		NominatimAddressLookupResponseDto[] body = exchange.getBody();
 		if (body.length<=0)
 			throw new IllegalStateException("could not find any coordinates for this string");
