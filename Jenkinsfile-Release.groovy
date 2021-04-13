@@ -55,11 +55,6 @@ pipeline {
 		        sh 'cd dc-interface/ && mvn -B -U clean test deploy'
             }
         }
-        stage('Deploy ws-interface') {
-            steps {
-		        sh 'cd ws-interface/ && mvn -B -U clean test deploy'
-            }
-        }
         stage('Tag') {
             when {expression {return "${params.BRANCH}" == "master"}}
             steps {
