@@ -30,8 +30,8 @@ do
     $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:id" -v $REP_ID $FOLDER/pom.xml
 
     $CMD -u "/pom:project/pom:version" -v $VERSION $FOLDER/pom.xml
-    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dto']/pom:version" -v $VERSION $FOLDER/pom.xml
-    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dal']/pom:version" -v $VERSION $FOLDER/pom.xml
+    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.odh'][pom:artifactId='dto']/pom:version" -v $VERSION $FOLDER/pom.xml
+    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.odh'][pom:artifactId='dal']/pom:version" -v $VERSION $FOLDER/pom.xml
 done
 
 # WARNING: ws-interface must always use a fixed DTO package version (DTO_VERSION_FOR_WS)
@@ -42,7 +42,7 @@ done
 # happens with data collectors sometimes. The solution is now to keep an old
 # version for webservices, where the API is stable and just update it for data
 # collectors, which can be adapted easily.
-$CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dto']/pom:version" -v $DTO_VERSION_FOR_WS $FOLDER/pom.xml
+$CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.odh'][pom:artifactId='dto']/pom:version" -v $DTO_VERSION_FOR_WS $FOLDER/pom.xml
 
 # UPDATING CONTRIBUTORS.rst...
 bash CONTRIBUTORS.rst

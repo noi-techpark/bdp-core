@@ -270,7 +270,7 @@ final_message() {
     echo
     echo_bold "To get started, let's insert a new Environmentstation and read it afterwards:"
     echo
-    echo_bold "curl -i -X POST -H 'Content-Type:application/json' -d '[{\"id\":\"Hello world\",\"_t\":\"it.bz.idm.bdp.dto.StationDto\"}]' http://127.0.0.1:8080/writer/json/syncStations/Environmentstation"
+    echo_bold "curl -i -X POST -H 'Content-Type:application/json' -d '[{\"id\":\"Hello world\",\"_t\":\"it.bz.odh.dto.StationDto\"}]' http://127.0.0.1:8080/writer/json/syncStations/Environmentstation"
     echo
     echo_bold "...which sould return: HTTP/1.1 200 Content-Length: 0 Date: ..."
     echo

@@ -14,12 +14,12 @@
       <property name="hibernate.hikari.dataSource.user" value="bdpreadonly"/>
       <property name="hibernate.hikari.dataSource.password" value="bdpreadonly"/>
       <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
-      <property name="hibernate.implicit_naming_strategy" value="it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
+      <property name="hibernate.implicit_naming_strategy" value="it.bz.odh.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
     </properties>
   </persistence-unit>
   <persistence-unit name="jpa-persistence-write" transaction-type="RESOURCE_LOCAL">
-    <class>it.bz.idm.bdp.dal.DataType</class>
-    <class>it.bz.idm.bdp.dal.DataTypeMetaData</class>
+    <class>it.bz.odh.dal.DataType</class>
+    <class>it.bz.odh.dal.DataTypeMetaData</class>
     <properties>
       <property name="hibernate.default_schema" value="intime"/>
       <property name="hibernate.dialect" value="org.hibernate.spatial.dialect.postgis.PostgisDialect"/>
@@ -34,7 +34,7 @@
       <property name="hibernate.hikari.dataSource.password" value="bdp"/>
       <property name="hibernate.id.new_generator_mappings" value="true"/>
       <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
-      <property name="hibernate.implicit_naming_strategy" value="it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
+      <property name="hibernate.implicit_naming_strategy" value="it.bz.odh.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
     </properties>
   </persistence-unit>
 </persistence>

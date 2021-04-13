@@ -26,7 +26,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>it.bz.idm.bdp</groupId>
+    <groupId>it.bz.odh</groupId>
     <artifactId>dc-interface</artifactId>
     <version>5.1.2</version>
     <inceptionYear>2019</inceptionYear>
@@ -34,8 +34,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.2.11.RELEASE</spring.version>
-        <spring.security.version>5.3.5.RELEASE</spring.security.version>
+        <spring.version>5.2.13.RELEASE</spring.version>
+        <spring.security.version>5.3.9.RELEASE</spring.security.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
     <repositories>
@@ -47,7 +47,7 @@
     </repositories>
     <dependencies>
         <dependency>
-            <groupId>it.bz.idm.bdp</groupId>
+            <groupId>it.bz.odh</groupId>
             <artifactId>dto</artifactId>
             <version>5.1.2</version>
         </dependency>
@@ -70,17 +70,12 @@
         <dependency>
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty</artifactId>
-            <version>0.9.14.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <version>1.10</version>
+            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
