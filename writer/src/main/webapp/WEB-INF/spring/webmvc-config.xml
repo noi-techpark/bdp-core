@@ -32,7 +32,7 @@
 
 	<!-- The controllers are autodetected POJOs labeled with the @Controller 
 		annotation. -->
-	<context:component-scan base-package="it.bz.odh.writer"
+	<context:component-scan base-package="it.bz.idm.bdp.writer"
 		use-default-filters="false">
 		<context:include-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
