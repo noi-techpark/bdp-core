@@ -32,7 +32,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -53,11 +52,6 @@ import it.bz.idm.bdp.dto.RecordDto;
  */
 @Table(
 	name = "measurementhistory",
-	indexes = {
-		@Index(
-			columnList = "station_id, type_id, timestamp DESC, period"
-		)
-	},
 	uniqueConstraints = {
 		@UniqueConstraint(
 			columnNames = {"station_id", "type_id", "timestamp", "period", "double_value"}
