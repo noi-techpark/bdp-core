@@ -29,8 +29,8 @@
 * dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 * Martin Malfertheiner <martin.malfertheiner@gmail.com>
 * Stefano David <stefano.david.bz@gmail.com>
-* bertolla <patrick.bertolla@gmail.com>
 * Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+* bertolla <patrick.bertolla@gmail.com>
 * Patrick Ohnewein <p.ohnewein@noi.bz.it>
 * PaddyBee <patrick.bertolla@gmail.com>
 * Davide Montesin <d@vide.bz>
