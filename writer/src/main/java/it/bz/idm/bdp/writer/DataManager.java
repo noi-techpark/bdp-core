@@ -46,6 +46,7 @@ import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
@@ -244,5 +245,17 @@ public class DataManager {
 			if (em.isOpen())
 				em.close();
 		}
+	}
+
+	public static ResponseEntity<?> syncEvents(List<EventDto> eventDtos,URI responseLocation) {
+		EntityManager em = JPAUtil.createEntityManager();
+		try {
+			em.getTransaction().begin();
+			em.getTransaction().commit();
+			return ResponseEntity.created(responseLocation).build();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

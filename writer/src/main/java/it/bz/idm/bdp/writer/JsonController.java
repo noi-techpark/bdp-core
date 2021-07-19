@@ -25,6 +25,9 @@ package it.bz.idm.bdp.writer;
 import java.util.Date;
 import java.util.List;
 
+import org.geojson.GeoJsonObject;
+import org.geojson.LngLatAlt;
+import org.geojson.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
@@ -127,5 +131,10 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<?> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
 		return DataManager.syncDataTypes(data, getURIMapping("/types"));
+	}
+
+	@RequestMapping(value = "/syncEvents", method = RequestMethod.POST)
+	public @ResponseBody ResponseEntity<?> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
+		return DataManager.syncEvents(eventDtos,getURIMapping("/events"));
 	}
 }
