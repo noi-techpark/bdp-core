@@ -25,9 +25,6 @@ package it.bz.idm.bdp.writer;
 import java.util.Date;
 import java.util.List;
 
-import org.geojson.GeoJsonObject;
-import org.geojson.LngLatAlt;
-import org.geojson.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

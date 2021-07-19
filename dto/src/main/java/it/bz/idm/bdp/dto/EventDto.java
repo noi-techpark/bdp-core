@@ -27,13 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.geojson.GeoJsonObject;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.vividsolutions.jts.geom.Geometry;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -68,7 +67,7 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
 	private Map<String, Object> metaData = new HashMap<>();
 	
-	private GeoJsonObject geoJson;
+	private Geometry geoJson;
 
 	public String getCategory() {
 		return category;
@@ -86,11 +85,11 @@ public class EventDto implements Serializable {
 		this.subCategory = subCategory;
 	}
 
-	public GeoJsonObject getGeoJson() {
+	public Geometry getGeoJson() {
 		return geoJson;
 	}
 
-	public void setGeoJson(GeoJsonObject geoJson) {
+	public void setGeoJson(Geometry geoJson) {
 		this.geoJson = geoJson;
 	}
 
