@@ -26,7 +26,6 @@ import java.util.List;
 
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
-import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
@@ -77,5 +76,4 @@ public interface IntegreenPushable {
 	 */
 	public abstract List<StationDto> fetchStations(String datasourceName, String origin);
 
-	public abstract Object addEvents(List<EventDto> dtos);
 }

@@ -33,7 +33,6 @@ import org.springframework.web.client.RestTemplate;
 import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
-import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
@@ -54,7 +53,6 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String JSON_ENDPOINT = "json_endpoint";
 	private static final String STATIONS = "/stations/";
 	private static final String PROVENANCE = "/provenance/";
-	private static final String EVENTS = "/events/";
 
 	protected RestTemplate restTemplate = new RestTemplate();
 
@@ -117,10 +115,5 @@ public abstract class JSONPusher extends DataPusher {
 		StationDto[] object = restTemplate.getForObject(url + STATIONS +"{datasourceName}/?origin={origin}",StationDto[].class,datasourceName, origin);
 		return Arrays.asList(object);
 	}
-	@Override
-	public Object addEvents(List<EventDto> dtos) {
-		if (dtos == null)
-			return null;
-		return restTemplate.postForObject(url + EVENTS , dtos, Object.class);
-	}
+
 }

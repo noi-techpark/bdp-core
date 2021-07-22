@@ -35,6 +35,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import it.bz.idm.bdp.DataPusher;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
@@ -56,6 +57,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
     private static final String STATIONS = "/stations/";
     private static final String PROVENANCE = "/provenance/";
+	private static final String EVENTS = "/events/";
 
     @Resource(name = "webClient")
     protected WebClient client;
@@ -133,4 +135,10 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
                 .bodyToMono(StationDto[].class).block();
         return Arrays.asList(object);
     }
+	public Object addEvents(List<EventDto> dtos) {
+		if (dtos == null)
+			return null;
+		return client.post().uri(EVENTS).body(Mono.just(dtos), Object.class).retrieve()
+        .bodyToMono(Object.class).block();
+	}
 }
