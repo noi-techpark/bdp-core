@@ -22,6 +22,7 @@
  */
 package it.bz.idm.bdp.writer;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -130,8 +131,8 @@ public class JsonController extends DataManager {
 		return DataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 
-	@RequestMapping(value = "/syncEvents", method = RequestMethod.POST)
+	@RequestMapping(value = "/event", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<?> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
-		return DataManager.syncEvents(eventDtos,getURIMapping("/events"));
+		return DataManager.addEvents(eventDtos,getURIMapping("/events"));
 	}
 }

@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
+import it.bz.idm.bdp.dal.Event;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.MeasurementString;
@@ -247,10 +248,11 @@ public class DataManager {
 		}
 	}
 
-	public static ResponseEntity<?> syncEvents(List<EventDto> eventDtos,URI responseLocation) {
+	public static ResponseEntity<?> addEvents(List<EventDto> eventDtos,URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			em.getTransaction().begin();
+			Event.add(em, eventDtos);
 			em.getTransaction().commit();
 			return ResponseEntity.created(responseLocation).build();
 		}catch(Exception e) {
