@@ -94,7 +94,7 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 			em.getTransaction().begin();
 			em.createQuery("DELETE FROM Measurement WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM Measurement WHERE type_id IN (SELECT id FROM DataType WHERE cname LIKE '" + prefix + "%')").executeUpdate();
-			em.createQuery("UPDATE Station SET metadata_id = NULL WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
+			em.createQuery("UPDATE Station SET meta_data_id = NULL WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
 			em.createQuery("DELETE FROM BDPRules WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM MetaData WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM Station WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
