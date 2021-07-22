@@ -18,8 +18,8 @@ public class Location {
 	
 	@Id
 	@GeneratedValue(generator = "event_location_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "event_location__gen", sequenceName = "event_location__seq", allocationSize = 1)
-	@ColumnDefault(value = "nextval('event_location__seq')")
+	@SequenceGenerator(name = "event_location_gen", sequenceName = "event_location_seq", allocationSize = 1)
+	@ColumnDefault(value = "nextval('event_location_seq')")
 	protected Long id;
 
 	protected Geometry geometry;

@@ -4,7 +4,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -52,6 +54,9 @@ public class Event {
 	@Lob
 	private String description;
 
+	public Event() {
+		setCreatedOn(new Date());
+	}
 	public String getUuid() {
 		return uuid;
 	}
@@ -123,14 +128,20 @@ public class Event {
 				}
 				if (!dto.getMetaData().isEmpty()) {
 					MetaData metaData = new MetaData();
-					metaData.getJson().putAll(dto.getMetaData());
-					event.setMetaData(metaData);
+					Map<String, Object> json = new HashMap<>();
+					if (!json.equals(dto.getMetaData())) {
+						json.putAll(dto.getMetaData());
+						metaData.setJson(json);
+						event.setMetaData(metaData);
+						em.persist(metaData);
+					}
 				}
 				if (dto.getGeoJson() != null) {
 					Location loc = new Location();
 					loc.setGeometry(dto.getGeoJson());
 					loc.setDescription(dto.getLocationDescription());
 					event.setLocation(loc);
+					em.persist(loc);
 				}
 				em.persist(event);
 			}
