@@ -51,23 +51,32 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("Unique event code describing a single event (ex. fog1458)")
 	protected String id;
 
+	@ApiModelProperty (notes = "The event description")
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("")
+	protected String description;
+
 	@ApiModelProperty (notes = "The event category")
-	@JsonProperty(required = true)
+	@JsonProperty(required = false)
 	@JsonPropertyDescription("")
 	protected String category;
-	
-	@ApiModelProperty (notes = "The events subcategory")
-	@JsonProperty(required = true)
-	@JsonPropertyDescription("")
-	protected String subCategory;
 
 	@JsonPropertyDescription("Who provided the event?")
 	private String origin;
 
 	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
 	private Map<String, Object> metaData = new HashMap<>();
-	
+
+	@ApiModelProperty (notes = "The event location description")
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("")
+	protected String locationDescription;
+
 	private Geometry geoJson;
+
+	private Long eventStart;
+
+	private Long eventEnd;
 
 	public String getCategory() {
 		return category;
@@ -77,24 +86,12 @@ public class EventDto implements Serializable {
 		this.category = category;
 	}
 
-	public String getSubCategory() {
-		return subCategory;
-	}
-
-	public void setSubCategory(String subCategory) {
-		this.subCategory = subCategory;
-	}
-
 	public Geometry getGeoJson() {
 		return geoJson;
 	}
 
 	public void setGeoJson(Geometry geoJson) {
 		this.geoJson = geoJson;
-	}
-
-	public EventDto() {
-		super();
 	}
 
 	public String getId() {
@@ -112,6 +109,38 @@ public class EventDto implements Serializable {
 
 	public Map<String, Object> getMetaData() {
 		return metaData;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Long getEventStart() {
+		return eventStart;
+	}
+
+	public void setEventStart(Long eventStart) {
+		this.eventStart = eventStart;
+	}
+
+	public Long getEventEnd() {
+		return eventEnd;
+	}
+
+	public void setEventEnd(Long eventEnd) {
+		this.eventEnd = eventEnd;
+	}
+
+	public String getLocationDescription() {
+		return locationDescription;
+	}
+
+	public void setLocationDescription(String locationDescription) {
+		this.locationDescription = locationDescription;
 	}
 
 	public void setMetaData(Map<String, Object> metaData) {
