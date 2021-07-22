@@ -28,12 +28,21 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
@@ -41,6 +50,7 @@ import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataTypeDto;
+import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.writer.DataManager;
 
@@ -85,5 +95,26 @@ public class DataRetrievalIT extends WriterTestSetup {
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
 		DataManager.syncDataTypes(dtos, null);
+	}
+	@Test
+	public void testAddEvents() {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+		EventDto t = new EventDto();
+		t.setId(UUID.randomUUID().toString());
+		t.setCategory("category");
+		t.setDescription("description");
+		t.setEventEnd(new Date().getTime());
+		t.setEventStart(new Date().getTime());
+		Coordinate coordinate = new Coordinate(45., 11.);
+		t.setGeoJson(geometryFactory.createPoint(coordinate));
+		t.setLocationDescription("Fake location");
+		Map<String, Object> metaData = new HashMap<>();
+		metaData.put("test", 5);
+		t.setMetaData(metaData );
+		t.setOrigin("origin");
+		List<EventDto> dtos = new ArrayList<EventDto>();
+		dtos.add(t);
+		DataManager.addEvents(dtos, null);
 	}
 }
