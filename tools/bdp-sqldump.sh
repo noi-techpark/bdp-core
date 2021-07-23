@@ -67,7 +67,6 @@ test -f "$DAL" || {
 }
 
 # Do not overwrite existing files, move them to .backup
-EXISTED=""
 test -f "$OUTPUTFILE" && {
     mv "$OUTPUTFILE" "$OUTPUTPATH/schema-$OUTPUTVERSION-dump.sql.backup"
     echo "File '$OUTPUTFILE' exists, we move the original one to $OUTPUTPATH/schema-$OUTPUTVERSION-dump.sql.backup"
@@ -79,12 +78,12 @@ test -f "$OUTPUTFILE" && {
 cd tools
 temp_file=$(mktemp)
 java -cp "$CLASSPATH" -Dlog4j.configuration=src/main/resources/log4j.properties \
-        $GENERATORMAIN $CLASSPREFIX $STRATEGYCLASS $OUTPUTFILE 2>temp_file || {
+        $GENERATORMAIN $CLASSPREFIX $STRATEGYCLASS "$OUTPUTFILE" 2>"$temp_file" || {
     RES=$?
     echo "ERROR: Response code:" $RES
     echo "ERROR: Message:"
-    cat temp_file
-    rm temp_file
+    cat $temp_file
+    rm $temp_file
     cd -
     exit $RES
 }
