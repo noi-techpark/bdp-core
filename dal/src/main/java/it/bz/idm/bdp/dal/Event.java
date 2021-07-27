@@ -44,6 +44,9 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import com.vladmihalcea.hibernate.type.range.Range;
 
 import it.bz.idm.bdp.dto.EventDto;
@@ -52,6 +55,7 @@ import it.bz.idm.bdp.dto.EventDto;
 @Entity
 public class Event {
 	
+	private static WKTReader wktReader = new WKTReader(Station.geometryFactory);
 	
 	private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 	@Id
@@ -160,7 +164,11 @@ public class Event {
 				}
 				if (dto.getGeoJson() != null) {
 					Location loc = new Location();
-					loc.setGeometry(dto.getGeoJson());
+					try {
+						loc.setGeometry(wktReader.read(dto.getGeoJson()));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
 					loc.setDescription(dto.getLocationDescription());
 					event.setLocation(loc);
 					em.persist(loc);

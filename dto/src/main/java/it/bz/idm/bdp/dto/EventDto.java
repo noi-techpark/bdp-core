@@ -32,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.vividsolutions.jts.geom.Geometry;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -72,7 +71,7 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("")
 	protected String locationDescription;
 
-	private Geometry geoJson;
+	private String geoJson;
 
 	private Long eventStart;
 
@@ -86,11 +85,11 @@ public class EventDto implements Serializable {
 		this.category = category;
 	}
 
-	public Geometry getGeoJson() {
+	public String getGeoJson() {
 		return geoJson;
 	}
 
-	public void setGeoJson(Geometry geoJson) {
+	public void setGeoJson(String geoJson) {
 		this.geoJson = geoJson;
 	}
 

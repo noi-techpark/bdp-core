@@ -57,7 +57,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
     private static final String STATIONS = "/stations/";
     private static final String PROVENANCE = "/provenance/";
-	private static final String EVENTS = "/events/";
+	private static final String EVENTS = "/event/";
 
     @Resource(name = "webClient")
     protected WebClient client;
