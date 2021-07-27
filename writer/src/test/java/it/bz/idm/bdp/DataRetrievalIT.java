@@ -107,7 +107,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		t.setEventEnd(new Date().getTime());
 		t.setEventStart(new Date().getTime());
 		Coordinate coordinate = new Coordinate(45., 11.);
-		t.setGeoJson(geometryFactory.createPoint(coordinate));
+		t.setGeoJson(geometryFactory.createPoint(coordinate).toText());
 		t.setLocationDescription("Fake location");
 		Map<String, Object> metaData = new HashMap<>();
 		metaData.put("test", 5);
