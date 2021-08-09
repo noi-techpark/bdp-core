@@ -52,30 +52,48 @@ public class EventDto implements Serializable {
 
 	@ApiModelProperty (notes = "The event description")
 	@JsonProperty(required = false)
-	@JsonPropertyDescription("")
+	@JsonPropertyDescription("Describes the event in few words")
 	protected String description;
 
 	@ApiModelProperty (notes = "The event category")
 	@JsonProperty(required = false)
-	@JsonPropertyDescription("")
+	@JsonPropertyDescription("describes a group in which the event falls e.g. a car accident can be part of the category traffic jam ")
 	protected String category;
 
 	@JsonPropertyDescription("Who provided the event?")
 	private String origin;
 
-	@JsonPropertyDescription("Meta data, that describes this station (can be any valid JSON string)")
+	@JsonPropertyDescription("Meta data, describing additional features of the event")
 	private Map<String, Object> metaData = new HashMap<>();
 
-	@ApiModelProperty (notes = "The event location description")
+	@ApiModelProperty (notes = "The event location")
 	@JsonProperty(required = false)
-	@JsonPropertyDescription("")
+	@JsonPropertyDescription("A short text summarizing the location")
 	protected String locationDescription;
 
-	private String geoJson;
+	@ApiModelProperty (notes = "The geografic representation of the location using the projection EPSG:4326")
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Well-known Text representation of this Geometry(OpenGIS Simple Features Specification)")
+	private String wktGeometry;
 
+	@ApiModelProperty (notes = "The start time of the event")
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("Start time as unix timestamp in milliseconds")
 	private Long eventStart;
 
+	@ApiModelProperty (notes = "The end time of the event")
+	@JsonProperty(required = false)
+	@JsonPropertyDescription("End time as unix timestamp in milliseconds")
 	private Long eventEnd;
+	
+	public String getWktGeometry() {
+		return wktGeometry;
+	}
+
+	public void setWktGeometry(String wktGeometry) {
+		this.wktGeometry = wktGeometry;
+	}
+
 
 	public String getCategory() {
 		return category;
@@ -83,14 +101,6 @@ public class EventDto implements Serializable {
 
 	public void setCategory(String category) {
 		this.category = category;
-	}
-
-	public String getGeoJson() {
-		return geoJson;
-	}
-
-	public void setGeoJson(String geoJson) {
-		this.geoJson = geoJson;
 	}
 
 	public String getId() {
