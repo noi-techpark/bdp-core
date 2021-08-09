@@ -162,10 +162,10 @@ public class Event {
 						em.persist(metaData);
 					}
 				}
-				if (dto.getGeoJson() != null) {
+				if (dto.getWktGeometry() != null) {
 					Location loc = new Location();
 					try {
-						loc.setGeometry(wktReader.read(dto.getGeoJson()));
+						loc.setGeometry(wktReader.read(dto.getWktGeometry()));
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
