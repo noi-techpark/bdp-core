@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
@@ -204,9 +205,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
                         MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
                         long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
+                        MeasurementAbstract latestJSONMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementJSON.class);
+                        long latestJSONMeasurementTime = (latestJSONMeasurement != null) ? latestJSONMeasurement.getTimestamp().getTime() : 0;
 
                         SimpleRecordDto newestStringDto = null;
                         SimpleRecordDto newestNumberDto = null;
+                        SimpleRecordDto newestJsonDto = null;
                         for (RecordDto recordDto : dataRecords) {
 
                             /*
@@ -241,7 +245,18 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                     newestStringDto = simpleRecordDto;
                                 }
                                 givenDataOK = true;
-                            } else {
+                            }else if (valueObj instanceof Map) {
+                                if (latestStringMeasurementTime < dateOfMeasurement) {
+                                    Map<String,Object> value = (Map<String,Object>) valueObj;
+                                    MeasurementJSONHistory record = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    record.setProvenance(provenance);
+                                    em.persist(record);
+                                }
+                                if (newestJsonDto == null || newestJsonDto.getTimestamp() < newestJsonDto.getTimestamp()) {
+                                    newestJsonDto = simpleRecordDto;
+                                }
+                                givenDataOK = true;
+                            }else {
                                 logger.error("pushRecords: Unsupported data format for "
                                         + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
                                         + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
@@ -275,6 +290,19 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 latestStringMeasurement.setValue(valueString);
                                 latestStringMeasurement.setProvenance(provenance);
                                 em.merge(latestStringMeasurement);
+                            }
+                        }
+                        if (newestJsonDto != null) {
+                            Map<String,Object> jsonValue = (Map<String,Object>) newestStringDto.getValue();
+                            if (latestJSONMeasurement == null) {
+                                latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+                                latestJSONMeasurement.setProvenance(provenance);
+                                em.persist(latestJSONMeasurement);
+                            } else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
+                                latestJSONMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
+                                latestJSONMeasurement.setValue(jsonValue);
+                                latestJSONMeasurement.setProvenance(provenance);
+                                em.merge(latestJSONMeasurement);
                             }
                         }
 
