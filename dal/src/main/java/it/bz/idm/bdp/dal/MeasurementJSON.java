@@ -89,7 +89,7 @@ public class MeasurementJSON extends MeasurementAbstract {
 	 */
 	public MeasurementJSON(Station station, DataType type, Map<String, Object> json, Date timestamp, Integer period) {
 		super(station,type,timestamp,period);
-		this.json = json;
+		this.jsonValue = json;
 	}
 
 	public Long getId() {
@@ -102,14 +102,14 @@ public class MeasurementJSON extends MeasurementAbstract {
 	
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private Map<String, Object> json;
-
-	public Map<String, Object> getJson() {
-		return json;
+	private Map<String, Object> jsonValue;
+	
+	public Map<String, Object> getJsonValue() {
+		return jsonValue;
 	}
 
-	public void setJson(Map<String, Object> json) {
-		this.json = json;
+	public void setJsonValue(Map<String, Object> jsonValue) {
+		this.jsonValue = jsonValue;
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public class MeasurementJSON extends MeasurementAbstract {
 	@Override
 	public void setValue(Object value) {
 		if (value instanceof Map) {
-			this.setJson(((Map<String,Object>)value));
+			this.setJsonValue(((Map<String,Object>)value));
 		}
 	}
 }

@@ -75,14 +75,14 @@ public class MeasurementJSONHistory extends MeasurementAbstractHistory {
 
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private Map<String, Object> json;
-	
-	public Map<String, Object> getJson() {
-		return json;
+	private Map<String, Object> jsonValue;
+
+	public Map<String, Object> getJsonValue() {
+		return jsonValue;
 	}
 
-	public void setJson(Map<String, Object> json) {
-		this.json = json;
+	public void setJsonValue(Map<String, Object> jsonValue) {
+		this.jsonValue = jsonValue;
 	}
 
 	public MeasurementJSONHistory() {
@@ -115,13 +115,13 @@ public class MeasurementJSONHistory extends MeasurementAbstractHistory {
 	@Override
 	public void setValue(Object value) {
 		if (value instanceof Map) {
-			this.setJson(((Map<String,Object>)value));
+			this.setJsonValue(((Map<String,Object>)value));
 		}
 	}
 
 	@Override
 	public Object getValue() {
-		return json;
+		return jsonValue;
 	}
 
 }
