@@ -293,13 +293,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }
                         }
                         if (newestJsonDto != null) {
-                            Map<String,Object> jsonValue = (Map<String,Object>) newestStringDto.getValue();
+                            Map<String,Object> jsonValue = (Map<String,Object>) newestJsonDto.getValue();
                             if (latestJSONMeasurement == null) {
-                                latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+                                latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestJsonDto.getTimestamp()), newestJsonDto.getPeriod());
                                 latestJSONMeasurement.setProvenance(provenance);
                                 em.persist(latestJSONMeasurement);
-                            } else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
-                                latestJSONMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
+                            } else if (newestJsonDto.getTimestamp() > latestStringMeasurementTime) {
+                                latestJSONMeasurement.setTimestamp(new Date(newestJsonDto.getTimestamp()));
                                 latestJSONMeasurement.setValue(jsonValue);
                                 latestJSONMeasurement.setProvenance(provenance);
                                 em.merge(latestJSONMeasurement);
