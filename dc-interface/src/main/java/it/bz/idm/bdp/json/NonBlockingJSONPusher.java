@@ -140,6 +140,9 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		if (dtos == null)
 			return null;
 		this.pushProvenance();
+		for (EventDto dto: dtos) {
+			dto.setProvenance(this.provenance.getUuid());
+		}
         return client.post().uri(EVENTS).body(Mono.just(dtos), Object.class).retrieve()
         .bodyToMono(Object.class).block();
 	}
