@@ -32,6 +32,7 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,31 +55,42 @@ import it.bz.idm.bdp.dto.EventDto;
 @Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid"}))
 @Entity
 public class Event {
-	
+
 	private static WKTReader wktReader = new WKTReader(Station.geometryFactory);
-	
+
 	private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 	@Id
 	@GeneratedValue(generator = "event_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "event_gen", sequenceName = "event_seq", allocationSize = 1)
 	@ColumnDefault(value = "nextval('event_seq')")
 	protected Long id;
-	
+
 	private String uuid;
 	private String category;
 
 	private Date createdOn;
-	
+
 	private Range<LocalDateTime> eventInterval;
-	
+
 	@ManyToOne
 	private Location location;
-	
+
 	@OneToOne
 	private MetaData metaData;
-	
+
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	private Provenance provenance;
+
 	@Lob
 	private String description;
+
+	public Provenance getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(Provenance provenance) {
+		this.provenance = provenance;
+	}
 
 	public Event() {
 		setCreatedOn(new Date());
@@ -100,7 +112,7 @@ public class Event {
 	}
 
 	public Date getCreatedOn() {
-		return createdOn;	
+		return createdOn;
 	}
 
 	public void setCreatedOn(Date createdOn) {
@@ -187,6 +199,6 @@ public class Event {
 
 	public static Event find(String id) {
 		return null;
-		
+
 	}
 }
