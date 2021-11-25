@@ -135,10 +135,12 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
                 .bodyToMono(StationDto[].class).block();
         return Arrays.asList(object);
     }
+
 	public Object addEvents(List<EventDto> dtos) {
 		if (dtos == null)
 			return null;
-		return client.post().uri(EVENTS).body(Mono.just(dtos), Object.class).retrieve()
+		this.pushProvenance();
+        return client.post().uri(EVENTS).body(Mono.just(dtos), Object.class).retrieve()
         .bodyToMono(Object.class).block();
 	}
 }

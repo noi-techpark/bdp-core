@@ -22,8 +22,6 @@
  */
 package it.bz.idm.bdp;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.configuration.Configuration;
@@ -31,7 +29,6 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.springframework.stereotype.Component;
 
-import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 
 /**

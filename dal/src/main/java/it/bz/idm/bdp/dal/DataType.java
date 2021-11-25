@@ -86,7 +86,7 @@ public class DataType {
 	private String rtype;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "type", fetch = FetchType.LAZY)
-	private Collection<DataTypeMetaData> metaDataHistory = new ArrayList<DataTypeMetaData>();
+	private Collection<DataTypeMetaData> metaDataHistory = new ArrayList<>();
 
 	@OneToOne(cascade = CascadeType.PERSIST)
 	private DataTypeMetaData metaData;
@@ -211,8 +211,8 @@ public class DataType {
 				.addSql("GROUP BY type, m.period")
 				.buildResultList(Object[].class);
 
-		List<TypeDto> types = new ArrayList<TypeDto>();
-		Map<String,TypeDto> dtos = new HashMap<String, TypeDto>();
+		List<TypeDto> types = new ArrayList<>();
+		Map<String,TypeDto> dtos = new HashMap<>();
 
 		for (Object obj : resultList){
 			Object[] results = (Object[]) obj;
@@ -225,7 +225,7 @@ public class DataType {
 				dto.setId(id);
 				dto.setUnit(type.getCunit());
 				if (type.getDescription() != null) {
-					Map<String, String> desc = new HashMap<String, String>();
+					Map<String, String> desc = new HashMap<>();
 					desc.put("default", type.getDescription().trim());
 					dto.setDesc(desc);
 				}

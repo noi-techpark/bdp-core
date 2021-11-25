@@ -246,7 +246,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 }
                                 givenDataOK = true;
                             }else if (valueObj instanceof Map) {
-                                if (latestStringMeasurementTime < dateOfMeasurement) {
+                                if (latestJSONMeasurementTime < dateOfMeasurement) {
                                     Map<String,Object> value = (Map<String,Object>) valueObj;
                                     MeasurementJSONHistory record = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
                                     record.setProvenance(provenance);

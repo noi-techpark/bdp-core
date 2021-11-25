@@ -45,7 +45,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vladmihalcea.hibernate.type.range.Range;
@@ -58,7 +57,6 @@ public class Event {
 
 	private static WKTReader wktReader = new WKTReader(Station.geometryFactory);
 
-	private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 	@Id
 	@GeneratedValue(generator = "event_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "event_gen", sequenceName = "event_seq", allocationSize = 1)
@@ -191,10 +189,11 @@ public class Event {
 	}
 
 	public static String generateRangeString(EventDto dto) {
-		String eventStart = df.format(new Date(dto.getEventStart()));
-		String eventEnd= df.format(new Date(dto.getEventEnd()));
-		String rangeString = "["+eventStart+","+eventEnd+"]";
-		return rangeString;
+		// SimpleDateFormat is not thread-safe, so we better do not mark it as "static"
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+		String eventStart = dateFormat.format(new Date(dto.getEventStart()));
+		String eventEnd = dateFormat.format(new Date(dto.getEventEnd()));
+		return "[" + eventStart + "," + eventEnd +"]";
 	}
 
 	public static Event find(String id) {

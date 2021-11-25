@@ -85,7 +85,12 @@ public class EventDto implements Serializable {
 	@JsonProperty(required = false)
 	@JsonPropertyDescription("End time as unix timestamp in milliseconds")
 	private Long eventEnd;
-	
+
+	@ApiModelProperty (notes = "The data collector name and version that inserts this event")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("The UUID of a data collector name and version")
+	private String provenance;
+
 	public String getWktGeometry() {
 		return wktGeometry;
 	}
@@ -162,6 +167,14 @@ public class EventDto implements Serializable {
 				this.metaData.put(entry.getKey(), entry.getValue());
 			}
 		}
+	}
+
+	public String getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(String provenanceUuid) {
+		this.provenance = provenanceUuid;
 	}
 
 	@JsonIgnore

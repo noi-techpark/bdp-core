@@ -77,7 +77,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
 	public abstract void setValue(Object value);
 
-	public MeasurementAbstract() {
+	protected MeasurementAbstract() {
 		this.created_on = new Date();
 	}
 
@@ -87,7 +87,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param timestamp UTC time of the measurement detection
 	 * @param period standard interval between 2 measurements
 	 */
-	public MeasurementAbstract(Station station, DataType type, Date timestamp, Integer period) {
+	protected MeasurementAbstract(Station station, DataType type, Date timestamp, Integer period) {
 		this.station = station;
 		this.type = type;
 		this.timestamp = timestamp;
