@@ -150,6 +150,10 @@ public class Event {
 	}
 
 	public static void add(EntityManager em, List<EventDto> eventDtos) {
+		if (eventDtos == null || eventDtos.isEmpty()) {
+			return;
+		}
+		Provenance provenance = Provenance.findByUuid(em, eventDtos.get(0).getProvenance());
 		for (EventDto dto : eventDtos) {
 			Event event = Event.find(dto.getId());
 			if (event == null) { // avoid saving the same event multiple times
@@ -157,6 +161,7 @@ public class Event {
 				event.setUuid(dto.getId());
 				event.setCategory(dto.getCategory());
 				event.setDescription(dto.getDescription());
+				event.setProvenance(provenance);
 				if (dto.getEventStart() != null && dto.getEventEnd() != null) {
 					String rangeString = generateRangeString(dto);
 					Range<LocalDateTime> eventInterval = Range.localDateTimeRange(rangeString);
