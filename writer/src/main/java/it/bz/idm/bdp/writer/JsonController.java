@@ -22,7 +22,6 @@
  */
 package it.bz.idm.bdp.writer;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,12 +88,12 @@ public class JsonController extends DataManager {
 
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	public @ResponseBody List<String> stationsGetTypes() {
-		return super.getStationTypes();
+		return DataManager.getStationTypes();
 	}
 
 	@RequestMapping(value = "/types", method = RequestMethod.GET)
 	public @ResponseBody List<String> dataTypes() {
-		return super.getDataTypes();
+		return DataManager.getDataTypes();
 	}
 
 	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
@@ -105,7 +104,7 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
 	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
 											@PathVariable String stationType) {
-		return super.pushRecords(stationType, null, dataMap);
+		return DataManager.pushRecords(stationType, null, dataMap);
 	}
 
 	@Deprecated
