@@ -44,15 +44,21 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.TypeDef;
 
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
 import com.vladmihalcea.hibernate.type.range.Range;
 
 import it.bz.idm.bdp.dto.EventDto;
 
 @Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid"}))
 @Entity
+@TypeDef(
+    typeClass = PostgreSQLRangeType.class,
+    defaultForType = Range.class
+)
 public class Event {
 
 	private static WKTReader wktReader = new WKTReader(Station.geometryFactory);
