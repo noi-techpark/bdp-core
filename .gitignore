@@ -1,7 +1,6 @@
 *.class
 *.orig
-persistence.xml
-*.mde 
+*.mde
 *.she
 *.old
 *.xmle
@@ -9,8 +8,13 @@ persistence.xml
 *.backup
 *.diste
 .mvn
-.vscode
 
+.vscode
+*.code-workspace
+
+# Ignore all persistence.xml files, except if they end in .dist
+persistence.xml*
+!persistence.xml.dist
 
 # Taken from https://github.com/spring-projects/spring-boot/blob/master/.gitignore
 *#
