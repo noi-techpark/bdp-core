@@ -190,6 +190,8 @@ public class DataManager {
 	}
 
 	/**
+	 * @deprecated
+	 *
 	 * Does nothing right now
 	 * @param stations list of data transfer objects
 	 */
