@@ -1,5 +1,5 @@
 ##### VSCODE / REST Client
-# Create a .env file and set the corresponding variables 
+# Create a .env file and set the corresponding variables
 # See all $dotenv fields below
 
 ### Get access token use the writer
@@ -10,12 +10,15 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=password
 &username=pmoser
 &password={{$dotenv PASSWORD}}
-&client_id=odh-mobility-datacollector
+&client_id=odh-mobility-datacollector-test
 &client_secret={{$dotenv CLIENT_SECRET}}
 
-### Post some data to the writer
+#@host=https://mobility.share.opendatahub.testingmachine.eu
+@host=http://localhost:8081
 @authtoken = {{login.response.body.access_token}}
 
-GET http://tomcat.testingmachine.eu/writer/json/stations
+### Post some data to the writer
+
+GET {{host}}/json/stations
 Authorization: Bearer {{authtoken}}
 
