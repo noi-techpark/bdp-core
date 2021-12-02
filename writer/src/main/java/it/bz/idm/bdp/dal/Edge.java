@@ -22,6 +22,9 @@
  */
 package it.bz.idm.bdp.dal;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,12 +34,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
 import org.hibernate.annotations.ColumnDefault;
-
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  * This class is a model of an edge with meta data.
@@ -57,15 +55,22 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 public class Edge {
 
 	public static final String GEOM_CRS = "EPSG:4326";
-	public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
+	public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(
+		new PrecisionModel(),
+		4326
+	);
 
 	@Id
 	@GeneratedValue(generator = "edge_gen", strategy = GenerationType.SEQUENCE)
-	@SequenceGenerator(name = "edge_gen", sequenceName = "edge_seq", allocationSize = 1)
+	@SequenceGenerator(
+		name = "edge_gen",
+		sequenceName = "edge_seq",
+		allocationSize = 1
+	)
 	@ColumnDefault(value = "nextval('edge_seq')")
 	protected Long id;
 
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "GEOMETRY")
 	protected LineString linegeometry;
 
 	@Column(nullable = false)

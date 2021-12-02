@@ -173,7 +173,7 @@ public class Event {
 		}
 		Provenance provenance = Provenance.findByUuid(em, eventDtos.get(0).getProvenance());
 		for (EventDto dto : eventDtos) {
-			Event event = Event.find(dto.getId());
+			Event event = Event.find(em, dto.getId());
 			if (event == null) { // avoid saving the same event multiple times
 				event = new Event();
 				event.setUuid(dto.getId());

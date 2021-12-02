@@ -92,7 +92,7 @@ public class Station {
 	@Column(nullable = false)
 	protected String name;
 
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "GEOMETRY")
 	protected Point pointprojection;
 
 	@Column(nullable = false)

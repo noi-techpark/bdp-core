@@ -41,7 +41,7 @@ public class UtilityTest {
 		dto.setEventStart(startTime.atZone(ZoneId.systemDefault()).toEpochSecond()*1000);
 		dto.setEventEnd(endTime.atZone(ZoneId.systemDefault()).toEpochSecond()*1000);
 		String generateRangeString = Event.generateRangeString(dto);
-		
-		assertEquals("[2021-05-12 04:20:00.000000,2021-05-12 06:20:00.000000]", generateRangeString);
+
+		assertEquals("[2021-05-12 04:20:00.000000,2021-05-12 06:20:00.000001)", generateRangeString);
 	}
 }

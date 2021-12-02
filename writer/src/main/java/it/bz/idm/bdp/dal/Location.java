@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -37,15 +38,16 @@ import com.vividsolutions.jts.geom.Geometry;
 @Table(name = "location")
 @Entity
 public class Location {
-	
+
 	@Id
 	@GeneratedValue(generator = "event_location_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "event_location_gen", sequenceName = "event_location_seq", allocationSize = 1)
 	@ColumnDefault(value = "nextval('event_location_seq')")
 	protected Long id;
 
+	@Column(nullable = true, columnDefinition = "GEOMETRY")
 	protected Geometry geometry;
-	
+
 	@Lob
 	private String description;
 
@@ -64,5 +66,5 @@ public class Location {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 }
