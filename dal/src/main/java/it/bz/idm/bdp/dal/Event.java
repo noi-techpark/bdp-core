@@ -51,6 +51,7 @@ import com.vividsolutions.jts.io.WKTReader;
 import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
 import com.vladmihalcea.hibernate.type.range.Range;
 
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.EventDto;
 
 @Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid"}))
@@ -135,8 +136,19 @@ public class Event {
 		return eventInterval;
 	}
 
+	/**
+	 * Set the event interval as follows:
+	 *
+	 * <code>[lower-bound, upper-bound)</code>
+	 *
+	 * That is, a half-open interval, which is useful for moving window aggregates,
+	 * because each window does not overlap with the next, which might happen
+	 * with a closed interval on boundaries.
+	 *
+	 * @param eventInterval
+	 */
 	public void setEventInterval(Range<LocalDateTime> eventInterval) {
-		this.eventInterval = eventInterval;
+		this.eventInterval = Range.closedOpen(eventInterval.lower(), eventInterval.upper());
 	}
 
 	public MetaData getMetaData() {
@@ -203,12 +215,16 @@ public class Event {
 		// SimpleDateFormat is not thread-safe, so we better do not mark it as "static"
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 		String eventStart = dateFormat.format(new Date(dto.getEventStart()));
-		String eventEnd = dateFormat.format(new Date(dto.getEventEnd()));
-		return "[" + eventStart + "," + eventEnd +"]";
+		String eventEnd = dateFormat.format(new Date(dto.getEventEnd() + 1));
+		return "[" + eventStart + "," + eventEnd +")";
 	}
 
-	public static Event find(String id) {
-		return null;
-
+	public static Event find(EntityManager em, String uuid) {
+		return QueryBuilder
+			.init(em)
+			.addSql("SELECT e FROM Event e where 1=1")
+			.setParameterIfNotNull("uuid", uuid, "and uuid = :uuid")
+			.buildSingleResultOrNull(Event.class);
 	}
+
 }
