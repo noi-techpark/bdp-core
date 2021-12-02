@@ -22,10 +22,6 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
     - [WRITER](#writer)
       - [Authentication](#authentication)
       - [dc-interface](#dc-interface)
-    - [READER](#reader)
-      - [Authentication](#authentication-1)
-      - [Authorization](#authorization)
-      - [ws-interface](#ws-interface)
     - [DAL](#dal)
       - [Station](#station)
       - [DataType](#datatype)
@@ -154,36 +150,6 @@ Each point is represented as timestamp and value. To better understand the
 structure, see the
 [DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
 source.
-
-  
-### READER
-
-**NB: This is the old version of the reader, please use the new one instead, which is called `ninja`. Have a look at the [Ninja README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/master/README.md) for details.**
-
-The reader is an API exposing data through a [JSON REST
-service](ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java). It
-depends on the DAL module and retrieves data by querying the underlying database
-through JPA query language.
-
-#### Authentication
-The reader side handles authentication for non-opendata through an OAuth authentication mechanism using [JSON Web Tokens (JWT)](https://jwt.io/) through the [Java JWT library](https://github.com/jwtk/jjwt).
-
-> If you want to access closed data, write a request to info@opendatahub.bz.it.
-
-#### Authorization
-Each user we create is associated to a *ROLE*, which has a set of permissions. The rules which define these permissions are inserted manually into `/dal/src/main/resources/META-INF/sql/opendatarules.sql`.
-
-Two default roles exist:
-- *ADMIN*, which has full access on all existing data in the database
-- *GUEST*, which has restricted access to all data published under an open data license. Everybody who is not authenticated is therefore automatically using this role to access data.
-
-#### ws-interface
-If you create a Java client to access data from the reader's API, you may use
-this library. Just include the `ws-interface` [maven
-dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
-in your project and implement the abstract [JSON client
-implementation](ws-interface/src/main/java/it/bz/idm/bdp/ws/RestClient.java).
-
 
 ### DAL
 
