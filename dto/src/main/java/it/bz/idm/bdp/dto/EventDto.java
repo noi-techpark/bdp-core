@@ -76,14 +76,14 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("Well-known Text representation of this Geometry(OpenGIS Simple Features Specification)")
 	private String wktGeometry;
 
-	@ApiModelProperty (notes = "The start time of the event")
+	@ApiModelProperty (notes = "The start time of the event (included, we have a half-open interval)")
 	@JsonProperty(required = false)
 	@JsonPropertyDescription("Start time as unix timestamp in milliseconds")
 	private Long eventStart;
 
-	@ApiModelProperty (notes = "The end time of the event")
+	@ApiModelProperty (notes = "The end time of the event (excluded, we have a half-open interval)")
 	@JsonProperty(required = false)
-	@JsonPropertyDescription("End time as unix timestamp in milliseconds")
+	@JsonPropertyDescription("End time as unix timestamp in milliseconds (excluded)")
 	private Long eventEnd;
 
 	@ApiModelProperty (notes = "The data collector name and version that inserts this event")
