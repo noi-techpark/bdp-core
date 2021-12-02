@@ -22,16 +22,6 @@ pipeline {
                 sh 'cd dc-interface && mvn -B -U clean test install'
             }
         }
-        stage('Test - WS-INTERFACE') {
-            steps {
-                sh 'cd ws-interface && mvn -B -U clean test install'
-            }
-        }
-        stage('Test - Reader') {
-            steps {
-                sh 'cd reader && mvn -B -U clean test'
-            }
-        }
         stage('Test - Writer') {
             steps {
                 sh 'cd writer && mvn -B -U clean test'
