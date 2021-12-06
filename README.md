@@ -21,17 +21,17 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
   - [CORE](#core)
     - [WRITER](#writer)
       - [Authentication](#authentication)
-      - [dc-interface](#dc-interface)
-    - [DAL](#dal)
-      - [Station](#station)
-      - [DataType](#datatype)
-      - [Record](#record)
-      - [Edge](#edge)
+      - [DAL](#dal)
+        - [Station](#station)
+        - [DataType](#datatype)
+        - [Record](#record)
+        - [Edge](#edge)
     - [DTO](#dto)
       - [StationDto](#stationdto)
       - [DataTypeDto](#datatypedto)
       - [SimpleRecordDto](#simplerecorddto)
   - [Installation guide](#installation-guide)
+    - [dc-interface](#dc-interface)
   - [Flight rules](#flight-rules)
     - [I want to generate a new schema dump out of Hibernate's Entity classes](#i-want-to-generate-a-new-schema-dump-out-of-hibernates-entity-classes)
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
@@ -99,59 +99,7 @@ curl -X GET "https://share.mobility.api.opendatahub.bz.it/json/stations" \
 Write an email to `help@opendatahub.bz.it`, if you want to get the `client_secret`
 and an Open Data Hub OAuth2 account.
 
-#### dc-interface
-The dc-interface contains the API through which components can communicate with
-the BDP writer. Just include the `dc-interface` [maven
-dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
-in your project and use the existing [JSON client
-implementation](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
-
-The API contains several methods. We describe the most important methods here,
-for the rest see
-[JSONPusher.java](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java)
-implementation.
-
-**`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
-
-This method is required to get the date of the last valid record
-
-
-**`Object syncStations(List<StationDto> data)`**
-
-This method is used to create, update, and deactivate stations of a specific
-typology; `data` must be a list of StationDto's
-
-**`Object syncDataTypes(List<DataTypeDto> data)`**
-
-This method is used to create and update(and therefore upsert) data types;
-`data` must be a list of DataTypeDto
-
-**`Object pushData(DataMapDto<? extends RecordDtoImpl> dto)`**
-
-This is the place, where you place all the data you want to pass to the writer.
-The data in here gets saved in form of a tree.
-
-Each branch can have multiple child branches, but can also have data itself,
-which means it can have indefinite depth. Right now, by our internal conventions
-we store everything on the second level, like this:
-
-```
-+- Station
-   |
-   +- DataType
-      |
-      `-Data
-```
-
-As value you can put a list of
-[SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java),
-which contains all the data points with a specific station and  a specific type.
-Each point is represented as timestamp and value. To better understand the
-structure, see the
-[DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
-source.
-
-### DAL
+#### DAL
 
 DAL is the layer which communicates with the DB underneath used by the so called
 reader and writer modules. The communication is handled through the ORM
@@ -190,7 +138,7 @@ See the [Installation guide](#installation-guide) for a fast initial setup.
 The following chapters describe the most important entities: `station`, `data
 type`, `record` and `edge`.
 
-#### Station
+##### Station
 The `station` represents the origin of the data which needs an identifier, a
 name, a coordinate and a so called `stationtype`. It also should contain the
 origin of the data, the current *active* state (if actively used or not) and if
@@ -207,7 +155,7 @@ have additional information like address, municipality, opening times etc.,
 which would be modelled as meta data entry.
 
 
-#### DataType
+##### DataType
 The `data type` represents the typology of the data in form of an unique name
 and a unit. Description and metric of measurements can also be provided.
 
@@ -215,7 +163,7 @@ and a unit. Description and metric of measurements can also be provided.
 >A `temperature` can have a unit `°C` and can be an `average` value of the last
 >300 seconds (called `period`).
 
-#### Record
+##### Record
 A `record` represents a single measurement containing a `value`, a `timestamp` ,
 a `data-type`, a `station`, and a `provenance`. Provenance indicates which data
 collector in which version collected the data. It is needed to implement
@@ -227,7 +175,7 @@ cleansing or bug fixes.
 > type example) of `20.4` for a meteo station called `89935GW` (see station
 > example).
 
-#### Edge
+##### Edge
 An edge represents the spatial geometry between two stations. We model this
 internally as a station triple: `origin, edge, destination`, because currently
 only stations can be exposed through our API. We add a line-geometry to that
@@ -289,8 +237,60 @@ own. If you want to fill your DB with data, you will either create your own
 module, which works with the writer API or you can follow the guide on
 https://github.com/noi-techpark/bdp-helloworld/tree/master/data-collectors/my-first-data-collector
 where it's shown hot to use an already existing JAVA-client. If you also need to
-expose this data you can either use the reader API or use the existing client
-interface `ws-interface`.
+expose this data you can either use the NINJA API.
+
+### dc-interface
+The dc-interface contains the API through which components can communicate with
+the BDP writer. Just include the `dc-interface` [maven
+dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
+in your project and use the existing [JSON client
+implementation](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
+
+The API contains several methods. We describe the most important methods here,
+for the rest see
+[JSONPusher.java](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java)
+implementation.
+
+**`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
+
+This method is required to get the date of the last valid record
+
+
+**`Object syncStations(List<StationDto> data)`**
+
+This method is used to create, update, and deactivate stations of a specific
+typology; `data` must be a list of StationDto's
+
+**`Object syncDataTypes(List<DataTypeDto> data)`**
+
+This method is used to create and update(and therefore upsert) data types;
+`data` must be a list of DataTypeDto
+
+**`Object pushData(DataMapDto<? extends RecordDtoImpl> dto)`**
+
+This is the place, where you place all the data you want to pass to the writer.
+The data in here gets saved in form of a tree.
+
+Each branch can have multiple child branches, but can also have data itself,
+which means it can have indefinite depth. Right now, by our internal conventions
+we store everything on the second level, like this:
+
+```
++- Station
+   |
+   +- DataType
+      |
+      `-Data
+```
+
+As value you can put a list of
+[SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java),
+which contains all the data points with a specific station and  a specific type.
+Each point is represented as timestamp and value. To better understand the
+structure, see the
+[DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
+source.
+
 
 ## Flight rules
 
