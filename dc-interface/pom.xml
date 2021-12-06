@@ -29,7 +29,7 @@
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dc-interface</artifactId>
     <version>6.0.0-SNAPSHOT</version>
-    <inceptionYear>2019</inceptionYear>
+    <inceptionYear>2021</inceptionYear>
     <description>Data Collector Interface for the Big Data Platform</description>
 
     <properties>
@@ -153,32 +153,6 @@
                 <configuration>
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>../GPL-3.0-header.txt</header>
-                    <properties>
-                        <owner>NOI Techpark - Südtirol / Alto Adige</owner>
-                        <email>info@opendatahub.bz.it</email>
-                    </properties>
-                    <excludes>
-                        <exclude>bin/**</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>**/*.java.orig</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
         <extensions>
