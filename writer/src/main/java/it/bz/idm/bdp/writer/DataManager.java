@@ -24,6 +24,7 @@ package it.bz.idm.bdp.writer;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Event;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
+import it.bz.idm.bdp.dal.MeasurementJSON;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
@@ -136,9 +138,12 @@ public class DataManager {
 			BDPRole role = BDPRole.fetchAdminRole(em);
 
 			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
-			Date date1 = new Measurement().getDateOfLastRecord(em, station, dataType, period, role);
-			Date date2 = new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role);
-			return date1.after(date2) ? date1 : date2;
+			List<Date> dates = new ArrayList<>();
+			dates.add(new Measurement().getDateOfLastRecord(em, station, dataType, period, role));
+			dates.add(new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role));
+			dates.add(new MeasurementJSON().getDateOfLastRecord(em, station, dataType, period, role));
+			Collections.sort(dates);
+			return dates.get(dates.size() - 1);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		} finally {
