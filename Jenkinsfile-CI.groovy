@@ -12,11 +12,6 @@ pipeline {
                 sh 'cd dto && mvn -B -U clean test install'
             }
         }
-        stage('Test - DAL') {
-            steps {
-                sh 'cd dal && mvn -B -U clean test install'
-            }
-        }
         stage('Test - DC-INTERFACE') {
             steps {
                 sh 'cd dc-interface && mvn -B -U clean test install'
