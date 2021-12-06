@@ -36,12 +36,11 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -55,7 +54,7 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
+@ComponentScan(basePackages = "it.bz.idm.bdp")
 public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test

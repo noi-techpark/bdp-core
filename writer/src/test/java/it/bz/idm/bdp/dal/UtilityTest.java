@@ -23,15 +23,40 @@
 package it.bz.idm.bdp.dal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.junit.Test;
 
+import it.bz.idm.bdp.dal.util.PropertiesWithEnv;
 import it.bz.idm.bdp.dto.EventDto;
 
 public class UtilityTest {
+
+	@Test
+	public void testPropertiesWithEnv() {
+		PropertiesWithEnv prop = new PropertiesWithEnv();
+		prop.setProperty("a.test", "${__TEST_ENV_VAR}");
+		try {
+			prop.substitueEnv();
+			fail("We expect an IllegalArgumentException!");
+		} catch (IllegalArgumentException ex) {
+			/* We expect this */
+		}
+
+		prop = new PropertiesWithEnv();
+		prop.setProperty("a.test", "${__TEST_ENV_VAR:default-if-missing}");
+		prop.substitueEnv();
+		assertEquals("default-if-missing", prop.getProperty("a.test"));
+
+		prop = new PropertiesWithEnv();
+		prop.setProperty("a.test", "${__TEST_ENV_VAR:-default-if-missing}");
+		prop.addEnv("__TEST_ENV_VAR", "this-is-a-test");
+		prop.substitueEnv();
+		assertEquals("this-is-a-test", prop.getProperty("a.test"));
+	}
 
 	@Test
 	public void testRangeCasting() {

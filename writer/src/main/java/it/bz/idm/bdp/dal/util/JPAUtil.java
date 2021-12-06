@@ -25,7 +25,6 @@ package it.bz.idm.bdp.dal.util;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -49,13 +48,16 @@ import javax.persistence.metamodel.ManagedType;
  */
 public class JPAUtil {
 
-	public static EntityManagerFactory emFactory;
-	private static final Properties properties = new Properties();
+	private static EntityManagerFactory emFactory;
+	private static final PropertiesWithEnv properties = new PropertiesWithEnv();
+
+	private JPAUtil() {}
+
 	static {
 		try {
-			properties.load(JPAUtil.class.getClassLoader().getResourceAsStream("META-INF/persistence.properties"));
-			emFactory = Persistence.createEntityManagerFactory(properties.getProperty("persistenceunit"));
-		}catch(Throwable ex){
+			properties.load(JPAUtil.class.getClassLoader().getResourceAsStream("application.properties"));
+			emFactory = Persistence.createEntityManagerFactory("jpa-persistence-local", properties.getStringMap());
+		} catch(Exception ex) {
 			System.err.println("Cannot create EntityManagerFactory.");
 			ex.printStackTrace(System.err);
 			throw new ExceptionInInitializerError(ex);
@@ -76,7 +78,7 @@ public class JPAUtil {
 	 */
 	public static List<String> getInstanceTypes(EntityManager em) {
 		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
-		List<String> types = new ArrayList<String>();
+		List<String> types = new ArrayList<>();
 		for (ManagedType<?> entity : managedTypes) {
 			types.add(entity.getJavaType().getSimpleName());
 		}
@@ -107,7 +109,7 @@ public class JPAUtil {
 	 * @throws Exception
 	 */
 	public static void executeNativeQueries(final InputStream query) throws Exception {
-		List<String> commands = new ArrayList<String>();
+		List<String> commands = new ArrayList<>();
 		String finalSQL = "";
 
 		// Remove all comments from SQL

@@ -33,7 +33,7 @@ import javax.persistence.TypedQuery;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.bz.idm.bdp.dal.DataType;
@@ -45,7 +45,7 @@ import it.bz.idm.bdp.dal.authentication.BDPRules;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations= {"/META-INF/spring/applicationContext.xml"})
+@ComponentScan(basePackages = "it.bz.idm.bdp")
 public class SecurityIT extends WriterTestSetup {
 
 	@Test

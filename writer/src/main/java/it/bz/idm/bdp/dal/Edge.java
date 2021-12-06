@@ -70,7 +70,7 @@ public class Edge {
 	@ColumnDefault(value = "nextval('edge_seq')")
 	protected Long id;
 
-	@Column(nullable = true, columnDefinition = "GEOMETRY")
+	@Column(nullable = true, columnDefinition = "geometry")
 	protected LineString linegeometry;
 
 	@Column(nullable = false)
