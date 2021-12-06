@@ -46,4 +46,9 @@ COPY --from=build /code/target/writer.war /usr/local/tomcat/webapps/ROOT.war
 FROM archive as run
 CMD ["catalina.sh", "run"]
 
+# Only used by the CI pipeline on Jenkins
+FROM base as ci
+WORKDIR /code
+COPY dto /code/dto
+RUN cd dto && mvn -B -U -DskipTests install
 
