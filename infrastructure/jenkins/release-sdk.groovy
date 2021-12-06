@@ -1,8 +1,8 @@
 pipeline {
     agent {
         dockerfile {
-            filename 'docker/dockerfile-java'
-            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+            filename 'infrastructure/docker/Dockerfile'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins)'
         }
     }
 
@@ -42,7 +42,7 @@ pipeline {
         }
         stage('Preparation for release') {
             steps {
-                sh "./quickrelease.sh $REL_TYPE '${params.TAG}'"
+                sh "./infrastructure/utils/quickrelease.sh $REL_TYPE '${params.TAG}'"
             }
         }
         stage('Deploy dto') {

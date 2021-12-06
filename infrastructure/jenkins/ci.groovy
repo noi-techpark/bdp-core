@@ -1,8 +1,8 @@
 pipeline {
     agent {
         dockerfile {
-            filename 'docker/dockerfile-java'
-            additionalBuildArgs '--build-arg JENKINS_USER_ID=`id -u jenkins` --build-arg JENKINS_GROUP_ID=`id -g jenkins`'
+            filename 'infrastructure/docker/Dockerfile'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins)'
         }
     }
 
@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Test - DC-INTERFACE') {
             steps {
-                sh 'cd dc-interface && mvn -B -U clean test install'
+                sh 'cd dc-interface && mvn -B -U clean test'
             }
         }
         stage('Test - Writer') {

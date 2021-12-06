@@ -27,6 +27,6 @@ services:
   app:
     image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     build:
-      context: ../../
-      dockerfile: writer/infrastructure/docker/Dockerfile
+      context: ../
+      dockerfile: infrastructure/docker/Dockerfile
       target: archive
