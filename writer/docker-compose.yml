@@ -22,14 +22,41 @@
 #
 
 version: "3.4"
-
 services:
   app:
     build:
       context: ../
       dockerfile: writer/infrastructure/docker/Dockerfile
-      target: archive
-    volumes: 
-        - ./:/code
+      target: build
+    network_mode: bridge
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      MAVEN_CONFIG: /var/maven/.m2
+      MAVEN_OPTS: -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8990
+    entrypoint: mvn -Duser.home=/var/maven spring-boot:run
     ports:
-      - "1010:8080"
+      - 8999:8999
+      - 8990:8990
+    volumes:
+      - ~/.m2/:/var/maven/.m2
+      - ./:/code
+    working_dir: /code
+    tty: true
+
+  # In case you had already one and changed some parameters here, docker-compose
+  # might reuse the existing one and not update your password, DB or role... so
+  # stop the containers and execute 'docker-compose rm -fv postgres' to get rid
+  # of cached databases...
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_DB: bdp
+      POSTGRES_USER: bdp
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./tmp/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "5555:5432"
