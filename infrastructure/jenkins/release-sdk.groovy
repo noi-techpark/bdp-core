@@ -13,18 +13,17 @@ pipeline {
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because the maven AWS plugin needs them to retrieve meta data
     environment {
-        AWS_ACCESS_KEY=credentials('s3_repo_username')
-        AWS_SECRET_KEY=credentials('s3_repo_password')
-        REL_TYPE="${params.BRANCH == "development" ? "snapshot" : "release"}"
-        VERSION="${params.BRANCH == "development" ? "${params.TAG}-SNAPSHOT" : "${params.TAG}"}"
-        S3_REPO_ID="${params.BRANCH == "development" ? "maven-repo.opendatahub.bz.it-snapshot" : "maven-repo.opendatahub.bz.it-release"}"
+        AWS_ACCESS_KEY = credentials('s3_repo_username')
+        AWS_SECRET_KEY = credentials('s3_repo_password')
+        REL_TYPE = "${params.BRANCH == "master" ? "release" : "snapshot"}"
+        VERSION = "${params.BRANCH == "master" ? "${params.TAG}" : "${params.TAG}-SNAPSHOT"}"
+        S3_REPO_ID = "${params.BRANCH == "master" ? "maven-repo.opendatahub.bz.it-release": "maven-repo.opendatahub.bz.it-snapshot"}"
     }
 
     stages {
         stage('Check if BRANCH is correct and TAG exists') {
             steps {
-                sh "test '${params.BRANCH}' = 'development' -o '${params.BRANCH}' = 'master' || false"
-                sh "test '${params.BRANCH}' = 'development' || { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true; }"
+                sh "test '${params.BRANCH}' = 'master' && { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true; }"
             }
         }
         stage('Configure') {
