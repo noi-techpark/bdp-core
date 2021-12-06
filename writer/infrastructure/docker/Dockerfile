@@ -32,9 +32,9 @@ FROM base as dev
 FROM base as build
 
 WORKDIR /code
-COPY dal /code/dal
+COPY dto /code/dto
 COPY GPL-3.0-header.txt /code
-RUN cd dal && mvn -B -U -DskipTests install && rm -rf dal
+RUN cd dto && mvn -B -U -DskipTests install && rm -rf dto
 COPY writer/src /code/src
 COPY writer/pom.xml /code/
 RUN mvn package -DfinalName=ROOT
