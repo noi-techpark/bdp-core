@@ -33,7 +33,6 @@ FROM base as build
 
 WORKDIR /code
 COPY dto /code/dto
-COPY GPL-3.0-header.txt /code
 RUN cd dto && mvn -B -U -DskipTests install && rm -rf dto
 COPY writer/src /code/src
 COPY writer/pom.xml /code/
