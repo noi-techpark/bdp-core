@@ -24,96 +24,182 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>war</packaging>
-    <groupId>it.bz.idm.bdp</groupId>
-    <artifactId>writer</artifactId>
-    <version>5.4.2-SNAPSHOT</version>
-    <name>writer</name>
-    <inceptionYear>2019</inceptionYear>
-    <description>Data Writer for the Big Data Platform</description>
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>war</packaging>
+	<groupId>it.bz.idm.bdp</groupId>
+	<artifactId>writer</artifactId>
+	<version>6.0.0-SNAPSHOT</version>
+	<name>writer</name>
+	<inceptionYear>2021</inceptionYear>
+	<description>Data Writer for the Big Data Platform</description>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.9.RELEASE</version>
-        <relativePath/>
-        <!-- lookup parent from repository -->
-    </parent>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.9.RELEASE</version>
+		<relativePath/>
+		<!-- lookup parent from repository -->
+	</parent>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <java.version>1.8</java.version>
-        <finalName>writer</finalName>
-    </properties>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<finalName>writer</finalName>
+		<geotools.version>14.5</geotools.version>
+		<hibernate.version>5.4.2.Final</hibernate.version>
+	</properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.keycloak.bom</groupId>
-                <artifactId>keycloak-adapter-bom</artifactId>
-                <version>4.1.0.Final</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>4.1.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>it.bz.idm.bdp</groupId>
-            <artifactId>dal</artifactId>
-            <version>5.4.2-SNAPSHOT</version>
-        </dependency>
-        <!-- To create JSON schema descriptions out of classes -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jsonSchema</artifactId>
-            <version>2.10.2</version>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
 
-    <repositories>
-        <repository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
-        </repository>
-    </repositories>
+		<!-- To create JSON schema descriptions out of classes -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jsonSchema</artifactId>
+			<version>2.10.2</version>
+		</dependency>
+		<!-- DAL dependencies -->
+		<dependency>
+			<groupId>it.bz.idm.bdp</groupId>
+			<artifactId>dto</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+		</dependency>
 
-    <build>
-        <finalName>${finalName}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+		<!-- Hibernate: ORM with spatial entity support (Postgis, Geometry, ...) -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+
+		<!-- Hibernate: Rangetype support-->
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.14.0</version>
+		</dependency>
+
+		<!-- Hibernate: Connection pooling -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-hikaricp</artifactId>
+		</dependency>
+
+		<!-- geotools dependencies -->
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-api</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<!-- StringSubstitutor: Replace env vars in .properties files -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.9</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>Hibernate Spatial repo</id>
+			<url>http://www.hibernatespatial.org/repository</url>
+		</repository>
+		<!-- add JBOSS repository for easy access to Hibernate libraries -->
+		<repository>
+			<id>JBOSS</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>osgeo-alt</id>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>
+		<repository>
+			<id>geomajas</id>
+			<name>Geomajas Maven Repository</name>
+			<url>http://maven.geomajas.org/(http://maven.geomajas.org/)</url>
+		</repository>
+		<repository>
+			<id>maven-repo.opendatahub.bz.it-snapshot</id>
+			<url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<finalName>${finalName}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
