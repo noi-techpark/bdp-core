@@ -9,22 +9,25 @@ pipeline {
     stages {
         stage('Test - DTO') {
             steps {
-                sh 'cd dto && mvn -B -U clean test'
+                sh '''
+                    cd dto
+                    mvn -B -U -Duser.home=$WORKSPACE clean test install
+                '''
             }
         }
         stage('Test - DC-INTERFACE') {
             steps {
                 sh '''
-                    (cd dto && mvn -B -U -DskipTests install)
-                    (cd dc-interface && mvn -B -U clean test)
+                    cd dc-interface
+                    mvn -B -U -Duser.home=$WORKSPACE clean test
                 '''
             }
         }
         stage('Test - Writer') {
             steps {
                 sh '''
-                    (cd dto && mvn -B -U -DskipTests install)
-                    (cd writer && mvn -B -U clean test)
+                    cd writer
+                    mvn -B -U -Duser.home=$WORKSPACE clean test
                 '''
             }
         }
