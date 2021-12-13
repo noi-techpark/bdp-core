@@ -25,9 +25,13 @@ pipeline {
     }
 
     stages {
-        stage('Check if BRANCH is correct and TAG exists') {
+        stage('Check if BRANCH is correct and TAG exists (only master)') {
+            when {expression {return "${params.BRANCH}" == "master"}}
             steps {
-                sh "test '${params.BRANCH}' = 'master' && { echo CHECK IF TAG ${VERSION} ALREADY EXISTS; git rev-parse ${VERSION} >/dev/null 2>&1 && false || true; }"
+                sh """
+                    echo FAIL IF TAG ${VERSION} ALREADY EXISTS!
+                    git rev-parse ${VERSION} &> /dev/null && false || true
+                """
             }
         }
         stage('Configure') {
@@ -64,7 +68,7 @@ pipeline {
                 '''
             }
         }
-        stage('Tag') {
+        stage('Tag (only master)') {
             when {expression {return "${params.BRANCH}" == "master"}}
             steps {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
