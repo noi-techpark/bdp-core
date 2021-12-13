@@ -2,7 +2,7 @@ pipeline {
     agent {
         dockerfile {
             filename 'infrastructure/docker/Dockerfile'
-            additionalBuildArgs '--build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins) --target base'
+            additionalBuildArgs '--build-arg JENKINS_USER_ID=$(id -u jenkins) --build-arg JENKINS_GROUP_ID=$(id -g jenkins) --target cd'
         }
     }
 
@@ -36,15 +36,15 @@ pipeline {
         }
         stage('Configure') {
             steps {
-                sh 'sed -i -e "s/<\\/settings>$//g\" $WORKSPACE/.m2/settings.xml'
-                sh 'echo "    <servers>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "        <server>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "            <id>${S3_REPO_ID}</id>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "            <username>${AWS_ACCESS_KEY}</username>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "            <password>${AWS_SECRET_KEY}</password>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "        </server>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "    </servers>" >> $WORKSPACE/.m2/settings.xml'
-                sh 'echo "</settings>" >> $WORKSPACE/.m2/settings.xml'
+                sh 'sed -i -e "s/<\\/settings>$//g\" ~/.m2/settings.xml'
+                sh 'echo "    <servers>" >> ~/.m2/settings.xml'
+                sh 'echo "        <server>" >> ~/.m2/settings.xml'
+                sh 'echo "            <id>${S3_REPO_ID}</id>" >> ~/.m2/settings.xml'
+                sh 'echo "            <username>${AWS_ACCESS_KEY}</username>" >> ~/.m2/settings.xml'
+                sh 'echo "            <password>${AWS_SECRET_KEY}</password>" >> ~/.m2/settings.xml'
+                sh 'echo "        </server>" >> ~/.m2/settings.xml'
+                sh 'echo "    </servers>" >> ~/.m2/settings.xml'
+                sh 'echo "</settings>" >> ~/.m2/settings.xml'
             }
         }
         stage('Preparation for release') {
@@ -56,7 +56,7 @@ pipeline {
             steps {
                 sh '''
                     cd dto
-                    mvn -B -U -Duser.home=$WORKSPACE clean test install deploy
+                    mvn -B -U clean test install deploy
                 '''
             }
         }
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 sh '''
                     cd dc-interface
-                    mvn -B -U -Duser.home=$WORKSPACE clean test deploy
+                    mvn -B -U clean test deploy
                 '''
             }
         }
