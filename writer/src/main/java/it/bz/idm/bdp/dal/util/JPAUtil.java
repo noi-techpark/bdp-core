@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -55,9 +54,16 @@ public class JPAUtil {
 
 	static {
 		try {
-			properties.load(JPAUtil.class.getClassLoader().getResourceAsStream("application.properties"));
-			emFactory = Persistence.createEntityManagerFactory("jpa-persistence-local", properties.getStringMap());
-		} catch(Exception ex) {
+			properties.load(
+				JPAUtil.class.getClassLoader()
+					.getResourceAsStream("application.properties")
+			);
+			emFactory =
+				Persistence.createEntityManagerFactory(
+					"jpa-persistence",	// This must correspond to the persistence.xml persistence-unit tag
+					properties.getStringMap("hikari")
+				);
+		} catch (Exception ex) {
 			System.err.println("Cannot create EntityManagerFactory.");
 			ex.printStackTrace(System.err);
 			throw new ExceptionInInitializerError(ex);
@@ -68,7 +74,7 @@ public class JPAUtil {
 		return emFactory.createEntityManager();
 	}
 
-	public static void close(){
+	public static void close() {
 		emFactory.close();
 	}
 
@@ -77,7 +83,10 @@ public class JPAUtil {
 	 * @return names of all existing jpa entities
 	 */
 	public static List<String> getInstanceTypes(EntityManager em) {
-		Set<ManagedType<?>> managedTypes = em.getEntityManagerFactory().getMetamodel().getManagedTypes();
+		Set<ManagedType<?>> managedTypes = em
+			.getEntityManagerFactory()
+			.getMetamodel()
+			.getManagedTypes();
 		List<String> types = new ArrayList<>();
 		for (ManagedType<?> entity : managedTypes) {
 			types.add(entity.getJavaType().getSimpleName());
@@ -90,12 +99,19 @@ public class JPAUtil {
 	 * @return name of the jpa entity/class of the given object
 	 */
 	public static String getEntityNameByObject(Object obj) {
-		for (EntityType<?> type: emFactory.getMetamodel().getEntities()) {
-			if (obj.getClass().getTypeName().equals(type.getJavaType().getName()))
-					return type.getName();
+		for (EntityType<?> type : emFactory.getMetamodel().getEntities()) {
+			if (
+				obj
+					.getClass()
+					.getTypeName()
+					.equals(type.getJavaType().getName())
+			) return type.getName();
 		}
-		throw new JPAException("ERROR: Cannot get any entity name for object "
-				+ obj.getClass().getTypeName() + ". Class not found.");
+		throw new JPAException(
+			"ERROR: Cannot get any entity name for object " +
+			obj.getClass().getTypeName() +
+			". Class not found."
+		);
 	}
 
 	/**
@@ -108,7 +124,8 @@ public class JPAUtil {
 	 *            The query input stream
 	 * @throws Exception
 	 */
-	public static void executeNativeQueries(final InputStream query) throws Exception {
+	public static void executeNativeQueries(final InputStream query)
+		throws Exception {
 		List<String> commands = new ArrayList<>();
 		String finalSQL = "";
 
@@ -134,28 +151,32 @@ public class JPAUtil {
 				 * Clean up some whitespace overkill to make the queries human-readable.
 				 */
 				cmd = cmd.trim().replaceAll("\\s+", " ").replace(":", "\\:");
-				if (cmd.length() > 0)
-					commands.add(cmd + ";");
+				if (cmd.length() > 0) commands.add(cmd + ";");
 			}
 		}
 
 		// Execute all remaining commands
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-		em.getTransaction().begin();
-		for (String cmd : commands) {
-			if (cmd.toLowerCase().startsWith("select")) {
-				em.createNativeQuery(cmd).getSingleResult();
-			} else {
-				em.createNativeQuery(cmd).executeUpdate();
+			em.getTransaction().begin();
+			for (String cmd : commands) {
+				if (cmd.toLowerCase().startsWith("select")) {
+					em.createNativeQuery(cmd).getSingleResult();
+				} else {
+					em.createNativeQuery(cmd).executeUpdate();
+				}
+				System.err.println(
+					"Execution from input stream successful: " + cmd
+				);
 			}
-			System.err.println("Execution from input stream successful: " + cmd);
-		}
-		em.getTransaction().commit();
-		}catch(Exception e) {
+			em.getTransaction().commit();
+		} catch (Exception e) {
 			e.printStackTrace();
-			throw new PersistenceException("ERROR: Native querry failed: " + e.getMessage(),e);
-		}finally {
+			throw new PersistenceException(
+				"ERROR: Native querry failed: " + e.getMessage(),
+				e
+			);
+		} finally {
 			em.close();
 		}
 	}

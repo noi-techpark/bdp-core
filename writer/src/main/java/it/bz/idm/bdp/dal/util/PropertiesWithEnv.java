@@ -18,11 +18,6 @@ public class PropertiesWithEnv extends Properties {
 		substitueEnv();
 	}
 
-	@Override
-	public synchronized Object setProperty(String key, String value) {
-		return super.setProperty(key, value);
-	}
-
 	public void substitueEnv() {
 		Map<String, String> environment = new HashMap<>(localEnv);
 		environment.putAll(System.getenv());
@@ -34,10 +29,12 @@ public class PropertiesWithEnv extends Properties {
 		}
 	}
 
-	public Map<String, String> getStringMap() {
+	public Map<String, String> getStringMap(final String prefix) {
 		Map<String, String> result = new HashMap<>();
 		for (final String name : super.stringPropertyNames()) {
-			result.put(name, super.getProperty(name));
+			if (prefix == null || prefix.isEmpty() || name.startsWith(prefix)) {
+				result.put(name, super.getProperty(name));
+			}
 		}
 		return result;
 	}

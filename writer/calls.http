@@ -8,10 +8,10 @@ POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=password
-&username=pmoser
-&password={{$dotenv PASSWORD}}
+&username={{$dotenv AUTH_TEST_USERNAME}}
+&password={{$dotenv AUTH_TEST_PASSWORD}}
 &client_id=odh-mobility-datacollector-test
-&client_secret={{$dotenv CLIENT_SECRET}}
+&client_secret={{$dotenv AUTH_TEST_CLIENT_SECRET}}
 
 #@host=https://mobility.share.opendatahub.testingmachine.eu
 @host=http://localhost:8081
