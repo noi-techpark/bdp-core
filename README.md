@@ -158,7 +158,7 @@ Connection pooling is handled by [HikariCP](https://github.com/noi-techpark/bdp-
 In some cases geometry transformations and elaborations were needed to be executed on application level and therefore [Geotools](http://www.geotools.org/) was added as dependency.
 
 To configure the DAL module to communicate with your database you need to provide configuration and credentials:
->`src/main/resources/META-INF/persistence.xml`
+>[`dal/src/main/resources/META-INF/persistence.xml`](https://github.com/noi-techpark/bdp-core/blob/master/dal/src/main/resources/META-INF/persistence.xml.dist)
 
 As you will see 2 persistence-units are configured. One is meant for the reader with preferably a read-only user and the other one for the writer which performs all the transactions.
 
