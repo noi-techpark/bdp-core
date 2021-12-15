@@ -28,7 +28,7 @@
 
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dto</artifactId>
-    <version>5.4.0</version>
+    <version>5.4.1</version>
     <inceptionYear>2019</inceptionYear>
     <description>Data Transport Objects for an object-relational mapping</description>
 
