@@ -48,7 +48,7 @@ COPY dto /code/dto
 RUN cd dto && mvn -B -U -DskipTests install && rm -rf dto
 COPY writer/src /code/src
 COPY writer/pom.xml /code/
-RUN mvn package -DfinalName=ROOT
+RUN mvn -B -DfinalName=ROOT -DskipTests package
 
 # Archive
 FROM tomcat:8.5-jdk8-openjdk-slim-buster as archive

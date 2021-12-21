@@ -15,7 +15,7 @@ grant_type=password
 
 #@host=https://mobility.share.opendatahub.testingmachine.eu
 @host=http://localhost:8081
-#@host=http://localhost:8999
+@host=http://localhost:8999
 @authtoken = {{login.response.body.access_token}}
 
 ### Post some data to the writer
