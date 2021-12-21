@@ -47,7 +47,7 @@
 		<java.version>1.8</java.version>
 		<finalName>writer</finalName>
 		<geotools.version>14.5</geotools.version>
-		<hibernate.version>5.4.2.Final</hibernate.version>
+		<hibernate.version>5.4.33.Final</hibernate.version>
 		<log4j2.version>2.17.0</log4j2.version>
 	</properties>
 
