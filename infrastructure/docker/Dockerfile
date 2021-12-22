@@ -52,7 +52,7 @@ RUN mvn -B -DfinalName=ROOT -DskipTests package
 
 # Archive
 FROM tomcat:8.5-jdk8-openjdk-slim-buster as archive
-COPY --from=build /code/target/writer.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=build /code/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
 
 # Run
 FROM archive as run
