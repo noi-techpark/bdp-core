@@ -29,17 +29,40 @@ public class PropertiesWithEnv extends Properties {
 		}
 	}
 
-	public Map<String, String> getStringMap(final String prefix) {
+	public Map<String, String> getStringMap() {
 		Map<String, String> result = new HashMap<>();
-		for (final String name : super.stringPropertyNames()) {
-			if (prefix == null || prefix.isEmpty() || name.startsWith(prefix)) {
-				result.put(name, super.getProperty(name));
-			}
+		for (final String name: super.stringPropertyNames()) {
+			result.put(name, super.getProperty(name));
 		}
 		return result;
 	}
 
 	public void addEnv(final String key, final String value) {
 		localEnv.put(key, value);
+	}
+
+	@Override
+	public synchronized int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((localEnv == null) ? 0 : localEnv.hashCode());
+		return result;
+	}
+
+	@Override
+	public synchronized boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PropertiesWithEnv other = (PropertiesWithEnv) obj;
+		if (localEnv == null) {
+			if (other.localEnv != null)
+				return false;
+		} else if (!localEnv.equals(other.localEnv))
+			return false;
+		return true;
 	}
 }

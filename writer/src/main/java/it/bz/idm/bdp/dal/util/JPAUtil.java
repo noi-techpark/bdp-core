@@ -61,8 +61,9 @@ public class JPAUtil {
 			emFactory =
 				Persistence.createEntityManagerFactory(
 					"jpa-persistence",	// This must correspond to the persistence.xml persistence-unit tag
-					properties.getStringMap("hikari")
+					properties.getStringMap()
 				);
+
 		} catch (Exception ex) {
 			System.err.println("Cannot create EntityManagerFactory.");
 			ex.printStackTrace(System.err);

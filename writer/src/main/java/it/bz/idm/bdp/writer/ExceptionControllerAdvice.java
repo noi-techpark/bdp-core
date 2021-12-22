@@ -77,7 +77,7 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 	}
 	@ExceptionHandler(PersistenceException.class)
 	public ResponseEntity<Object> handlePropertyValueException(PersistenceException ex) {
-		if (ex.getCause() != null && ex.getCause() instanceof PropertyValueException) {
+		if (ex.getCause() instanceof PropertyValueException) {
 			JPAException jpaex = new JPAException("Invalid JSON: " + ex.getCause().getMessage());
 			return buildResponse(HttpStatus.BAD_REQUEST, jpaex);
 		}
