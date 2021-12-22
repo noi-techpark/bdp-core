@@ -60,7 +60,6 @@ pipeline {
             steps {
                 sh """
                     ./infrastructure/utils/quickrelease.sh '${params.bdp_type}' '${params.bdp_version}'
-                    cd writer
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
                     echo 'PROJECT=${PROJECT}' >> .env
                     echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
