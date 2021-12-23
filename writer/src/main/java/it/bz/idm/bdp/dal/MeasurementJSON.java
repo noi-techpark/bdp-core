@@ -65,11 +65,11 @@ import it.bz.idm.bdp.dal.authentication.BDPRole;
 public class MeasurementJSON extends MeasurementAbstract {
 
     /**
-	 * 
+	 *
 	 */
 	@Transient
 	private static final long serialVersionUID = 8498633392410463424L;
-	
+
 	@Id
 	@GeneratedValue(generator = "measurement_json_gen", strategy = GenerationType.SEQUENCE)
 	@SequenceGenerator(name = "measurement_json_gen", sequenceName = "measurement_json_seq", allocationSize = 1)
@@ -99,11 +99,11 @@ public class MeasurementJSON extends MeasurementAbstract {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
 	private Map<String, Object> jsonValue;
-	
+
 	public Map<String, Object> getJsonValue() {
 		return jsonValue;
 	}

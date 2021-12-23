@@ -45,7 +45,7 @@ public class Location {
 	@ColumnDefault(value = "nextval('event_location_seq')")
 	protected Long id;
 
-	@Column(nullable = true, columnDefinition = "GEOMETRY")
+	@Column(nullable = true)
 	protected Geometry geometry;
 
 	@Lob

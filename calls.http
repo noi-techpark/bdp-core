@@ -20,13 +20,16 @@ grant_type=password
 
 
 ### Get all stationtypes from the writer
-GET {{host}}/json/stations/MeteoStation
+GET {{host}}/json/stations
 Authorization: Bearer {{authtoken}}
 
 ### Get a single stationtype from the writer
 GET {{host}}/json/stations/MeteoStation
 Authorization: Bearer {{authtoken}}
 
+### Get a single stationtype from the writer
+GET {{host}}/json/provenance
+Authorization: Bearer {{authtoken}}
 
 ### Get all datatypes from the writer
 GET {{host}}/json/types

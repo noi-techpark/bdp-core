@@ -255,7 +255,7 @@ public class DataManager {
 		}
 	}
 
-	public static ResponseEntity<?> addEvents(List<EventDto> eventDtos,URI responseLocation) {
+	public static ResponseEntity<?> addEvents(List<EventDto> eventDtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			em.getTransaction().begin();
