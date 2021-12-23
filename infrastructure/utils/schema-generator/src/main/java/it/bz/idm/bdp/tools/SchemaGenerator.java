@@ -127,7 +127,7 @@ public class SchemaGenerator {
 		 * a warning on stderr, which cannot be avoided with a try-catch...
 		 */
 		PGSimpleDataSource ds = new PGSimpleDataSource();
-		ds.setServerName(env.getOrDefault("ODH_SG_SERVER", PGSERVER_DEFAULT));
+		// ds.setServerName(env.getOrDefault("ODH_SG_SERVER", PGSERVER_DEFAULT));
 		ds.setDatabaseName(env.get("ODH_SG_DBNAME"));
 		ds.setUser(env.getOrDefault("ODH_SG_USER", PGUSER_DEFAULT));
 		ds.setPassword(env.get("ODH_SG_PASSWD"));

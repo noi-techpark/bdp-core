@@ -58,3 +58,5 @@ application-local.properties
 __DEPRECATED__
 target/
 /tmp
+
+schema-*-dump.sql

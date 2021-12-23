@@ -23,9 +23,10 @@
     SPDX-License-Identifier: GPL-3.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<packaging>war</packaging>
+	<packaging>${packaging}</packaging>	<!-- jar packaging needed by infrastructure/utils/schema-generator -->
 	<groupId>it.bz.idm.bdp</groupId>
 	<artifactId>writer</artifactId>
 	<version>6.0.0-SNAPSHOT</version>
@@ -205,14 +206,34 @@
 		</repository>
 	</repositories>
 
-	<build>
-		<finalName>${finalName}</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+	<profiles>
+		<!-- war packaging for the REST API deployment -->
+		<profile>
+			<id>default</id>
+			<properties>
+				<packaging>war</packaging>
+			</properties>
+			<build>
+				<finalName>${finalName}</finalName>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+
+		<!-- jar packaging needed by infrastructure/utils/schema-generator -->
+		<profile>
+			<id>generator</id>
+			<properties>
+				<packaging>jar</packaging>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

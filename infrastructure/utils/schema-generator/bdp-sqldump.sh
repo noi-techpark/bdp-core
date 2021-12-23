@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VERSION="1.0.0"
+VERSION="2.0.0"
 
 echo
 echo "## BIG DATA PLATFORM -- SQL GENERATOR v$VERSION ##"
@@ -25,9 +25,12 @@ BDPROOT=$(pwd)
 OUTPUTVERSION=$1
 
 # Jar files and classpath
-GEN="$BDPROOT/tools/target/schemagenerator-$VERSION.jar"
-DTO="$BDPROOT/dto/target/dto-$OUTPUTVERSION.jar"
-DAL="$BDPROOT/dal/target/dal-$OUTPUTVERSION.jar"
+GENPATH="$BDPROOT/infrastructure/utils/schema-generator"
+DTOPATH="$BDPROOT/dto"
+DALPATH="$BDPROOT/writer"
+GEN="$GENPATH/target/schemagenerator-$VERSION.jar"
+DTO="$DTOPATH/target/dto-$OUTPUTVERSION.jar"
+DAL="$DALPATH/target/classes"
 CLASSPATH="$DTO:$DAL:$GEN"
 
 # Classes and paths
@@ -37,32 +40,27 @@ STRATEGYCLASS='it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
 
 # Output
 OUTPUTPATH="$BDPROOT/dal/src/main/resources/META-INF/sql"
+OUTPUTPATH="$BDPROOT"
 OUTPUTFILE="$OUTPUTPATH/schema-$OUTPUTVERSION-dump.sql"
 
-cd tools
-mvn clean package
-cd -
+(cd infrastructure/utils/schema-generator && mvn clean package)
 test -f "$GEN" || {
     echo "ERROR: $GEN not found. Maybe you have a version mismatch with $VERSION. See:"
-    ls $(dirname $GEN)/*.jar
+    ls "$(dirname "$GEN")/*.jar"
     exit 1
 }
 
-cd dto
-mvn clean install
-cd -
+(cd "$DTOPATH" && mvn clean install)
 test -f "$DTO" || {
     echo "ERROR: $DTO not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
-    ls $(dirname $DTO)/*.jar
+    ls "$(dirname "$DTO")"
     exit 1
 }
 
-cd dal
-mvn clean install
-cd -
-test -f "$DAL" || {
+(cd "$DALPATH" && mvn -Dpackaging=jar clean install)
+test -d "$DAL" || {
     echo "ERROR: $DAL not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
-    ls $(dirname $DAL)/*.jar
+    ls "$(dirname "$DAL")"
     exit 1
 }
 
@@ -75,15 +73,17 @@ test -f "$OUTPUTFILE" && {
 # Separate multiple .jar files defined inside parameter $1 with : (colon)
 # We override log4j properties to minimize verbose outputs
 # A known issue throws always exceptions, therefore we pipe it to /dev/null
-cd tools
-temp_file=$(mktemp)
-java -cp "$CLASSPATH" -Dlog4j.configuration=src/main/resources/log4j.properties \
-        $GENERATORMAIN $CLASSPREFIX $STRATEGYCLASS "$OUTPUTFILE" 2>"$temp_file" || {
+cd "$GENPATH"
+TMPFILE=$(mktemp)
+java -cp "$CLASSPATH" \
+        $GENERATORMAIN $CLASSPREFIX $STRATEGYCLASS \
+		"$OUTPUTFILE" \
+		2>"$TMPFILE" || {
     RES=$?
     echo "ERROR: Response code:" $RES
     echo "ERROR: Message:"
-    cat $temp_file
-    rm $temp_file
+    cat "$TMPFILE"
+    rm "$TMPFILE"
     cd -
     exit $RES
 }
