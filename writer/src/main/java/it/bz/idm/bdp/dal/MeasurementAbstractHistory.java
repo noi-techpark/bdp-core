@@ -38,8 +38,8 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
@@ -62,7 +62,7 @@ import it.bz.idm.bdp.dto.SimpleRecordDto;
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class MeasurementAbstractHistory implements Serializable {
 
-    private static final Logger logger = LogManager.getLogger(MeasurementAbstractHistory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MeasurementAbstractHistory.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -86,7 +86,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
     public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
 
-    public MeasurementAbstractHistory() {
+    protected MeasurementAbstractHistory() {
         this.created_on = new Date();
     }
     /**
@@ -95,7 +95,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
      * @param timestamp UTC time of the measurement detection
      * @param period standard interval between 2 measurements
      */
-    public MeasurementAbstractHistory(Station station, DataType type, Date timestamp, Integer period) {
+    protected MeasurementAbstractHistory(Station station, DataType type, Date timestamp, Integer period) {
         this.station = station;
         this.type = type;
         this.timestamp = timestamp;
@@ -176,7 +176,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-                    logger.error("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
+                    LOG.error("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
                     continue;
                 }
                 stationFound = true;
@@ -184,13 +184,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-                            logger.error("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
+                            LOG.error("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
                             continue;
                         }
                         typeFound = true;
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
-                            logger.error("pushRecords: Empty data set. Skipping...");
+                            LOG.error("pushRecords: Empty data set. Skipping...");
                             continue;
                         }
                         em.getTransaction().begin();
@@ -198,7 +198,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
                         if (period == null){
-                            logger.error("pushRecords: No period specified. Skipping...");
+                            LOG.error("pushRecords: No period specified. Skipping...");
                             continue;
                         }
                         MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
@@ -226,9 +226,9 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             if (valueObj instanceof Number) {
                                 if (latestNumberMeasurementTime < dateOfMeasurement) {
                                     Double value = ((Number)valueObj).doubleValue();
-                                    MeasurementHistory record = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
-                                    record.setProvenance(provenance);
-                                    em.persist(record);
+                                    MeasurementHistory rec = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    rec.setProvenance(provenance);
+                                    em.persist(rec);
                                 }
                                 if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestNumberDto = simpleRecordDto;
@@ -237,27 +237,27 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             } else if (valueObj instanceof String) {
                                 if (latestStringMeasurementTime < dateOfMeasurement) {
                                     String value = (String) valueObj;
-                                    MeasurementStringHistory record = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
-                                    record.setProvenance(provenance);
-                                    em.persist(record);
+                                    MeasurementStringHistory rec = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    rec.setProvenance(provenance);
+                                    em.persist(rec);
                                 }
                                 if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestStringDto = simpleRecordDto;
                                 }
                                 givenDataOK = true;
-                            }else if (valueObj instanceof Map) {
+                            } else if (valueObj instanceof Map) {
                                 if (latestJSONMeasurementTime < dateOfMeasurement) {
                                     Map<String,Object> value = (Map<String,Object>) valueObj;
-                                    MeasurementJSONHistory record = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
-                                    record.setProvenance(provenance);
-                                    em.persist(record);
+                                    MeasurementJSONHistory rec = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
+                                    rec.setProvenance(provenance);
+                                    em.persist(rec);
                                 }
                                 if (newestJsonDto == null || newestJsonDto.getTimestamp() < newestJsonDto.getTimestamp()) {
                                     newestJsonDto = simpleRecordDto;
                                 }
                                 givenDataOK = true;
                             }else {
-                                logger.error("pushRecords: Unsupported data format for "
+                                LOG.error("pushRecords: Unsupported data format for "
                                         + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
                                         + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
                                                 + ". Skipping..."));
@@ -311,22 +311,21 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         ex.printStackTrace();
                         if (em.getTransaction().isActive())
                             em.getTransaction().rollback();
-                        continue;
                     }
                 }
             }
 
-            if (stationFound == false) {
+            if (!stationFound) {
                 throw new JPAException("No station found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
             }
-            if (typeFound == false) {
+            if (!typeFound) {
                 throw new JPAException("No station/type found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
             }
-            if (givenDataOK == false) {
+            if (!givenDataOK) {
                 throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
             }
             /* FALSE, if no valid data can be found, either because of missing station/type/data combinations, hence invalid JSON */
-            if (jsonOK == false) {
+            if (!jsonOK) {
                 throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
             }
 

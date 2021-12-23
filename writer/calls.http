@@ -18,9 +18,20 @@ grant_type=password
 @host=http://localhost:8999
 @authtoken = {{login.response.body.access_token}}
 
-### Post some data to the writer
 
 ### Get all stationtypes from the writer
-GET {{host}}/json/stations
+GET {{host}}/json/stations/MeteoStation
 Authorization: Bearer {{authtoken}}
 
+### Get a single stationtype from the writer
+GET {{host}}/json/stations/MeteoStation
+Authorization: Bearer {{authtoken}}
+
+
+### Get all datatypes from the writer
+GET {{host}}/json/types
+Authorization: Bearer {{authtoken}}
+
+### Post some data to the writer
+POST {{host}}/json/getDateOfLastRecord/MeteoStation
+Authorization: Bearer {{authtoken}}

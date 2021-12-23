@@ -33,6 +33,9 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * <p>
@@ -47,8 +50,8 @@ import javax.persistence.metamodel.ManagedType;
  */
 public class JPAUtil {
 
+	private static final Logger LOG = LoggerFactory.getLogger(JPAUtil.class);
 	private static EntityManagerFactory emFactory;
-	private static final PropertiesWithEnv properties = new PropertiesWithEnv();
 
 	private JPAUtil() {}
 
@@ -56,10 +59,13 @@ public class JPAUtil {
 		try {
 			String profile = System.getProperty("spring.profiles.active");
 			if (profile == null) {
+				LOG.debug("Create an EntityManager with the default profile");
 				profile = "";
 			} else {
+				LOG.debug("Create an EntityManager with a custom profile named " + profile);
 				profile = "-" + profile;
 			}
+			PropertiesWithEnv properties = new PropertiesWithEnv();
 			properties.load(
 				JPAUtil.class.getClassLoader()
 					.getResourceAsStream(
