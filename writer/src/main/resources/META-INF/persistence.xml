@@ -7,7 +7,7 @@
        <properties>
            <property name="hibernate.default_schema" value="intimev2"/>
            <property name="hibernate.dialect" value="org.hibernate.spatial.dialect.postgis.PostgisDialect"/>
-           <property name="hibernate.hbm2ddl.auto" value="validate"/>
+           <property name="hibernate.hbm2ddl.auto" value="none"/>
            <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
            <property name="hibernate.hikari.dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>
            <property name="hibernate.hikari.maximumPoolSize" value="2" />
