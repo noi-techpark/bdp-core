@@ -53,9 +53,6 @@ import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Writer API
@@ -229,7 +226,7 @@ public class DataManager {
 										  .buildAndExpand(uriVariableValues)
 										  .toUri();
 	}
-	public static ResponseEntity<?> addProvenance(ProvenanceDto provenance, URI responseLocation) {
+	public static ResponseEntity<?> addProvenance(ProvenanceDto provenance) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			em.getTransaction().begin();

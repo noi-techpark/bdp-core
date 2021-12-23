@@ -54,7 +54,7 @@ public class JsonController extends DataManager {
 
 	@RequestMapping(value="/provenance", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<?>  createProvenance(@RequestBody ProvenanceDto provenance) {
-		return DataManager.addProvenance(provenance,getURIMapping("/provenance"));
+		return DataManager.addProvenance(provenance);
 	}
 
 	@RequestMapping(value = "/provenance", method = RequestMethod.GET)
