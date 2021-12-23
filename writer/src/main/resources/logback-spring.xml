@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<springProfile name="local">
+		<include resource="org/springframework/boot/logging/logback/base.xml"/>
+		<logger name="it.bz.idm">
+			<level value="DEBUG"/>
+		</logger>
+	</springProfile>
+
+	<springProfile name="default">
+		<appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+			<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+				<fieldNames>
+					<version>[ignore]</version>
+					<logger>[ignore]</logger>
+					<thread>[ignore]</thread>
+				</fieldNames>
+				<customFields>{"application":"${LOG_APPLICATION_NAME:-ninja}","application_version":"${LOG_APPLICATION_VERSION:-0000}"}</customFields>
+			</encoder>
+		</appender>
+		<root level="INFO">
+			<appender-ref ref="jsonConsoleAppender"/>
+		</root>
+	</springProfile>
+
+</configuration>
