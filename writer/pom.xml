@@ -49,7 +49,7 @@
 		<finalName>writer</finalName>
 		<geotools.version>14.5</geotools.version>
 		<hibernate.version>5.3.25.Final</hibernate.version>
-		<log4j2.version>2.17.0</log4j2.version>
+		<log4j2.version>2.17.1</log4j2.version>
 	</properties>
 
 	<dependencyManagement>
