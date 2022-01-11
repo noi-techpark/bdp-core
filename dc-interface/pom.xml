@@ -11,8 +11,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.2.13.RELEASE</spring.version>
-		<spring.security.version>5.3.9.RELEASE</spring.security.version>
+		<spring.version>5.2.19.RELEASE</spring.version>
+		<spring.security.version>5.3.13.RELEASE</spring.security.version>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 	</properties>
 	<repositories>
