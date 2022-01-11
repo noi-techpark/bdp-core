@@ -18,7 +18,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 
@@ -39,12 +39,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	}
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception
-	{
+	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		http.authorizeRequests()
-			.anyRequest()
-			.permitAll();
+		http.csrf().disable().authorizeRequests().anyRequest().permitAll();
 	}
-
 }

@@ -16,7 +16,7 @@
 					<logger>[ignore]</logger>
 					<thread>[ignore]</thread>
 				</fieldNames>
-				<customFields>{"application":"${LOG_APPLICATION_NAME:-ninja}","application_version":"${LOG_APPLICATION_VERSION:-0000}"}</customFields>
+				<customFields>{"application":"${LOG_APPLICATION_NAME:-bdpwriter}","application_version":"${LOG_APPLICATION_VERSION:-0000}"}</customFields>
 			</encoder>
 		</appender>
 		<root level="INFO">
