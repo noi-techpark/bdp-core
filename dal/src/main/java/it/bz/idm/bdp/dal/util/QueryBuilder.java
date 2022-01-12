@@ -41,7 +41,7 @@ import javax.persistence.TypedQuery;
 public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
 	private EntityManager em = null;
-	private Map<String, Object> parameters = new HashMap<String, Object>();
+	private Map<String, Object> parameters = new HashMap<>();
 
 	/**
 	 * Create a new {@link QueryBuilder} instance

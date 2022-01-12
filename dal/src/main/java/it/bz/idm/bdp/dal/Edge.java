@@ -82,6 +82,8 @@ public class Edge {
 	 * FIXME This should be changed to use meta data separately, and point from edges
 	 * and stations (=nodes) to it directly. We must think of how to group historical
 	 * meta data records inside the meta data table itself.
+	 *
+	 * FIXME This should have an unique constraint, currently set manually on the DB
 	 */
 	@OneToOne(optional = true)
 	protected Station edgeData;
