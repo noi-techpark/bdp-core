@@ -45,7 +45,7 @@
     <repositories>
         <repository>
             <id>maven-repo.opendatahub.bz.it-release</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+            <url>https://maven-repo.opendatahub.bz.it/release</url>
         </repository>
     </repositories>
     <dependencies>
