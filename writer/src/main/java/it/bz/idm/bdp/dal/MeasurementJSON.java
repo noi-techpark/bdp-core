@@ -123,9 +123,10 @@ public class MeasurementJSON extends MeasurementAbstract {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (value instanceof Map) {
-			this.setJsonValue(((Map<String,Object>)value));
+			this.setJsonValue((Map<String,Object>) value);
 		}
 	}
 }

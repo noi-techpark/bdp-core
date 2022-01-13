@@ -211,7 +211,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         SimpleRecordDto newestStringDto = null;
                         SimpleRecordDto newestNumberDto = null;
                         SimpleRecordDto newestJsonDto = null;
-                        for (RecordDto recordDto : dataRecords) {
+                        for (RecordDtoImpl recordDto : dataRecords) {
 
                             /*
                              * XXX We support only SimpleRecordDtos at the moment. This should be removed,
@@ -247,12 +247,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 givenDataOK = true;
                             } else if (valueObj instanceof Map) {
                                 if (latestJSONMeasurementTime < dateOfMeasurement) {
+									@SuppressWarnings("unchecked")
                                     Map<String,Object> value = (Map<String,Object>) valueObj;
                                     MeasurementJSONHistory rec = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
                                     rec.setProvenance(provenance);
                                     em.persist(rec);
                                 }
-                                if (newestJsonDto == null || newestJsonDto.getTimestamp() < newestJsonDto.getTimestamp()) {
+                                if (newestJsonDto == null || newestJsonDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestJsonDto = simpleRecordDto;
                                 }
                                 givenDataOK = true;
@@ -293,6 +294,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }
                         }
                         if (newestJsonDto != null) {
+							@SuppressWarnings("unchecked")
                             Map<String,Object> jsonValue = (Map<String,Object>) newestJsonDto.getValue();
                             if (latestJSONMeasurement == null) {
                                 latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestJsonDto.getTimestamp()), newestJsonDto.getPeriod());

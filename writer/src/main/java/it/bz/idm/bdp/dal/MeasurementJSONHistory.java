@@ -61,11 +61,11 @@ import it.bz.idm.bdp.dto.RecordDto;
 )
 @Entity
 public class MeasurementJSONHistory extends MeasurementAbstractHistory {
-	
+
 	@Transient
 	private static final long serialVersionUID = 3374278433057820376L;
 
-	
+
 
     @Id
 	@GeneratedValue(generator = "measurementhistory_json_gen", strategy = GenerationType.SEQUENCE)
@@ -112,7 +112,9 @@ public class MeasurementJSONHistory extends MeasurementAbstractHistory {
 	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
 		return MeasurementAbstractHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
 	}
+
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (value instanceof Map) {
 			this.setJsonValue(((Map<String,Object>)value));

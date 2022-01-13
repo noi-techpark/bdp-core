@@ -22,7 +22,6 @@ package it.bz.idm.bdp.tools;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -62,11 +61,10 @@ import org.reflections.Reflections;
  */
 public class SchemaGenerator {
 
-	private static final String PGSERVER_DEFAULT  = "localhost";
 	private static final String PGUSER_DEFAULT    = "postgres";
 	private static final String HIBERNATE_DIALECT = "org.hibernate.spatial.dialect.postgis.PostgisDialect";
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) {
 		Map<String, String> env = System.getenv();
 
 		if (args.length != 3) {
@@ -122,12 +120,10 @@ public class SchemaGenerator {
 
 		/*
 		 * Build meta data sources for a hibernate registry defined by a PostgreSQL data source.
-		 * FIXME Unfortunately, the registry builder needs a data source, however, also if the connection
 		 * fails it succeeds in building a DDL SQL script.  The drawback hereby is, that it generates
 		 * a warning on stderr, which cannot be avoided with a try-catch...
 		 */
 		PGSimpleDataSource ds = new PGSimpleDataSource();
-		// ds.setServerName(env.getOrDefault("ODH_SG_SERVER", PGSERVER_DEFAULT));
 		ds.setDatabaseName(env.get("ODH_SG_DBNAME"));
 		ds.setUser(env.getOrDefault("ODH_SG_USER", PGUSER_DEFAULT));
 		ds.setPassword(env.get("ODH_SG_PASSWD"));
