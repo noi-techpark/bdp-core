@@ -148,12 +148,15 @@ public class Event {
 	 */
 	public void setEventInterval(Range<LocalDateTime> eventInterval) {
 		if (
-			(eventInterval.isLowerBoundClosed() || eventInterval.hasMask(Range.LOWER_INFINITE)) &&
-			(!eventInterval.isUpperBoundClosed() || eventInterval.hasMask(Range.UPPER_INFINITE))
+			(!eventInterval.isLowerBoundClosed() && !eventInterval.hasMask(Range.LOWER_INFINITE))
+			|| eventInterval.isUpperBoundClosed()
 		) {
-			this.eventInterval = eventInterval;
+			throw new IllegalArgumentException(
+				"The interval must be half-open [a,b) or unbounded. Given = "
+				+ eventInterval.asString()
+			);
 		}
-		throw new IllegalArgumentException("The interval must be half-open [a,b) or unbounded.");
+		this.eventInterval = eventInterval;
 	}
 
 	public void setEventInterval(final String eventInterval) {
