@@ -22,8 +22,6 @@
  */
 package it.bz.idm.bdp.dal;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
@@ -143,12 +141,23 @@ public class Event {
 	 *
 	 * That is, a half-open interval, which is useful for moving window aggregates,
 	 * because each window does not overlap with the next, which might happen
-	 * with a closed interval on boundaries.
+	 * with a closed interval on boundaries. It is possible that we have unbound
+	 * limits, that is, they are infinite.
 	 *
 	 * @param eventInterval
 	 */
 	public void setEventInterval(Range<LocalDateTime> eventInterval) {
-		this.eventInterval = Range.closedOpen(eventInterval.lower(), eventInterval.upper());
+		if (
+			(eventInterval.isLowerBoundClosed() || eventInterval.hasMask(Range.LOWER_INFINITE)) &&
+			(!eventInterval.isUpperBoundClosed() || eventInterval.hasMask(Range.UPPER_INFINITE))
+		) {
+			this.eventInterval = eventInterval;
+		}
+		throw new IllegalArgumentException("The interval must be half-open [a,b) or unbounded.");
+	}
+
+	public void setEventInterval(final String eventInterval) {
+		setEventInterval(Range.localDateTimeRange(eventInterval));
 	}
 
 	public MetaData getMetaData() {
@@ -180,11 +189,7 @@ public class Event {
 				event.setCategory(dto.getCategory());
 				event.setDescription(dto.getDescription());
 				event.setProvenance(provenance);
-				if (dto.getEventStart() != null && dto.getEventEnd() != null) {
-					String rangeString = generateRangeString(dto);
-					Range<LocalDateTime> eventInterval = Range.localDateTimeRange(rangeString);
-					event.setEventInterval(eventInterval);
-				}
+				event.setEventInterval(dto.getEventIntervalAsString());
 				if (!dto.getMetaData().isEmpty()) {
 					MetaData metaData = new MetaData();
 					Map<String, Object> json = new HashMap<>();
@@ -209,14 +214,6 @@ public class Event {
 				em.persist(event);
 			}
 		}
-	}
-
-	public static String generateRangeString(EventDto dto) {
-		// SimpleDateFormat is not thread-safe, so we better do not mark it as "static"
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
-		String eventStart = dateFormat.format(new Date(dto.getEventStart()));
-		String eventEnd = dateFormat.format(new Date(dto.getEventEnd() + 1));
-		return "[" + eventStart + "," + eventEnd +")";
 	}
 
 	public static Event find(EntityManager em, String uuid) {

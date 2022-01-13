@@ -36,7 +36,7 @@ services:
     environment:
       MAVEN_CONFIG: /var/maven/.m2
       MAVEN_OPTS: -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8990
-    command: mvn -Duser.home=/var/maven spring-boot:run
+    command: mvn -Duser.home=/var/maven -Dmaven.tomcat.port=8999 spring-boot:run
     ports:
       - 8999:8999
       - 8990:8990

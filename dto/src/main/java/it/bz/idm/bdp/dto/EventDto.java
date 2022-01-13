@@ -23,6 +23,9 @@
 package it.bz.idm.bdp.dto;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -175,6 +178,32 @@ public class EventDto implements Serializable {
 
 	public void setProvenance(String provenanceUuid) {
 		this.provenance = provenanceUuid;
+	}
+
+	/**
+	 * Generate a half-open interval string representation of this events start and end.
+	 * If the start or end is null, we consider it to be unbound, that is "infinite" in
+	 * that direction.
+	 *
+	 * @param dto
+	 * @return Half-open interval, like [1,3)
+	 */
+	public String getEventIntervalAsString() {
+		// SimpleDateFormat is not thread-safe, so we better do not mark it as "static"
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+		StringBuilder sb = new StringBuilder();
+		if (getEventStart() == null) {
+			sb.append("(");
+		} else {
+			sb.append("[");
+			sb.append(dateFormat.format(new Date(getEventStart())));
+		}
+		sb.append(",");
+		if (getEventEnd() != null) {
+			sb.append(dateFormat.format(new Date(getEventEnd() + 1)));
+		}
+		sb.append(")");
+		return sb.toString();
 	}
 
 	@JsonIgnore
