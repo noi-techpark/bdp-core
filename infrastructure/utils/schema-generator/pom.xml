@@ -42,8 +42,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <geotools.version>14.4</geotools.version>
-        <hibernate.version>5.4.33</hibernate.version>
+        <geotools.version>14.5</geotools.version>
+        <hibernate.version>5.3.25.Final</hibernate.version>
         <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
@@ -230,32 +230,6 @@
                 <configuration>
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>../GPL-3.0-header.txt</header>
-                    <properties>
-                        <owner>NOI Techpark - Südtirol / Alto Adige</owner>
-                        <email>info@opendatahub.bz.it</email>
-                    </properties>
-                    <excludes>
-                        <exclude>bin/**</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                        <exclude>**/*.java.orig</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
