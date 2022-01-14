@@ -52,7 +52,7 @@ import com.vladmihalcea.hibernate.type.range.Range;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.EventDto;
 
-@Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid"}))
+@Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = {"uuid"}))
 @Entity
 @TypeDef(
     typeClass = PostgreSQLRangeType.class,
@@ -70,6 +70,7 @@ public class Event {
 
 	private String uuid;
 	private String category;
+	private String origin;
 
 	private Date createdOn;
 
@@ -89,6 +90,14 @@ public class Event {
 
 	public Provenance getProvenance() {
 		return provenance;
+	}
+
+	public String getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(String origin) {
+		this.origin = origin;
 	}
 
 	public void setProvenance(Provenance provenance) {
@@ -190,6 +199,7 @@ public class Event {
 				event = new Event();
 				event.setUuid(dto.getId());
 				event.setCategory(dto.getCategory());
+				event.setOrigin(dto.getOrigin());
 				event.setDescription(dto.getDescription());
 				event.setProvenance(provenance);
 				event.setEventInterval(dto.getEventIntervalAsString());

@@ -38,9 +38,9 @@ public class TypeDto implements Serializable {
 	private String id;
 	@ApiModelProperty (notes = "The unit of measurement of the type.")
 	private String unit;
-	private Map<String,String> desc = new HashMap<String, String>();
+	private Map<String,String> desc = new HashMap<>();
 	private String typeOfMeasurement;
-	private Set<Integer> acquisitionIntervals = new TreeSet<Integer>();
+	private Set<Integer> acquisitionIntervals = new TreeSet<>();
 
 	public TypeDto() {
 	}
