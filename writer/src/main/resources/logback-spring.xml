@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<springProfile name="local">
+	<springProfile name="devlocal">
+		<include resource="org/springframework/boot/logging/logback/base.xml"/>
+		<logger name="it.bz.idm">
+			<level value="DEBUG"/>
+		</logger>
+	</springProfile>
+	<springProfile name="devtestdb">
 		<include resource="org/springframework/boot/logging/logback/base.xml"/>
 		<logger name="it.bz.idm">
 			<level value="DEBUG"/>

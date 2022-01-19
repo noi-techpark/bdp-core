@@ -7,8 +7,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.text.StringSubstitutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PropertiesWithEnv extends Properties {
+
+	private static final Logger LOG = LoggerFactory.getLogger(
+		PropertiesWithEnv.class
+	);
 
 	private Map<String, String> localEnv = new HashMap<>();
 
@@ -16,6 +22,25 @@ public class PropertiesWithEnv extends Properties {
 	public synchronized void load(InputStream inStream) throws IOException {
 		super.load(inStream);
 		substitueEnv();
+	}
+
+	public static PropertiesWithEnv fromActiveSpringProfile() throws IOException {
+		String profile = System.getProperty("spring.profiles.active");
+		if (profile == null) {
+			LOG.debug("Create an EntityManager with the default profile");
+			profile = "";
+		} else {
+			LOG.debug(
+				"Create an EntityManager with a custom profile named " + profile
+			);
+			profile = "-" + profile;
+		}
+		PropertiesWithEnv properties = new PropertiesWithEnv();
+		properties.load(
+			PropertiesWithEnv.class.getClassLoader()
+				.getResourceAsStream("application" + profile + ".properties")
+		);
+		return properties;
 	}
 
 	public void substitueEnv() {
@@ -31,7 +56,7 @@ public class PropertiesWithEnv extends Properties {
 
 	public Map<String, String> getStringMap() {
 		Map<String, String> result = new HashMap<>();
-		for (final String name: super.stringPropertyNames()) {
+		for (final String name : super.stringPropertyNames()) {
 			result.put(name, super.getProperty(name));
 		}
 		return result;
@@ -45,24 +70,20 @@ public class PropertiesWithEnv extends Properties {
 	public synchronized int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((localEnv == null) ? 0 : localEnv.hashCode());
+		result =
+			prime * result + ((localEnv == null) ? 0 : localEnv.hashCode());
 		return result;
 	}
 
 	@Override
 	public synchronized boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
 		PropertiesWithEnv other = (PropertiesWithEnv) obj;
 		if (localEnv == null) {
-			if (other.localEnv != null)
-				return false;
-		} else if (!localEnv.equals(other.localEnv))
-			return false;
+			if (other.localEnv != null) return false;
+		} else if (!localEnv.equals(other.localEnv)) return false;
 		return true;
 	}
 }

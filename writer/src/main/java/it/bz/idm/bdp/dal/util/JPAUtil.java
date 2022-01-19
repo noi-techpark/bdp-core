@@ -57,29 +57,14 @@ public class JPAUtil {
 
 	static {
 		try {
-			String profile = System.getProperty("spring.profiles.active");
-			if (profile == null) {
-				LOG.debug("Create an EntityManager with the default profile");
-				profile = "";
-			} else {
-				LOG.debug("Create an EntityManager with a custom profile named " + profile);
-				profile = "-" + profile;
-			}
-			PropertiesWithEnv properties = new PropertiesWithEnv();
-			properties.load(
-				JPAUtil.class.getClassLoader()
-					.getResourceAsStream(
-						"application" + profile + ".properties"
-					)
-			);
+			PropertiesWithEnv properties = PropertiesWithEnv.fromActiveSpringProfile();
 			emFactory =
 				Persistence.createEntityManagerFactory(
 					"jpa-persistence", // This must correspond to the persistence.xml persistence-unit tag
 					properties.getStringMap()
 				);
 		} catch (Exception ex) {
-			System.err.println("Cannot create EntityManagerFactory.");
-			ex.printStackTrace(System.err);
+			LOG.error("Cannot create EntityManagerFactory. Exception is " + ex);
 			throw new ExceptionInInitializerError(ex);
 		}
 	}

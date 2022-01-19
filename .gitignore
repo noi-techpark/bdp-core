@@ -60,3 +60,4 @@ target/
 /tmp
 
 schema-*-dump.sql
+application-*.properties

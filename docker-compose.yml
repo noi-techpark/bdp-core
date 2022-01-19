@@ -28,7 +28,6 @@ services:
       context: ./
       dockerfile: infrastructure/docker/Dockerfile
       target: base
-    network_mode: bridge
     depends_on:
       - postgres
     env_file:
@@ -36,9 +35,15 @@ services:
     environment:
       MAVEN_CONFIG: /var/maven/.m2
       MAVEN_OPTS: -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8990
-    command: mvn -Duser.home=/var/maven -Dmaven.tomcat.port=8999 spring-boot:run
+      SERVER_PORT: ${SERVER_PORT}
+    command: >
+      mvn
+        -Dmaven.tomcat.port=${SERVER_PORT}
+        -Duser.home=/var/maven
+        -Dspring.profiles.active=devlocal
+        clean spring-boot:run
     ports:
-      - 8999:8999
+      - "${SERVER_PORT}:${SERVER_PORT}"
       - 8990:8990
     volumes:
       - ~/.m2/:/var/maven/.m2
@@ -51,7 +56,7 @@ services:
   # stop the containers and execute 'docker-compose rm -fv postgres' to get rid
   # of cached databases...
   postgres:
-    image: postgres:11
+    image: postgis/postgis:12-3.2-alpine
     environment:
       POSTGRES_DB: bdp
       POSTGRES_USER: bdp
