@@ -1,10 +1,9 @@
 /*
- * If you use migration scripts within Java Application, then you need a "mvn clean", 
- * because otherwise the clone inside the target folder gets used, which might be outdated
+ * If you use migration scripts within Java Application, then you need a "mvn clean",
+ * because otherwise the copy inside the "target" folder gets used, which might be outdated
  */
-
-select pg_catalog.set_config('search_path', 'intimev2', false);
-create extension postgis;
+set search_path to public, intimev2;
+create extension if not exists postgis;
 
 create sequence metadata_seq start 1 increment 1;
 create table metadata (
@@ -85,10 +84,10 @@ create table "event" (
 	description text,
 	event_interval tsrange,
 	origin varchar(255),
-	uuid varchar(255),
+	uuid uuid not null,
 	location_id int8,
 	meta_data_id int8,
-	provenance_id int8,
+	provenance_id int8 not null,
 	primary key (id),
 	constraint uc_event_uuid unique (uuid)
 );
@@ -150,20 +149,19 @@ create table measurementjsonhistory (
 	period int4 not null,
 	timestamp timestamp not null,
 	json_value jsonb,
+	json_value_md5 varchar(32) generated always as (md5(json_value::text)) stored,
 	provenance_id int8,
 	station_id int8 not null,
 	type_id int8 not null,
-	primary key (id)
-);
+	primary key (id),
 
-/*
- * The md5 checksum is not possible within a "constraint" syntax
- * This is to prevent the following error:
- *     Values larger than 1/3 of a buffer page cannot be indexed.
- *     Consider a function index of an MD5 hash of the value, or use full text indexing.
- */
-create unique index uc_measurementjsonhistory_stati_id_timestamp_period_json_value_ 
-	on measurementjsonhistory (station_id, type_id, timestamp, period, md5(json_value::text));
+	/* The md5 checksum is not possible within a "constraint" syntax
+	 * This is to prevent the following error:
+	 *     Values larger than 1/3 of a buffer page cannot be indexed.
+	 *     Consider a function index of an MD5 hash of the value, or use full text indexing.
+	 */
+	constraint uc_measurementjsonhistory_stati__time__p_period_json_value_md5_ unique (station_id, type_id, "timestamp", period, json_value_md5)
+);
 
 create sequence measurementstring_seq start 1 increment 1;
 create table measurementstring (

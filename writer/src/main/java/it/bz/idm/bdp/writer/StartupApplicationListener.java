@@ -27,16 +27,19 @@ public class StartupApplicationListener
 		PropertiesWithEnv prop;
 		try {
 			prop = PropertiesWithEnv.fromActiveSpringProfile();
-			if (prop.getProperty("spring.flyway.enabled").equalsIgnoreCase("true")) {
+			if (prop.getProperty("flyway.enabled").equalsIgnoreCase("true")) {
 				Flyway flyway = Flyway
 					.configure()
 					.dataSource(
-						prop.getProperty("spring.flyway.url"),
-						prop.getProperty("spring.flyway.user"),
-						prop.getProperty("spring.flyway.password")
+						prop.getProperty("flyway.url"),
+						prop.getProperty("flyway.user"),
+						prop.getProperty("flyway.password")
 					)
+					.schemas(prop.getProperty("flyway.defaultSchema"))
+					.defaultSchema(prop.getProperty("flyway.defaultSchema"))
+					.locations(prop.getProperty("flyway.locations"))
 					.load();
-				LOG.info("FLYWAY: Start migration for on " + prop.getProperty("spring.flyway.url"));
+				LOG.info("FLYWAY: Start migration for on " + prop.getProperty("flyway.url"));
 				flyway.migrate();
 				LOG.info("FLYWAY: Migrations done...");
 			}
