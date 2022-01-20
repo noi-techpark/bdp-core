@@ -2,7 +2,7 @@
  * If you use migration scripts within Java Application, then you need a "mvn clean",
  * because otherwise the copy inside the "target" folder gets used, which might be outdated
  */
-set search_path to public, intimev2;
+set search_path to ${flyway:defaultSchema}, public;
 create extension if not exists postgis;
 
 create sequence metadata_seq start 1 increment 1;
@@ -84,7 +84,7 @@ create table "event" (
 	description text,
 	event_interval tsrange,
 	origin varchar(255),
-	uuid uuid not null,
+	uuid varchar(255) not null,
 	location_id int8,
 	meta_data_id int8,
 	provenance_id int8 not null,

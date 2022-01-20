@@ -48,6 +48,8 @@ pipeline {
         KEYCLOAK_CLIENT_ID = "odh-mobility-writer"
 
         // Logging
+        LOG_APPLICATION_NAME = "writer"
+        LOG_APPLICATION_VERSION = "6.0.0-SNAPSHOT"
         LOG_LEVEL = "info"
         HIBERNATE_SQL_LOG = "false"
     }
@@ -81,6 +83,8 @@ pipeline {
                     echo 'KEYCLOAK_REALM=${KEYCLOAK_REALM}' >> .env
                     echo 'KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}' >> .env
 
+                    echo 'LOG_APPLICATION_NAME=${LOG_APPLICATION_NAME}' >> .env
+                    echo 'LOG_APPLICATION_VERSION=${LOG_APPLICATION_VERSION}' >> .env
                     echo 'LOG_LEVEL=${LOG_LEVEL}' >> .env
                     echo 'HIBERNATE_SQL_LOG=${HIBERNATE_SQL_LOG}' >> .env
                 """
