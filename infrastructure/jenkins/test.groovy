@@ -64,7 +64,7 @@ pipeline {
                 sh """
                     ./infrastructure/utils/quickrelease.sh '${params.bdp_type}' '${params.bdp_version}'
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
-                    echo 'PROJECT=${PROJECT}' >> .env
+                    echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
                     echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
                     echo 'LIMIT=${LIMIT}' >> .env
                     echo 'DOCKER_IMAGE=${DOCKER_IMAGE}' >> .env
