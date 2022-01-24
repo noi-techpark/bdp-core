@@ -51,6 +51,7 @@ pipeline {
         LOG_APPLICATION_NAME = "writer"
         LOG_APPLICATION_VERSION = "6.0.0-SNAPSHOT"
         LOG_LEVEL = "info"
+        HIBERNATE_LOG_LEVEL = "warning"
         HIBERNATE_SQL_LOG = "false"
     }
     parameters{
@@ -86,6 +87,7 @@ pipeline {
                     echo 'LOG_APPLICATION_NAME=${LOG_APPLICATION_NAME}' >> .env
                     echo 'LOG_APPLICATION_VERSION=${LOG_APPLICATION_VERSION}' >> .env
                     echo 'LOG_LEVEL=${LOG_LEVEL}' >> .env
+                    echo 'HIBERNATE_LOG_LEVEL=${HIBERNATE_LOG_LEVEL}' >> .env
                     echo 'HIBERNATE_SQL_LOG=${HIBERNATE_SQL_LOG}' >> .env
                 """
             }
