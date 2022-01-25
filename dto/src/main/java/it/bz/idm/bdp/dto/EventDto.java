@@ -48,23 +48,34 @@ public class EventDto implements Serializable {
 
 	private static final long serialVersionUID = 7928534360551629831L;
 
-	@ApiModelProperty (notes = "The unique ID associated to the event.")
+	@ApiModelProperty (notes = "The unique UUID associated to the event.")
 	@JsonProperty(required = true)
-	@JsonPropertyDescription("Unique event code describing a single event (ex. fog1458)")
-	protected String id;
+	@JsonPropertyDescription("Unique UUID describing a single event.")
+	protected String uuid;
+
+	@JsonPropertyDescription("Who provided the event?")
+	@JsonProperty(required = true)
+	private String origin;
+
+	@ApiModelProperty (notes = "The event category")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("describes a group in which the event falls e.g. a car accident can be part of the category traffic jam ")
+	protected String category;
+
+	@ApiModelProperty (notes = "The event series ID")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("concatenates equal events, that change over time")
+	protected String eventSeriesId;
+
+	@ApiModelProperty (notes = "The human-readable name associated to the event.")
+	@JsonProperty(required = true)
+	@JsonPropertyDescription("Unique name describing a single event inside the origin/category/event-series-id hierarchy.")
+	protected String name;
 
 	@ApiModelProperty (notes = "The event description")
 	@JsonProperty(required = false)
 	@JsonPropertyDescription("Describes the event in few words")
 	protected String description;
-
-	@ApiModelProperty (notes = "The event category")
-	@JsonProperty(required = false)
-	@JsonPropertyDescription("describes a group in which the event falls e.g. a car accident can be part of the category traffic jam ")
-	protected String category;
-
-	@JsonPropertyDescription("Who provided the event?")
-	private String origin;
 
 	@JsonPropertyDescription("Meta data, describing additional features of the event")
 	private Map<String, Object> metaData = new HashMap<>();
@@ -112,10 +123,10 @@ public class EventDto implements Serializable {
 	}
 
 	public String getId() {
-		return id;
+		return uuid;
 	}
 	public void setId(String id) {
-		this.id = id;
+		this.uuid = id;
 	}
 	public String getOrigin() {
 		return origin;

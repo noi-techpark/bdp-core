@@ -41,6 +41,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import javax.persistence.Column;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.TypeDef;
 
@@ -52,7 +53,13 @@ import com.vladmihalcea.hibernate.type.range.Range;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.EventDto;
 
-@Table(name = "event", uniqueConstraints = @UniqueConstraint(columnNames = {"uuid"}))
+@Table(
+	name = "event",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"uuid"}),
+		@UniqueConstraint(columnNames = {"origin", "category", "event_series_id", "name"})
+	}
+)
 @Entity
 @TypeDef(
     typeClass = PostgreSQLRangeType.class,
@@ -68,9 +75,38 @@ public class Event {
 	@ColumnDefault(value = "nextval('event_seq')")
 	protected Long id;
 
+	// Unique inside the event table
+	@Column(nullable = false)
 	private String uuid;
-	private String category;
+
+	// Hierarchy of events: DB columns = [ origin, category, event_series_id, name ]
+	@Column(nullable = false)
 	private String origin;
+
+	@Column(nullable = false)
+	private String category;
+
+	@Column(nullable = false)
+	private String eventSeriesId;
+
+	@Column(nullable = false)
+	private String name;
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEventSeriesId() {
+		return this.eventSeriesId;
+	}
+
+	public void setEventSeriesId(String eventSeriesId) {
+		this.eventSeriesId = eventSeriesId;
+	}
 
 	private Date createdOn;
 
