@@ -65,10 +65,10 @@ public abstract class DataPusher implements IntegreenPushable  {
 		this.integreenTypology = initIntegreenTypology();
 		if (this.integreenTypology == null)
 			throw new IllegalStateException("You need to provide a valid data source type to continue");
-		ProvenanceDto provenance = defineProvenance();
-		if (provenance == null || !provenance.isValid())
+		ProvenanceDto provenanceCandidate = defineProvenance();
+		if (!ProvenanceDto.isValid(provenanceCandidate))
 			throw new IllegalStateException("You need to provide a valid provenance to be able to send data");
-		this.provenance = provenance;
+		this.provenance = provenanceCandidate;
 	}
 
 	/**

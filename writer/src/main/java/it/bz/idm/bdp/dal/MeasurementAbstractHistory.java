@@ -260,8 +260,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }else {
                                 LOG.error("pushRecords: Unsupported data format for "
                                         + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
-                                        + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName()
-                                                + ". Skipping..."));
+                                        + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
+                                                + ". Skipping...");
                             }
                             jsonOK = true;
                         }
