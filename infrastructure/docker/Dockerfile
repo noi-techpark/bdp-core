@@ -45,11 +45,7 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 FROM base as build
 
 WORKDIR /code
-COPY dto/src /code/dto/src
-COPY dto/pom.xml /code/dto
-COPY writer/src /code/writer/src
-COPY writer/pom.xml /code/writer
-COPY pom.xml /code
+COPY . /code
 RUN mvn -B -DfinalName=ROOT --projects writer --also-make package
 
 # Archive
