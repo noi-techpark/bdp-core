@@ -34,6 +34,7 @@ ARG JENKINS_USER_ID=1000
 RUN addgroup -g $JENKINS_GROUP_ID jenkins && \
     adduser -D -u $JENKINS_USER_ID -G jenkins jenkins
 
+# Needed for release-sdk.groovy and utils/quickrelease.sh
 RUN apk add --no-cache xmlstarlet git openssh-client gawk
 
 COPY infrastructure/docker/java-entrypoint.sh /entrypoint.sh
@@ -44,15 +45,16 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 FROM base as build
 
 WORKDIR /code
-COPY dto /code/dto
-RUN cd dto && mvn -B -U -DskipTests install && rm -rf dto
-COPY writer/src /code/src
-COPY writer/pom.xml /code/
-RUN mvn -B -DfinalName=ROOT -DskipTests package
+COPY dto/src /code/dto/src
+COPY dto/pom.xml /code/dto
+COPY writer/src /code/writer/src
+COPY writer/pom.xml /code/writer
+COPY pom.xml /code
+RUN mvn -B -DfinalName=ROOT --projects writer --also-make package
 
 # Archive
 FROM tomcat:8.5-jdk8-openjdk-slim-buster as archive
-COPY --from=build /code/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=build /code/writer/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
 
 # Run
 FROM archive as run

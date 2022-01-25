@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>it.bz.idm.bdp</groupId>
+	<artifactId>core</artifactId>
+	<packaging>pom</packaging>
+	<version>${revision}</version>
+    <inceptionYear>2019</inceptionYear>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.9.RELEASE</version>
+		<relativePath/>
+		<!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<revision>6.0.0-SNAPSHOT</revision>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<log4j2.version>2.17.1</log4j2.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<dependency.locations.enabled>false</dependency.locations.enabled>
+	</properties>
+
+	<repositories>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
+        </repository>
+    </repositories>
+
+	<modules>
+		<module>dto</module>
+		<module>writer</module>
+		<module>dc-interface</module>
+	</modules>
+
+	<dependencies>
+		<!-- Logging -->
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>6.3</version>
+		</dependency>
+
+		<!-- Testing -->
+		<dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+	</dependencies>
+
+	<build>
+		<extensions>
+            <extension>
+                <groupId>org.springframework.build</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>5.0.0.RELEASE</version>
+            </extension>
+        </extensions>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+
+	<distributionManagement>
+        <snapshotRepository>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <name>Open Data Hub AWS S3 Snapshot Repository</name>
+            <url>s3://it.bz.opendatahub/snapshot</url>
+        </snapshotRepository>
+        <repository>
+            <id>maven-repo.opendatahub.bz.it-release</id>
+            <name>Open Data Hub AWS S3 Release Repository</name>
+            <url>s3://it.bz.opendatahub/release</url>
+        </repository>
+    </distributionManagement>
+
+</project>

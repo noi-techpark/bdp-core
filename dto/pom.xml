@@ -26,34 +26,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+	<parent>
+        <groupId>it.bz.idm.bdp</groupId>
+        <artifactId>core</artifactId>
+		<version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+	<packaging>jar</packaging>
     <groupId>it.bz.idm.bdp</groupId>
     <artifactId>dto</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
-    <inceptionYear>2019</inceptionYear>
     <description>Data Transport Objects for an object-relational mapping</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.locations.enabled>false</dependency.locations.enabled>
-		<log4j2.version>2.17.1</log4j2.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
-        </repository>
-    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.12.6</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
         </dependency>
 		<dependency>
 		    <groupId>com.vividsolutions</groupId>
@@ -67,66 +61,5 @@
             <version>2.9.2</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <!--
-                    ISSUE: org.apache.maven.surefire.booter.SurefireBooterForkException: The forked VM terminated
-                           without properly saying goodbye
-                    SOLUTION: Override Spring Boot's maven-surefire-plugin definition
-                    See https://stackoverflow.com/a/50661649 and https://stackoverflow.com/a/53016532
-                    for the reason why we are doing this here.
-                    This is a bug in the openjdk-8 package (behavior deviates from upstream significantly
-                    without need; missing the upstream patch to revert back to disabling a security check)
-                    that you just upgraded to. But it is also a bug in the surefire plugin, SUREFIRE-1588:
-                    it apparently is using absolute paths in a place where Java will in the future only
-                    allow relative path names (and Debian activated the future behavior already).
-                    -->
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                </configuration>
-            </plugin>
-        </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.springframework.build</groupId>
-                <artifactId>aws-maven</artifactId>
-                <version>5.0.0.RELEASE</version>
-            </extension>
-        </extensions>
-    </build>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
-            <name>Open Data Hub AWS S3 Snapshot Repository</name>
-            <url>s3://it.bz.opendatahub/snapshot</url>
-        </snapshotRepository>
-        <repository>
-            <id>maven-repo.opendatahub.bz.it-release</id>
-            <name>Open Data Hub AWS S3 Release Repository</name>
-            <url>s3://it.bz.opendatahub/release</url>
-        </repository>
-    </distributionManagement>
 
 </project>
