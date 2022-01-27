@@ -27,11 +27,11 @@ public class PropertiesWithEnv extends Properties {
 	public static PropertiesWithEnv fromActiveSpringProfile() throws IOException {
 		String profile = System.getProperty("spring.profiles.active");
 		if (profile == null) {
-			LOG.debug("Create an EntityManager with the default profile");
+			LOG.debug("Loading properties from the default profile");
 			profile = "";
 		} else {
 			LOG.debug(
-				"Create an EntityManager with a custom profile named " + profile
+				"Loading properties from a custom profile named " + profile
 			);
 			profile = "-" + profile;
 		}

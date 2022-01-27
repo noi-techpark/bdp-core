@@ -250,10 +250,10 @@ public class DataType {
 	 * @return a list of data types with all their details
 	 */
 	public static List<TypeDto> findTypes(EntityManager em, String stationType, String stationCode) {
-		List<TypeDto> resultDouble = findTypes(em, stationType, stationCode, Measurement.class);
-		List<TypeDto> resultString = findTypes(em, stationType, stationCode, MeasurementString.class);
-		resultDouble.addAll(resultString);
-		return new ArrayList<>(new HashSet<>(resultDouble));
+		List<TypeDto> result = findTypes(em, stationType, stationCode, Measurement.class);
+		result.addAll(findTypes(em, stationType, stationCode, MeasurementString.class));
+		result.addAll(findTypes(em, stationType, stationCode, MeasurementJSON.class));
+		return new ArrayList<>(new HashSet<>(result));
 	}
 
 	/**
