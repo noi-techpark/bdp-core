@@ -105,6 +105,30 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("The UUID of a data collector name and version")
 	private String provenance;
 
+	public String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getEventSeriesId() {
+		return this.eventSeriesId;
+	}
+
+	public void setEventSeriesId(String eventSeriesId) {
+		this.eventSeriesId = eventSeriesId;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getWktGeometry() {
 		return wktGeometry;
 	}
@@ -112,7 +136,6 @@ public class EventDto implements Serializable {
 	public void setWktGeometry(String wktGeometry) {
 		this.wktGeometry = wktGeometry;
 	}
-
 
 	public String getCategory() {
 		return category;
@@ -122,12 +145,6 @@ public class EventDto implements Serializable {
 		this.category = category;
 	}
 
-	public String getId() {
-		return uuid;
-	}
-	public void setId(String id) {
-		this.uuid = id;
-	}
 	public String getOrigin() {
 		return origin;
 	}
@@ -222,7 +239,7 @@ public class EventDto implements Serializable {
 	public boolean equals(Object obj) {
 		if (obj instanceof EventDto){
 			EventDto dto =(EventDto) obj;
-			if (this.getId().equals(dto.getId()))
+			if (this.getUuid().equals(dto.getUuid()))
 				return true;
 		}
 		return false;
@@ -231,5 +248,23 @@ public class EventDto implements Serializable {
 	@Override
 	public int hashCode() {
 		return 1;
+	}
+
+	public static boolean isValid(EventDto dto) {
+		if (dto == null)
+			return false;
+		if (dto.getProvenance() == null || dto.getProvenance().isEmpty())
+			return false;
+		if (dto.getUuid() == null || dto.getUuid().isEmpty())
+			return false;
+		if (dto.getOrigin() == null || dto.getOrigin().isEmpty())
+			return false;
+		if (dto.getCategory() == null || dto.getCategory().isEmpty())
+			return false;
+		if (dto.getEventSeriesId() == null || dto.getEventSeriesId().isEmpty())
+			return false;
+		if (dto.getName() == null || dto.getName().isEmpty())
+			return false;
+		return true;
 	}
 }

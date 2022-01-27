@@ -142,8 +142,15 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		this.pushProvenance();
 		for (EventDto dto: dtos) {
 			dto.setProvenance(this.provenance.getUuid());
+			if (! EventDto.isValid(dto))
+				throw new IllegalArgumentException("addEvents: The given event DTO is invalid.");
 		}
-        return client.post().uri(EVENTS).body(Mono.just(dtos), Object.class).retrieve()
-        .bodyToMono(Object.class).block();
+        return client
+			.post()
+			.uri(EVENTS)
+			.body(Mono.just(dtos), Object.class)
+			.retrieve()
+			.bodyToMono(Object.class)
+			.block();
 	}
 }

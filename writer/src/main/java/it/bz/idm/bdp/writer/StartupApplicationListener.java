@@ -3,8 +3,6 @@ package it.bz.idm.bdp.writer;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dal.util.PropertiesWithEnv;
 
-import java.io.IOException;
-
 import javax.persistence.EntityManager;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;

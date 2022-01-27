@@ -79,17 +79,20 @@ create table edge (
 create sequence event_seq start 1 increment 1;
 create table "event" (
 	id int8 default nextval('event_seq') not null,
-	category varchar(255),
-	created_on timestamp,
+	category varchar(255) not null,
+	event_series_id varchar(255) not null,
+	created_on timestamp not null,
 	description text,
 	event_interval tsrange,
-	origin varchar(255),
+	origin varchar(255) not null,
 	uuid varchar(255) not null,
+	name varchar(255) not null,
 	location_id int8,
 	meta_data_id int8,
 	provenance_id int8 not null,
 	primary key (id),
-	constraint uc_event_uuid unique (uuid)
+	constraint uc_event_uuid unique (uuid),
+	constraint uc_event_origin_category_event_series_id_name unique (origin, category, event_series_id, name)
 );
 
 create sequence event_location_seq start 1 increment 1;

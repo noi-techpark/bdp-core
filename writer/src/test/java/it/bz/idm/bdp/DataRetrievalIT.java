@@ -100,7 +100,7 @@ public class DataRetrievalIT extends WriterTestSetup {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 		EventDto t = new EventDto();
-		t.setId(UUID.randomUUID().toString());
+		t.setUuid(UUID.randomUUID().toString());
 		t.setCategory("category");
 		t.setDescription("description");
 		t.setEventEnd(new Date().getTime());

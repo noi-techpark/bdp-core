@@ -230,12 +230,14 @@ public class Event {
 		}
 		Provenance provenance = Provenance.findByUuid(em, eventDtos.get(0).getProvenance());
 		for (EventDto dto : eventDtos) {
-			Event event = Event.find(em, dto.getId());
+			Event event = Event.find(em, dto.getUuid());
 			if (event == null) { // avoid saving the same event multiple times
 				event = new Event();
-				event.setUuid(dto.getId());
-				event.setCategory(dto.getCategory());
+				event.setUuid(dto.getUuid());
 				event.setOrigin(dto.getOrigin());
+				event.setCategory(dto.getCategory());
+				event.setEventSeriesId(dto.getEventSeriesId());
+				event.setName(dto.getName());
 				event.setDescription(dto.getDescription());
 				event.setProvenance(provenance);
 				event.setEventInterval(dto.getEventIntervalAsString());
