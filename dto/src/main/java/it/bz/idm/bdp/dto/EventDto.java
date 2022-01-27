@@ -120,14 +120,14 @@ public class EventDto implements Serializable {
 		this.uuid = uuid;
 	}
 
-    public String setUuidByMap(Map<String, Object> uuidMap) throws JsonProcessingException {
-		return setUuidByMap(uuidMap, null);
+    public void setUuidByMap(Map<String, Object> uuidMap) throws JsonProcessingException {
+		setUuidByMap(uuidMap, null);
     }
 
-	public String setUuidByMap(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
+	public void setUuidByMap(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         String uuidNameJson = mapper.writer().writeValueAsString(uuidMap);
-        return Generators.nameBasedGenerator(uuidNameSpace).generate(uuidNameJson).toString();
+        setUuid(Generators.nameBasedGenerator(uuidNameSpace).generate(uuidNameJson).toString());
     }
 
 	public String getEventSeriesId() {
