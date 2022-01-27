@@ -55,16 +55,14 @@ pipeline {
         stage('Deploy DTO') {
             steps {
                 sh '''
-                    cd dto
-                    mvn -B -U clean test install deploy
+                    mvn -B -U -pl dto -am clean test install deploy
                 '''
             }
         }
         stage('Deploy DC-INTERFACE') {
             steps {
                 sh '''
-                    cd dc-interface
-                    mvn -B -U clean test deploy
+                    mvn -B -U -pl dc-interface -am clean test deploy
                 '''
             }
         }
