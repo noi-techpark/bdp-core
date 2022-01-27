@@ -176,7 +176,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-                    LOG.error("pushRecords: Station '" + stationType + "/" + stationEntry.getKey() + "' not found. Skipping...");
+                    LOG.error(String.format("[%s/%s] pushRecords: Station '%s/%s' not found. Skipping...",
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion(),
+						stationType,
+						stationEntry.getKey()
+					));
                     continue;
                 }
                 stationFound = true;
@@ -184,13 +189,20 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-                            LOG.error("pushRecords: Type '" + typeEntry.getKey() + "' not found. Skipping...");
-                            continue;
+							LOG.error(String.format("[%s/%s] pushRecords: Type '%s' not found. Skipping...",
+								provenance.getDataCollector(),
+								provenance.getDataCollectorVersion(),
+								typeEntry.getKey()
+							));
+							continue;
                         }
                         typeFound = true;
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
-                            LOG.error("pushRecords: Empty data set. Skipping...");
+                            LOG.error(String.format("[%s/%s] pushRecords: Empty data set. Skipping...",
+                                provenance.getDataCollector(),
+                                provenance.getDataCollectorVersion()
+                            ));
                             continue;
                         }
                         em.getTransaction().begin();
@@ -258,10 +270,14 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 }
                                 givenDataOK = true;
                             }else {
-                                LOG.error("pushRecords: Unsupported data format for "
-                                        + stationType + "/" + stationEntry.getKey() + "/" + typeEntry.getKey()
-                                        + ": " + (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
-                                                + ". Skipping...");
+                                LOG.error(String.format("[%s/%s] pushRecords: Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
+                                    provenance.getDataCollector(),
+                                    provenance.getDataCollectorVersion(),
+                                    stationType,
+                                    stationEntry.getKey(),
+                                    typeEntry.getKey(),
+                                    (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
+                                ));
                             }
                             jsonOK = true;
                         }
