@@ -28,15 +28,20 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.uuid.Generators;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.swagger.annotations.ApiModelProperty;
+import it.bz.idm.bdp.dto.utils.Constraints;
 
 /**
  * Data transfer object representing an event
@@ -110,8 +115,20 @@ public class EventDto implements Serializable {
 	}
 
 	public void setUuid(String uuid) {
+		if (! Constraints.isUUID(uuid))
+			throw new IllegalArgumentException("EventDto: Invalid UUID format given '" + uuid + "'.");
 		this.uuid = uuid;
 	}
+
+    public String setUuidByMap(Map<String, Object> uuidMap) throws JsonProcessingException {
+		return setUuidByMap(uuidMap, null);
+    }
+
+	public String setUuidByMap(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        String uuidNameJson = mapper.writer().writeValueAsString(uuidMap);
+        return Generators.nameBasedGenerator(uuidNameSpace).generate(uuidNameJson).toString();
+    }
 
 	public String getEventSeriesId() {
 		return this.eventSeriesId;
@@ -253,18 +270,13 @@ public class EventDto implements Serializable {
 	public static boolean isValid(EventDto dto) {
 		if (dto == null)
 			return false;
-		if (dto.getProvenance() == null || dto.getProvenance().isEmpty())
-			return false;
-		if (dto.getUuid() == null || dto.getUuid().isEmpty())
-			return false;
-		if (dto.getOrigin() == null || dto.getOrigin().isEmpty())
-			return false;
-		if (dto.getCategory() == null || dto.getCategory().isEmpty())
-			return false;
-		if (dto.getEventSeriesId() == null || dto.getEventSeriesId().isEmpty())
-			return false;
-		if (dto.getName() == null || dto.getName().isEmpty())
-			return false;
-		return true;
+		return Constraints.someEmpty(
+			dto.getProvenance(),
+			dto.getUuid(),
+			dto.getOrigin(),
+			dto.getCategory(),
+			dto.getEventSeriesId(),
+			dto.getName()
+		);
 	}
 }
