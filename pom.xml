@@ -28,11 +28,11 @@
 	</properties>
 
 	<repositories>
-        <repository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
-            <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
-        </repository>
-    </repositories>
+		<repository>
+			<id>maven-repo.opendatahub.bz.it</id>
+			<url>https://maven-repo.opendatahub.bz.it/snapshot</url>
+		</repository>
+	</repositories>
 
 	<modules>
 		<module>dto</module>
