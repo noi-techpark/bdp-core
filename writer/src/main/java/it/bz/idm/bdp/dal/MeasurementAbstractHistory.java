@@ -353,8 +353,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             throw JPAException.unnest(e);
         } finally {
             em.clear();
-            if (em.isOpen())
-                em.close();
         }
     }
 

@@ -56,7 +56,8 @@ public class StartupApplicationListener
 				ex.getMessage()
 			);
 		} finally {
-			if (em != null && em.isOpen()) em.close();
+			if (em != null && em.isOpen())
+				em.close();
 		}
 		LOG.info("ENTITYMANAGER: Warmup DONE!");
 	}
