@@ -316,7 +316,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestJsonDto.getTimestamp()), newestJsonDto.getPeriod());
                                 latestJSONMeasurement.setProvenance(provenance);
                                 em.persist(latestJSONMeasurement);
-                            } else if (newestJsonDto.getTimestamp() > latestStringMeasurementTime) {
+                            } else if (newestJsonDto.getTimestamp() > latestJSONMeasurementTime) {
                                 latestJSONMeasurement.setTimestamp(new Date(newestJsonDto.getTimestamp()));
                                 latestJSONMeasurement.setValue(jsonValue);
                                 latestJSONMeasurement.setProvenance(provenance);
