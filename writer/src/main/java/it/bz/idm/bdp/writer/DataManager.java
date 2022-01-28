@@ -280,9 +280,11 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			em.getTransaction().begin();
-			Event.add(em, eventDtos);
+			Event.pushEvents(em, eventDtos);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			if (em.getTransaction().isActive())
+				em.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
