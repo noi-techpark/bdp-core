@@ -231,40 +231,40 @@ public class Event {
 		}
 		Provenance provenance = Provenance.findByUuid(em, eventDtos.get(0).getProvenance());
 		for (EventDto dto : eventDtos) {
-			Event event = Event.find(em, dto.getUuid());
-			if (event == null) { // avoid saving the same event multiple times
-				event = new Event();
-				event.setUuid(dto.getUuid());
-				event.setOrigin(dto.getOrigin());
-				event.setCategory(dto.getCategory());
-				event.setEventSeriesId(dto.getEventSeriesId());
-				event.setName(dto.getName());
-				event.setDescription(dto.getDescription());
-				event.setProvenance(provenance);
-				event.setEventInterval(dto.getEventIntervalAsString());
-				if (!dto.getMetaData().isEmpty()) {
-					MetaData metaData = new MetaData();
-					Map<String, Object> json = new HashMap<>();
-					if (!json.equals(dto.getMetaData())) {
-						json.putAll(dto.getMetaData());
-						metaData.setJson(json);
-						event.setMetaData(metaData);
-						em.persist(metaData);
-					}
+			// avoid saving the same event multiple times
+			if (Event.find(em, dto.getUuid()) != null)
+				continue;
+			Event event = new Event();
+			event.setUuid(dto.getUuid());
+			event.setOrigin(dto.getOrigin());
+			event.setCategory(dto.getCategory());
+			event.setEventSeriesId(dto.getEventSeriesId());
+			event.setName(dto.getName());
+			event.setDescription(dto.getDescription());
+			event.setProvenance(provenance);
+			event.setEventInterval(dto.getEventIntervalAsString());
+			if (!dto.getMetaData().isEmpty()) {
+				MetaData metaData = new MetaData();
+				Map<String, Object> json = new HashMap<>();
+				if (!json.equals(dto.getMetaData())) {
+					json.putAll(dto.getMetaData());
+					metaData.setJson(json);
+					event.setMetaData(metaData);
+					em.persist(metaData);
 				}
-				if (dto.getWktGeometry() != null) {
-					Location loc = new Location();
-					try {
-						loc.setGeometry(wktReader.read(dto.getWktGeometry()));
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-					loc.setDescription(dto.getLocationDescription());
-					event.setLocation(loc);
-					em.persist(loc);
-				}
-				em.persist(event);
 			}
+			if (dto.getWktGeometry() != null) {
+				Location loc = new Location();
+				try {
+					loc.setGeometry(wktReader.read(dto.getWktGeometry()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				loc.setDescription(dto.getLocationDescription());
+				event.setLocation(loc);
+				em.persist(loc);
+			}
+			em.persist(event);
 		}
 	}
 
