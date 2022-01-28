@@ -73,11 +73,13 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			MeasurementAbstractHistory.pushRecords(em, stationType, dataMap);
-			return ResponseEntity.created(responseLocation).build();
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
+		return ResponseEntity.created(responseLocation).build();
 	}
 
 	/**
@@ -90,11 +92,13 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Station.syncStations(em, stationType, dtos);
-			return ResponseEntity.created(responseLocation).build();
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
+		return ResponseEntity.created(responseLocation).build();
 	}
 
 	/**
@@ -106,11 +110,13 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			DataType.sync(em,dtos);
-			return ResponseEntity.created(responseLocation).build();
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
+		return ResponseEntity.created(responseLocation).build();
 	}
 
 	/**
@@ -137,7 +143,7 @@ public class DataManager {
 
 			BDPRole role = BDPRole.fetchAdminRole(em);
 
-			/* Hibernate does not support UNION ALL queries, hence we must run two retrieval queries here */
+			/* Hibernate does not support UNION ALL queries, hence we must run all retrieval queries here */
 			List<Date> dates = new ArrayList<>();
 			dates.add(new Measurement().getDateOfLastRecord(em, station, dataType, period, role));
 			dates.add(new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role));
@@ -162,6 +168,8 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			return Station.convertToDto(Station.findStations(em, stationType, origin));
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -175,6 +183,8 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			return Station.findStationTypes(em);
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -188,6 +198,8 @@ public class DataManager {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			return DataType.findTypeNames(em);
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -209,6 +221,8 @@ public class DataManager {
 				Station.patch(em, dto);
 			}
 			em.getTransaction().commit();
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
@@ -226,33 +240,40 @@ public class DataManager {
 										  .buildAndExpand(uriVariableValues)
 										  .toUri();
 	}
+
 	public static ResponseEntity<?> addProvenance(ProvenanceDto provenance) {
 		EntityManager em = JPAUtil.createEntityManager();
+		String uuid = null;
 		try {
 			em.getTransaction().begin();
-			String uuid = Provenance.add(em,provenance);
+			uuid = Provenance.add(em,provenance);
 			em.getTransaction().commit();
-			return new ResponseEntity<>(uuid, HttpStatus.OK);
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
+		return new ResponseEntity<>(uuid, HttpStatus.OK);
 	}
 
 	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		EntityManager em = JPAUtil.createEntityManager();
-		List<ProvenanceDto> provenances = new ArrayList<>();
+		List<Provenance> resultList = new ArrayList<>();
 		try {
-			List<Provenance> resultList = Provenance.find(em,uuid,name,version,lineage);
-			for (Provenance p : resultList) {
-				ProvenanceDto dto = new ProvenanceDto(p.getUuid(),p.getDataCollector(),p.getDataCollectorVersion(),p.getLineage());
-				provenances.add(dto);
-			}
-			return provenances;
+			resultList = Provenance.find(em, uuid, name, version, lineage);
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
 		} finally {
 			if (em.isOpen())
 				em.close();
 		}
+		List<ProvenanceDto> provenances = new ArrayList<>();
+		for (Provenance p : resultList) {
+			ProvenanceDto dto = new ProvenanceDto(p.getUuid(), p.getDataCollector(), p.getDataCollectorVersion(), p.getLineage());
+			provenances.add(dto);
+		}
+		return provenances;
 	}
 
 	public static ResponseEntity<?> addEvents(List<EventDto> eventDtos, URI responseLocation) {
@@ -261,10 +282,12 @@ public class DataManager {
 			em.getTransaction().begin();
 			Event.add(em, eventDtos);
 			em.getTransaction().commit();
-			return ResponseEntity.created(responseLocation).build();
-		}catch(Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
+		} finally {
+			if (em.isOpen())
+				em.close();
 		}
-		return null;
+		return ResponseEntity.created(responseLocation).build();
 	}
 }

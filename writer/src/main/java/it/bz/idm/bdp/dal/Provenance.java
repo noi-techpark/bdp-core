@@ -126,9 +126,8 @@ public class Provenance {
 		this.dataCollectorVersion = dataCollectorVersion;
 	}
 
-	public static List<Provenance> find(EntityManager em, String uuid, String name, String version,
-			String lineage) {
-		List<Provenance> resultList = QueryBuilder
+	public static List<Provenance> find(EntityManager em, String uuid, String name, String version, String lineage) {
+		return QueryBuilder
 				.init(em)
 				.addSql("SELECT p FROM Provenance p where 1=1")
 				.setParameterIfNotNull("uuid",uuid,"and uuid = :uuid")
@@ -136,8 +135,6 @@ public class Provenance {
 				.setParameterIfNotNull("version",version,"and dataCollectorVersion = :version")
 				.setParameterIfNotNull("lineage",lineage,"and lineage = :lineage")
 				.buildResultList(Provenance.class);
-
-		return resultList;
 	}
 
 	public static String add(EntityManager em, ProvenanceDto provenance) {
