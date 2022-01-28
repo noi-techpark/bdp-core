@@ -321,12 +321,12 @@ for further details.
 ### I want to use dc-interface or ws-interface in my Java Maven project
 Include the following snippet in your `pom.xml` file:
 ```
-<repositories>
-  <repository>
-    <id>maven-repo.opendatahub.bz.it</id>
-    <url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
-  </repository>
-</repositories>
+	<repositories>
+		<repository>
+			<id>maven-repo.opendatahub.bz.it</id>
+			<url>https://maven-repo.opendatahub.bz.it/snapshot</url>
+		</repository>
+	</repositories>
 ```
 
 Include then, also the dependency (either `dc-interface` for data collectors or
