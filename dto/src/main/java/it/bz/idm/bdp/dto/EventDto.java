@@ -267,11 +267,12 @@ public class EventDto implements Serializable {
 		return 1;
 	}
 
-	public static boolean isValid(EventDto dto) {
+	public static boolean isValid(EventDto dto, boolean checkProvenance) {
 		if (dto == null)
 			return false;
-		return Constraints.someEmpty(
-			dto.getProvenance(),
+		if (checkProvenance && Constraints.isEmpty(dto.getProvenance()))
+			return false;
+		return Constraints.noneEmpty(
 			dto.getUuid(),
 			dto.getOrigin(),
 			dto.getCategory(),

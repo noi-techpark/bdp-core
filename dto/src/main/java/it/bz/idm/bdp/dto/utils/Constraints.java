@@ -28,4 +28,8 @@ public class Constraints {
 		return false;
 	}
 
+	public static boolean noneEmpty(String... values) {
+		return ! someEmpty(values);
+	}
+
 }

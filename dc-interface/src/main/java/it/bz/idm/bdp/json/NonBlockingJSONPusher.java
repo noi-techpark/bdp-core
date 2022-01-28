@@ -142,8 +142,8 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		this.pushProvenance();
 		for (EventDto dto: dtos) {
 			dto.setProvenance(this.provenance.getUuid());
-			if (! EventDto.isValid(dto))
-				throw new IllegalArgumentException("addEvents: The given event DTO is invalid.");
+			if (! EventDto.isValid(dto, true))
+				throw new IllegalArgumentException("addEvents: The given event DTO is invalid. Nothing has been send to the ODH writer...");
 		}
         return client
 			.post()
