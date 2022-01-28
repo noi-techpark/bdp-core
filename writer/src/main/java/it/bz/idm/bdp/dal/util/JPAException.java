@@ -45,7 +45,7 @@ public class JPAException extends RuntimeException {
 
 	public JPAException(String error, int httpCode, Throwable cause) {
 		super(error, cause);
-		exceptionDto.setStatus(new Integer(httpCode));
+		exceptionDto.setStatus(Integer.valueOf(httpCode));
 		exceptionDto.setDescription(error);
 	}
 
@@ -61,7 +61,7 @@ public class JPAException extends RuntimeException {
 
 	public JPAException(String error, int httpCode) {
 		super(error);
-		exceptionDto.setStatus(new Integer(httpCode));
+		exceptionDto.setStatus(Integer.valueOf(httpCode));
 		exceptionDto.setDescription(error);
 	}
 
