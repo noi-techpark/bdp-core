@@ -87,7 +87,7 @@ public class Event {
 	private String category;
 
 	@Column(nullable = false)
-	private String eventSeriesId;
+	private String eventSeriesUuid;
 
 	@Column(nullable = false)
 	private String name;
@@ -100,12 +100,12 @@ public class Event {
 		this.name = name;
 	}
 
-	public String getEventSeriesId() {
-		return this.eventSeriesId;
+	public String getEventSeriesUuid() {
+		return this.eventSeriesUuid;
 	}
 
-	public void setEventSeriesId(String eventSeriesId) {
-		this.eventSeriesId = eventSeriesId;
+	public void setEventSeriesUuid(String eventSeriesId) {
+		this.eventSeriesUuid = eventSeriesId;
 	}
 
 	private Date createdOn;
@@ -237,7 +237,7 @@ public class Event {
 			event.setUuid(dto.getUuid());
 			event.setOrigin(dto.getOrigin());
 			event.setCategory(dto.getCategory());
-			event.setEventSeriesId(dto.getEventSeriesUuid());
+			event.setEventSeriesUuid(dto.getEventSeriesUuid());
 			event.setName(dto.getName());
 			event.setDescription(dto.getDescription());
 			event.setProvenance(provenance);
