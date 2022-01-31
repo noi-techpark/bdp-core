@@ -30,7 +30,8 @@ import java.util.TreeSet;
 
 import io.swagger.annotations.ApiModelProperty;
 
-@Deprecated
+// @Deprecated This one is deprecated, but since we might change more than just this in the future, lets remove
+// this tag and reduce warnings for now!
 public class TypeDto implements Serializable {
 
 	private static final long serialVersionUID = -1224947780318447560L;
@@ -88,7 +89,9 @@ public class TypeDto implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof TypeDto) || obj == null) {
+		if (obj == null)
+			return false;
+		if (!(obj instanceof TypeDto)) {
 			return false;
 		}
 		TypeDto dto = (TypeDto) obj;

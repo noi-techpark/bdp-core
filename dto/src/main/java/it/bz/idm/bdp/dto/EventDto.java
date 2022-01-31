@@ -67,10 +67,10 @@ public class EventDto implements Serializable {
 	@JsonPropertyDescription("describes a group in which the event falls e.g. a car accident can be part of the category traffic jam ")
 	protected String category;
 
-	@ApiModelProperty (notes = "The event series ID")
+	@ApiModelProperty (notes = "The event series UUID")
 	@JsonProperty(required = true)
 	@JsonPropertyDescription("concatenates equal events, that change over time")
-	protected String eventSeriesId;
+	protected String eventSeriesUuid;
 
 	@ApiModelProperty (notes = "The human-readable name associated to the event.")
 	@JsonProperty(required = true)
@@ -120,23 +120,37 @@ public class EventDto implements Serializable {
 		this.uuid = uuid;
 	}
 
-    public void setUuidByMap(Map<String, Object> uuidMap) throws JsonProcessingException {
-		setUuidByMap(uuidMap, null);
+    public void setUuid(Map<String, Object> uuidMap) throws JsonProcessingException {
+		setUuid(uuidMap, null);
     }
 
-	public void setUuidByMap(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
+	public void setUuid(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
+		this.uuid = generateUuidByMap(uuidMap, uuidNameSpace);
+    }
+
+	private String generateUuidByMap(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         String uuidNameJson = mapper.writer().writeValueAsString(uuidMap);
-        this.uuid = Generators.nameBasedGenerator(uuidNameSpace).generate(uuidNameJson).toString();
+        return Generators.nameBasedGenerator(uuidNameSpace).generate(uuidNameJson).toString();
     }
 
-	public String getEventSeriesId() {
-		return this.eventSeriesId;
+	public String getEventSeriesUuid() {
+		return this.eventSeriesUuid;
 	}
 
-	public void setEventSeriesId(String eventSeriesId) {
-		this.eventSeriesId = eventSeriesId;
+	public void setEventSeriesUuid(String uuid) {
+		if (! Constraints.isUUID(uuid))
+			throw new IllegalArgumentException("EventDto: Invalid UUID format for event-series given '" + uuid + "'.");
+		this.eventSeriesUuid = uuid;
 	}
+
+    public void setEventSeriesUuid(Map<String, Object> uuidMap) throws JsonProcessingException {
+		setEventSeriesUuid(uuidMap, null);
+    }
+
+	public void setEventSeriesUuid(Map<String, Object> uuidMap, UUID uuidNameSpace) throws JsonProcessingException {
+		this.eventSeriesUuid = generateUuidByMap(uuidMap, uuidNameSpace);
+    }
 
 	public String getName() {
 		return this.name;
@@ -273,10 +287,9 @@ public class EventDto implements Serializable {
 		if (checkProvenance && Constraints.isEmpty(dto.getProvenance()))
 			return false;
 		return Constraints.noneEmpty(
-			dto.getUuid(),
 			dto.getOrigin(),
-			dto.getCategory(),
-			dto.getEventSeriesId(),
+			dto.getEventSeriesUuid(),
+			dto.getUuid(),
 			dto.getName()
 		);
 	}

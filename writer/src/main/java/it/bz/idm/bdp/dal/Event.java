@@ -50,7 +50,6 @@ import com.vividsolutions.jts.io.WKTReader;
 import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
 import com.vladmihalcea.hibernate.type.range.Range;
 
-import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.EventDto;
 
@@ -58,7 +57,7 @@ import it.bz.idm.bdp.dto.EventDto;
 	name = "event",
 	uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"uuid"}),
-		@UniqueConstraint(columnNames = {"origin", "category", "event_series_id", "name"})
+		@UniqueConstraint(columnNames = {"origin", "event_series_uuid", "name"})
 	}
 )
 @Entity
@@ -80,7 +79,7 @@ public class Event {
 	@Column(nullable = false)
 	private String uuid;
 
-	// Hierarchy of events: DB columns = [ origin, category, event_series_id, name ]
+	// Hierarchy of events: DB columns = [ origin, event_series_uuid, name ]
 	@Column(nullable = false)
 	private String origin;
 
@@ -238,7 +237,7 @@ public class Event {
 			event.setUuid(dto.getUuid());
 			event.setOrigin(dto.getOrigin());
 			event.setCategory(dto.getCategory());
-			event.setEventSeriesId(dto.getEventSeriesId());
+			event.setEventSeriesId(dto.getEventSeriesUuid());
 			event.setName(dto.getName());
 			event.setDescription(dto.getDescription());
 			event.setProvenance(provenance);
