@@ -15,4 +15,4 @@ jobs:
         uses: noi-techpark/github-actions/maven-test@v2
         with:
           java-version: '8'
-          test-command: 'mvn -U clean test'
+          test-command: 'mvn -B test'
