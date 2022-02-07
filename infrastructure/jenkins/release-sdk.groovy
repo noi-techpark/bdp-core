@@ -52,17 +52,10 @@ pipeline {
                 sh "./infrastructure/utils/quickrelease.sh $REL_TYPE '${params.TAG}'"
             }
         }
-        stage('Deploy DTO') {
+        stage('Deploy DTO and DC-INTERFACE') {
             steps {
                 sh '''
-                    mvn -B -U -pl dto -am clean test install deploy
-                '''
-            }
-        }
-        stage('Deploy DC-INTERFACE') {
-            steps {
-                sh '''
-                    mvn -B -U -pl dc-interface -am clean test deploy
+                    mvn -B -U -pl dto -pl dc-interface -am clean install deploy
                 '''
             }
         }
