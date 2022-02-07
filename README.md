@@ -104,8 +104,7 @@ and an Open Data Hub OAuth2 account.
 DAL is the layer which communicates with the DB underneath used by the so called
 reader and writer modules. The communication is handled through the ORM
 Hibernate and its spatial component for geometries. The whole module got
-developed using PostgreSQL as database and Postgis as an extension, but should
-also work with other RDBMS (nobody knows :)).
+developed using PostgreSQL as database and Postgis as an extension.
 
 Connection pooling is handled by
 [HikariCP](https://github.com/brettwooldridge/HikariCP) for high speed
@@ -117,7 +116,7 @@ was added as dependency.
 
 To configure the DAL module to communicate with your database you need to
 provide configuration and credentials:
->`src/main/resources/META-INF/persistence.xml`
+>`writer/src/main/resources/META-INF/persistence.xml`
 
 As you will see 2 persistence-units are configured. One is meant for the reader
 with preferably a read-only user and the other one for the writer which performs
