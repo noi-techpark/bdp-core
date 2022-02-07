@@ -38,7 +38,7 @@ pipeline {
         POSTGRES_SCHEMA = "intimev2"
         POSTGRES_USERNAME = "bdp"
         POSTGRES_PASSWORD = credentials('bdp-core-prod-database-write-password')
-        HIBERNATE_MAX_POOL_SIZE = "20"
+        HIBERNATE_MAX_POOL_SIZE = "40"
 
         // Security
         SECURITY_ALLOWED_ORIGINS = "*"
