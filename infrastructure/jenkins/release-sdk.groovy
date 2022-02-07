@@ -10,23 +10,23 @@ pipeline {
         string(
             name: 'TAG',
             defaultValue: '1.0.0',
-            description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you if you choose the development branch, so write only a plain version'
+            description: 'Tag pushed to Git. We add the postfix "-SNAPSHOT" for you if you choose the main branch, so write only a plain version'
         )
-        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'development', type: 'PT_BRANCH', description: 'Choose either master or development as branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the master branch, if you want to make a SNAPSHOT release use development.'
+        gitParameter name: 'BRANCH', branchFilter: 'origin/(.*)', defaultValue: 'main', type: 'PT_BRANCH', description: 'Choose a branch. The tag and version bump commit will be made on it. If you want to make a RELEASE use the prod branch, if you want to make a SNAPSHOT release use any other branch.'
     }
 
     // Do not rename keys AWS_ACCESS_KEY or AWS_SECRET_KEY, because the maven AWS plugin needs them to retrieve meta data
     environment {
         AWS_ACCESS_KEY = credentials('s3_repo_username')
         AWS_SECRET_KEY = credentials('s3_repo_password')
-        REL_TYPE = "${params.BRANCH == "master" ? "release" : "snapshot"}"
-        VERSION = "${params.BRANCH == "master" ? "${params.TAG}" : "${params.TAG}-SNAPSHOT"}"
-        S3_REPO_ID = "${params.BRANCH == "master" ? "maven-repo.opendatahub.bz.it-release": "maven-repo.opendatahub.bz.it-snapshot"}"
+        REL_TYPE = "${params.BRANCH == "prod" ? "release" : "snapshot"}"
+        VERSION = "${params.BRANCH == "prod" ? "${params.TAG}" : "${params.TAG}-SNAPSHOT"}"
+        S3_REPO_ID = "${params.BRANCH == "prod" ? "maven-repo.opendatahub.bz.it-release": "maven-repo.opendatahub.bz.it-snapshot"}"
     }
 
     stages {
-        stage('Check if BRANCH is correct and TAG exists (only master)') {
-            when {expression {return "${params.BRANCH}" == "master"}}
+        stage('Check if BRANCH is correct and TAG exists (only prod)') {
+            when {expression {return "${params.BRANCH}" == "prod"}}
             steps {
                 sh """
                     echo FAIL IF TAG ${VERSION} ALREADY EXISTS!
@@ -66,8 +66,8 @@ pipeline {
                 '''
             }
         }
-        stage('Tag (only master)') {
-            when {expression {return "${params.BRANCH}" == "master"}}
+        stage('Tag (only prod)') {
+            when {expression {return "${params.BRANCH}" == "prod"}}
             steps {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
                     sh "git config --global user.email 'info@opendatahub.bz.it'"

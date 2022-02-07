@@ -53,7 +53,7 @@ The core provides two components, the `writer`, that writes data to the database
 and `reader`, that exposes REST APIs for web services. The new version of the
 `reader` is called `ninja`, which is stored in another repository. Have a look
 at the [Ninja
-README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/master/README.md)
+README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/main/README.md)
 for details.
 
 ### WRITER
@@ -234,7 +234,7 @@ If this works you made it.
 You deployed your bdp-core and now will be able to add modules or develop your
 own. If you want to fill your DB with data, you will either create your own
 module, which works with the writer API or you can follow the guide on
-https://github.com/noi-techpark/bdp-helloworld/tree/master/data-collectors/my-first-data-collector
+https://github.com/noi-techpark/bdp-helloworld/tree/main/data-collectors/my-first-data-collector
 where it's shown hot to use an already existing JAVA-client. If you also need to
 expose this data you can either use the NINJA API.
 
