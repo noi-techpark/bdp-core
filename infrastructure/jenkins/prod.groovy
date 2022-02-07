@@ -42,7 +42,7 @@ pipeline {
 
         // Security
         SECURITY_ALLOWED_ORIGINS = "*"
-        KEYCLOAK_URL = "https://auth.opendatahub.testingmachine.eu/auth"
+        KEYCLOAK_URL = "https://auth.opendatahub.bz.it/auth"
         KEYCLOAK_SSL_REQUIRED = "none"
         KEYCLOAK_REALM = "noi"
         KEYCLOAK_CLIENT_ID = "odh-mobility-writer"
