@@ -5,7 +5,7 @@
 	<parent>
         <groupId>it.bz.idm.bdp</groupId>
         <artifactId>core</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
+		<version>6.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -75,7 +75,7 @@
 		<dependency>
 			<groupId>it.bz.idm.bdp</groupId>
 			<artifactId>dto</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>6.0.0</version>
 		</dependency>
 
 		<!-- DB migration - Flyway -->

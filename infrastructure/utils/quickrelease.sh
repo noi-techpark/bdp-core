@@ -21,17 +21,17 @@ test "$TYPE" = "snapshot" && {
     VERSION="$VERSION-SNAPSHOT"
 }
 
+# Parent pom.xml inside root-folder
+$CMD -u "/pom:project/pom:version" -v "$VERSION" pom.xml
+$CMD -u "/pom:project/pom:properties/pom:revision" -v "$VERSION" pom.xml
+$CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:id" -v "$REP_ID" pom.xml
+$CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:url" -v "$REP_URL" pom.xml
+
 # UPDATE pom.xml files
 for FOLDER in dto writer dc-interface
 do
-    $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:url" -v "$REP_URL" $FOLDER/pom.xml
-    $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:id" -v "$REP_ID" $FOLDER/pom.xml
-
-    $CMD -u "/pom:project/pom:version" -v "$VERSION" $FOLDER/pom.xml
+    $CMD -u "/pom:project/pom:parent/pom:version" -v "$VERSION" $FOLDER/pom.xml
     $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dto']/pom:version" -v "$VERSION" $FOLDER/pom.xml
 done
-
-# UPDATING CONTRIBUTORS.rst...
-bash CONTRIBUTORS.rst
 
 exit 0
