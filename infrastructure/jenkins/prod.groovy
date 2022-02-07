@@ -22,53 +22,85 @@
  */
 pipeline {
     agent any
-    
+
     environment {
         SERVER_PORT="1010"
         PROJECT = "odh-writer"
-        PROJECT_FOLDER = "writer"
-        LOG_FOLDER = "/var/log/opendatahub/"
         ARTIFACT_NAME = "writer"
-        DOCKER_IMAGE = '755952719952.dkr.ecr.eu-west-1.amazonaws.com/odh-writer-prod'
-        DOCKER_TAG = "prod-$BUILD_NUMBER"
-        BDP_WRITER_KEYCLOAK_CONFIG = credentials('bigdataplatform-writer-keycloak-prod.json')
-        BDP_DATABASE_SCHEMA = "intimev2"
-        BDP_DATABASE_HOST = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
-        BDP_DATABASE_PORT = "5432"
-        BDP_DATABASE_NAME = "bdp"
-        BDP_DATABASE_WRITE_USER = "bdp"
-        BDP_DATABASE_WRITE_PASSWORD = credentials('bdp-core-prod-database-write-password')
-    }
+		LIMIT = "prod"
+        DOCKER_IMAGE = "755952719952.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT}-${LIMIT}"
+        DOCKER_TAG = "$LIMIT-$BUILD_NUMBER"
 
+        // Database Configuration
+        POSTGRES_SERVER = "prod-pg-bdp.co90ybcr8iim.eu-west-1.rds.amazonaws.com"
+        POSTGRES_DB = "bdp"
+        POSTGRES_PORT = "5432"
+        POSTGRES_SCHEMA = "intimev2"
+        POSTGRES_USERNAME = "bdp"
+        POSTGRES_PASSWORD = credentials('bdp-core-prod-database-write-password')
+        HIBERNATE_MAX_POOL_SIZE = "20"
+
+        // Security
+        SECURITY_ALLOWED_ORIGINS = "*"
+        KEYCLOAK_URL = "https://auth.opendatahub.testingmachine.eu/auth"
+        KEYCLOAK_SSL_REQUIRED = "none"
+        KEYCLOAK_REALM = "noi"
+        KEYCLOAK_CLIENT_ID = "odh-mobility-writer"
+
+        // Logging
+        LOG_APPLICATION_NAME = "writer"
+        //LOG_APPLICATION_VERSION = "6.0.0" will be set from Jenkins parameter
+        LOG_LEVEL = "info"
+        HIBERNATE_LOG_LEVEL = "warning"
+        HIBERNATE_SQL_LOG = "false"
+    }
+    parameters{
+        string(
+            name: 'bdp_version',
+            defaultValue: 'x.y.z',
+            description: 'version of dependencies to use in deployment (must be released)'
+        );
+    }
     stages {
         stage('Configure') {
             steps {
-                sh 'cp dal/src/main/resources/META-INF/persistence.xml.dist dal/src/main/resources/META-INF/persistence.xml'
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.default_schema']/@value" -v ${BDP_DATABASE_SCHEMA} dal/src/main/resources/META-INF/persistence.xml'''
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.serverName']/@value" -v ${BDP_DATABASE_HOST} dal/src/main/resources/META-INF/persistence.xml'''
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.portNumber']/@value" -v ${BDP_DATABASE_PORT} dal/src/main/resources/META-INF/persistence.xml'''
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit/_:properties/_:property[@name='hibernate.hikari.dataSource.databaseName']/@value" -v ${BDP_DATABASE_NAME} dal/src/main/resources/META-INF/persistence.xml'''
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.user']/@value" -v ${BDP_DATABASE_WRITE_USER} dal/src/main/resources/META-INF/persistence.xml'''
-                sh '''xmlstarlet ed -L -u "//_:persistence-unit[@name='jpa-persistence-write']/_:properties/_:property[@name='hibernate.hikari.dataSource.password']/@value" -v ${BDP_DATABASE_WRITE_PASSWORD} dal/src/main/resources/META-INF/persistence.xml'''
                 sh """
-                    cd ${PROJECT_FOLDER}
+                    ./infrastructure/utils/quickrelease.sh 'release' '${params.bdp_version}'
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
+                    echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
+                    echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
+                    echo 'LIMIT=${LIMIT}' >> .env
                     echo 'DOCKER_IMAGE=${DOCKER_IMAGE}' >> .env
                     echo 'DOCKER_TAG=${DOCKER_TAG}' >> .env
-                    echo 'LOG_LEVEL=INFO' >> .env
-                    echo 'LOG_FOLDER=writer' >> .env
-                    echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
-                    echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
+
+                    echo 'POSTGRES_SERVER=${POSTGRES_SERVER}' >> .env
+                    echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env
+                    echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env
+                    echo 'POSTGRES_SCHEMA=${POSTGRES_SCHEMA}' >> .env
+                    echo 'POSTGRES_USERNAME=${POSTGRES_USERNAME}' >> .env
+                    echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env
+                    echo 'HIBERNATE_MAX_POOL_SIZE=${HIBERNATE_MAX_POOL_SIZE}' >> .env
+
+                    echo 'SECURITY_ALLOWED_ORIGINS=${SECURITY_ALLOWED_ORIGINS}' >> .env
+                    echo 'KEYCLOAK_URL=${KEYCLOAK_URL}' >> .env
+                    echo 'KEYCLOAK_SSL_REQUIRED=${KEYCLOAK_SSL_REQUIRED}' >> .env
+                    echo 'KEYCLOAK_REALM=${KEYCLOAK_REALM}' >> .env
+                    echo 'KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}' >> .env
+
+                    echo 'LOG_APPLICATION_NAME=${LOG_APPLICATION_NAME}' >> .env
+                    echo 'LOG_APPLICATION_VERSION=${params.bdp_version}' >> .env
+                    echo 'LOG_LEVEL=${LOG_LEVEL}' >> .env
+                    echo 'HIBERNATE_LOG_LEVEL=${HIBERNATE_LOG_LEVEL}' >> .env
+                    echo 'HIBERNATE_SQL_LOG=${HIBERNATE_SQL_LOG}' >> .env
                 """
-                sh 'cat ${BDP_WRITER_KEYCLOAK_CONFIG} > writer/src/main/resources/keycloak.json'
             }
         }
         stage('Test & Build') {
             steps {
                 sh """
                     aws ecr get-login --region eu-west-1 --no-include-email | bash
-                    docker-compose --no-ansi -f ${PROJECT_FOLDER}/infrastructure/docker-compose.build.yml build --pull
-                    docker-compose --no-ansi -f ${PROJECT_FOLDER}/infrastructure/docker-compose.build.yml push
+                    docker-compose --no-ansi -f infrastructure/docker-compose.build.yml build --pull
+                    docker-compose --no-ansi -f infrastructure/docker-compose.build.yml push
                 """
             }
         }
@@ -76,8 +108,9 @@ pipeline {
             steps {
                sshagent(['jenkins-ssh-key']) {
                     sh """
-                        (cd ${PROJECT_FOLDER}/infrastructure/ansible && ansible-galaxy install -f -r requirements.yml)
-                        (cd ${PROJECT_FOLDER}/infrastructure/ansible && ansible-playbook --limit=prod deploy.yml --extra-vars "release_name=${BUILD_NUMBER}")
+						cd infrastructure/ansible
+                        ansible-galaxy install -f -r requirements.yml
+                        ansible-playbook --limit=${LIMIT} deploy.yml --extra-vars "release_name=${BUILD_NUMBER}"
                     """
                 }
             }
