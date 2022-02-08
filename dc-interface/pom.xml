@@ -71,6 +71,13 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
 		</dependency>
+
+		<!-- To handle spatial objects and transformations -->
+		<dependency>
+		    <groupId>com.vividsolutions</groupId>
+		    <artifactId>jts-core</artifactId>
+		    <version>1.14.0</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
