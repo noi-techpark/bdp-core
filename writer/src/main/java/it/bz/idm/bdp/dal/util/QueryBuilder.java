@@ -201,7 +201,6 @@ public class QueryBuilder {
 		if (list == null || list.isEmpty()) {
 			return alternative;
 		}
-		System.out.println(list.get(0));
 		return (T) list.get(0);
 	}
 
