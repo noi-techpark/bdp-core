@@ -29,7 +29,7 @@ services:
       dockerfile: infrastructure/docker/Dockerfile
       target: base
     depends_on:
-      - postgres
+      - db
     env_file:
       - .env
     environment:
@@ -53,9 +53,9 @@ services:
 
   # In case you had already one and changed some parameters here, docker-compose
   # might reuse the existing one and not update your password, DB or role... so
-  # stop the containers and execute 'docker-compose rm -fv postgres' to get rid
+  # stop the containers and execute 'docker-compose rm -fv db' to get rid
   # of cached databases...
-  postgres:
+  db:
     image: postgis/postgis:12-3.2-alpine
     environment:
       POSTGRES_DB: bdp

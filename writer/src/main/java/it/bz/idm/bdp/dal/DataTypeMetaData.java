@@ -37,7 +37,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
@@ -51,7 +50,7 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
  * @author Patrick Bertolla
  *
  */
-@TypeDefs({ @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(name = "type_metadata")
 public class DataTypeMetaData {
@@ -88,7 +87,7 @@ public class DataTypeMetaData {
 	public void setJson(Map<String, Object> metaData) {
 		this.json = metaData;
 	}
-	
+
 	public DataType getType() {
 		return type;
 	}
@@ -125,5 +124,5 @@ public class DataTypeMetaData {
 			return false;
 		return true;
 	}
-	
+
 }

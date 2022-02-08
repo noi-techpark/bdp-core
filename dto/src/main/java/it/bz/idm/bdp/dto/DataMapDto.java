@@ -47,8 +47,8 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 
 	private static final long serialVersionUID = -6053193762265167013L;
 	private String name = "(default)";
-	private List<RecordDtoImpl> data = new ArrayList<RecordDtoImpl>();
-	private Map<String,DataMapDto<RecordDtoImpl>> branch = new TreeMap<String,DataMapDto<RecordDtoImpl>>();
+	private List<RecordDtoImpl> data = new ArrayList<>();
+	private Map<String,DataMapDto<RecordDtoImpl>> branch = new TreeMap<>();
 	private String provenance;
 
 	public String getName() {
@@ -84,7 +84,7 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 		DataMapDto<RecordDtoImpl> existingMap = branch.get(key);
 
 		if (existingMap == null) {
-			existingMap = new DataMapDto<RecordDtoImpl>();
+			existingMap = new DataMapDto<>();
 			branch.put(key, existingMap);
 		}
 
