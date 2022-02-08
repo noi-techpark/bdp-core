@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -42,6 +43,7 @@ public class QueryBuilder {
 	private StringBuilder sql = new StringBuilder();
 	private EntityManager em = null;
 	private Map<String, Object> parameters = new HashMap<>();
+	private boolean isNativeQuery = false;
 
 	/**
 	 * Create a new {@link QueryBuilder} instance
@@ -66,6 +68,11 @@ public class QueryBuilder {
 	public QueryBuilder(EntityManager em) {
 		super();
 		this.em = em;
+	}
+
+	public QueryBuilder nativeQuery() {
+		this.isNativeQuery = true;
+		return this;
 	}
 
 	/**
@@ -133,12 +140,31 @@ public class QueryBuilder {
 	}
 
 	/**
+	 * Create a {@link Query} with type <code>resultClass</code> and set
+	 * all collected parameters.
+	 *
+	 * @param resultClass Type of the query result
+	 * @return {@link Query} with type <code>resultClass</code>
+	 */
+	public <T> Query buildNative(Class<T> resultClass) {
+		Query query = em.createNativeQuery(sql.toString());
+		for (Entry<String, Object> entry : parameters.entrySet()) {
+			query.setParameter(entry.getKey(), entry.getValue());
+		}
+		return query;
+	}
+
+	/**
 	 * Build the current query and execute {@link javax.persistence.TypedQuery#getResultList}
 	 *
 	 * @param resultClass Type of the query result
 	 * @return List of <code>resultClass</code> objects
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> List<T> buildResultList(Class<T> resultClass) {
+		if (isNativeQuery) {
+			return buildNative(resultClass).getResultList();
+		}
 		return build(resultClass).getResultList();
 	}
 
@@ -167,14 +193,16 @@ public class QueryBuilder {
 	 * @param alternative to be returned, if {@link javax.persistence.TypedQuery#getResultList} does not return results
 	 * @return topmost result or 'alternative' if not found
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
-		TypedQuery<T> query = build(resultClass);
+		Query query = isNativeQuery ? buildNative(Object[].class) : build(resultClass);
 		query.setMaxResults(1);
-		List<T> list = query.getResultList();
+		List<Object[]> list = query.getResultList();
 		if (list == null || list.isEmpty()) {
 			return alternative;
 		}
-		return list.get(0);
+		System.out.println(list.get(0));
+		return (T) list.get(0);
 	}
 
 	/**

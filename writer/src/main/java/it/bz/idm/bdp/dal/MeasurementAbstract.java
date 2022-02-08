@@ -168,6 +168,43 @@ public abstract class MeasurementAbstract implements Serializable {
 				.buildSingleResultOrAlternative(Date.class, new Date(-1));
 	}
 
+	public static Date getDateOfLastRecordSingleImpl(EntityManager em, String stationType, String stationCode, String dataTypeName, Integer period) {
+		if (stationType == null || stationCode == null)
+			return null;
+
+		return QueryBuilder
+			.init(em)
+			.nativeQuery()
+			.addSql("SELECT max(timestamp) FROM measurement m")
+			.addSql("JOIN station s ON s.id = m.station_id")
+			.addSql("JOIN type t ON t.id = m.type_id")
+			.addSql("WHERE stationtype = :stationtype AND stationcode = :stationcode")
+			.setParameterIfNotNull("type", dataTypeName, "AND cname = :type")
+			.setParameterIfNotNull("period", period, "AND period = :period")
+			.setParameter("stationtype", stationType)
+			.setParameter("stationcode", stationCode)
+			.addSql("UNION ALL")
+			.addSql("SELECT max(timestamp) FROM measurementjson m")
+			.addSql("JOIN station s ON s.id = m.station_id")
+			.addSql("JOIN type t ON t.id = m.type_id")
+			.addSql("WHERE stationtype = :stationtype AND stationcode = :stationcode")
+			.setParameterIfNotNull("type", dataTypeName, "AND cname = :type")
+			.setParameterIfNotNull("period", period, "AND period = :period")
+			.setParameter("stationtype", stationType)
+			.setParameter("stationcode", stationCode)
+			.addSql("UNION ALL")
+			.addSql("SELECT max(timestamp) FROM measurementstring m")
+			.addSql("JOIN station s ON s.id = m.station_id")
+			.addSql("JOIN type t ON t.id = m.type_id")
+			.addSql("WHERE stationtype = :stationtype AND stationcode = :stationcode")
+			.setParameterIfNotNull("type", dataTypeName, "AND cname = :type")
+			.setParameterIfNotNull("period", period, "AND period = :period")
+			.setParameter("stationtype", stationType)
+			.setParameter("stationcode", stationCode)
+			.addSql("ORDER BY 1 DESC NULLS LAST")
+			.buildSingleResultOrNull(Date.class);
+	}
+
 	/**
 	 * This is the {@link findLatestEntryImpl} implementation without permission control.
 	 *

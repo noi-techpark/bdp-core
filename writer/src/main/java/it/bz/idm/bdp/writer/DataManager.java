@@ -39,6 +39,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Event;
 import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.MeasurementJSON;
 import it.bz.idm.bdp.dal.MeasurementString;
@@ -132,21 +133,33 @@ public class DataManager {
 		}
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			Station station = Station.findStation(em, stationType, stationCode);
-			if (station == null) {
-				return new Date(0);
-				//TODO: find another way to fix this since it causes regressions
-				//throw new JPAException("Station '" + stationType + "/" + stationCode + "' not found (station type/station code).", HttpStatus.NOT_FOUND.value());
-			}
-			DataType dataType = DataType.findByCname(em, dataTypeName);
+			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(em, stationType, stationCode, dataTypeName, period);
 
-			/* Hibernate does not support UNION ALL queries, hence we must run all retrieval queries here */
-			List<Date> dates = new ArrayList<>();
-			dates.add(new Measurement().getDateOfLastRecord(em, station, dataType, period));
-			dates.add(new MeasurementString().getDateOfLastRecord(em, station, dataType, period));
-			dates.add(new MeasurementJSON().getDateOfLastRecord(em, station, dataType, period));
-			Collections.sort(dates);
-			return dates.get(dates.size() - 1);
+			/*
+			 * Backward compatibility: We need to distinguish station-not-found
+			 * from station found, but not a datatype and period combination
+			 * within.
+			 * TODO: We tried the following in the past, but some data collectors no longer worked afterwards:
+			 * >  throw new JPAException(
+			 * >      "Station '" + stationType + "/" + stationCode + "' not found (station type/station code).",
+			 * >      HttpStatus.NOT_FOUND.value()
+			 * >  );
+			 */
+			if (queryResult == null) {
+				// Query did not return a result and we used only station-related constraints, then
+				// the only possible empty result is a station not found, otherwise we need to check
+				// if such a station would exist. This is slow, but needed for backward compatibility.
+				if ((dataTypeName == null || dataTypeName.isEmpty()) && period == null) {
+					return new Date(0);
+				}
+				Station station = Station.findStation(em, stationType, stationCode);
+				if (station == null) {
+					return new Date(0);
+				}
+				return new Date(-1);
+			}
+
+			return queryResult;
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		} finally {
