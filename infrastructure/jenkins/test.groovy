@@ -49,28 +49,15 @@ pipeline {
 
         // Logging
         LOG_APPLICATION_NAME = "writer"
-        //LOG_APPLICATION_VERSION = "6.0.0-SNAPSHOT" will be set from Jenkins parameter
+        LOG_APPLICATION_VERSION = "6.1.0-SNAPSHOT"
         LOG_LEVEL = "info"
         HIBERNATE_LOG_LEVEL = "warning"
         HIBERNATE_SQL_LOG = "false"
-    }
-    parameters{
-        string(
-            name: 'bdp_version',
-            defaultValue: 'x.y.z',
-            description: 'version of dependencies to use in deployment (must be released)'
-        );
-        choice(
-            name: 'bdp_type',
-            choices: ['snapshot', 'release'],
-            description: 'use production ready releases or snapshots'
-        );
     }
     stages {
         stage('Configure') {
             steps {
                 sh """
-                    ./infrastructure/utils/quickrelease.sh '${params.bdp_type}' '${params.bdp_version}'
                     echo 'SERVER_PORT=${SERVER_PORT}' > .env
                     echo 'COMPOSE_PROJECT_NAME=${PROJECT}' >> .env
                     echo 'ARTIFACT_NAME=${ARTIFACT_NAME}' >> .env
@@ -93,7 +80,7 @@ pipeline {
                     echo 'KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}' >> .env
 
                     echo 'LOG_APPLICATION_NAME=${LOG_APPLICATION_NAME}' >> .env
-                    echo 'LOG_APPLICATION_VERSION=${params.bdp_version}' >> .env
+                    echo 'LOG_APPLICATION_VERSION=${LOG_APPLICATION_VERSION}' >> .env
                     echo 'LOG_LEVEL=${LOG_LEVEL}' >> .env
                     echo 'HIBERNATE_LOG_LEVEL=${HIBERNATE_LOG_LEVEL}' >> .env
                     echo 'HIBERNATE_SQL_LOG=${HIBERNATE_SQL_LOG}' >> .env

@@ -5,7 +5,7 @@
 	<groupId>it.bz.idm.bdp</groupId>
 	<artifactId>core</artifactId>
 	<packaging>pom</packaging>
-	<version>6.0.0</version>
+	<version>6.1.0-SNAPSHOT</version>
     <inceptionYear>2019</inceptionYear>
 
 	<parent>
@@ -17,7 +17,7 @@
 	</parent>
 
 	<properties>
-		<revision>6.0.0</revision>
+		<revision>6.1.0-SNAPSHOT</revision>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
@@ -28,8 +28,8 @@
 
 	<repositories>
 		<repository>
-			<id>maven-repo.opendatahub.bz.it-release</id>
-			<url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/release</url>
+			<id>maven-repo.opendatahub.bz.it-snapshot</id>
+			<url>http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/snapshot</url>
 		</repository>
 	</repositories>
 
