@@ -24,7 +24,6 @@ package it.bz.idm.bdp.writer;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -38,11 +37,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Event;
-import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
-import it.bz.idm.bdp.dal.MeasurementJSON;
-import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAException;
@@ -106,7 +102,7 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<?> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
+	public static ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			DataType.sync(em,dtos);
