@@ -47,7 +47,6 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -69,11 +68,10 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testFindLatestEntry() {
-		BDPRole role = BDPRole.fetchAdminRole(em);
 		Integer period = 500;
 		DataType type = DataType.findByCname(em, this.type.getCname());
 		Station station = Station.findStation(em, this.station.getStationtype(), this.station.getStationcode());
-		MeasurementAbstract latestEntry = new Measurement().findLatestEntry(em, station, type, period, role);
+		MeasurementAbstract latestEntry = new Measurement().findLatestEntry(em, station, type, period);
 		assertNotNull(latestEntry);
 		assertEquals(period, latestEntry.getPeriod());
 		assertTrue(this.station.getActive());

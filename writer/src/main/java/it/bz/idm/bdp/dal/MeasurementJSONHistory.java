@@ -41,7 +41,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dto.RecordDto;
 
 /**
@@ -109,8 +108,8 @@ public class MeasurementJSONHistory extends MeasurementAbstractHistory {
 	}
 
 	@Override
-	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role) {
-		return MeasurementAbstractHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, role, this);
+	public List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period) {
+		return MeasurementAbstractHistory.findRecordsImpl(em, stationtype, identifier, cname, start, end, period, this);
 	}
 
 	@Override

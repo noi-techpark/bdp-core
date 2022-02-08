@@ -24,6 +24,7 @@ package it.bz.idm.bdp.dal;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,7 +35,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 
 /**
@@ -73,8 +73,8 @@ public abstract class MeasurementAbstract implements Serializable {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	private Provenance provenance;
 
-	public abstract MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
-	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role);
+	public abstract MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period);
+	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period);
 	public abstract void setValue(Object value);
 
 	protected MeasurementAbstract() {
@@ -150,26 +150,20 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param station entity {@link Station} to filter by
 	 * @param type entity {@link DataType} to filter by
 	 * @param period interval between measurements to filter by
-	 * @param role authorization level of the current user
 	 * @param table implementation of m which we need to query
 	 * @return date of the last inserted record
 	 */
-	public static <T> Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
+	public static <T> Date getDateOfLastRecordImpl(EntityManager em, Station station, DataType type, Integer period, T table) {
 		if (station == null)
 			return null;
 
 		return QueryBuilder
 				.init(em)
-				.addSql("SELECT record.timestamp FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
-						"WHERE (record.station = p.station OR p.station = null)",
-						"AND (record.type = p.type OR p.type = null)",
-						"AND (record.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND record.station = :station")
+				.addSql("SELECT record.timestamp FROM " + table.getClass().getSimpleName() + " record",
+						"WHERE record.station = :station")
 				.setParameterIfNotNull("type", type, "AND record.type = :type")
 				.setParameterIfNotNull("period", period, "AND record.period = :period")
 				.setParameter("station", station)
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp DESC")
 				.buildSingleResultOrAlternative(Date.class, new Date(-1));
 	}
@@ -179,7 +173,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	 *
 	 * <p> THIS METHOD SEES ALL DATA, SO CAREFUL WHEN YOU USE IT </p>
 	 *
-	 * Use {@link MeasurementAbstract#findLatestEntry(EntityManager, Station, DataType, Integer, BDPRole)},
+	 * Use {@link MeasurementAbstract#findLatestEntry(EntityManager, Station, DataType, Integer)},
 	 * if you need permission handling.
 	 *
 	 * @param em entity manager
@@ -208,26 +202,20 @@ public abstract class MeasurementAbstract implements Serializable {
 	 * @param station entity {@link Station} to filter by
 	 * @param type entity {@link DataType} to filter by
 	 * @param period interval between measurements to filter by
-	 * @param role authorization level of the current session
 	 * @param table measurement implementation table to search in
 	 * @return newest measurement {@link MeasurementAbstract} of a specific station. It can also be narrowed down to type and period
 	 */
-	protected static <T extends MeasurementAbstract> MeasurementAbstract findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, BDPRole role, T table) {
+	protected static <T extends MeasurementAbstract> MeasurementAbstract findLatestEntryImpl(EntityManager em, Station station, DataType type, Integer period, T table) {
 		if (station == null)
 			return null;
 
 		return QueryBuilder
 				.init(em)
-				.addSql("SELECT record FROM " + table.getClass().getSimpleName() + " record, BDPPermissions p",
-						"WHERE (record.station = p.station OR p.station = null)",
-						"AND (record.type = p.type OR p.type = null)",
-						"AND (record.period = p.period OR p.period = null)",
-						"AND p.role = :role",
-						"AND record.station = :station")
+				.addSql("SELECT record FROM " + table.getClass().getSimpleName() + " record",
+						"WHERE record.station = :station")
 				.setParameterIfNotNull("period", period, "AND record.period = :period")
 				.setParameterIfNotNull("type", type, "AND record.type = :type")
 				.setParameter("station", station)
-				.setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
 				.addSql("ORDER BY record.timestamp DESC")
 				.buildSingleResultOrNull(table.getClass());
 	}

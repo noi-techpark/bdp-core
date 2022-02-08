@@ -41,8 +41,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
-
 /**
  * Implementation for measurements cache of type double
  *
@@ -113,13 +111,13 @@ public class MeasurementJSON extends MeasurementAbstract {
 	}
 
 	@Override
-	public MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return MeasurementAbstract.findLatestEntryImpl(em, station, type, period, role, this);
+	public MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period) {
+		return MeasurementAbstract.findLatestEntryImpl(em, station, type, period, this);
 	}
 
 	@Override
-	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period, BDPRole role) {
-		return MeasurementAbstract.getDateOfLastRecordImpl(em, station, type, period, role, this);
+	public Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period) {
+		return MeasurementAbstract.getDateOfLastRecordImpl(em, station, type, period, this);
 	}
 
 	@Override

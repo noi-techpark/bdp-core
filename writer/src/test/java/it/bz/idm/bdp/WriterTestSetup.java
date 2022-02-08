@@ -33,8 +33,6 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.authentication.BDPRole;
-import it.bz.idm.bdp.dal.authentication.BDPRules;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 
 public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
@@ -47,31 +45,23 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 	protected static final String prefix = "--TEST--";
 
 	protected EntityManager em;
-	protected BDPRole roleParent, roleChild;
 	protected Station station;
 	protected DataType type;
-	protected BDPRules rule;
 	protected Measurement measurement;
 
 	@Before
 	public void setup() {
 		em = JPAUtil.createEntityManager();
 
-		roleParent = new BDPRole(prefix + "parent", "The Parent Role");
-		roleChild = new BDPRole(prefix + "child", "The Child Role", roleParent);
 		station = new Station(prefix + "Environment", prefix + "Station01", "Station One");
 		type = new DataType(prefix + "NO2", "mg", "Fake type", "Instants");
-		rule = new BDPRules(roleParent, station, type, 500);
 		measurement = new Measurement(station, type, 1.11, new Date(), 500);
 
 		try {
 			em.getTransaction().begin();
-			em.persist(roleParent);
-			em.persist(roleChild);
 			em.persist(station);
 			em.persist(type);
 			em.persist(measurement);
-			em.persist(rule);
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -41,7 +41,6 @@ import javax.persistence.MappedSuperclass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataMapDto;
@@ -84,7 +83,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Provenance provenance;
 
-    public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role);
+    public abstract List<RecordDto> findRecords(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period);
 
     protected MeasurementAbstractHistory() {
         this.created_on = new Date();
@@ -378,20 +377,15 @@ public abstract class MeasurementAbstractHistory implements Serializable {
      * @param start time filter start in milliseconds UTC for query, required
      * @param end time filter start in milliseconds UTC for query, required
      * @param period interval between measurements
-     * @param role authorization level of the current session
      * @param tableObject implementation which calls this method to decide which table to query, required
      * @return a list of measurements from history tables
      */
-    protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, BDPRole role, T tableObject) {
+    protected static <T> List<RecordDto> findRecordsImpl(EntityManager em, String stationtype, String identifier, String cname, Date start, Date end, Integer period, T tableObject) {
         List<MeasurementAbstractHistory> result = QueryBuilder
                 .init(em)
                 .addSql("SELECT record")
-                .addSql("FROM  " + tableObject.getClass().getSimpleName() + " record, BDPPermissions p",
-                        "WHERE (record.station = p.station OR p.station = null)",
-                        "AND (record.type = p.type OR p.type = null)",
-                        "AND (record.period = p.period OR p.period = null)",
-                        "AND p.role = :role",
-                        "AND record.station = (",
+                .addSql("FROM  " + tableObject.getClass().getSimpleName() + " record",
+                        "WHERE record.station = (",
                         "SELECT s FROM Station s WHERE s.stationtype = :stationtype AND s.stationcode = :stationcode",
                         ")",
                         "AND record.type = (SELECT t FROM DataType t WHERE t.cname = :cname)",
@@ -402,7 +396,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                 .setParameter("cname", cname)
                 .setParameter("start", start)
                 .setParameter("end", end)
-                .setParameter("role", role == null ? BDPRole.fetchGuestRole(em) : role)
                 .addSql("ORDER BY record.timestamp")
                 .buildResultList(MeasurementAbstractHistory.class);
         return MeasurementAbstractHistory.castToDtos(result, period == null);
