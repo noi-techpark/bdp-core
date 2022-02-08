@@ -44,7 +44,6 @@ import it.bz.idm.bdp.dal.MeasurementJSON;
 import it.bz.idm.bdp.dal.MeasurementString;
 import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
-import it.bz.idm.bdp.dal.authentication.BDPRole;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dto.DataMapDto;
@@ -141,13 +140,11 @@ public class DataManager {
 			}
 			DataType dataType = DataType.findByCname(em, dataTypeName);
 
-			BDPRole role = BDPRole.fetchAdminRole(em);
-
 			/* Hibernate does not support UNION ALL queries, hence we must run all retrieval queries here */
 			List<Date> dates = new ArrayList<>();
-			dates.add(new Measurement().getDateOfLastRecord(em, station, dataType, period, role));
-			dates.add(new MeasurementString().getDateOfLastRecord(em, station, dataType, period, role));
-			dates.add(new MeasurementJSON().getDateOfLastRecord(em, station, dataType, period, role));
+			dates.add(new Measurement().getDateOfLastRecord(em, station, dataType, period));
+			dates.add(new MeasurementString().getDateOfLastRecord(em, station, dataType, period));
+			dates.add(new MeasurementJSON().getDateOfLastRecord(em, station, dataType, period));
 			Collections.sort(dates);
 			return dates.get(dates.size() - 1);
 		} catch (Exception e) {
