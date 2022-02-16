@@ -53,7 +53,7 @@ import it.bz.idm.bdp.dto.StationDto;
 public class JsonController extends DataManager {
 
 	@RequestMapping(value="/provenance", method=RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> createProvenance(@RequestBody ProvenanceDto provenance) {
+	public @ResponseBody ResponseEntity<String> createProvenance(@RequestBody ProvenanceDto provenance) {
 		return DataManager.addProvenance(provenance);
 	}
 
@@ -97,7 +97,7 @@ public class JsonController extends DataManager {
 	}
 
 	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> pushRecordsMissingTopology() {
+	public @ResponseBody ResponseEntity<Object> pushRecordsMissingTopology() {
 		throw new JPAException("Missing station type. For example set MyStationType: .../pushRecords/MyStationType");
 	}
 
@@ -118,23 +118,23 @@ public class JsonController extends DataManager {
 	}
 
 	@RequestMapping(value = "/syncStations", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> syncStationsMissingTopology() {
+	public @ResponseBody ResponseEntity<Object> syncStationsMissingTopology() {
 		throw new JPAException("Missing station type. For example set MyStationType: .../syncStations/MyStationType");
 	}
 
 	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> syncStations(@PathVariable String stationType,
+	public @ResponseBody ResponseEntity<Object> syncStations(@PathVariable String stationType,
 														@RequestBody(required = true) List<StationDto> stationDtos) {
 		return DataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
 	}
 
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
+	public @ResponseBody ResponseEntity<Object> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
 		return DataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 
 	@RequestMapping(value = "/event", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
+	public @ResponseBody ResponseEntity<Object> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
 		return DataManager.addEvents(eventDtos,getURIMapping("/events"));
 	}
 }

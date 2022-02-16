@@ -49,6 +49,8 @@ import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writer API
@@ -59,14 +61,17 @@ import it.bz.idm.bdp.dto.StationDto;
 @Component
 public class DataManager {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DataManager.class);
+
 	/**
 	 * @param stationType all data sets must have stations as reference with given station type
 	 * @param responseLocation
 	 * @param dataMap containing all data as measurement in a tree structure
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<?> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
+	public static ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: pushRecords: %s, %s", stationType, responseLocation));
 		try {
 			MeasurementAbstractHistory.pushRecords(em, stationType, dataMap);
 		} catch (Exception e) {
@@ -84,8 +89,9 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<?> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
+	public static ResponseEntity<Object> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: syncStations: %s, %s, List<StationDto>.size = %d", stationType, responseLocation, dtos.size()));
 		try {
 			Station.syncStations(em, stationType, dtos);
 		} catch (Exception e) {
@@ -104,6 +110,7 @@ public class DataManager {
 	 */
 	public static ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: syncDataTypes: %s, List<DataTypeDto>.size = %d", responseLocation, dtos.size()));
 		try {
 			DataType.sync(em,dtos);
 		} catch (Exception e) {
@@ -127,6 +134,7 @@ public class DataManager {
 				|| stationCode == null || stationCode.isEmpty()) {
 			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
+		LOG.debug(String.format("DataManager: getDateOfLastRecord: %s, %s, %s, %d", stationType, stationCode, dataTypeName, period));
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(em, stationType, stationCode, dataTypeName, period);
@@ -172,6 +180,7 @@ public class DataManager {
 	 */
 	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: getStations: %s, %s", stationType, origin));
 		try {
 			return Station.convertToDto(Station.findStations(em, stationType, origin));
 		} catch (Exception e) {
@@ -187,6 +196,7 @@ public class DataManager {
 	 */
 	public static List<String> getStationTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: getStationTypes"));
 		try {
 			return Station.findStationTypes(em);
 		} catch (Exception e) {
@@ -202,6 +212,7 @@ public class DataManager {
 	 */
 	public static List<String> getDataTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: getDataTypes"));
 		try {
 			return DataType.findTypeNames(em);
 		} catch (Exception e) {
@@ -221,6 +232,7 @@ public class DataManager {
 	@Deprecated
 	public void patchStations(List<StationDto> stations) {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: patchStations (deprecated)"));
 		try {
 			em.getTransaction().begin();
 			for (StationDto dto:stations) {
@@ -247,9 +259,10 @@ public class DataManager {
 										  .toUri();
 	}
 
-	public static ResponseEntity<?> addProvenance(ProvenanceDto provenance) {
+	public static ResponseEntity<String> addProvenance(ProvenanceDto provenance) {
 		EntityManager em = JPAUtil.createEntityManager();
 		String uuid = null;
+		LOG.debug(String.format("DataManager: addProvenance: %s", provenance.toString()));
 		try {
 			em.getTransaction().begin();
 			uuid = Provenance.add(em,provenance);
@@ -266,6 +279,7 @@ public class DataManager {
 	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		EntityManager em = JPAUtil.createEntityManager();
 		List<Provenance> resultList = new ArrayList<>();
+		LOG.debug(String.format("DataManager: findProvenance: %s, %s, %s, %s", uuid, name, version, lineage));
 		try {
 			resultList = Provenance.find(em, uuid, name, version, lineage);
 		} catch (Exception e) {
@@ -282,8 +296,9 @@ public class DataManager {
 		return provenances;
 	}
 
-	public static ResponseEntity<?> addEvents(List<EventDto> eventDtos, URI responseLocation) {
+	public static ResponseEntity<Object> addEvents(List<EventDto> eventDtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: addEvents: %s, List<EventDto>.size = %d", responseLocation, eventDtos.size()));
 		try {
 			em.getTransaction().begin();
 			Event.pushEvents(em, eventDtos);

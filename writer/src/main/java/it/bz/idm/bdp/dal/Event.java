@@ -205,7 +205,11 @@ public class Event {
 	}
 
 	public void setEventInterval(final String eventInterval) {
-		setEventInterval(Range.localDateTimeRange(eventInterval));
+		try {
+			setEventInterval(Range.localDateTimeRange(eventInterval));
+		} catch (IllegalArgumentException ex) {
+			throw new IllegalArgumentException("Given input: " + eventInterval, ex);
+		}
 	}
 
 	public MetaData getMetaData() {
