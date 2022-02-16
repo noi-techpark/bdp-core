@@ -1,5 +1,7 @@
 # Big Data Platform
 
+[![CI](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml)
+
 The Big Data Platform is part of the [Open Data Hub](http://opendatahub.bz.it/)
 project. It collects and exposes data sets of various domains.
 
