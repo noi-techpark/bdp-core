@@ -1,38 +1,8 @@
-#
-# writer - Data Writer for the Big Data Platform
-#
-# Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
-# Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.bz.it)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program (see LICENSES/GPL-3.0.txt). If not, see
-# <http://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0
-#
-
 FROM maven:3-jdk-8-alpine as base
 
 RUN mkdir -p /code
 
-# Jenkins CD pipelines
 FROM base as cd
-
-ARG JENKINS_GROUP_ID=1000
-ARG JENKINS_USER_ID=1000
-
-RUN addgroup -g $JENKINS_GROUP_ID jenkins && \
-    adduser -D -u $JENKINS_USER_ID -G jenkins jenkins
 
 # Needed for release-sdk.groovy and utils/quickrelease.sh
 RUN apk add --no-cache xmlstarlet git openssh-client gawk
