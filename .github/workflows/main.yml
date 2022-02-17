@@ -126,7 +126,7 @@ jobs:
       - name: Deploy application
         uses: noi-techpark/github-actions/docker-deploy@v2
         with:
-          hosts: 'test'
+          hosts: 'prod'
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           docker-username: 'noi-techpark-bot'
           docker-password: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
