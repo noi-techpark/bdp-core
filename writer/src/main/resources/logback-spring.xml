@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<springProfile name="devlocal">
+	<springProfile name="devlocaldb">
 		<include resource="org/springframework/boot/logging/logback/base.xml"/>
 		<logger name="it.bz.idm">
-			<level value="DEBUG"/>
+			<level value="${LOG_LEVEL:-DEBUG}"/>
 		</logger>
 	</springProfile>
 	<springProfile name="devtestdb">
 		<include resource="org/springframework/boot/logging/logback/base.xml"/>
 		<logger name="it.bz.idm">
-			<level value="DEBUG"/>
+			<level value="${LOG_LEVEL:-DEBUG}"/>
 		</logger>
 	</springProfile>
 
@@ -25,7 +25,7 @@
 				<customFields>{"application":"${LOG_APPLICATION_NAME:-bdpwriter}","application_version":"${LOG_APPLICATION_VERSION:-0000}"}</customFields>
 			</encoder>
 		</appender>
-		<root level="INFO">
+		<root level="${LOG_LEVEL:-INFO}">
 			<appender-ref ref="jsonConsoleAppender"/>
 		</root>
 	</springProfile>

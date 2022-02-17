@@ -33,8 +33,6 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -50,7 +48,6 @@ import org.slf4j.LoggerFactory;
  */
 public class JPAUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JPAUtil.class);
 	private static EntityManagerFactory emFactory;
 
 	private JPAUtil() {}
@@ -64,8 +61,7 @@ public class JPAUtil {
 					properties.getStringMap()
 				);
 		} catch (Exception ex) {
-			LOG.error("Cannot create EntityManagerFactory. Exception is " + ex);
-			throw new ExceptionInInitializerError(ex);
+			throw new RuntimeException("JPAUtil: Cannot create EntityManagerFactory", ex);
 		}
 	}
 
