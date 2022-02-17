@@ -35,7 +35,7 @@ GET {{host}}/json/types
 Authorization: Bearer {{authtoken}}
 
 ###
-GET {{host}}/json/getDateOfLastRecord/MeteoStation?stationId=102343000&period=777
+GET {{host}}/json/getDateOfLastRecord/MeteoStation?stationId=T0009&period=900
 Authorization: Bearer {{authtoken}}
 
 ### Post some data to the writer
