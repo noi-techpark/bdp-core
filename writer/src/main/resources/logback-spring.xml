@@ -14,7 +14,7 @@
 		</logger>
 	</springProfile>
 
-	<springProfile name="devlocaldb">
+	<springProfile name="default">
 		<appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder class="net.logstash.logback.encoder.LogstashEncoder">
 				<fieldNames>
