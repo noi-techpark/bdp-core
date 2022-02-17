@@ -151,6 +151,15 @@ public abstract class MeasurementAbstractHistory implements Serializable {
     public abstract void setValue(Object value);
     public abstract Object getValue();
 
+	private static void logError(String method, Provenance provenance, String format, Object... args) {
+		LOG.error(String.format("[%s/%s] %s: " + format,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion(),
+			method,
+			args
+		));
+	}
+
     /**
      * <p>
      * persists all measurement data send to the writer from data collectors to the database.<br/>
@@ -175,12 +184,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-                    LOG.error(String.format("[%s/%s] pushRecords: Station '%s/%s' not found. Skipping...",
-						provenance.getDataCollector(),
-						provenance.getDataCollectorVersion(),
-						stationType,
-						stationEntry.getKey()
-					));
+					logError("pushRecords", provenance, "Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey());
                     continue;
                 }
                 stationFound = true;
@@ -188,20 +192,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-							LOG.error(String.format("[%s/%s] pushRecords: Type '%s' not found. Skipping...",
-								provenance.getDataCollector(),
-								provenance.getDataCollectorVersion(),
-								typeEntry.getKey()
-							));
+							logError("pushRecords", provenance, "Type '%s' not found. Skipping...", typeEntry.getKey());
 							continue;
                         }
                         typeFound = true;
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
-                            LOG.error(String.format("[%s/%s] pushRecords: Empty data set. Skipping...",
-                                provenance.getDataCollector(),
-                                provenance.getDataCollectorVersion()
-                            ));
+							logError("pushRecords", provenance, "Empty data set. Skipping...");
                             continue;
                         }
                         em.getTransaction().begin();
@@ -209,7 +206,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
                         if (period == null){
-                            LOG.error("pushRecords: No period specified. Skipping...");
+                            logError("pushRecords", provenance, "No period specified. Skipping...");
                             continue;
                         }
                         MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
@@ -268,15 +265,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                     newestJsonDto = simpleRecordDto;
                                 }
                                 givenDataOK = true;
-                            }else {
-                                LOG.error(String.format("[%s/%s] pushRecords: Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
-                                    provenance.getDataCollector(),
-                                    provenance.getDataCollectorVersion(),
+                            } else {
+								logError("pushRecords", provenance, "Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
                                     stationType,
                                     stationEntry.getKey(),
                                     typeEntry.getKey(),
                                     (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
-                                ));
+                                );
                             }
                             jsonOK = true;
                         }

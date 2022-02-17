@@ -1,4 +1,4 @@
-package it.bz.idm.bdp.writer;
+package it.bz.idm.bdp.writer.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
