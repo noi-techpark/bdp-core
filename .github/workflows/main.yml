@@ -2,13 +2,13 @@ name: CI/CD
 
 on:
   push:
-    paths:
-      - '!dc-interface/**'
-      - '!*.md'
+    paths-ignore:
+      - 'dc-interface/**'
+      - '*.md'
   pull_request:
-    paths:
-      - '!dc-interface/**'
-      - '!*.md'
+    paths-ignore:
+      - 'dc-interface/**'
+      - '*.md'
 
 env:
   PROJECT_NAME: odh-writer
