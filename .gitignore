@@ -55,3 +55,4 @@ secrets.yml
 settings.xml
 target/
 transaction-logs
+.m2/
