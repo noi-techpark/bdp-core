@@ -151,12 +151,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
     public abstract void setValue(Object value);
     public abstract Object getValue();
 
-	private static void logError(String method, Provenance provenance, String format, Object... args) {
-		LOG.error(String.format("[%s/%s] %s: " + format,
+	private static void logError(String method, Provenance provenance, String message) {
+		LOG.error(String.format("[%s/%s] %s: %s",
 			provenance.getDataCollector(),
 			provenance.getDataCollectorVersion(),
 			method,
-			args
+			message
 		));
 	}
 
@@ -184,7 +184,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-					logError("pushRecords", provenance, "Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey());
+					logError("pushRecords", provenance, String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
                     continue;
                 }
                 stationFound = true;
@@ -192,7 +192,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-							logError("pushRecords", provenance, "Type '%s' not found. Skipping...", typeEntry.getKey());
+							logError("pushRecords", provenance, String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
 							continue;
                         }
                         typeFound = true;
@@ -266,12 +266,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 }
                                 givenDataOK = true;
                             } else {
-								logError("pushRecords", provenance, "Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
+								logError("pushRecords", provenance,
+									String.format("Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
                                     stationType,
                                     stationEntry.getKey(),
                                     typeEntry.getKey(),
                                     (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
-                                );
+                                ));
                             }
                             jsonOK = true;
                         }
