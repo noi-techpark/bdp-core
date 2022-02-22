@@ -56,8 +56,7 @@ import it.bz.idm.bdp.dto.EventDto;
 @Table(
 	name = "event",
 	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"uuid"}),
-		@UniqueConstraint(columnNames = {"origin", "event_series_uuid", "name"})
+		@UniqueConstraint(columnNames = {"uuid"})
 	}
 )
 @Entity

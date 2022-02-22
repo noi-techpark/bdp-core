@@ -91,8 +91,7 @@ create table "event" (
 	meta_data_id int8,
 	provenance_id int8 not null,
 	primary key (id),
-	constraint uc_event_uuid unique (uuid),
-	constraint uc_event_origin_event_series_uuid_name unique (origin, event_series_uuid, name)
+	constraint uc_event_uuid unique (uuid)
 );
 
 create sequence event_location_seq start 1 increment 1;
