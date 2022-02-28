@@ -6,7 +6,7 @@
     <persistence-unit name="jpa-persistence" transaction-type="RESOURCE_LOCAL">
        <properties>
            <property name="hibernate.default_schema" value="intimev2"/>
-           <property name="hibernate.dialect" value="it.bz.idm.bdp.dal.util.PostgisPG95JsonDialect"/>
+           <property name="hibernate.dialect" value="it.bz.idm.bdp.dal.util.PostgisJsonDialect"/>
            <property name="hibernate.hbm2ddl.auto" value="none"/>
            <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
            <property name="hibernate.hikari.dataSourceClassName" value="org.postgresql.ds.PGSimpleDataSource"/>
