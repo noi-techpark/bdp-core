@@ -49,12 +49,16 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+// import com.vividsolutions.jts.geom.Coordinate;
+// import com.vividsolutions.jts.geom.Geometry;
+// import com.vividsolutions.jts.geom.GeometryFactory;
+// import com.vividsolutions.jts.geom.Point;
+// import com.vividsolutions.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;

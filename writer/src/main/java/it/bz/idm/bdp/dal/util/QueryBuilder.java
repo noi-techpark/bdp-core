@@ -197,11 +197,17 @@ public class QueryBuilder {
 	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
 		Query query = isNativeQuery ? buildNative(Object[].class) : build(resultClass);
 		query.setMaxResults(1);
-		List<Object[]> list = query.getResultList();
-		if (list == null || list.isEmpty() || (isNativeQuery && list.get(0) == null)) {
-			return alternative;
+		List<Object[]> list = null ;
+		try {
+			list = query.getResultList();
+			if (list == null || list.isEmpty() || (isNativeQuery && list.get(0) == null)) {
+				return alternative;
+			}
+			return (T) list.get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
-		return (T) list.get(0);
 	}
 
 	/**

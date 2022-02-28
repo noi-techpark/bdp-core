@@ -44,9 +44,9 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Column;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.TypeDef;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
 import com.vladmihalcea.hibernate.type.range.Range;
 

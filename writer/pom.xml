@@ -16,8 +16,8 @@
 
 	<properties>
 		<finalName>writer</finalName>
-		<geotools.version>14.5</geotools.version>
-		<hibernate.version>5.4.24.Final</hibernate.version>
+		<geotools.version>20.5</geotools.version>
+		<hibernate.version>5.5.9.Final</hibernate.version>
 	</properties>
 
 	<dependencyManagement>
@@ -105,7 +105,7 @@
 		<!-- Hibernate: Rangetype support-->
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
-			<artifactId>hibernate-types-52</artifactId>
+			<artifactId>hibernate-types-55</artifactId>
 			<version>2.14.0</version>
 		</dependency>
 

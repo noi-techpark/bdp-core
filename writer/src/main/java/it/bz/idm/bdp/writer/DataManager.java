@@ -92,7 +92,7 @@ public class DataManager {
 	 */
 	public static ResponseEntity<Object> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: syncStations: %s, %s, List<StationDto>.size = %d", stationType, responseLocation, dtos.size()));
+		LOG.debug("DataManager: syncStations: {}, {}, List<StationDto>.size = {}", stationType, responseLocation, dtos.size());
 		try {
 			Station.syncStations(em, stationType, dtos);
 		} catch (Exception e) {
@@ -111,7 +111,7 @@ public class DataManager {
 	 */
 	public static ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: syncDataTypes: %s, List<DataTypeDto>.size = %d", responseLocation, dtos.size()));
+		LOG.debug("DataManager: syncDataTypes: {}, List<DataTypeDto>.size = {}", responseLocation, dtos.size());
 		try {
 			DataType.sync(em,dtos);
 		} catch (Exception e) {
@@ -135,7 +135,7 @@ public class DataManager {
 				|| stationCode == null || stationCode.isEmpty()) {
 			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
-		LOG.debug(String.format("DataManager: getDateOfLastRecord: %s, %s, %s, %d", stationType, stationCode, dataTypeName, period));
+		LOG.debug("DataManager: getDateOfLastRecord: {}, {}, {}, {}", stationType, stationCode, dataTypeName, period);
 		EntityManager em = JPAUtil.createEntityManager();
 		try {
 			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(em, stationType, stationCode, dataTypeName, period);
