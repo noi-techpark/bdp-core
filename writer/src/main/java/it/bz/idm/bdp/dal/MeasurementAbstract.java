@@ -29,8 +29,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
@@ -49,7 +47,6 @@ import it.bz.idm.bdp.dal.util.QueryBuilder;
  * @author Patrick Bertolla
  */
 @MappedSuperclass
-@Inheritance (strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class MeasurementAbstract implements Serializable {
 
 	private static final long serialVersionUID = 1L;

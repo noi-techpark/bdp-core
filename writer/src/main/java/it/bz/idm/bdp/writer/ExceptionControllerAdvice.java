@@ -25,28 +25,13 @@ package it.bz.idm.bdp.writer;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.PropertyValueException;
-import org.springframework.beans.ConversionNotSupportedException;
-import org.springframework.beans.TypeMismatchException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.validation.BindException;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingPathVariableException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -67,84 +52,24 @@ import it.bz.idm.bdp.dto.ExceptionDto;
 @ControllerAdvice
 public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
-	@ExceptionHandler({ Exception.class })
-	public ResponseEntity<Object> handleAll(final Exception ex) {
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Object> handleAll(HttpServletRequest request, Exception ex) {
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
 	}
 	@ExceptionHandler(JPAException.class)
-	public ResponseEntity<Object> handleJPA(JPAException ex) {
-		return buildResponse(HttpStatus.BAD_REQUEST, ex);
+	public ResponseEntity<Object> handleJPA(HttpServletRequest request, JPAException ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex, request);
 	}
 	@ExceptionHandler(PersistenceException.class)
-	public ResponseEntity<Object> handlePropertyValueException(PersistenceException ex) {
+	public ResponseEntity<Object> handlePropertyValueException(HttpServletRequest request, PersistenceException ex) {
 		if (ex.getCause() instanceof PropertyValueException) {
 			JPAException jpaex = new JPAException("Invalid JSON: " + ex.getCause().getMessage());
-			return buildResponse(HttpStatus.BAD_REQUEST, jpaex);
+			return buildResponse(HttpStatus.BAD_REQUEST, jpaex, request);
 		}
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
 	}
-	@Override
-	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status,
-			WebRequest request) {
-		return buildResponse(HttpStatus.BAD_REQUEST,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleConversionNotSupported(ConversionNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.BAD_REQUEST,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(HttpStatus.BAD_REQUEST,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	@Override
-	protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return buildResponse(status,ex);
-	}
-	private ResponseEntity<Object> buildResponse(HttpStatus httpStatus, Exception ex) {
+
+	private ResponseEntity<Object> buildResponse(HttpStatus httpStatus, Exception ex, HttpServletRequest request) {
 		ExceptionDto exceptionDto;
 		if (ex instanceof JPAException) {
 			JPAException jpaex = (JPAException) ex;
@@ -167,7 +92,6 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 					Map<String, Object> map = mapper.convertValue(node, Map.class);
 			        exceptionDto.setJsonSchema(map);
 		        } catch (Exception e) {
-		        	e.printStackTrace();
 		        	exceptionDto.setDescription(exceptionDto.getDescription() + " --- We had an error during schema information creation: " + e.getMessage());
 		        }
 			}
@@ -183,6 +107,10 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 			exceptionDto.setName(HttpStatus.valueOf(exceptionDto.getStatus()).getReasonPhrase());
 		}
 		httpStatus = HttpStatus.valueOf(exceptionDto.getStatus());
+		if (request != null) {
+			request.setAttribute("exception_dto", exceptionDto);
+			request.setAttribute("exception", ex);
+		}
 		return ResponseEntity.status(httpStatus).body(exceptionDto);
 	}
 }

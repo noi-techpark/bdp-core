@@ -181,7 +181,7 @@ public class DataManager {
 	 */
 	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: getStations: %s, %s", stationType, origin));
+		LOG.debug("DataManager: getStations: {}, {}", stationType, origin);
 		try {
 			return Station.convertToDto(Station.findStations(em, stationType, origin));
 		} catch (Exception e) {
@@ -194,7 +194,7 @@ public class DataManager {
 
 	public static Object getStationsNative(String stationType, String origin) throws JPAException {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: getStationsNew: %s, %s", stationType, origin));
+		LOG.debug("DataManager: getStationsNative: {}, {}", stationType, origin);
 		try {
 			return QueryBuilder
 				.init(em)

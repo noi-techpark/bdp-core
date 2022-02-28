@@ -31,7 +31,7 @@ GET {{host}}/json/stations/MeteoStation
 Authorization: Bearer {{authtoken}}
 
 ### Get TrafficSensor stations (a22-elaborations)
-GET {{host}}/json/stations/TrafficSensor
+GET {{host}}/json/stations/ON_DEMAND_VEHICLE
 Authorization: Bearer {{authtoken}}
 
 ### Get TrafficSensor stations (a22-elaborations)

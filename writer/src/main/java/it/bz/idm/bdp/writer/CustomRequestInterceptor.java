@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import it.bz.idm.bdp.dto.ExceptionDto;
+
 import static net.logstash.logback.argument.StructuredArguments.v;
 
 /**
@@ -53,10 +55,20 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> logPayload = (Map<String, Object>) request.getAttribute("log_payload");
 		long startTime = (Long) logPayload.get("start_epochmilli");
-		logPayload.put("request_state", "END");
 		logPayload.put("end_time", now.toString());
 		logPayload.put("end_epochmilli", now.toEpochMilli());
 		logPayload.put("response_time_ms", now.toEpochMilli() - startTime);
-		LOG.info("API call", v("api_request_info", logPayload));
+		logPayload.put("http_status_code", response.getStatus());
+		ExceptionDto exceptionDto = (ExceptionDto) request.getAttribute("exception_dto");
+		Exception exception = (Exception) request.getAttribute("exception");
+		if (exception == null && exceptionDto == null) {
+			logPayload.put("request_state", "END");
+			LOG.info("API call", v("api_request_info", logPayload));
+		} else {
+			logPayload.put("request_state", "ERROR");
+			logPayload.put("exception_dto", exceptionDto);
+			logPayload.put("exception", exception);
+			LOG.error("API call", v("api_request_info", logPayload));
+		}
 	}
 }
