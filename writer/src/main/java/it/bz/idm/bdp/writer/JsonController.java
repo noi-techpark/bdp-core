@@ -81,9 +81,9 @@ public class JsonController extends DataManager {
 	}
 
 	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
-	public @ResponseBody List<StationDto> stationsGetList(@PathVariable("integreenTypology") String stationType,
+	public @ResponseBody Object stationsGetList(@PathVariable("integreenTypology") String stationType,
 														  @RequestParam(value="origin", required=false) String origin) {
-		return DataManager.getStations(stationType, origin);
+		return DataManager.getStationsNative(stationType, origin);
 	}
 
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)

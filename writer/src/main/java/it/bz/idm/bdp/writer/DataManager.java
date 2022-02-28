@@ -43,6 +43,7 @@ import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.JPAUtil;
+import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.EventDto;
@@ -191,12 +192,43 @@ public class DataManager {
 		}
 	}
 
+	public static Object getStationsNative(String stationType, String origin) throws JPAException {
+		EntityManager em = JPAUtil.createEntityManager();
+		LOG.debug(String.format("DataManager: getStationsNew: %s, %s", stationType, origin));
+		try {
+			return QueryBuilder
+				.init(em)
+				.nativeQuery()
+				.addSql("select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(",
+					"'id', s.stationcode,",
+					"'name', s.name,",
+					"'longitude', public.ST_X (public.ST_Transform (pointprojection, 4326)),",
+					"'latitude', public.ST_Y (public.ST_Transform (pointprojection, 4326)),",
+					"'coordinateReferenceSystem', 'EPSG:4326',",
+					"'origin', s.origin,",
+					"'metaData', cast(nullif(jsonb_strip_nulls(m.json), '{}') as jsonb)",
+				")))",
+				"from {h-schema}station s",
+				"left join {h-schema}metadata m on m.id = s.meta_data_id")
+				.addSql("where s.active = :active and s.stationtype = :stationtype")
+				.setParameter("active", true)
+				.setParameter("stationtype", stationType)
+				.setParameterIf("origin", origin, "AND origin = :origin", origin!=null && !origin.isEmpty())
+				.buildSingleResultOrAlternative(Object.class, new ArrayList<>());
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
+		} finally {
+			if (em.isOpen())
+				em.close();
+		}
+	}
+
 	/**
 	 * @return list of unique station type identifier
 	 */
 	public static List<String> getStationTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: getStationTypes"));
+		LOG.debug("DataManager: getStationTypes");
 		try {
 			return Station.findStationTypes(em);
 		} catch (Exception e) {
@@ -212,7 +244,7 @@ public class DataManager {
 	 */
 	public static List<String> getDataTypes() {
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: getDataTypes"));
+		LOG.debug("DataManager: getDataTypes");
 		try {
 			return DataType.findTypeNames(em);
 		} catch (Exception e) {
@@ -279,7 +311,7 @@ public class DataManager {
 	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		EntityManager em = JPAUtil.createEntityManager();
 		List<Provenance> resultList = new ArrayList<>();
-		LOG.debug(String.format("DataManager: findProvenance: %s, %s, %s, %s", uuid, name, version, lineage));
+		LOG.debug("DataManager: findProvenance: {}, {}, {}, {}", uuid, name, version, lineage);
 		try {
 			resultList = Provenance.find(em, uuid, name, version, lineage);
 		} catch (Exception e) {

@@ -38,7 +38,6 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		logPayload.put("request_path", request.getRequestURI().substring(request.getContextPath().length()));
 		logPayload.put("start_time", now.toString());
 		logPayload.put("start_epochmilli", now.toEpochMilli());
-		LOG.info("API call", v("api_request_info", logPayload));
 		request.setAttribute("log_payload", logPayload);
 		return true;
 	}

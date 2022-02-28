@@ -23,7 +23,27 @@ GET {{host}}/json/stations
 Authorization: Bearer {{authtoken}}
 
 ### Get a single stationtype from the writer
+GET {{host}}/json/stations2/MeteoStation
+Authorization: Bearer {{authtoken}}
+
+### Get a single stationtype from the writer
 GET {{host}}/json/stations/MeteoStation
+Authorization: Bearer {{authtoken}}
+
+### Get TrafficSensor stations (a22-elaborations)
+GET {{host}}/json/stations/TrafficSensor
+Authorization: Bearer {{authtoken}}
+
+### Get TrafficSensor stations (a22-elaborations)
+GET {{host}}/json/stations2/TrafficSensor
+Authorization: Bearer {{authtoken}}
+
+### Get a single stationtype from the writer
+GET {{host}}/json/stations2/MeteoStation?origin=1111
+Authorization: Bearer {{authtoken}}
+
+### Get a single stationtype from the writer
+GET {{host}}/json/stations/MeteoStation?origin=1111
 Authorization: Bearer {{authtoken}}
 
 ### Get a single stationtype from the writer
