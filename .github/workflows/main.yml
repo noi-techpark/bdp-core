@@ -126,7 +126,7 @@ jobs:
 
           # Logging
           X_LOG_APPLICATION_NAME: "writer"
-          X_LOG_APPLICATION_VERSION: "6.2.1"  # Do not forget to update pom.xml files
+          X_LOG_APPLICATION_VERSION: ${{ github.sha }}
           X_LOG_LEVEL: "info"
           X_HIBERNATE_LOG_LEVEL: "warning"
           X_HIBERNATE_SQL_LOG: "false"
