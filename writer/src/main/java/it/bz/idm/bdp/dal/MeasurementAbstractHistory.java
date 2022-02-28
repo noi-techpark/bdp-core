@@ -318,7 +318,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
                         em.getTransaction().commit();
                     } catch(Exception ex) {
-                        ex.printStackTrace();
                         if (em.getTransaction().isActive())
                             em.getTransaction().rollback();
                     }

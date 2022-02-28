@@ -198,16 +198,11 @@ public class QueryBuilder {
 		Query query = isNativeQuery ? buildNative(Object[].class) : build(resultClass);
 		query.setMaxResults(1);
 		List<Object[]> list = null ;
-		try {
-			list = query.getResultList();
-			if (list == null || list.isEmpty() || (isNativeQuery && list.get(0) == null)) {
-				return alternative;
-			}
-			return (T) list.get(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
+		list = query.getResultList();
+		if (list == null || list.isEmpty() || (isNativeQuery && list.get(0) == null)) {
+			return alternative;
 		}
+		return (T) list.get(0);
 	}
 
 	/**

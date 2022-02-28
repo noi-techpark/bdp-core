@@ -94,7 +94,6 @@ public class JPAException extends RuntimeException {
 	public static JPAException unnest(Exception e) {
 		if (e instanceof JPAException)
 			return (JPAException) e;
-		//e.printStackTrace();
 		return new JPAException(e.getMessage(), e);
 	}
 

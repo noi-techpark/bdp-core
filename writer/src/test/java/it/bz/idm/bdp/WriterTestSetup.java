@@ -64,7 +64,6 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 			em.persist(measurement);
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			em.getTransaction().rollback();
 			if (em.isOpen()) {
 				em.clear();
@@ -92,7 +91,6 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 			em.createQuery("DELETE FROM BDPRole WHERE name LIKE '" + prefix + "%'").executeUpdate();
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			em.getTransaction().rollback();
 			throw e;
 		} finally {

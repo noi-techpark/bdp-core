@@ -260,7 +260,7 @@ public class Event {
 				try {
 					loc.setGeometry(wktReader.read(dto.getWktGeometry()));
 				} catch (ParseException e) {
-					e.printStackTrace();
+					// Ignored
 				}
 				loc.setDescription(dto.getLocationDescription());
 				event.setLocation(loc);

@@ -166,9 +166,8 @@ public class JPAUtil {
 			}
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new PersistenceException(
-				"ERROR: Native querry failed: " + e.getMessage(),
+				"ERROR: Native query failed: " + e.getMessage(),
 				e
 			);
 		} finally {

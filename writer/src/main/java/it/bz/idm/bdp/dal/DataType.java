@@ -327,7 +327,6 @@ public class DataType {
 			}
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			em.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		}

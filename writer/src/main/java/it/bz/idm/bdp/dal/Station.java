@@ -432,7 +432,6 @@ public class Station {
 					Geometry geometry = JTS.transform(point, CRS.findMathTransform(thirdPartyCRS, crs));
 					point = geometry.getCentroid();
 				} catch (FactoryException | MismatchedDimensionException | TransformException e) {
-					e.printStackTrace();
 					throw new JPAException("Unable to create a valid coordinate reference system for station " + existingStation.getName(), e);
 					// FIXME Should an invalid CRS terminate any insertion or continue without?
 					// Should we return an message that some station had problems with their CRS, but were nevertheless inserted
