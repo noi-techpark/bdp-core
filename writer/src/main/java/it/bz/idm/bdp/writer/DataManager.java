@@ -72,7 +72,7 @@ public class DataManager {
 	 */
 	public static ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: pushRecords: %s, %s", stationType, responseLocation));
+		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
 		try {
 			MeasurementAbstractHistory.pushRecords(em, stationType, dataMap);
 		} catch (Exception e) {
