@@ -149,13 +149,14 @@ public abstract class MeasurementAbstractHistory implements Serializable {
     public abstract void setValue(Object value);
     public abstract Object getValue();
 
-	private static void logError(String method, Provenance provenance, String message) {
-		LOG.error(String.format("[%s/%s] %s: %s",
+	private static void logWarning(String method, Provenance provenance, String message) {
+		LOG.warn(
+			"[{}/{}] {}: {}",
 			provenance.getDataCollector(),
 			provenance.getDataCollectorVersion(),
 			method,
 			message
-		));
+		);
 	}
 
     /**
@@ -182,7 +183,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-					logError("pushRecords", provenance, String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
+					logWarning("pushRecords", provenance, String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
                     continue;
                 }
                 stationFound = true;
@@ -190,20 +191,20 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-							logError("pushRecords", provenance, String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
+							logWarning("pushRecords", provenance, String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
 							continue;
                         }
                         typeFound = true;
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
-							logError("pushRecords", provenance, "Empty data set. Skipping...");
+							logWarning("pushRecords", provenance, "Empty data set. Skipping...");
                             continue;
                         }
 
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
                         if (period == null){
-                            logError("pushRecords", provenance, "No period specified. Skipping...");
+                            logWarning("pushRecords", provenance, "No period specified. Skipping...");
                             continue;
                         }
                         MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
@@ -263,7 +264,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 }
                                 givenDataOK = true;
                             } else {
-								logError("pushRecords", provenance,
+								logWarning("pushRecords", provenance,
 									String.format("Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
                                     stationType,
                                     stationEntry.getKey(),
