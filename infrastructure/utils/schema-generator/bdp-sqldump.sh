@@ -57,7 +57,7 @@ test -f "$DTO" || {
     exit 1
 }
 
-(cd "$DALPATH" && mvn clean install)
+(cd "$DALPATH" && mvn -Dpackaging=jar clean install)
 test -d "$DAL" || {
     echo "ERROR: $DAL not found. Maybe you have a version mismatch with $OUTPUTVERSION. See:"
     ls "$(dirname "$DAL")"

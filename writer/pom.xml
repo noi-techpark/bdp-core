@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-	<packaging>jar</packaging>
+	<packaging>${packaging}</packaging>	<!-- jar packaging needed by infrastructure/utils/schema-generator -->
 	<groupId>it.bz.idm.bdp</groupId>
 	<artifactId>writer</artifactId>
 	<description>Data Writer for the Big Data Platform</description>
@@ -170,14 +170,34 @@
 		</repository>
 	</repositories>
 
-	<build>
-		<finalName>${finalName}</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+	<profiles>
+		<!-- war packaging for the REST API deployment -->
+		<profile>
+			<id>default</id>
+			<properties>
+				<packaging>war</packaging>
+			</properties>
+			<build>
+				<finalName>${finalName}</finalName>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+
+		<!-- jar packaging needed by infrastructure/utils/schema-generator -->
+		<profile>
+			<id>generator</id>
+			<properties>
+				<packaging>jar</packaging>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
