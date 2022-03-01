@@ -28,10 +28,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +51,7 @@ import it.bz.idm.bdp.dto.StationDto;
  * For more documentation on the single API calls refer to {@link DataManager}
  *
  * @author Patrick Bertolla
+ * @author Peter Moser
  */
 @RestController
 @RequestMapping("/json")
@@ -58,58 +60,76 @@ public class JsonController {
 	@Autowired
 	DataManager dataManager;
 
-	@RequestMapping(value="/provenance", method=RequestMethod.POST)
-	public @ResponseBody ResponseEntity<String> createProvenance(@RequestBody ProvenanceDto provenance) {
+	@PostMapping(value = "/provenance")
+	@ResponseBody
+	public ResponseEntity<String> createProvenance(
+		@RequestBody ProvenanceDto provenance
+	) {
 		return dataManager.addProvenance(provenance);
 	}
 
-	@RequestMapping(value = "/provenance", method = RequestMethod.GET)
-	public @ResponseBody List<ProvenanceDto> getProvenance(
-			@RequestParam(value = "uuid", required = false) String uuid,
-			@RequestParam(value = "dataCollector", required = false) String name,
-			@RequestParam(value = "dataCollectorVersion", required = false) String version,
-			@RequestParam(value = "lineage", required = false) String lineage) {
-		return dataManager.findProvenance(uuid,name,version,lineage);
+	@GetMapping(value = "/provenance")
+	@ResponseBody
+	public List<ProvenanceDto> getProvenance(
+		@RequestParam(value = "uuid", required = false) String uuid,
+		@RequestParam(value = "dataCollector", required = false) String name,
+		@RequestParam(value = "dataCollectorVersion", required = false) String version,
+		@RequestParam(value = "lineage", required = false) String lineage
+	) {
+		return dataManager.findProvenance(uuid, name, version, lineage);
 	}
 
 
-	@RequestMapping(value = "/getDateOfLastRecord", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Date> dateOfLastRecordMissingTopology() {
+	@GetMapping(value = "/getDateOfLastRecord")
+	@ResponseBody
+	public ResponseEntity<Date> dateOfLastRecordMissingTopology() {
 		throw new JPAException("Missing station type. For example set MyStationType: .../getDateOfLastRecord/MyStationType?stationId=X&typeId=Y");
 	}
 
-	@RequestMapping(value = "/getDateOfLastRecord/{integreenTypology}", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity<Date> dateOfLastRecord(@PathVariable("integreenTypology") String stationType,
-															   @RequestParam("stationId") String stationId,
-															   @RequestParam(value="typeId", required=false) String typeId,
-															   @RequestParam(value="period", required=false) Integer period) {
+	@GetMapping(value = "/getDateOfLastRecord/{integreenTypology}")
+	@ResponseBody
+	public ResponseEntity<Date> dateOfLastRecord(
+		@PathVariable("integreenTypology") String stationType,
+		@RequestParam("stationId") String stationId,
+		@RequestParam(value="typeId", required=false) String typeId,
+		@RequestParam(value="period", required=false) Integer period
+	) {
 		return ResponseEntity.ok(dataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
-	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
-	public @ResponseBody Object stationsGetList(@PathVariable("integreenTypology") String stationType,
-														  @RequestParam(value="origin", required=false) String origin) {
+	@GetMapping(value = "/stations/{integreenTypology}")
+	@ResponseBody
+	public Object stationsGetList(
+		@PathVariable("integreenTypology") String stationType,
+		@RequestParam(value="origin", required=false) String origin
+	) {
 		return dataManager.getStationsNative(stationType, origin);
 	}
 
-	@RequestMapping(value = "/stations", method = RequestMethod.GET)
-	public @ResponseBody List<String> stationsGetTypes() {
+	@GetMapping(value = "/stations")
+	@ResponseBody
+	public List<String> stationsGetTypes() {
 		return dataManager.getStationTypes();
 	}
 
-	@RequestMapping(value = "/types", method = RequestMethod.GET)
-	public @ResponseBody List<String> dataTypes() {
+	@GetMapping(value = "/types")
+	@ResponseBody
+	public List<String> dataTypes() {
 		return dataManager.getDataTypes();
 	}
 
-	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<Object> pushRecordsMissingTopology() {
+	@PostMapping(value = "/pushRecords")
+	@ResponseBody
+	public ResponseEntity<Object> pushRecordsMissingTopology() {
 		throw new JPAException("Missing station type. For example set MyStationType: .../pushRecords/MyStationType");
 	}
 
-	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
-	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
-											@PathVariable String stationType) {
+	@PostMapping(value = "/pushRecords/{stationType}")
+	@ResponseBody
+	public Object pushRecords(
+		@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
+		@PathVariable String stationType
+	) {
 		return dataManager.pushRecords(stationType, null, dataMap);
 	}
 
@@ -117,29 +137,46 @@ public class JsonController {
 	 * @deprecated
 	 */
 	@Deprecated
-	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
-	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
+	@PostMapping(value = "/patchStations")
+	@ResponseBody
+	public void patchStations(
+		@RequestBody(required = true) List<StationDto> stations
+	) {
 		dataManager.patchStations(stations);
 	}
 
-	@RequestMapping(value = "/syncStations", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<Object> syncStationsMissingTopology() {
+	@PostMapping(value = "/syncStations")
+	@ResponseBody
+	public ResponseEntity<Object> syncStationsMissingTopology() {
 		throw new JPAException("Missing station type. For example set MyStationType: .../syncStations/MyStationType");
 	}
 
-	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<Object> syncStations(@PathVariable String stationType,
-														@RequestBody(required = true) List<StationDto> stationDtos) {
-		return dataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
+	@PostMapping(value = "/syncStations/{stationType}")
+	@ResponseBody
+	public ResponseEntity<Object> syncStations(
+		@PathVariable String stationType,
+		@RequestBody(required = true) List<StationDto> stationDtos
+	) {
+		return dataManager.syncStations(
+			stationType,
+			stationDtos,
+			getURIMapping("/stations/{stationType}", stationType)
+		);
 	}
 
-	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<Object> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
+	@PostMapping(value = "/syncDataTypes")
+	@ResponseBody
+	public ResponseEntity<Object> syncDataTypes(
+		@RequestBody(required = true) List<DataTypeDto> data
+	) {
 		return dataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 
-	@RequestMapping(value = "/event", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<Object> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
+	@PostMapping(value = "/event")
+	@ResponseBody
+	public ResponseEntity<Object> syncEvents(
+		@RequestBody(required = true) List<EventDto> eventDtos
+	) {
 		return dataManager.addEvents(eventDtos, getURIMapping("/events"));
 	}
 
@@ -149,10 +186,11 @@ public class JsonController {
 		else if (mapping.length() > 0)
 			mapping = "/" + mapping;
 		String mappingController = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-		return ServletUriComponentsBuilder.fromCurrentContextPath()
-										  .path(mappingController + mapping)
-										  .buildAndExpand(uriVariableValues)
-										  .toUri();
+		return ServletUriComponentsBuilder
+			.fromCurrentContextPath()
+			.path(mappingController + mapping)
+			.buildAndExpand(uriVariableValues)
+			.toUri();
 	}
 
 }
