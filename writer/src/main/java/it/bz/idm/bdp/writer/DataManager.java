@@ -26,12 +26,19 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -42,7 +49,6 @@ import it.bz.idm.bdp.dal.MeasurementAbstractHistory;
 import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dal.util.JPAException;
-import it.bz.idm.bdp.dal.util.JPAUtil;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
@@ -64,22 +70,22 @@ public class DataManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataManager.class);
 
+	@PersistenceContext
+	private EntityManager entityManager;
+
 	/**
 	 * @param stationType all data sets must have stations as reference with given station type
 	 * @param responseLocation
 	 * @param dataMap containing all data as measurement in a tree structure
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
 		try {
-			MeasurementAbstractHistory.pushRecords(em, stationType, dataMap);
+			MeasurementAbstractHistory.pushRecords(entityManager, stationType, dataMap);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -90,16 +96,13 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<Object> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public ResponseEntity<Object> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
 		LOG.debug("DataManager: syncStations: {}, {}, List<StationDto>.size = {}", stationType, responseLocation, dtos.size());
 		try {
-			Station.syncStations(em, stationType, dtos);
+			Station.syncStations(entityManager, stationType, dtos);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -109,16 +112,13 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	public static ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		LOG.debug("DataManager: syncDataTypes: {}, List<DataTypeDto>.size = {}", responseLocation, dtos.size());
 		try {
-			DataType.sync(em,dtos);
+			DataType.sync(entityManager, dtos);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -130,15 +130,15 @@ public class DataManager {
 	 * @param period interval between 2 measurements
 	 * @return a date object representing the time when the specific measurement was updated last
 	 */
-	public static Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
+	@Transactional
+	public Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
 		if (stationType == null || stationType.isEmpty()
 				|| stationCode == null || stationCode.isEmpty()) {
 			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
 		}
 		LOG.debug("DataManager: getDateOfLastRecord: {}, {}, {}, {}", stationType, stationCode, dataTypeName, period);
-		EntityManager em = JPAUtil.createEntityManager();
 		try {
-			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(em, stationType, stationCode, dataTypeName, period);
+			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(entityManager, stationType, stationCode, dataTypeName, period);
 
 			/*
 			 * Backward compatibility: We need to distinguish station-not-found
@@ -157,7 +157,7 @@ public class DataManager {
 				if ((dataTypeName == null || dataTypeName.isEmpty()) && period == null) {
 					return new Date(0);
 				}
-				Station station = Station.findStation(em, stationType, stationCode);
+				Station station = Station.findStation(entityManager, stationType, stationCode);
 				if (station == null) {
 					return new Date(0);
 				}
@@ -167,9 +167,6 @@ public class DataManager {
 			return queryResult;
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
@@ -179,25 +176,22 @@ public class DataManager {
 	 * @return list of station DTOs converted from station entities
 	 * @throws JPAException
 	 */
-	public static List<StationDto> getStations(String stationType, String origin) throws JPAException {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStations: {}, {}", stationType, origin);
 		try {
-			return Station.convertToDto(Station.findStations(em, stationType, origin));
+			return Station.convertToDto(Station.findStations(entityManager, stationType, origin));
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
-	public static Object getStationsNative(String stationType, String origin) throws JPAException {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public Object getStationsNative(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStationsNative: {}, {}", stationType, origin);
 		try {
 			return QueryBuilder
-				.init(em)
+				.init(entityManager)
 				.nativeQuery()
 				.addSql("select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(",
 					"'id', s.stationcode,",
@@ -217,41 +211,32 @@ public class DataManager {
 				.buildSingleResultOrAlternative(Object.class, new ArrayList<>());
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
 	/**
 	 * @return list of unique station type identifier
 	 */
-	public static List<String> getStationTypes() {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public List<String> getStationTypes() {
 		LOG.debug("DataManager: getStationTypes");
 		try {
-			return Station.findStationTypes(em);
+			return Station.findStationTypes(entityManager);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
 	/**
 	 * @return list of unique data type identifier
 	 */
-	public static List<String> getDataTypes() {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public List<String> getDataTypes() {
 		LOG.debug("DataManager: getDataTypes");
 		try {
-			return DataType.findTypeNames(em);
+			return DataType.findTypeNames(entityManager);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
@@ -262,63 +247,38 @@ public class DataManager {
 	 * @param stations list of data transfer objects
 	 */
 	@Deprecated
+	@Transactional
 	public void patchStations(List<StationDto> stations) {
-		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: patchStations (deprecated)"));
+		LOG.debug("DataManager: patchStations (deprecated)");
 		try {
-			em.getTransaction().begin();
 			for (StationDto dto:stations) {
-				Station.patch(em, dto);
+				Station.patch(entityManager, dto);
 			}
-			em.getTransaction().commit();
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 	}
 
-	protected URI getURIMapping(String mapping, Object... uriVariableValues) {
-		if (mapping == null)
-			mapping = "";
-		else if (mapping.length() > 0)
-			mapping = "/" + mapping;
-		String mappingController = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-		return ServletUriComponentsBuilder.fromCurrentContextPath()
-										  .path(mappingController + mapping)
-										  .buildAndExpand(uriVariableValues)
-										  .toUri();
-	}
-
-	public static ResponseEntity<String> addProvenance(ProvenanceDto provenance) {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public ResponseEntity<String> addProvenance(ProvenanceDto provenance) {
 		String uuid = null;
-		LOG.debug(String.format("DataManager: addProvenance: %s", provenance.toString()));
+		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
 		try {
-			em.getTransaction().begin();
-			uuid = Provenance.add(em,provenance);
-			em.getTransaction().commit();
+			uuid = Provenance.add(entityManager, provenance);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		return new ResponseEntity<>(uuid, HttpStatus.OK);
 	}
 
-	public static List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
-		EntityManager em = JPAUtil.createEntityManager();
+	@Transactional
+	public List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		List<Provenance> resultList = new ArrayList<>();
 		LOG.debug("DataManager: findProvenance: {}, {}, {}, {}", uuid, name, version, lineage);
 		try {
-			resultList = Provenance.find(em, uuid, name, version, lineage);
+			resultList = Provenance.find(entityManager, uuid, name, version, lineage);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		List<ProvenanceDto> provenances = new ArrayList<>();
 		for (Provenance p : resultList) {
@@ -328,21 +288,19 @@ public class DataManager {
 		return provenances;
 	}
 
-	public static ResponseEntity<Object> addEvents(List<EventDto> eventDtos, URI responseLocation) {
-		EntityManager em = JPAUtil.createEntityManager();
-		LOG.debug(String.format("DataManager: addEvents: %s, List<EventDto>.size = %d", responseLocation, eventDtos.size()));
+	@Transactional
+	public ResponseEntity<Object> addEvents(List<EventDto> eventDtos, URI responseLocation) {
+		LOG.debug("DataManager: addEvents: {}, List<EventDto>.size = {}", responseLocation, eventDtos.size());
 		try {
-			em.getTransaction().begin();
-			Event.pushEvents(em, eventDtos);
-			em.getTransaction().commit();
+			Event.pushEvents(entityManager, eventDtos);
 		} catch (Exception e) {
-			if (em.getTransaction().isActive())
-				em.getTransaction().rollback();
 			throw JPAException.unnest(e);
-		} finally {
-			if (em.isOpen())
-				em.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
+
+	@PostConstruct
+    public void postConstruct() {
+        Objects.requireNonNull(entityManager);
+    }
 }

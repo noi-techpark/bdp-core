@@ -38,6 +38,7 @@ import javax.persistence.MappedSuperclass;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
@@ -198,7 +199,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							logError("pushRecords", provenance, "Empty data set. Skipping...");
                             continue;
                         }
-                        em.getTransaction().begin();
 
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
@@ -315,11 +315,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 em.merge(latestJSONMeasurement);
                             }
                         }
-
-                        em.getTransaction().commit();
                     } catch(Exception ex) {
-                        if (em.getTransaction().isActive())
-                            em.getTransaction().rollback();
+						TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                     }
                 }
             }
@@ -339,8 +336,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             }
 
         } catch(Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw JPAException.unnest(e);
         } finally {
             em.clear();

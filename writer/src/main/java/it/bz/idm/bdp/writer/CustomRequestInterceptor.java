@@ -67,7 +67,10 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		} else {
 			logPayload.put("request_state", "ERROR");
 			logPayload.put("exception_dto", exceptionDto);
-			logPayload.put("exception", exception);
+			logPayload.put("exception", exception.getStackTrace());
+			if (LOG.isDebugEnabled()) {
+				exception.printStackTrace(System.err);
+			}
 			LOG.error("API call", v("api_request_info", logPayload));
 		}
 	}

@@ -22,9 +22,11 @@
  */
 package it.bz.idm.bdp.writer;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dto.DataMapDto;
@@ -50,11 +53,14 @@ import it.bz.idm.bdp.dto.StationDto;
  */
 @RestController
 @RequestMapping("/json")
-public class JsonController extends DataManager {
+public class JsonController {
+
+	@Autowired
+	DataManager dataManager;
 
 	@RequestMapping(value="/provenance", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> createProvenance(@RequestBody ProvenanceDto provenance) {
-		return DataManager.addProvenance(provenance);
+		return dataManager.addProvenance(provenance);
 	}
 
 	@RequestMapping(value = "/provenance", method = RequestMethod.GET)
@@ -63,7 +69,7 @@ public class JsonController extends DataManager {
 			@RequestParam(value = "dataCollector", required = false) String name,
 			@RequestParam(value = "dataCollectorVersion", required = false) String version,
 			@RequestParam(value = "lineage", required = false) String lineage) {
-		return DataManager.findProvenance(uuid,name,version,lineage);
+		return dataManager.findProvenance(uuid,name,version,lineage);
 	}
 
 
@@ -77,23 +83,23 @@ public class JsonController extends DataManager {
 															   @RequestParam("stationId") String stationId,
 															   @RequestParam(value="typeId", required=false) String typeId,
 															   @RequestParam(value="period", required=false) Integer period) {
-		return ResponseEntity.ok(DataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
+		return ResponseEntity.ok(dataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
 	@RequestMapping(value = "/stations/{integreenTypology}", method = RequestMethod.GET)
 	public @ResponseBody Object stationsGetList(@PathVariable("integreenTypology") String stationType,
 														  @RequestParam(value="origin", required=false) String origin) {
-		return DataManager.getStationsNative(stationType, origin);
+		return dataManager.getStationsNative(stationType, origin);
 	}
 
 	@RequestMapping(value = "/stations", method = RequestMethod.GET)
 	public @ResponseBody List<String> stationsGetTypes() {
-		return DataManager.getStationTypes();
+		return dataManager.getStationTypes();
 	}
 
 	@RequestMapping(value = "/types", method = RequestMethod.GET)
 	public @ResponseBody List<String> dataTypes() {
-		return DataManager.getDataTypes();
+		return dataManager.getDataTypes();
 	}
 
 	@RequestMapping(value = "/pushRecords", method = RequestMethod.POST)
@@ -104,17 +110,16 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/pushRecords/{stationType}", method = RequestMethod.POST)
 	public @ResponseBody Object pushRecords(@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
 											@PathVariable String stationType) {
-		return DataManager.pushRecords(stationType, null, dataMap);
+		return dataManager.pushRecords(stationType, null, dataMap);
 	}
 
 	/**
 	 * @deprecated
 	 */
 	@Deprecated
-	@Override
 	@RequestMapping(value = "/patchStations", method = RequestMethod.POST)
 	public @ResponseBody void patchStations(@RequestBody(required = true) List<StationDto> stations) {
-		super.patchStations(stations);
+		dataManager.patchStations(stations);
 	}
 
 	@RequestMapping(value = "/syncStations", method = RequestMethod.POST)
@@ -125,16 +130,29 @@ public class JsonController extends DataManager {
 	@RequestMapping(value = "/syncStations/{stationType}", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<Object> syncStations(@PathVariable String stationType,
 														@RequestBody(required = true) List<StationDto> stationDtos) {
-		return DataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
+		return dataManager.syncStations(stationType, stationDtos, getURIMapping("/stations/{stationType}", stationType));
 	}
 
 	@RequestMapping(value = "/syncDataTypes", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<Object> syncDataTypes(@RequestBody(required = true) List<DataTypeDto> data) {
-		return DataManager.syncDataTypes(data, getURIMapping("/types"));
+		return dataManager.syncDataTypes(data, getURIMapping("/types"));
 	}
 
 	@RequestMapping(value = "/event", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<Object> syncEvents(@RequestBody(required = true) List<EventDto> eventDtos) {
-		return DataManager.addEvents(eventDtos,getURIMapping("/events"));
+		return dataManager.addEvents(eventDtos, getURIMapping("/events"));
 	}
+
+	private URI getURIMapping(String mapping, Object... uriVariableValues) {
+		if (mapping == null)
+			mapping = "";
+		else if (mapping.length() > 0)
+			mapping = "/" + mapping;
+		String mappingController = this.getClass().getAnnotation(RequestMapping.class).value()[0];
+		return ServletUriComponentsBuilder.fromCurrentContextPath()
+										  .path(mappingController + mapping)
+										  .buildAndExpand(uriVariableValues)
+										  .toUri();
+	}
+
 }

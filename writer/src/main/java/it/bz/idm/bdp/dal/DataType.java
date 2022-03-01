@@ -305,12 +305,10 @@ public class DataType {
 	 */
 	public static void sync(EntityManager em, List<DataTypeDto> data) {
 		try {
-			em.getTransaction().begin();
 			for (DataTypeDto dto : data) {
 				if (! dto.isValid()) {
 					throw new JPAException("Invalid JSON for " + DataTypeDto.class.getSimpleName(), DataTypeDto.class);
 				}
-
 				DataType type = DataType.findByCname(em,dto.getName());
 				DataTypeMetaData metaData = new DataTypeMetaData(type,dto.getMetaData());
 				if (type != null){
@@ -325,9 +323,7 @@ public class DataType {
 					em.persist(type);
 				}
 			}
-			em.getTransaction().commit();
 		} catch (Exception e) {
-			em.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		}
 	}

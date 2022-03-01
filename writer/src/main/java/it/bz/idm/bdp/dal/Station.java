@@ -49,6 +49,7 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -389,7 +390,6 @@ public class Station {
 	 */
 	public static void syncStations(EntityManager em, String stationType, List<StationDto> data) {
 		syncActiveOfExistingStations(em, data);
-		em.getTransaction().begin();
 		for (StationDto dto : data){
 			try {
 				if (dto.getStationType() == null) {
@@ -400,11 +400,10 @@ public class Station {
 				}
 				sync(em, dto);
 			} catch (Exception e) {
-				em.getTransaction().rollback();
+				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 				throw JPAException.unnest(e);
 			}
 		}
-		em.getTransaction().commit();
 	}
 
 	/**
@@ -501,7 +500,6 @@ public class Station {
 		if (stations.isEmpty()) {
 			return;
 		}
-		em.getTransaction().begin();
 		for (Station station : stations){
 			boolean isActive = false;
 			for (StationDto dto : dtos) {
@@ -515,7 +513,6 @@ public class Station {
 				em.merge(station);
 			}
 		}
-		em.getTransaction().commit();
 	}
 
 	/**
