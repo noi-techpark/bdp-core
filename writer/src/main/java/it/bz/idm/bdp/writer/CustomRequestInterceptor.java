@@ -40,6 +40,8 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		String path = request.getRequestURI().substring(request.getContextPath().length());
 		Map<String, Object> logPayload = new HashMap<>();
 		logPayload.put("request_state", "START");
+		logPayload.put("provenance_name", request.getParameter("prn"));
+		logPayload.put("provenance_version", request.getParameter("prv"));
 		logPayload.put("request_uuid", uuid);
 		logPayload.put("request_path", path);
 		logPayload.put("request_path_variables", pathVariables);
@@ -77,6 +79,9 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		Exception exception = (Exception) request.getAttribute("exception");
 		if (exception == null && exceptionDto == null) {
 			logPayload.put("request_state", "END");
+			if (LOG.isDebugEnabled()) {
+				System.err.println(logPayload);
+			}
 			LOG.info("API call", v("api_request_info", logPayload));
 		} else {
 			logPayload.put("request_state", "ERROR");

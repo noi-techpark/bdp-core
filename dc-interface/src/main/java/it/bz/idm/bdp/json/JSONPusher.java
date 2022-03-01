@@ -55,26 +55,40 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String PROVENANCE = "/provenance/";
 
 	protected RestTemplate restTemplate = new RestTemplate();
-
 	private String url;
+
 	@Override
 	@PostConstruct
 	public void init() {
 		super.init();
 		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
 	}
+
 	@Override
 	public Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto) {
 		this.pushProvenance();
 		dto.setProvenance(this.provenance.getUuid());
-		return restTemplate.postForObject(url + PUSH_RECORDS + "{datasourceName}", dto, Object.class, datasourceName);
+		return restTemplate.postForObject(
+			url + PUSH_RECORDS + "{datasourceName}?prn={}&prv={}",
+			dto,
+			Object.class,
+			datasourceName,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 	}
-
 
 	private void pushProvenance() {
-		String provenanceUuid = restTemplate.postForObject(url + PROVENANCE , this.provenance, String.class);
+		String provenanceUuid = restTemplate.postForObject(
+			url + PROVENANCE + "?prn={}&prv={}",
+			this.provenance,
+			String.class,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 		this.provenance.setUuid(provenanceUuid);
 	}
+
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
 		dto.clean();
 		return pushData(this.integreenTypology, dto);
@@ -83,36 +97,69 @@ public abstract class JSONPusher extends DataPusher {
 	public Object syncStations(StationList data) {
 		return this.syncStations(this.integreenTypology, data);
 	}
+
 	@Override
 	public Object syncStations(String datasourceName, StationList data) {
 		if (data == null)
 			return null;
-		return restTemplate.postForObject(url + SYNC_STATIONS + "{datasourceName}" , data, Object.class, datasourceName);
+		return restTemplate.postForObject(
+			url + SYNC_STATIONS + "{datasourceName}?prn={}&prv={}",
+			data,
+			Object.class,
+			datasourceName,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 	}
+
 	@Override
 	public Object syncDataTypes(String datasourceName, List<DataTypeDto> data) {
 		if (data == null)
 			return null;
-		return restTemplate.postForObject(url + SYNC_DATA_TYPES, data, Object.class);
+		return restTemplate.postForObject(
+			url + SYNC_DATA_TYPES + "?prn={}&prv={}",
+			data,
+			Object.class,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 	}
+
 	public Object syncDataTypes(List<DataTypeDto> data) {
 		return syncDataTypes(this.integreenTypology, data);
 	}
 
 	@Override
 	public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-		return restTemplate.getForObject(url + GET_DATE_OF_LAST_RECORD+"{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}", Date.class,this.integreenTypology, stationCode, dataType, period);
+		return restTemplate.getForObject(
+			url + GET_DATE_OF_LAST_RECORD + "{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
+			Date.class,
+			this.integreenTypology,
+			stationCode,
+			dataType,
+			period,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 	}
 
 	@Override
 	public void connectToDataCenterCollector() {
 		// TODO authentification to writer
 	}
+
 	@Override
 	public List<StationDto> fetchStations(String datasourceName, String origin) {
-		if (datasourceName==null)
+		if (datasourceName == null)
 			datasourceName = this.integreenTypology;
-		StationDto[] object = restTemplate.getForObject(url + STATIONS +"{datasourceName}/?origin={origin}",StationDto[].class,datasourceName, origin);
+		StationDto[] object = restTemplate.getForObject(
+			url + STATIONS +"{datasourceName}/?origin={origin}&prn={}&prv={}",
+			StationDto[].class,
+			datasourceName,
+			origin,
+			provenance.getDataCollector(),
+			provenance.getDataCollectorVersion()
+		);
 		return Arrays.asList(object);
 	}
 

@@ -19,7 +19,7 @@ grant_type=password
 
 
 ### Get all stationtypes from the writer
-GET {{host}}/json/stations
+GET {{host}}/json/stations?prn=dc-blabla&prv=1.0.2
 Authorization: Bearer {{authtoken}}
 
 ### Get a single stationtype from the writer
