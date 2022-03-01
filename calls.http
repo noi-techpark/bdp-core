@@ -13,8 +13,8 @@ grant_type=password
 &client_id=odh-mobility-datacollector-test
 &client_secret={{$dotenv AUTH_TEST_CLIENT_SECRET}}
 
-#@host=https://mobility.share.opendatahub.testingmachine.eu
-@host=http://localhost:8999
+@host=https://mobility.share.opendatahub.testingmachine.eu
+#@host=http://localhost:8999
 @authtoken = {{login.response.body.access_token}}
 
 
