@@ -50,13 +50,4 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.and()
 			.authorizeRequests().anyRequest().permitAll();
 	}
-
-	@Bean
-public SecurityWebFilterChain securityWebFilterChain(
-  ServerHttpSecurity http) {
-    return http.authorizeExchange()
-      .pathMatchers("/actuator/**").permitAll()
-      .anyExchange().authenticated()
-      .and().build();
-}
 }
