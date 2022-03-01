@@ -1,2 +1,4 @@
-FROM tomcat:8.5-jdk8-openjdk-slim-buster
-COPY writer/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
+FROM adoptopenjdk/openjdk8:alpine-jre
+WORKDIR /writer
+COPY writer/target/ROOT.jar /writer/ROOT.jar
+CMD [ "java", "-jar", "ROOT.jar" ]
