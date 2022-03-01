@@ -8,3 +8,10 @@ services:
       - .env
     ports:
       - ${SERVER_PORT}:8080
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:${SERVER_PORT}/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
