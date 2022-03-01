@@ -74,7 +74,7 @@ jobs:
         uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          build-command: 'mvn -B -DskipTests -DfinalName=ROOT --projects writer --also-make package'
+          build-command: 'mvn -B -DskipTests -DfinalName=ROOT --projects writer --also-make clean package'
 
       - name: Build and push images
         uses: noi-techpark/github-actions/docker-build-and-push@v2
@@ -135,7 +135,7 @@ jobs:
         uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          build-command: 'mvn -B -DskipTests -DfinalName=ROOT --projects writer --also-make package'
+          build-command: 'mvn -B -DskipTests -DfinalName=ROOT --projects writer --also-make clean package'
 
       - name: Build and push images
         uses: noi-techpark/github-actions/docker-build-and-push@v2
