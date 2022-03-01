@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import it.bz.idm.bdp.dto.ExceptionDto;
@@ -34,10 +35,22 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 	) {
 		Instant now = Instant.now();
 		String uuid = UUID.randomUUID().toString();
+		@SuppressWarnings("unchecked")
+		Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		String path = request.getRequestURI().substring(request.getContextPath().length());
 		Map<String, Object> logPayload = new HashMap<>();
 		logPayload.put("request_state", "START");
 		logPayload.put("request_uuid", uuid);
-		logPayload.put("request_path", request.getRequestURI().substring(request.getContextPath().length()));
+		logPayload.put("request_path", path);
+		logPayload.put("request_path_variables", pathVariables);
+		if (pathVariables.isEmpty()) {
+			logPayload.put("request_path_base", path);
+		} else {
+			int len = path.length();
+			for (String val : pathVariables.values())
+				len -= val.length() + 1;
+			logPayload.put("request_path_base", path.substring(0, len));
+		}
 		logPayload.put("start_time", now.toString());
 		logPayload.put("start_epochmilli", now.toEpochMilli());
 		request.setAttribute("log_payload", logPayload);
@@ -59,6 +72,7 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		logPayload.put("end_epochmilli", now.toEpochMilli());
 		logPayload.put("response_time_ms", now.toEpochMilli() - startTime);
 		logPayload.put("http_status_code", response.getStatus());
+		logPayload.put("http_request_parameters", request.getParameterMap());
 		ExceptionDto exceptionDto = (ExceptionDto) request.getAttribute("exception_dto");
 		Exception exception = (Exception) request.getAttribute("exception");
 		if (exception == null && exceptionDto == null) {

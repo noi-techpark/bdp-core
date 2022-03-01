@@ -2,7 +2,7 @@
  * If you use migration scripts within Java Application, then you need a "mvn clean",
  * because otherwise the copy inside the "target" folder gets used, which might be outdated
  */
-set search_path to ${flyway:defaultSchema}, public;
+set search_path to ${default_schema}, public;
 create extension if not exists postgis;
 
 create sequence metadata_seq start 1 increment 1;

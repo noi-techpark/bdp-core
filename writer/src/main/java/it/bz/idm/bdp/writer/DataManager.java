@@ -255,7 +255,7 @@ public class DataManager {
 	}
 
 	@Transactional
-	public ResponseEntity<String> addProvenance(ProvenanceDto provenance) {
+	public String addProvenance(ProvenanceDto provenance) {
 		String uuid = null;
 		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
 		try {
@@ -263,7 +263,7 @@ public class DataManager {
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		}
-		return new ResponseEntity<>(uuid, HttpStatus.OK);
+		return uuid;
 	}
 
 	@Transactional

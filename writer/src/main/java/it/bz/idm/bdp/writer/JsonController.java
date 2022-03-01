@@ -65,7 +65,7 @@ public class JsonController {
 	public ResponseEntity<String> createProvenance(
 		@RequestBody ProvenanceDto provenance
 	) {
-		return dataManager.addProvenance(provenance);
+		return ResponseEntity.ok(dataManager.addProvenance(provenance));
 	}
 
 	@GetMapping(value = "/provenance")
