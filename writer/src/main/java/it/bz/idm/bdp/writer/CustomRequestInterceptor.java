@@ -1,6 +1,7 @@
 package it.bz.idm.bdp.writer;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -86,7 +87,7 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		} else {
 			logPayload.put("request_state", "ERROR");
 			logPayload.put("exception_dto", exceptionDto);
-			logPayload.put("exception", exception.getStackTrace());
+			logPayload.put("exception", Arrays.toString(exception.getStackTrace()));
 			if (LOG.isDebugEnabled()) {
 				exception.printStackTrace(System.err);
 			}
