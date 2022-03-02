@@ -59,7 +59,7 @@ GET {{host}}/json/getDateOfLastRecord/MeteoStation?stationId=T0009&period=900
 Authorization: Bearer {{authtoken}}
 
 ### Post some data to the writer
-POST {{host}}/json/provenance
+POST {{host}}/json/provenance?prn=test&prv=11111
 Content-Type: application/json
 Authorization: Bearer {{authtoken}}
 

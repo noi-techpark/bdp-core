@@ -72,13 +72,33 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto) {
         this.pushProvenance();
         dto.setProvenance(this.provenance.getUuid());
-        return client.post().uri(PUSH_RECORDS + datasourceName).body(Mono.just(dto), Object.class).retrieve()
-                .bodyToMono(Object.class).block();
+        return client
+			.post()
+			.uri(uriBuilder -> uriBuilder
+				.path(PUSH_RECORDS + datasourceName)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
+			.body(Mono.just(dto), Object.class)
+			.retrieve()
+            .bodyToMono(Object.class)
+			.block();
     }
 
     private void pushProvenance() {
-        String provenanceUuid = client.post().uri(PROVENANCE).body(Mono.just(this.provenance), ProvenanceDto.class).retrieve()
-                .bodyToMono(String.class).block();
+        String provenanceUuid = client
+			.post()
+			.uri(uriBuilder -> uriBuilder
+				.path(PROVENANCE)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
+			.body(Mono.just(this.provenance), ProvenanceDto.class)
+			.retrieve()
+            .bodyToMono(String.class)
+			.block();
         this.provenance.setUuid(provenanceUuid);
     }
 
@@ -95,16 +115,36 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public Object syncStations(String datasourceName, StationList data) {
         if (data == null)
             return null;
-        return client.post().uri(SYNC_STATIONS + datasourceName).body(Mono.just(data), Object.class).retrieve()
-                .bodyToMono(Object.class).block();
+        return client
+			.post()
+			.uri(uriBuilder -> uriBuilder
+				.path(SYNC_STATIONS + datasourceName)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
+			.body(Mono.just(data), Object.class)
+			.retrieve()
+            .bodyToMono(Object.class)
+			.block();
     }
 
     @Override
     public Object syncDataTypes(String datasourceName, List<DataTypeDto> data) {
         if (data == null)
             return null;
-        return client.post().uri(SYNC_DATA_TYPES).body(Mono.just(data), Object.class).retrieve()
-                .bodyToMono(Object.class).block();
+        return client
+			.post()
+			.uri(uriBuilder -> uriBuilder
+				.path(SYNC_DATA_TYPES)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
+			.body(Mono.just(data), Object.class)
+			.retrieve()
+            .bodyToMono(Object.class)
+			.block();
     }
 
     public Object syncDataTypes(List<DataTypeDto> data) {
@@ -113,12 +153,20 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     @Override
     public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-        return client.get().uri(uriBuilder -> uriBuilder
-                .path(GET_DATE_OF_LAST_RECORD + this.integreenTypology)
-                .queryParam("stationId", stationCode)
-                .queryParam("typeId", dataType)
-                .queryParam("period", period).build())
-                .retrieve().bodyToMono(Date.class).block();
+        return client
+			.get()
+			.uri(uriBuilder -> uriBuilder
+				.path(GET_DATE_OF_LAST_RECORD + this.integreenTypology)
+				.queryParam("stationId", stationCode)
+				.queryParam("typeId", dataType)
+				.queryParam("period", period)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
+			.retrieve()
+			.bodyToMono(Date.class)
+			.block();
     }
 
     @Override
@@ -128,11 +176,18 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     @Override
     public List<StationDto> fetchStations(String datasourceName, String origin) {
-        final String uri = STATIONS + datasourceName;
-        if (datasourceName == null)
-            datasourceName = this.integreenTypology;
-        StationDto[] object = client.get().uri(uriBuilder->uriBuilder.path(uri).queryParam("origin", "{origin}").build(origin)).retrieve()
-                .bodyToMono(StationDto[].class).block();
+        StationDto[] object = client
+			.get()
+			.uri(uriBuilder->uriBuilder
+				.path(datasourceName == null ? STATIONS + this.integreenTypology : STATIONS + datasourceName)
+				.queryParam("origin", "{origin}")
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build(origin)
+			)
+			.retrieve()
+            .bodyToMono(StationDto[].class)
+			.block();
         return Arrays.asList(object);
     }
 
@@ -147,7 +202,12 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		}
         return client
 			.post()
-			.uri(EVENTS)
+			.uri(uriBuilder->uriBuilder
+				.path(EVENTS)
+				.queryParam("prn", provenance.getDataCollector())
+				.queryParam("prv", provenance.getDataCollectorVersion())
+				.build()
+			)
 			.body(Mono.just(dtos), Object.class)
 			.retrieve()
 			.bodyToMono(Object.class)

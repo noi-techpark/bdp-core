@@ -100,8 +100,8 @@ public class JsonController {
 		HttpServletRequest request,
 		@PathVariable("integreenTypology") String stationType,
 		@RequestParam("stationId") String stationId,
-		@RequestParam(value="typeId", required=false) String typeId,
-		@RequestParam(value="period", required=false) Integer period,
+		@RequestParam(value = "typeId", required = false) String typeId,
+		@RequestParam(value = "period", required = false) Integer period,
 		@RequestParam(value = "prn", required = false) String proveanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
@@ -113,7 +113,7 @@ public class JsonController {
 	public Object stationsGetList(
 		HttpServletRequest request,
 		@PathVariable("integreenTypology") String stationType,
-		@RequestParam(value="origin", required=false) String origin,
+		@RequestParam(value = "origin", required = false) String origin,
 		@RequestParam(value = "prn", required = false) String proveanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
