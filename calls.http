@@ -69,3 +69,10 @@ Authorization: Bearer {{authtoken}}
 	"dataCollectorVersion": "1.1.1.1.1.1",
 	"lineage": "xyz"
 }
+
+### Actuator / Healthcheck
+GET {{host}}/actuator/health
+
+
+###
+GET {{host}}/error

@@ -16,6 +16,6 @@ public class RequestAppConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry
 			.addInterceptor(customRequestInterceptor)
-			.addPathPatterns("/json/**");
+			.addPathPatterns("/**");
 	}
 }
