@@ -281,10 +281,21 @@ public class EventDto implements Serializable {
 		return 1;
 	}
 
+	public boolean hasValidEventInterval() {
+		// open boundaries, are always ok
+		if (eventStart == null || eventEnd == null)
+			return true;
+		if (eventEnd.compareTo(eventStart) > 0)
+			return true;
+		return false;
+	}
+
 	public static boolean isValid(EventDto dto, boolean checkProvenance) {
 		if (dto == null)
 			return false;
 		if (checkProvenance && Constraints.isEmpty(dto.getProvenance()))
+			return false;
+		if (! dto.hasValidEventInterval())
 			return false;
 		return Constraints.noneEmpty(
 			dto.getOrigin(),
@@ -293,4 +304,24 @@ public class EventDto implements Serializable {
 			dto.getName()
 		);
 	}
+
+
+	@Override
+	public String toString() {
+		return "{" +
+			" uuid='" + getUuid() + "'" +
+			", origin='" + getOrigin() + "'" +
+			", category='" + getCategory() + "'" +
+			", eventSeriesUuid='" + getEventSeriesUuid() + "'" +
+			", name='" + getName() + "'" +
+			", description='" + getDescription() + "'" +
+			", metaData='" + getMetaData() + "'" +
+			", locationDescription='" + getLocationDescription() + "'" +
+			", wktGeometry='" + getWktGeometry() + "'" +
+			", eventStart='" + getEventStart() + "'" +
+			", eventEnd='" + getEventEnd() + "'" +
+			", provenance='" + getProvenance() + "'" +
+			"}";
+	}
+
 }
