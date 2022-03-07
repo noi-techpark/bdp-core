@@ -207,7 +207,7 @@ public class Event {
 		try {
 			setEventInterval(Range.localDateTimeRange(eventInterval));
 		} catch (IllegalArgumentException ex) {
-			throw new IllegalArgumentException("Given input: " + eventInterval, ex);
+			throw new IllegalArgumentException("Illegal interval boundaries. Given input: " + eventInterval, ex);
 		}
 	}
 
