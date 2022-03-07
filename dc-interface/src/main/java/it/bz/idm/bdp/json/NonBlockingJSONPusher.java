@@ -87,6 +87,14 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     private void pushProvenance() {
+		// We know that the provenance exist, and which UUID it has.
+		// So we do not need to get that information again from the DB
+		// This approach assumes, that the DB will not change from any
+		// other caller.
+		if (this.provenance.getUuid() != null) {
+			return;
+		}
+
         String provenanceUuid = client
 			.post()
 			.uri(uriBuilder -> uriBuilder
