@@ -1,5 +1,6 @@
 package it.bz.idm.bdp.writer;
 
+import java.io.BufferedReader;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,6 +9,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,14 +49,7 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		logPayload.put("request_uuid", uuid);
 		logPayload.put("request_path", path);
 		logPayload.put("request_path_variables", pathVariables);
-		if (pathVariables.isEmpty()) {
-			logPayload.put("request_path_base", path);
-		} else {
-			int len = path.length();
-			for (String val : pathVariables.values())
-				len -= val.length() + 1;
-			logPayload.put("request_path_base", path.substring(0, len));
-		}
+		logPayload.put("request_path_base", getRequestBasePath(path, pathVariables));
 		logPayload.put("start_time", now.toString());
 		logPayload.put("start_epochmilli", now.toEpochMilli());
 		request.setAttribute("log_payload", logPayload);
@@ -78,12 +74,15 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 		logPayload.put("http_request_parameters", request.getParameterMap());
 		ExceptionDto exceptionDto = (ExceptionDto) request.getAttribute("exception_dto");
 		Exception exception = (Exception) request.getAttribute("exception");
-		if (exception == null && exceptionDto == null) {
-			logPayload.put("request_state", "END");
+		if (exception == null && exceptionDto == null && response.getStatus() < 400) {
+			logPayload.put("request_state", "SUCCESS");
 			if (LOG.isDebugEnabled()) {
 				System.err.println(logPayload);
 			}
 			LOG.info("API call", v("api_request_info", logPayload));
+		} else if (response.getStatus() < 500) {
+			logPayload.put("request_state", "WARNING");
+			request.setAttribute("level", "WARN");
 		} else {
 			logPayload.put("request_state", "ERROR");
 			logPayload.put("exception_dto", exceptionDto);
@@ -93,5 +92,15 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 			}
 			LOG.error("API call", v("api_request_info", logPayload));
 		}
+	}
+
+	private String getRequestBasePath(String path, Map<String, String> pathVariables) {
+		path = path.trim();
+		int pathLength = path.length();
+		for (String val : pathVariables.values())
+			pathLength -= val.length() + 1;
+		if (path.endsWith("/"))
+			pathLength--;
+		return path.substring(0, pathLength);
 	}
 }
