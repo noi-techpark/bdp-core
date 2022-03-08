@@ -2,7 +2,7 @@
 # Create a .env file and set the corresponding variables
 # See all $dotenv fields below
 
-### Get access token use the writer
+### Get access token for the writer (TEST)
 # @name login
 POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
@@ -13,8 +13,20 @@ grant_type=password
 &client_id=odh-mobility-datacollector-test
 &client_secret={{$dotenv AUTH_TEST_CLIENT_SECRET}}
 
-@host=https://mobility.share.opendatahub.testingmachine.eu
-@host=http://localhost:8999
+### Get access token for the writer (PROD)
+# @name login
+POST https://auth.opendatahub.bz.it/auth/realms/noi/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password
+&username={{$dotenv AUTH_PROD_USERNAME}}
+&password={{$dotenv AUTH_PROD_PASSWORD}}
+&client_id=odh-mobility-datacollector-test
+&client_secret={{$dotenv AUTH_PROD_CLIENT_SECRET}}
+
+@host=https://mobility.share.opendatahub.bz.it
+#@host=https://mobility.share.opendatahub.testingmachine.eu
+#@host=http://localhost:8999
 @authtoken = {{login.response.body.access_token}}
 
 
@@ -55,7 +67,7 @@ GET {{host}}/json/types
 Authorization: Bearer {{authtoken}}
 
 ###
-GET {{host}}/json/getDateOfLastRecord/MeteoStation?stationId=T0009&period=900
+GET {{host}}/json/getDateOfLastRecord/TrafficSensor?stationId=A22:5416:2
 Authorization: Bearer {{authtoken}}
 
 ### Post some data to the writer

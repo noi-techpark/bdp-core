@@ -25,11 +25,16 @@ package it.bz.idm.bdp.json;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import it.bz.idm.bdp.DataPusher;
@@ -59,6 +64,8 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String PROVENANCE = "/provenance/";
 	private static final String EVENTS = "/event/";
 
+	private static final Logger LOG = LoggerFactory.getLogger(NonBlockingJSONPusher.class);
+
     @Resource(name = "webClient")
     protected WebClient client;
 
@@ -76,8 +83,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.path(PUSH_RECORDS + datasourceName)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(createParams())
 				.build()
 			)
 			.body(Mono.just(dto), Object.class)
@@ -99,8 +105,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.path(PROVENANCE)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(createParams())
 				.build()
 			)
 			.body(Mono.just(this.provenance), ProvenanceDto.class)
@@ -127,8 +132,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.path(SYNC_STATIONS + datasourceName)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(createParams())
 				.build()
 			)
 			.body(Mono.just(data), Object.class)
@@ -145,8 +149,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.path(SYNC_DATA_TYPES)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(createParams())
 				.build()
 			)
 			.body(Mono.just(data), Object.class)
@@ -161,15 +164,18 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     @Override
     public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-        return client
+        LOG.debug("Calling getDateOfLastRecord: {}, {}, {}", stationCode, dataType, period);
+		return client
 			.get()
 			.uri(uriBuilder -> uriBuilder
 				.path(GET_DATE_OF_LAST_RECORD + this.integreenTypology)
-				.queryParam("stationId", stationCode)
-				.queryParam("typeId", dataType)
-				.queryParam("period", period)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(
+					createParams(
+						"stationId", stationCode,
+						"typeId", dataType,
+						"period", period
+					)
+				)
 				.build()
 			)
 			.retrieve()
@@ -188,10 +194,8 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.get()
 			.uri(uriBuilder->uriBuilder
 				.path(datasourceName == null ? STATIONS + this.integreenTypology : STATIONS + datasourceName)
-				.queryParam("origin", "{origin}")
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
-				.build(origin)
+				.queryParams(createParams("origin", origin))
+				.build()
 			)
 			.retrieve()
             .bodyToMono(StationDto[].class)
@@ -212,8 +216,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder->uriBuilder
 				.path(EVENTS)
-				.queryParam("prn", provenance.getDataCollector())
-				.queryParam("prv", provenance.getDataCollectorVersion())
+				.queryParams(createParams())
 				.build()
 			)
 			.body(Mono.just(dtos), Object.class)
@@ -221,4 +224,19 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.bodyToMono(Object.class)
 			.block();
 	}
+
+	private MultiValueMap<String, String> createParams(Object... params) {
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+		for (int i = 0; i < params.length; i += 2) {
+			if (params[i+1] != null) {
+				result.add(params[i].toString(), params[i+1].toString());
+			}
+		}
+		if (provenance != null) {
+			result.add("prn", provenance.getDataCollector());
+			result.add("prv", provenance.getDataCollectorVersion());
+		}
+		return result;
+	}
+
 }
