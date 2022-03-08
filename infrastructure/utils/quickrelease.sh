@@ -10,9 +10,8 @@ test "$TYPE" = "release" -o "$TYPE" = "snapshot" || {
 }
 
 ### Configuration
-REP="maven-repo.opendatahub.bz.it"
-REP_ID="$REP-$TYPE"
-REP_URL="http://it.bz.opendatahub.s3-website-eu-west-1.amazonaws.com/$TYPE"
+REP_ID="maven-repo.opendatahub.bz.it"
+REP_URL="https://maven-repo.opendatahub.bz.it/$TYPE"
 XMLNS=http://maven.apache.org/POM/4.0.0
 CMD="xmlstarlet ed -P -L -N pom=$XMLNS"
 
@@ -24,8 +23,7 @@ test "$TYPE" = "snapshot" && {
 # Parent pom.xml inside root-folder
 $CMD -u "/pom:project/pom:version" -v "$VERSION" pom.xml
 $CMD -u "/pom:project/pom:properties/pom:revision" -v "$VERSION" pom.xml
-$CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:id" -v "$REP_ID" pom.xml
-$CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP')]/pom:url" -v "$REP_URL" pom.xml
+$CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP_ID')]/pom:url" -v "$REP_URL" pom.xml
 
 # UPDATE pom.xml files
 for FOLDER in dto writer dc-interface
