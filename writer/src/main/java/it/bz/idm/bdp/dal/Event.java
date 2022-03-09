@@ -274,7 +274,7 @@ public class Event {
 		return QueryBuilder
 			.init(em)
 			.addSql("SELECT e FROM Event e where 1=1")
-			.setParameterIfNotNull("uuid", uuid, "and uuid = :uuid")
+			.setParameterIfNotEmpty("uuid", uuid, "and uuid = :uuid")
 			.buildSingleResultOrNull(Event.class);
 	}
 

@@ -101,6 +101,21 @@ public class QueryBuilder {
 	 * @param condition that must hold
 	 * @return {@link QueryBuilder}
 	 */
+	public QueryBuilder setParameterIfNotEmpty(String name, String value, String sqlPart) {
+		return setParameterIf(name, value, sqlPart, value != null && !value.isEmpty());
+	}
+
+	/**
+	 * Set a parameter with <code>name</code> and <code>value</code> and add
+	 * <code>sqlPart</code> to the end of the SQL string, if the
+	 * <code>condition</code> holds.
+	 *
+	 * @param name of the parameter
+	 * @param value of the parameter
+	 * @param sqlPart SQL string
+	 * @param condition that must hold
+	 * @return {@link QueryBuilder}
+	 */
 	public QueryBuilder setParameterIf(String name, Object value, String sqlPart, boolean condition) {
 		if (condition) {
 			addSql(sqlPart);

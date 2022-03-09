@@ -127,13 +127,21 @@ public class DataManager {
 	 */
 	@Transactional
 	public Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
-		if (stationType == null || stationType.isEmpty()
-				|| stationCode == null || stationCode.isEmpty()) {
-			throw new JPAException("Invalid parameter value, either empty or null, which is not allowed", HttpStatus.BAD_REQUEST.value());
+		if (isEmpty(stationType) || isEmpty(stationCode)) {
+			throw new JPAException(
+				"Invalid parameter value, either empty or null, which is not allowed",
+				HttpStatus.BAD_REQUEST.value()
+			);
 		}
 		LOG.debug("DataManager: getDateOfLastRecord: {}, {}, {}, {}", stationType, stationCode, dataTypeName, period);
 		try {
-			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(entityManager, stationType, stationCode, dataTypeName, period);
+			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(
+				entityManager,
+				stationType,
+				stationCode,
+				dataTypeName,
+				period
+			);
 
 			/*
 			 * Backward compatibility: We need to distinguish station-not-found
@@ -149,7 +157,7 @@ public class DataManager {
 				// Query did not return a result and we used only station-related constraints, then
 				// the only possible empty result is a station not found, otherwise we need to check
 				// if such a station would exist. This is slow, but needed for backward compatibility.
-				if ((dataTypeName == null || dataTypeName.isEmpty()) && period == null) {
+				if (isEmpty(dataTypeName) && period == null) {
 					return new Date(0);
 				}
 				Station station = Station.findStation(entityManager, stationType, stationCode);
@@ -298,4 +306,9 @@ public class DataManager {
     public void postConstruct() {
         Objects.requireNonNull(entityManager);
     }
+
+	private boolean isEmpty(String what) {
+		return what == null || what.isEmpty();
+	}
+
 }

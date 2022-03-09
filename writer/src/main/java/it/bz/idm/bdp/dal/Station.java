@@ -530,7 +530,7 @@ public class Station {
 		QueryBuilder builder = QueryBuilder.init(em)
 				.addSql("select station from Station station where station.origin = :origin")
 				.setParameter("origin", origin)
-				.setParameterIfNotNull("stationtype", stationType, " and stationtype=:stationtype");
+				.setParameterIfNotEmpty("stationtype", stationType, " and stationtype = :stationtype");
 		List<Station> result = builder.buildResultList(Station.class);
 		return result == null ? new ArrayList<>() : result;
 	}

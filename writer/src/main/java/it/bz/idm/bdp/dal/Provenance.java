@@ -130,10 +130,10 @@ public class Provenance {
 		return QueryBuilder
 				.init(em)
 				.addSql("SELECT p FROM Provenance p where 1=1")
-				.setParameterIfNotNull("uuid",uuid,"and uuid = :uuid")
-				.setParameterIfNotNull("name",name,"and dataCollector = :name")
-				.setParameterIfNotNull("version",version,"and dataCollectorVersion = :version")
-				.setParameterIfNotNull("lineage",lineage,"and lineage = :lineage")
+				.setParameterIfNotEmpty("uuid", uuid, "and uuid = :uuid")
+				.setParameterIfNotEmpty("name", name, "and dataCollector = :name")
+				.setParameterIfNotEmpty("version", version, "and dataCollectorVersion = :version")
+				.setParameterIfNotEmpty("lineage", lineage, "and lineage = :lineage")
 				.buildResultList(Provenance.class);
 	}
 
