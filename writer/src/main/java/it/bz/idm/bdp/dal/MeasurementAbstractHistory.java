@@ -317,7 +317,13 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }
                         }
                     } catch(Exception ex) {
-						TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+						LOG.error(
+							"[{}/{}] Exception '{}'... Skipping this measurment!",
+							provenance.getDataCollector(),
+							provenance.getDataCollectorVersion(),
+							ex.getMessage(),
+							ex
+						);
                     }
                 }
             }
@@ -337,7 +343,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
             }
 
         } catch(Exception e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw JPAException.unnest(e);
         } finally {
             em.clear();
