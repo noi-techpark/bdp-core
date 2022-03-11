@@ -77,6 +77,26 @@
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 				</configuration>
 			</plugin>
+			<!--
+				The maven-source-plugin can be used to generate a source code
+				jar file for a project. Deploying this source jar to a remote
+				repository can be useful for other developers so that they can
+				'attach source' and debug into the project source code. Mainly
+				useful for the dc-interface / dto libraries used in data
+				collectors.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 	</build>
