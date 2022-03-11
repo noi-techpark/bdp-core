@@ -54,7 +54,7 @@ import it.bz.idm.bdp.dto.StationDto;
  * @author Patrick Bertolla
  *
  */
-@TypeDefs({ @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(name = "metadata")
 public class MetaData {

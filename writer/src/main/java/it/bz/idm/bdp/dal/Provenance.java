@@ -24,6 +24,7 @@ package it.bz.idm.bdp.dal;
 
 import java.util.List;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -62,6 +63,7 @@ import it.bz.idm.bdp.dto.ProvenanceDto;
 	}
 )
 @Entity
+@Cacheable
 public class Provenance {
 
 	@Id
