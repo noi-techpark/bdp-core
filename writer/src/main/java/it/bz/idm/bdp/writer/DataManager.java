@@ -92,10 +92,23 @@ public class DataManager {
 	 * @return correct response status code
 	 */
 	@Transactional
-	public ResponseEntity<Object> syncStations(String stationType, List<StationDto> dtos, URI responseLocation) {
-		LOG.debug("DataManager: syncStations: {}, {}, List<StationDto>.size = {}", stationType, responseLocation, dtos.size());
+	public ResponseEntity<Object> syncStations(
+		String stationType,
+		List<StationDto> dtos,
+		URI responseLocation,
+		String provenanceName,
+		String provenanceVersion
+	) {
+		LOG.debug(
+			"[{}/{}] DataManager: syncStations: {}, {}, List<StationDto>.size = {}",
+			provenanceName,
+			provenanceVersion,
+			stationType,
+			responseLocation,
+			dtos.size()
+		);
 		try {
-			Station.syncStations(entityManager, stationType, dtos);
+			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		}

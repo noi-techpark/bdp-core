@@ -49,15 +49,12 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-// import com.vividsolutions.jts.geom.Coordinate;
-// import com.vividsolutions.jts.geom.Geometry;
-// import com.vividsolutions.jts.geom.GeometryFactory;
-// import com.vividsolutions.jts.geom.Point;
-// import com.vividsolutions.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 
@@ -65,6 +62,8 @@ import it.bz.idm.bdp.dal.util.JPAException;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.StationDto;
+
+import static net.logstash.logback.argument.StructuredArguments.v;
 
 
 /**
@@ -81,6 +80,8 @@ import it.bz.idm.bdp.dto.StationDto;
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 public class Station {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Station.class);
 
 	public static final String GEOM_CRS = "EPSG:4326";
 	public static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
@@ -388,19 +389,24 @@ public class Station {
 	 * @param stationType typology of a {@link Station}
 	 * @param data list of station DTOs provided by a data collector
 	 */
-	public static void syncStations(EntityManager em, String stationType, List<StationDto> data) {
+	public static void syncStations(EntityManager em, String stationType, List<StationDto> data, String provenanceName, String provenanceVersion) {
 		syncActiveOfExistingStations(em, data);
 		for (StationDto dto : data){
 			try {
 				if (dto.getStationType() == null) {
 					dto.setStationType(stationType);
 				}
-				if (! dto.isValid()) {
-					throw new JPAException("Invalid JSON for " + StationDto.class.getSimpleName(), StationDto.class);
+				if (dto.isValid()) {
+					sync(em, dto);
+				} else {
+					LOG.warn(
+						"[{}/{}] Invalid JSON for StationDto: {}",
+						provenanceName,
+						provenanceVersion,
+						v("StationDto", dto)
+					);
 				}
-				sync(em, dto);
 			} catch (Exception e) {
-				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 				throw JPAException.unnest(e);
 			}
 		}

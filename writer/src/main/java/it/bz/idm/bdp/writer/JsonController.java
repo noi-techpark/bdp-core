@@ -67,7 +67,7 @@ public class JsonController {
 	public ResponseEntity<String> createProvenance(
 		HttpServletRequest request,
 		@RequestBody ProvenanceDto provenance,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return ResponseEntity.ok(dataManager.addProvenance(provenance));
@@ -81,7 +81,7 @@ public class JsonController {
 		@RequestParam(value = "dataCollector", required = false) String name,
 		@RequestParam(value = "dataCollectorVersion", required = false) String version,
 		@RequestParam(value = "lineage", required = false) String lineage,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.findProvenance(uuid, name, version, lineage);
@@ -102,7 +102,7 @@ public class JsonController {
 		@RequestParam("stationId") String stationId,
 		@RequestParam(value = "typeId", required = false) String typeId,
 		@RequestParam(value = "period", required = false) Integer period,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return ResponseEntity.ok(dataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
@@ -114,7 +114,7 @@ public class JsonController {
 		HttpServletRequest request,
 		@PathVariable("integreenTypology") String stationType,
 		@RequestParam(value = "origin", required = false) String origin,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.getStationsNative(stationType, origin);
@@ -124,7 +124,7 @@ public class JsonController {
 	@ResponseBody
 	public List<String> stationsGetTypes(
 		HttpServletRequest request,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.getStationTypes();
@@ -134,7 +134,7 @@ public class JsonController {
 	@ResponseBody
 	public List<String> dataTypes(
 		HttpServletRequest request,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.getDataTypes();
@@ -152,7 +152,7 @@ public class JsonController {
 		HttpServletRequest request,
 		@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
 		@PathVariable String stationType,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.pushRecords(stationType, null, dataMap);
@@ -167,7 +167,7 @@ public class JsonController {
 	public void patchStations(
 		HttpServletRequest request,
 		@RequestBody(required = true) List<StationDto> stations,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		dataManager.patchStations(stations);
@@ -185,13 +185,15 @@ public class JsonController {
 		HttpServletRequest request,
 		@PathVariable String stationType,
 		@RequestBody(required = true) List<StationDto> stationDtos,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.syncStations(
 			stationType,
 			stationDtos,
-			getURIMapping("/stations/{stationType}", stationType)
+			getURIMapping("/stations/{stationType}", stationType),
+			provenanceName,
+			provenanceVersion
 		);
 	}
 
@@ -200,7 +202,7 @@ public class JsonController {
 	public ResponseEntity<Object> syncDataTypes(
 		HttpServletRequest request,
 		@RequestBody(required = true) List<DataTypeDto> data,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.syncDataTypes(data, getURIMapping("/types"));
@@ -211,7 +213,7 @@ public class JsonController {
 	public ResponseEntity<Object> syncEvents(
 		HttpServletRequest request,
 		@RequestBody(required = true) List<EventDto> eventDtos,
-		@RequestParam(value = "prn", required = false) String proveanceName,
+		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
 		return dataManager.addEvents(eventDtos, getURIMapping("/events"));
