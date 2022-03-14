@@ -148,7 +148,7 @@ public class JsonController {
 
 	@PostMapping(value = "/pushRecords/{stationType}")
 	@ResponseBody
-	public Object pushRecords(
+	public ResponseEntity<Object> pushRecords(
 		HttpServletRequest request,
 		@RequestBody(required = true) DataMapDto<RecordDtoImpl> dataMap,
 		@PathVariable String stationType,

@@ -1,15 +1,12 @@
 package it.bz.idm.bdp.writer;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import static net.logstash.logback.argument.StructuredArguments.v;
-
+import it.bz.idm.bdp.util.Utils;
 
 @Component
 public class CustomHealthIndicator implements HealthIndicator {
@@ -18,7 +15,7 @@ public class CustomHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-		LOG.info("Health check", v("api_health_info", ImmutableMap.of("status", "HEALTHY")));
+		LOG.info("Health check", Utils.mapOf("api_health_info", Utils.mapOf("status", "HEALTHY")));
         return Health.up().build();
     }
 }

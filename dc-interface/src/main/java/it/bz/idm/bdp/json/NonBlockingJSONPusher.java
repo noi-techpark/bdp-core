@@ -22,10 +22,10 @@
  */
 package it.bz.idm.bdp.json;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -45,6 +45,7 @@ import it.bz.idm.bdp.dto.ProvenanceDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
+import it.bz.idm.bdp.util.Utils;
 import reactor.core.publisher.Mono;
 
 /**
@@ -76,13 +77,19 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     @Override
-    public Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto) {
+    public Object pushData(String stationType, DataMapDto<? extends RecordDtoImpl> dto) {
+		LOG.info(
+			"NonBlockingJSONPusher/pushData",
+			Utils.mapOf(
+				"provenance", provenance
+			)
+		);
         this.pushProvenance();
         dto.setProvenance(this.provenance.getUuid());
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
-				.path(PUSH_RECORDS + datasourceName)
+				.path(PUSH_RECORDS + stationType)
 				.queryParams(createParams())
 				.build()
 			)
@@ -93,6 +100,12 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     private void pushProvenance() {
+		LOG.info(
+			"NonBlockingJSONPusher/pushProvenance",
+			Utils.mapOf(
+				"provenance", provenance
+			)
+		);
 		// We know that the provenance exist, and which UUID it has.
 		// So we do not need to get that information again from the DB
 		// This approach assumes, that the DB will not change from any
@@ -125,26 +138,109 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     @Override
-    public Object syncStations(String datasourceName, StationList data) {
-        if (data == null)
-            return null;
+    public Object syncStations(String stationType, StationList stations) {
+		LOG.info(
+			"NonBlockingJSONPusher/syncStations",
+			Utils.mapOf(
+				"parameters", Utils.mapOf(
+					"stationType", stationType
+				),
+				"provenance", provenance
+			)
+		);
+		if (stations == null || stations.isEmpty()) {
+			LOG.warn("NonBlockingJSONPusher/syncStation: No stations given. Returning!");
+			return null;
+		}
+		LOG.info(
+			"NonBlockingJSONPusher/syncStation: Pushing {} stations to the writer",
+			stations.size()
+		);
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
-				.path(SYNC_STATIONS + datasourceName)
+				.path(SYNC_STATIONS + stationType)
 				.queryParams(createParams())
 				.build()
 			)
-			.body(Mono.just(data), Object.class)
+			.body(Mono.just(stations), Object.class)
 			.retrieve()
             .bodyToMono(Object.class)
 			.block();
     }
 
+	@Override
+	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
+		LOG.info(
+			"NonBlockingJSONPusher/syncStations",
+			Utils.mapOf(
+				"parameters", Utils.mapOf(
+					"stationType", stationType
+				),
+				"provenance", provenance
+			)
+		);
+		if (stations == null || stations.isEmpty()) {
+			LOG.warn("NonBlockingJSONPusher/syncStation: No stations given. Returning!");
+			return null;
+		}
+
+		if (chunkSize <= 0)
+			chunkSize = STATION_CHUNK_SIZE;
+		int chunks = (int) Math.ceil((float) stations.size() / chunkSize);
+		LOG.info(
+			"NonBlockingJSONPusher/syncStation: Syncing {} stations in {} chunks of a maximum size {}!",
+			stations.size(),
+			chunks,
+			STATION_CHUNK_SIZE
+		);
+
+		List<Object> results = new ArrayList<>();
+		for (int i = 0; i < chunks; i++) {
+			// We have the following interval boundaries for subList: [from, to)
+			int from = STATION_CHUNK_SIZE * i;
+			int to = from + STATION_CHUNK_SIZE;
+			if (to > stations.size())
+				to = stations.size();
+			StationList stationChunk = stations.subList(from, to);
+
+			if (stationChunk == null || stationChunk.isEmpty()) {
+				LOG.warn(
+					"NonBlockingJSONPusher/syncStation: No stations in chunk {} of {}. Skipping!",
+					i+1,
+					chunks
+				);
+				continue;
+			}
+
+			LOG.info("NonBlockingJSONPusher/syncStation: Chunk {} of {}", i+1, chunks);
+			results.add(syncStations(stationType, stationChunk));
+		}
+		LOG.info("NonBlockingJSONPusher/syncStation: READY!");
+
+		return results;
+	}
+
+
     @Override
-    public Object syncDataTypes(String datasourceName, List<DataTypeDto> data) {
-        if (data == null)
-            return null;
+    public Object syncDataTypes(String stationType, List<DataTypeDto> data) {
+		LOG.info(
+			"NonBlockingJSONPusher/syncDataTypes",
+			Utils.mapOf(
+				"parameters", Utils.mapOf(
+					"stationType", stationType
+				),
+				"provenance", provenance
+			)
+		);
+		if (data == null) {
+			LOG.warn("NonBlockingJSONPusher/syncDataTypes: No data types given. Returning!");
+			return null;
+		}
+		LOG.info(
+			"NonBlockingJSONPusher/syncDataTypes: Pushing {} data types to the writer",
+			data.size()
+		);
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
@@ -164,7 +260,17 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     @Override
     public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
-        LOG.debug("Calling getDateOfLastRecord: {}, {}, {}", stationCode, dataType, period);
+		LOG.info(
+			"NonBlockingJSONPusher/getDateOfLastRecord",
+			Utils.mapOf(
+				"parameters", Utils.mapOf(
+					"stationCode", stationCode,
+					"dataType", dataType,
+					"period", period
+				),
+				"provenance", provenance
+			)
+		);
 		return client
 			.get()
 			.uri(uriBuilder -> uriBuilder
@@ -189,11 +295,21 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     @Override
-    public List<StationDto> fetchStations(String datasourceName, String origin) {
+    public List<StationDto> fetchStations(String stationType, String origin) {
+		LOG.info(
+			"NonBlockingJSONPusher/fetchStations",
+			Utils.mapOf(
+				"parameters", Utils.mapOf(
+					"stationType", stationType,
+					"origin", origin
+				),
+				"provenance", provenance
+			)
+		);
         StationDto[] object = client
 			.get()
 			.uri(uriBuilder->uriBuilder
-				.path(datasourceName == null ? STATIONS + this.integreenTypology : STATIONS + datasourceName)
+				.path(stationType == null ? STATIONS + this.integreenTypology : STATIONS + stationType)
 				.queryParams(createParams("origin", origin))
 				.build()
 			)
@@ -204,14 +320,33 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
 	public Object addEvents(List<EventDto> dtos) {
-		if (dtos == null)
+		LOG.info(
+			"NonBlockingJSONPusher/addEvents",
+			Utils.mapOf(
+				"provenance", provenance
+			)
+		);
+		if (dtos == null) {
+			LOG.warn("NonBlockingJSONPusher/addEvents: No events given. Returning!");
 			return null;
+		}
 		this.pushProvenance();
+		List<EventDto> eventsToSend = new ArrayList<>();
 		for (EventDto dto: dtos) {
 			dto.setProvenance(this.provenance.getUuid());
-			if (! EventDto.isValid(dto, true))
-				throw new IllegalArgumentException("addEvents: The given event DTO is invalid. Nothing has been send to the ODH writer...");
+			if (EventDto.isValid(dto, true)) {
+				eventsToSend.add(dto);
+			} else {
+				LOG.warn(
+					"NonBlockingJSONPusher/addEvents: The given event DTO is invalid. Skipping!",
+					Utils.mapOf("eventDto", dto)
+				);
+			}
 		}
+		LOG.info(
+			"NonBlockingJSONPusher/addEvents: Pushing {} events to the writer",
+			eventsToSend.size()
+		);
         return client
 			.post()
 			.uri(uriBuilder->uriBuilder
@@ -219,7 +354,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 				.queryParams(createParams())
 				.build()
 			)
-			.body(Mono.just(dtos), Object.class)
+			.body(Mono.just(eventsToSend), Object.class)
 			.retrieve()
 			.bodyToMono(Object.class)
 			.block();

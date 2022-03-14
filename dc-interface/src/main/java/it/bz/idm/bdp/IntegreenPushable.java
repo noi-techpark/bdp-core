@@ -50,18 +50,28 @@ public interface IntegreenPushable {
 	 * @return outcome of the api call
 	 */
 	public abstract Object pushData(String datasourceName, DataMapDto<? extends RecordDtoImpl> dto);
+
 	/**
 	 * @param datasourceName unique existing station typology
 	 * @param dtos list of station dtos to sync with existing in database
-	 * @return outcome of the api call
+	 * @return outcome of the api calls (single call)
 	 */
 	public abstract Object syncStations(String datasourceName, StationList dtos);
+
+	/**
+	 * @param datasourceName unique existing station typology
+	 * @param dtos list of station dtos to sync with existing in database
+	 * @return outcome of the api calls, more than one because we split the calls in chunks
+	 */
+	public abstract List<Object> syncStations(String datasourceName, StationList stations, int chunkSize);
+
 	/**
 	 * @param datasourceName unique existing station typology
 	 * @param data list of datatypes to sync with the existing in the database
 	 * @return outcome of the api call
 	 */
 	public abstract Object syncDataTypes(String datasourceName,List<DataTypeDto> data);
+
 	/**
 	 * @param stationCode unique identifer of a station
 	 * @param dataType unique identifier of a datatype
@@ -69,6 +79,7 @@ public interface IntegreenPushable {
 	 * @return outcome of the api call
 	 */
 	public abstract Object getDateOfLastRecord(String stationCode,String dataType,Integer period);
+
 	/**
 	 * @param datasourceName  unique existing station typology
 	 * @param origin unique reference to a webservice

@@ -39,5 +39,10 @@ public class StationList extends ArrayList<StationDto>{
 	public StationList() {
 	}
 
+	@Override
+	public StationList subList(int fromIndex, int toIndex) {
+		return new StationList(super.subList(fromIndex, toIndex));
+	}
+
 	private static final long serialVersionUID = 2408060694809964354L;
 }

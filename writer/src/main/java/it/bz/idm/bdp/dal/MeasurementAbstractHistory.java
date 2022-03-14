@@ -47,6 +47,8 @@ import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 
+import static net.logstash.logback.argument.StructuredArguments.v;
+
 /**
  * <p>This entity contains all measurements and is the biggest container for the data.
  * Each measurement <strong>must</strong> extend this base class to keep integrity.
@@ -151,11 +153,10 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
 	private static void logWarning(String method, Provenance provenance, String message) {
 		LOG.warn(
-			"[{}/{}] {}: {}",
-			provenance.getDataCollector(),
-			provenance.getDataCollectorVersion(),
+			"{}: {}",
 			method,
-			message
+			message,
+			v("provenance", provenance)
 		);
 	}
 

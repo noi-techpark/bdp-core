@@ -38,6 +38,9 @@ import it.bz.idm.bdp.dto.ProvenanceDto;
  */
 @Component
 public abstract class DataPusher implements IntegreenPushable  {
+
+	public static final int STATION_CHUNK_SIZE = 25;
+
 	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
 	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
 	protected static final String HOST_KEY							= "bdp_host";
@@ -92,4 +95,5 @@ public abstract class DataPusher implements IntegreenPushable  {
 	public void setIntegreenTypology(String integreenTypology) {
 		this.integreenTypology = integreenTypology;
 	}
+
 }
