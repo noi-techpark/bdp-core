@@ -131,7 +131,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     public Object syncStations(StationList data) {
-        return this.syncStations(this.integreenTypology, data);
+        return this.syncStations(this.integreenTypology, data, STATION_CHUNK_SIZE);
     }
 
     public Object syncStations(StationList data, int chunkSize) {
