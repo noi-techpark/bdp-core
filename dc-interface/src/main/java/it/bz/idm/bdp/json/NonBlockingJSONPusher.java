@@ -48,6 +48,8 @@ import it.bz.idm.bdp.dto.StationList;
 import it.bz.idm.bdp.util.Utils;
 import reactor.core.publisher.Mono;
 
+import static net.logstash.logback.argument.StructuredArguments.v;
+
 /**
  * Send data as JSON-format to the writer. Implementation with spring REST
  * template.
@@ -80,9 +82,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public Object pushData(String stationType, DataMapDto<? extends RecordDtoImpl> dto) {
 		LOG.info(
 			"NonBlockingJSONPusher/pushData",
-			Utils.mapOf(
-				"provenance", provenance
-			)
+			v("provenance", provenance)
 		);
         this.pushProvenance();
         dto.setProvenance(this.provenance.getUuid());
@@ -100,12 +100,6 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     private void pushProvenance() {
-		LOG.info(
-			"NonBlockingJSONPusher/pushProvenance",
-			Utils.mapOf(
-				"provenance", provenance
-			)
-		);
 		// We know that the provenance exist, and which UUID it has.
 		// So we do not need to get that information again from the DB
 		// This approach assumes, that the DB will not change from any
@@ -113,7 +107,10 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		if (this.provenance.getUuid() != null) {
 			return;
 		}
-
+		LOG.info(
+			"NonBlockingJSONPusher/pushProvenance",
+			v("provenance", provenance)
+		);
         String provenanceUuid = client
 			.post()
 			.uri(uriBuilder -> uriBuilder
@@ -137,16 +134,18 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
         return this.syncStations(this.integreenTypology, data);
     }
 
+    public Object syncStations(StationList data, int chunkSize) {
+        return this.syncStations(this.integreenTypology, data, chunkSize);
+    }
+
     @Override
     public Object syncStations(String stationType, StationList stations) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
-			Utils.mapOf(
-				"parameters", Utils.mapOf(
-					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+			v("parameters",
+				Utils.mapOf("stationType", stationType )
+			),
+			v("provenance", provenance)
 		);
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("NonBlockingJSONPusher/syncStation: No stations given. Returning!");
@@ -173,12 +172,13 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
-			Utils.mapOf(
-				"parameters", Utils.mapOf(
-					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+			v("parameters",
+				Utils.mapOf(
+					"stationType", stationType,
+					"chunkSize", chunkSize
+				)
+			),
+			v("provenance", provenance)
 		);
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("NonBlockingJSONPusher/syncStation: No stations given. Returning!");
@@ -226,12 +226,11 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public Object syncDataTypes(String stationType, List<DataTypeDto> data) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncDataTypes",
-			Utils.mapOf(
-				"parameters", Utils.mapOf(
+			v("parameters", Utils.mapOf(
 					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		if (data == null) {
 			LOG.warn("NonBlockingJSONPusher/syncDataTypes: No data types given. Returning!");
@@ -262,14 +261,13 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
 		LOG.info(
 			"NonBlockingJSONPusher/getDateOfLastRecord",
-			Utils.mapOf(
-				"parameters", Utils.mapOf(
+			v("parameters", Utils.mapOf(
 					"stationCode", stationCode,
 					"dataType", dataType,
 					"period", period
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		return client
 			.get()
@@ -298,13 +296,13 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     public List<StationDto> fetchStations(String stationType, String origin) {
 		LOG.info(
 			"NonBlockingJSONPusher/fetchStations",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationType", stationType,
 					"origin", origin
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
         StationDto[] object = client
 			.get()
@@ -322,9 +320,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 	public Object addEvents(List<EventDto> dtos) {
 		LOG.info(
 			"NonBlockingJSONPusher/addEvents",
-			Utils.mapOf(
-				"provenance", provenance
-			)
+			v("provenance", provenance)
 		);
 		if (dtos == null) {
 			LOG.warn("NonBlockingJSONPusher/addEvents: No events given. Returning!");
@@ -339,7 +335,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			} else {
 				LOG.warn(
 					"NonBlockingJSONPusher/addEvents: The given event DTO is invalid. Skipping!",
-					Utils.mapOf("eventDto", dto)
+					v("eventDto", dto)
 				);
 			}
 		}

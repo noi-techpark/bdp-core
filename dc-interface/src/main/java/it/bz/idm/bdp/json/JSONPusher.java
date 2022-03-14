@@ -45,6 +45,8 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 import it.bz.idm.bdp.util.Utils;
 
+import static net.logstash.logback.argument.StructuredArguments.v;
+
 /**
  * Send data as JSON-format to the writer. Implementation with spring REST template.
  *
@@ -78,9 +80,7 @@ public abstract class JSONPusher extends DataPusher {
 	public Object pushData(String stationType, DataMapDto<? extends RecordDtoImpl> dto) {
 		LOG.info(
 			"JSONPusher/pushData",
-			Utils.mapOf(
-				"provenance", provenance
-			)
+			v("provenance", provenance)
 		);
 		this.pushProvenance();
 		dto.setProvenance(this.provenance.getUuid());
@@ -98,12 +98,6 @@ public abstract class JSONPusher extends DataPusher {
 	}
 
 	private void pushProvenance() {
-		LOG.info(
-			"JSONPusher/pushProvenance",
-			Utils.mapOf(
-				"provenance", provenance
-			)
-		);
 		// We know that the provenance exist, and which UUID it has.
 		// So we do not need to get that information again from the DB
 		// This approach assumes, that the DB will not change from any
@@ -111,6 +105,10 @@ public abstract class JSONPusher extends DataPusher {
 		if (this.provenance.getUuid() != null) {
 			return;
 		}
+		LOG.info(
+			"JSONPusher/pushProvenance",
+			v("provenance", provenance)
+		);
 		ResponseEntity<String> provenanceUuid = restTemplate.exchange(
 			url + PROVENANCE + "?prn={}&prv={}",
 			HttpMethod.POST,
@@ -135,12 +133,12 @@ public abstract class JSONPusher extends DataPusher {
 	public Object syncStations(String stationType, StationList stations) {
 		LOG.info(
 			"JSONPusher/syncStations",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("JSONPusher/syncStation: No stations given. Returning!");
@@ -167,12 +165,12 @@ public abstract class JSONPusher extends DataPusher {
 	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
 		LOG.info(
 			"JSONPusher/syncStations",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("JSONPusher/syncStation: No stations given. Returning!");
@@ -219,12 +217,12 @@ public abstract class JSONPusher extends DataPusher {
 	public Object syncDataTypes(String stationType, List<DataTypeDto> data) {
 		LOG.info(
 			"JSONPusher/syncDataTypes",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationType", stationType
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 
 		if (data == null) {
@@ -255,14 +253,14 @@ public abstract class JSONPusher extends DataPusher {
 	public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
 		LOG.info(
 			"JSONPusher/getDateOfLastRecord",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationCode", stationCode,
 					"dataType", dataType,
 					"period", period
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		return restTemplate
 			.getForObject(
@@ -286,13 +284,13 @@ public abstract class JSONPusher extends DataPusher {
 	public List<StationDto> fetchStations(String stationType, String origin) {
 		LOG.info(
 			"JSONPusher/fetchStations",
-			Utils.mapOf(
+			v(
 				"parameters", Utils.mapOf(
 					"stationType", stationType,
 					"origin", origin
-				),
-				"provenance", provenance
-			)
+				)
+			),
+			v("provenance", provenance)
 		);
 		StationDto[] object = restTemplate
 			.getForObject(
