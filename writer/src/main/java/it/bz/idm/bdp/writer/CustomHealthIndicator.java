@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import it.bz.idm.bdp.util.Utils;
 
+import static net.logstash.logback.argument.StructuredArguments.v;
+
 @Component
 public class CustomHealthIndicator implements HealthIndicator {
 
@@ -15,7 +17,7 @@ public class CustomHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-		LOG.info("Health check", Utils.mapOf("api_health_info", Utils.mapOf("status", "HEALTHY")));
+		LOG.info("Health check", v("api_health_info", Utils.mapOf("status", "HEALTHY")));
         return Health.up().build();
     }
 }
