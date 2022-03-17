@@ -45,6 +45,7 @@ import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
+import it.bz.idm.bdp.util.Utils;
 
 import static net.logstash.logback.argument.StructuredArguments.v;
 
@@ -155,7 +156,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 			"{}: {}",
 			method,
 			message,
-			v("provenance", provenance)
+			v("api_request_info",
+				Utils.mapOf(
+					"provenance_name", provenance.getDataCollector(),
+					"provenance_version", provenance.getDataCollectorVersion()
+				)
+			)
 		);
 	}
 

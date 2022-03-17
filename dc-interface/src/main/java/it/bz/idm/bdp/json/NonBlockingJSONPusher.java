@@ -61,6 +61,7 @@ import static net.logstash.logback.argument.StructuredArguments.v;
 public abstract class NonBlockingJSONPusher extends DataPusher {
     private static final String SYNC_DATA_TYPES = "/syncDataTypes/";
     private static final String SYNC_STATIONS = "/syncStations/";
+	private static final String SYNC_STATION_STATES = "syncStationStates";
     private static final String PUSH_RECORDS = "/pushRecords/";
     private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
     private static final String STATIONS = "/stations/";
@@ -138,8 +139,12 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
         return this.syncStations(this.integreenTypology, data, chunkSize);
     }
 
-    @Override
+	@Override
     public Object syncStations(String stationType, StationList stations) {
+		return syncStationsImpl(stationType, stations, true);
+	}
+
+    private Object syncStationsImpl(String stationType, StationList stations, boolean syncState) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
 			v("parameters",
@@ -159,7 +164,11 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.path(SYNC_STATIONS + stationType)
-				.queryParams(createParams())
+				.queryParams(
+					createParams(
+						"syncState", syncState
+					)
+				)
 				.build()
 			)
 			.body(Mono.just(stations), Object.class)
@@ -184,6 +193,15 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			LOG.warn("NonBlockingJSONPusher/syncStation: No stations given. Returning!");
 			return null;
 		}
+
+		/* Syncronize station states, that is, set the active flag to true or false */
+		List<String> stationCodes = new ArrayList<>();
+		for (StationDto station : stations) {
+			if (stationCodes.contains(station.getId()))
+				continue;
+			stationCodes.add(station.getId());
+		}
+		syncStationStates(stationType, stations.get(0).getOrigin(), stationCodes);
 
 		if (chunkSize <= 0)
 			chunkSize = STATION_CHUNK_SIZE;
@@ -212,13 +230,47 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 				);
 				continue;
 			}
-
 			LOG.info("NonBlockingJSONPusher/syncStation: Chunk {} of {}", i+1, chunks);
-			results.add(syncStations(stationType, stationChunk));
+
+			// Do not sync states, since we need to do this once for all and not for each chunk
+			// otherwise the last chunk would set all other stations for that station type to inactive.
+			results.add(syncStationsImpl(stationType, stationChunk, false));
 		}
 		LOG.info("NonBlockingJSONPusher/syncStation: READY!");
 
 		return results;
+	}
+
+	public Object syncStationStates(String stationType, String origin, List<String> stationCodes) {
+		LOG.info(
+			"NonBlockingJSONPusher/syncStationStates",
+			v("parameters",
+				Utils.mapOf(
+					"stationType", stationType,
+					"origin", origin
+				)
+			),
+			v("provenance", provenance)
+		);
+		if (stationCodes == null || stationCodes.isEmpty()) {
+			LOG.warn("NonBlockingJSONPusher/syncStationStates: No station codes given. Returning!");
+			return null;
+		}
+		LOG.info(
+			"NonBlockingJSONPusher/syncStationStates: Syncronizing {} station states (active flag)",
+			stationCodes.size()
+		);
+        return client
+			.post()
+			.uri(uriBuilder -> uriBuilder
+				.pathSegment(SYNC_STATION_STATES, stationType, origin)
+				.queryParams(createParams())
+				.build()
+			)
+			.body(Mono.just(stationCodes), Object.class)
+			.retrieve()
+            .bodyToMono(Object.class)
+			.block();
 	}
 
 
