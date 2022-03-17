@@ -186,12 +186,34 @@ public class JsonController {
 		@PathVariable String stationType,
 		@RequestBody(required = true) List<StationDto> stationDtos,
 		@RequestParam(value = "prn", required = false) String provenanceName,
-		@RequestParam(value = "prv", required = false) String provenanceVersion
+		@RequestParam(value = "prv", required = false) String provenanceVersion,
+		@RequestParam(value = "syncState", required = false, defaultValue = "true") Boolean syncState
 	) {
 		return dataManager.syncStations(
 			stationType,
 			stationDtos,
 			getURIMapping("/stations/{stationType}", stationType),
+			provenanceName,
+			provenanceVersion,
+			syncState
+		);
+	}
+
+	@PostMapping(value = "/syncStationStates/{stationType}/{origin}")
+	@ResponseBody
+	public ResponseEntity<Object> syncStationStates(
+		HttpServletRequest request,
+		@PathVariable String stationType,
+		@PathVariable String origin,
+		@RequestBody(required = true) List<String> stationCodes,
+		@RequestParam(value = "prn", required = false) String provenanceName,
+		@RequestParam(value = "prv", required = false) String provenanceVersion
+	) {
+		return dataManager.syncStationStates(
+			stationType,
+			origin,
+			stationCodes,
+			getURIMapping("/stations/{stationType}/{origin}", stationType, origin),
 			provenanceName,
 			provenanceVersion
 		);

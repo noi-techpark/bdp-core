@@ -24,9 +24,9 @@ grant_type=password
 &client_id=odh-mobility-datacollector-test
 &client_secret={{$dotenv AUTH_PROD_CLIENT_SECRET}}
 
-@host=https://mobility.share.opendatahub.bz.it
+#@host=https://mobility.share.opendatahub.bz.it
 #@host=https://mobility.share.opendatahub.testingmachine.eu
-#@host=http://localhost:8999
+@host=http://localhost:8999
 @authtoken = {{login.response.body.access_token}}
 
 
@@ -81,6 +81,35 @@ Authorization: Bearer {{authtoken}}
 	"dataCollectorVersion": "1.1.1.1.1.1",
 	"lineage": "xyz"
 }
+
+### Post a station
+POST {{host}}/json/syncStations/EChargingStation
+?prn=test
+&prv=11111
+&syncState=false
+Content-Type: application/json
+Authorization: Bearer {{authtoken}}
+
+[
+	{
+		"name": "PETER",
+		"id": "PETER000001",
+		"stationType": "EChargingStation",
+		"origin": "ALPERIA"
+	}
+]
+
+### Post stations states
+POST {{host}}/json/syncStationStates/EChargingStation/ALPERIA?prn=test&prv=11111
+Content-Type: application/json
+Authorization: Bearer {{authtoken}}
+
+[
+	"HER_00000059",
+	"HER_00000003",
+	"ASM_00000456",
+	"A15_00000003"
+]
 
 ### Actuator / Healthcheck
 GET {{host}}/actuator/health

@@ -97,7 +97,8 @@ public class DataManager {
 		List<StationDto> dtos,
 		URI responseLocation,
 		String provenanceName,
-		String provenanceVersion
+		String provenanceVersion,
+		boolean syncState
 	) {
 		LOG.debug(
 			"[{}/{}] DataManager: syncStations: {}, {}, List<StationDto>.size = {}",
@@ -108,7 +109,7 @@ public class DataManager {
 			dtos.size()
 		);
 		try {
-			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion);
+			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		}
@@ -223,7 +224,7 @@ public class DataManager {
 				.addSql("where s.active = :active and s.stationtype = :stationtype")
 				.setParameter("active", true)
 				.setParameter("stationtype", stationType)
-				.setParameterIf("origin", origin, "AND origin = :origin", origin!=null && !origin.isEmpty())
+				.setParameterIfNotEmpty("origin", origin, "AND origin = :origin")
 				.buildSingleResultOrAlternative(Object.class, new ArrayList<>());
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
@@ -322,6 +323,30 @@ public class DataManager {
 
 	private boolean isEmpty(String what) {
 		return what == null || what.isEmpty();
+	}
+
+	@Transactional
+	public ResponseEntity<Object> syncStationStates(
+		String stationType,
+		String origin,
+		List<String> stationCodeList,
+		URI uriMapping,
+		String provenanceName,
+		String provenanceVersion
+	) {
+		LOG.debug("DataManager: syncStationStates: {}, {}", stationType, origin);
+		try {
+			int updatedRecords = Station.syncStationStates(
+				entityManager,
+				stationType,
+				origin,
+				stationCodeList
+			);
+			LOG.debug("DataManager: syncStationStates: {} records updated", updatedRecords);
+		} catch (Exception e) {
+			throw JPAException.unnest(e);
+		}
+		return ResponseEntity.created(uriMapping).build();
 	}
 
 }

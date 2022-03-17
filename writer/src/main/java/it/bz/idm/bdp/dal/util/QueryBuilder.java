@@ -158,10 +158,9 @@ public class QueryBuilder {
 	 * Create a {@link Query} with type <code>resultClass</code> and set
 	 * all collected parameters.
 	 *
-	 * @param resultClass Type of the query result
 	 * @return {@link Query} with type <code>resultClass</code>
 	 */
-	public <T> Query buildNative(Class<T> resultClass) {
+	public Query buildNative() {
 		Query query = em.createNativeQuery(sql.toString());
 		for (Entry<String, Object> entry : parameters.entrySet()) {
 			query.setParameter(entry.getKey(), entry.getValue());
@@ -178,7 +177,7 @@ public class QueryBuilder {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> buildResultList(Class<T> resultClass) {
 		if (isNativeQuery) {
-			return buildNative(resultClass).getResultList();
+			return buildNative().getResultList();
 		}
 		return build(resultClass).getResultList();
 	}
@@ -210,7 +209,7 @@ public class QueryBuilder {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T buildSingleResultOrAlternative(Class<T> resultClass, T alternative) {
-		Query query = isNativeQuery ? buildNative(Object[].class) : build(resultClass);
+		Query query = isNativeQuery ? buildNative() : build(resultClass);
 		query.setMaxResults(1);
 		List<Object[]> list = null ;
 		list = query.getResultList();

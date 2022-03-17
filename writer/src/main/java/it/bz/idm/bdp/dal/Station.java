@@ -388,8 +388,18 @@ public class Station {
 	 * @param stationType typology of a {@link Station}
 	 * @param data list of station DTOs provided by a data collector
 	 */
-	public static void syncStations(EntityManager em, String stationType, List<StationDto> data, String provenanceName, String provenanceVersion) {
-		syncActiveOfExistingStations(em, data);
+	public static void syncStations(
+		EntityManager em,
+		String stationType,
+		List<StationDto> data,
+		String provenanceName,
+		String provenanceVersion,
+		boolean syncState
+	) {
+		if (data == null || data.isEmpty()) {
+			return;
+		}
+		List<String> stationCodes = new ArrayList<>();
 		for (StationDto dto : data){
 			try {
 				if (dto.getStationType() == null) {
@@ -397,6 +407,7 @@ public class Station {
 				}
 				if (dto.isValid()) {
 					sync(em, dto);
+					stationCodes.add(dto.getId());
 				} else {
 					LOG.warn(
 						"[{}/{}] Invalid JSON for StationDto: {}",
@@ -409,7 +420,12 @@ public class Station {
 				throw JPAException.unnest(e);
 			}
 		}
+		if (syncState) {
+			String origin = data.get(0).getId();
+			syncStationStates(em, stationType, origin, stationCodes);
+		}
 	}
+
 
 	/**
 	 * @param em entity manager
@@ -424,6 +440,7 @@ public class Station {
 			existingStation.setStationcode(dto.getId());
 			existingStation.setStationtype(dto.getStationType());
 			existingStation.setName(dto.getName());
+			existingStation.setActive(true);
 			em.persist(existingStation);
 		}
 		if (dto.getLatitude() != null && dto.getLongitude() != null) {
@@ -454,6 +471,7 @@ public class Station {
 
 		/* We do not need to check for NULL, nor empty strings, because the writer will take care of that */
 		existingStation.setName(dto.getName());
+		existingStation.setActive(true);
 		em.merge(existingStation);
 	}
 
@@ -518,6 +536,33 @@ public class Station {
 				em.merge(station);
 			}
 		}
+	}
+
+	/**
+	 * Synchronizes stations state, active stations are provided by a data collector.
+	 * Queries database for stations with a specific origin and if provided, station type.
+	 * Deactivates stations in DB which are not in the provided list and activates the ones which are.
+	 *
+	 * @param em   entity manager
+	 * @param dtos active stations, provided by the corresponding data-collector
+	 */
+	public static int syncStationStates(
+		EntityManager em,
+		String stationType,
+		String origin,
+		List<String> stationCodeList
+	) {
+		return QueryBuilder
+			.init(em)
+			.nativeQuery()
+			.addSql("update {h-schema}station s set active = case")
+			.addSql("when s.stationcode in :stationlist then true else false end")
+			.addSql("where s.stationtype = :stationtype and s.origin = :origin")
+			.setParameter("stationlist", stationCodeList)
+			.setParameter("stationtype", stationType)
+			.setParameter("origin", origin)
+			.buildNative()
+			.executeUpdate();
 	}
 
 	/**
