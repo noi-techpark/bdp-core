@@ -31,6 +31,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -78,6 +79,7 @@ public class MeasurementString extends MeasurementAbstract {
      *     inside MeasurementString and Measurement respectively
      */
 	@Column(nullable = false)
+	@Lob
 	private String stringValue;
 
 	public MeasurementString() {
