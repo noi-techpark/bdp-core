@@ -40,14 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import it.bz.idm.bdp.dal.util.JPAException;
+import it.bz.idm.bdp.dal.util.Log;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.RecordDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
-import it.bz.idm.bdp.util.Utils;
-
-import static net.logstash.logback.argument.StructuredArguments.v;
 
 /**
  * <p>This entity contains all measurements and is the biggest container for the data.
@@ -151,20 +149,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
     public abstract void setValue(Object value);
     public abstract Object getValue();
 
-	private static void logWarning(String method, Provenance provenance, String message) {
-		LOG.warn(
-			"{}: {}",
-			method,
-			message,
-			v("api_request_info",
-				Utils.mapOf(
-					"provenance_name", provenance.getDataCollector(),
-					"provenance_version", provenance.getDataCollectorVersion()
-				)
-			)
-		);
-	}
-
     /**
      * <p>
      * persists all measurement data send to the writer from data collectors to the database.<br/>
@@ -179,31 +163,36 @@ public abstract class MeasurementAbstractHistory implements Serializable {
      * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
      */
     public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
+		Log log = new Log(LOG, "pushRecords");
         try {
             Provenance provenance = Provenance.findByUuid(em, dataMap.getProvenance());
+			if (provenance == null) {
+				throw new JPAException(String.format("Provenance with UUID %s not found", dataMap.getProvenance()));
+			}
+			log.setProvenance(provenance);
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
-					logWarning("pushRecords", provenance, String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
+					log.warn(String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
                     continue;
                 }
                 for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
                         if (type == null) {
-							logWarning("pushRecords", provenance, String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
+							log.warn(String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
 							continue;
                         }
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
-							logWarning("pushRecords", provenance, "Empty data set. Skipping...");
+							log.warn("Empty data set. Skipping...");
                             continue;
                         }
 
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
                         if (period == null){
-                            logWarning("pushRecords", provenance, "No period specified. Skipping...");
+                            log.warn("No period specified. Skipping...");
                             continue;
                         }
 
@@ -294,21 +283,19 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 									em.merge(latestJSONMeasurement);
 								}
                             } else {
-								logWarning("pushRecords", provenance,
+								log.warn(
 									String.format("Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
-                                    stationType,
-                                    stationEntry.getKey(),
-                                    typeEntry.getKey(),
-                                    (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
-                                ));
+										stationType,
+										stationEntry.getKey(),
+										typeEntry.getKey(),
+										(valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
+									)
+								);
                             }
                         }
                     } catch(Exception ex) {
-						LOG.error(
-							"[{}/{}] Exception '{}'... Skipping this measurement!",
-							provenance.getDataCollector(),
-							provenance.getDataCollectorVersion(),
-							ex.getMessage(),
+						log.error(
+							String.format("Exception '%s'... Skipping this measurement!", ex.getMessage()),
 							ex
 						);
                     }

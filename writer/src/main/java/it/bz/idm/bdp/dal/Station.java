@@ -421,7 +421,7 @@ public class Station {
 			}
 		}
 		if (syncState) {
-			String origin = data.get(0).getId();
+			String origin = data.get(0).getOrigin();
 			syncStationStates(em, stationType, origin, stationCodes);
 		}
 	}

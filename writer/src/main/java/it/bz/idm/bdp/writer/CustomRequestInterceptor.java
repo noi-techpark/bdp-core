@@ -78,17 +78,20 @@ public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
 				System.err.println(logPayload);
 			}
 			LOG.info("API call", v("api_request_info", logPayload));
-		} else if (response.getStatus() < 500) {
-			logPayload.put("request_state", "WARNING");
-			request.setAttribute("level", "WARN");
 		} else {
-			logPayload.put("request_state", "ERROR");
 			logPayload.put("exception_dto", exceptionDto);
-			logPayload.put("exception", Arrays.toString(exception.getStackTrace()));
-			if (LOG.isDebugEnabled()) {
-				exception.printStackTrace(System.err);
+			if (response.getStatus() < 500) {
+				logPayload.put("request_state", "WARNING");
+				request.setAttribute("level", "WARN");
+				LOG.warn("API call", v("api_request_info", logPayload));
+			} else {
+				logPayload.put("exception", Arrays.toString(exception.getStackTrace()));
+				logPayload.put("request_state", "ERROR");
+				LOG.error("API call", v("api_request_info", logPayload));
+				if (LOG.isDebugEnabled()) {
+					exception.printStackTrace(System.err);
+				}
 			}
-			LOG.error("API call", v("api_request_info", logPayload));
 		}
 	}
 

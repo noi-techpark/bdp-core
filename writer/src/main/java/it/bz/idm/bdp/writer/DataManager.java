@@ -31,7 +31,6 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.Transactional;
 
@@ -89,8 +88,11 @@ public class DataManager {
 		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			MeasurementAbstractHistory.pushRecords(entityManager, stationType, dataMap);
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -123,8 +125,11 @@ public class DataManager {
 		);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState);
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -142,8 +147,11 @@ public class DataManager {
 		LOG.debug("DataManager: syncDataTypes: {}, List<DataTypeDto>.size = {}", responseLocation, dtos.size());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			DataType.sync(entityManager, dtos);
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -303,10 +311,13 @@ public class DataManager {
 		LOG.debug("DataManager: patchStations (deprecated)");
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			for (StationDto dto:stations) {
 				Station.patch(entityManager, dto);
 			}
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -319,8 +330,11 @@ public class DataManager {
 		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			uuid = Provenance.add(entityManager, provenance);
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -353,8 +367,11 @@ public class DataManager {
 		LOG.debug("DataManager: addEvents: {}, List<EventDto>.size = {}", responseLocation, eventDtos.size());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			Event.pushEvents(entityManager, eventDtos);
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
@@ -383,14 +400,17 @@ public class DataManager {
 		LOG.debug("DataManager: syncStationStates: {}, {}", stationType, origin);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
+			entityManager.getTransaction().begin();
 			int updatedRecords = Station.syncStationStates(
 				entityManager,
 				stationType,
 				origin,
 				stationCodeList
 			);
+			entityManager.getTransaction().commit();
 			LOG.debug("DataManager: syncStationStates: {} records updated", updatedRecords);
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
