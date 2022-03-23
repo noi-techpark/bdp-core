@@ -324,7 +324,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         }
                     } catch(Exception ex) {
 						LOG.error(
-							"[{}/{}] Exception '{}'... Skipping this measurment!",
+							"[{}/{}] Exception '{}'... Skipping this measurement!",
 							provenance.getDataCollector(),
 							provenance.getDataCollectorVersion(),
 							ex.getMessage(),

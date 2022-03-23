@@ -30,7 +30,9 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import javax.transaction.Transactional;
 
 import org.springframework.http.HttpStatus;
@@ -65,8 +67,16 @@ public class DataManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataManager.class);
 
-	@PersistenceContext
-	private EntityManager entityManager;
+	/*
+	 * In the past we used @PersistenceContext here. However, if we inject this
+	 * EntityManager like that in environments where the concurrency is a
+	 * concern, we're not thread-safe. This caused some invalid pushRecord
+	 * calls, where strings would have been pushed to number measurement tables
+	 * which resulted in a database error. Hence, we better use a application
+	 * managed entity manager here.
+	 */
+	@PersistenceUnit
+	private EntityManagerFactory entityManagerFactory;
 
 	/**
 	 * @param stationType all data sets must have stations as reference with given station type
@@ -77,10 +87,13 @@ public class DataManager {
 	@Transactional
 	public ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			MeasurementAbstractHistory.pushRecords(entityManager, stationType, dataMap);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -108,10 +121,13 @@ public class DataManager {
 			responseLocation,
 			dtos.size()
 		);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -124,10 +140,13 @@ public class DataManager {
 	@Transactional
 	public ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		LOG.debug("DataManager: syncDataTypes: {}, List<DataTypeDto>.size = {}", responseLocation, dtos.size());
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			DataType.sync(entityManager, dtos);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
@@ -148,6 +167,7 @@ public class DataManager {
 			);
 		}
 		LOG.debug("DataManager: getDateOfLastRecord: {}, {}, {}, {}", stationType, stationCode, dataTypeName, period);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			Date queryResult = MeasurementAbstract.getDateOfLastRecordSingleImpl(
 				entityManager,
@@ -184,6 +204,8 @@ public class DataManager {
 			return queryResult;
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
@@ -196,16 +218,20 @@ public class DataManager {
 	@Transactional
 	public List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStations: {}, {}", stationType, origin);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			return Station.convertToDto(Station.findStations(entityManager, stationType, origin));
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
 	@Transactional
 	public Object getStationsNative(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStationsNative: {}, {}", stationType, origin);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			return QueryBuilder
 				.init(entityManager)
@@ -228,6 +254,8 @@ public class DataManager {
 				.buildSingleResultOrAlternative(Object.class, new ArrayList<>());
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
@@ -237,10 +265,13 @@ public class DataManager {
 	@Transactional
 	public List<String> getStationTypes() {
 		LOG.debug("DataManager: getStationTypes");
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			return Station.findStationTypes(entityManager);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
@@ -250,10 +281,13 @@ public class DataManager {
 	@Transactional
 	public List<String> getDataTypes() {
 		LOG.debug("DataManager: getDataTypes");
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			return DataType.findTypeNames(entityManager);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
@@ -267,12 +301,15 @@ public class DataManager {
 	@Transactional
 	public void patchStations(List<StationDto> stations) {
 		LOG.debug("DataManager: patchStations (deprecated)");
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			for (StationDto dto:stations) {
 				Station.patch(entityManager, dto);
 			}
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 	}
 
@@ -280,10 +317,13 @@ public class DataManager {
 	public String addProvenance(ProvenanceDto provenance) {
 		String uuid = null;
 		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			uuid = Provenance.add(entityManager, provenance);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return uuid;
 	}
@@ -292,10 +332,13 @@ public class DataManager {
 	public List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		List<Provenance> resultList = new ArrayList<>();
 		LOG.debug("DataManager: findProvenance: {}, {}, {}, {}", uuid, name, version, lineage);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			resultList = Provenance.find(entityManager, uuid, name, version, lineage);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		List<ProvenanceDto> provenances = new ArrayList<>();
 		for (Provenance p : resultList) {
@@ -308,17 +351,20 @@ public class DataManager {
 	@Transactional
 	public ResponseEntity<Object> addEvents(List<EventDto> eventDtos, URI responseLocation) {
 		LOG.debug("DataManager: addEvents: {}, List<EventDto>.size = {}", responseLocation, eventDtos.size());
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			Event.pushEvents(entityManager, eventDtos);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return ResponseEntity.created(responseLocation).build();
 	}
 
 	@PostConstruct
     public void postConstruct() {
-        Objects.requireNonNull(entityManager);
+        Objects.requireNonNull(entityManagerFactory);
     }
 
 	private boolean isEmpty(String what) {
@@ -335,6 +381,7 @@ public class DataManager {
 		String provenanceVersion
 	) {
 		LOG.debug("DataManager: syncStationStates: {}, {}", stationType, origin);
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
 			int updatedRecords = Station.syncStationStates(
 				entityManager,
@@ -345,6 +392,8 @@ public class DataManager {
 			LOG.debug("DataManager: syncStationStates: {} records updated", updatedRecords);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
+		} finally {
+			entityManager.close();
 		}
 		return ResponseEntity.created(uriMapping).build();
 	}
