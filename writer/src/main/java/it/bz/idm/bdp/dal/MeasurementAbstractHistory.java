@@ -179,12 +179,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
      * @throws JPAException if data is in any way corrupted or one of the references {@link Station}, {@link DataType}<br/> does not exist in the database yet
      */
     public static void pushRecords(EntityManager em, String stationType, DataMapDto<RecordDtoImpl> dataMap) {
-        boolean givenDataOK = false;
-        boolean stationFound = false;
-        boolean typeFound = false;
-        boolean jsonOK = false;
         try {
-
             Provenance provenance = Provenance.findByUuid(em, dataMap.getProvenance());
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
@@ -192,7 +187,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 					logWarning("pushRecords", provenance, String.format("Station '%s/%s' not found. Skipping...", stationType, stationEntry.getKey()));
                     continue;
                 }
-                stationFound = true;
                 for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
                     try {
                         DataType type = DataType.findByCname(em, typeEntry.getKey());
@@ -200,7 +194,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							logWarning("pushRecords", provenance, String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
 							continue;
                         }
-                        typeFound = true;
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
 							logWarning("pushRecords", provenance, "Empty data set. Skipping...");
@@ -252,7 +245,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 									latestNumberMeasurement.setValue(valueNumber);
 									em.merge(latestNumberMeasurement);
 								}
-                                givenDataOK = true;
                             } else if (valueObj instanceof String) {
 								MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
 								long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
@@ -276,7 +268,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 									latestStringMeasurement.setProvenance(provenance);
 									em.merge(latestStringMeasurement);
 								}
-                                givenDataOK = true;
                             } else if (valueObj instanceof Map) {
 								MeasurementAbstract latestJSONMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementJSON.class);
 								long latestJSONMeasurementTime = (latestJSONMeasurement != null) ? latestJSONMeasurement.getTimestamp().getTime() : 0;
@@ -302,7 +293,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 									latestJSONMeasurement.setProvenance(provenance);
 									em.merge(latestJSONMeasurement);
 								}
-                                givenDataOK = true;
                             } else {
 								logWarning("pushRecords", provenance,
 									String.format("Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
@@ -312,7 +302,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                     (valueObj == null ? "(null)" : valueObj.getClass().getSimpleName())
                                 ));
                             }
-                            jsonOK = true;
                         }
                     } catch(Exception ex) {
 						LOG.error(
@@ -325,21 +314,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     }
                 }
             }
-
-            if (!stationFound) {
-                throw new JPAException("No station found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-            }
-            if (!typeFound) {
-                throw new JPAException("No station/type found inside your DB corresponding to " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-            }
-            if (!givenDataOK) {
-                throw new JPAException("No valid data format for station/type found inside " + SimpleRecordDto.class.getSimpleName(), SimpleRecordDto.class);
-            }
-            /* FALSE, if no valid data can be found, either because of missing station/type/data combinations, hence invalid JSON */
-            if (!jsonOK) {
-                throw new JPAException("Invalid JSON for " + DataMapDto.class.getSimpleName(), DataMapDto.class);
-            }
-
         } catch(Exception e) {
             throw JPAException.unnest(e);
         } finally {
