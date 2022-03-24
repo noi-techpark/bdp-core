@@ -39,6 +39,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
 
 import it.bz.idm.bdp.dto.RecordDto;
 
@@ -76,6 +77,7 @@ public class MeasurementStringHistory extends MeasurementAbstractHistory {
      */
 	@Column(nullable = false)
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String stringValue;
 
 	public MeasurementStringHistory() {

@@ -38,6 +38,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
 
 
 /**
@@ -80,6 +81,7 @@ public class MeasurementString extends MeasurementAbstract {
      */
 	@Column(nullable = false)
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String stringValue;
 
 	public MeasurementString() {
