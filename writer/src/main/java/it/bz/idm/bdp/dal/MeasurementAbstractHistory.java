@@ -189,12 +189,20 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             continue;
                         }
 
+						em.getTransaction().begin();
+
                         //TODO: remove period check once it gets removed from database
                         Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
                         if (period == null){
                             log.warn("No period specified. Skipping...");
                             continue;
                         }
+                        MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
+                        long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
+                        MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
+                        long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
+                        MeasurementAbstract latestJSONMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementJSON.class);
+                        long latestJSONMeasurementTime = (latestJSONMeasurement != null) ? latestJSONMeasurement.getTimestamp().getTime() : 0;
 
                         SimpleRecordDto newestStringDto = null;
                         SimpleRecordDto newestNumberDto = null;
@@ -212,8 +220,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             Long dateOfMeasurement = simpleRecordDto.getTimestamp();
                             Object valueObj = simpleRecordDto.getValue();
                             if (valueObj instanceof Number) {
-								MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
-								long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
 								if (latestNumberMeasurementTime < dateOfMeasurement) {
                                     Double value = ((Number)valueObj).doubleValue();
                                     MeasurementHistory rec = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
@@ -223,20 +229,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 if (newestNumberDto == null || newestNumberDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestNumberDto = simpleRecordDto;
                                 }
-								Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
-								if (latestNumberMeasurement == null) {
-									latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
-									latestNumberMeasurement.setProvenance(provenance);
-									em.persist(latestNumberMeasurement);
-								} else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
-									latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
-									latestNumberMeasurement.setProvenance(provenance);
-									latestNumberMeasurement.setValue(valueNumber);
-									em.merge(latestNumberMeasurement);
-								}
                             } else if (valueObj instanceof String) {
-								MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
-								long latestStringMeasurementTime = (latestStringMeasurement != null) ? latestStringMeasurement.getTimestamp().getTime() : 0;
                                 if (latestStringMeasurementTime < dateOfMeasurement) {
                                     String value = (String) valueObj;
                                     MeasurementStringHistory rec = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
@@ -246,20 +239,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 if (newestStringDto == null || newestStringDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestStringDto = simpleRecordDto;
                                 }
-								String valueString = (String) newestStringDto.getValue();
-								if (latestStringMeasurement == null) {
-									latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
-									latestStringMeasurement.setProvenance(provenance);
-									em.persist(latestStringMeasurement);
-								} else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
-									latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
-									latestStringMeasurement.setValue(valueString);
-									latestStringMeasurement.setProvenance(provenance);
-									em.merge(latestStringMeasurement);
-								}
                             } else if (valueObj instanceof Map) {
-								MeasurementAbstract latestJSONMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementJSON.class);
-								long latestJSONMeasurementTime = (latestJSONMeasurement != null) ? latestJSONMeasurement.getTimestamp().getTime() : 0;
                                 if (latestJSONMeasurementTime < dateOfMeasurement) {
 									@SuppressWarnings("unchecked")
                                     Map<String,Object> value = (Map<String,Object>) valueObj;
@@ -270,18 +250,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 if (newestJsonDto == null || newestJsonDto.getTimestamp() < simpleRecordDto.getTimestamp()) {
                                     newestJsonDto = simpleRecordDto;
                                 }
-								@SuppressWarnings("unchecked")
-								Map<String,Object> jsonValue = (Map<String,Object>) newestJsonDto.getValue();
-								if (latestJSONMeasurement == null) {
-									latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestJsonDto.getTimestamp()), newestJsonDto.getPeriod());
-									latestJSONMeasurement.setProvenance(provenance);
-									em.persist(latestJSONMeasurement);
-								} else if (newestJsonDto.getTimestamp() > latestJSONMeasurementTime) {
-									latestJSONMeasurement.setTimestamp(new Date(newestJsonDto.getTimestamp()));
-									latestJSONMeasurement.setValue(jsonValue);
-									latestJSONMeasurement.setProvenance(provenance);
-									em.merge(latestJSONMeasurement);
-								}
                             } else {
 								log.warn(
 									String.format("Unsupported data format for %s/%s/%s with value '%s'. Skipping...",
@@ -293,18 +261,68 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 								);
                             }
                         }
+
+                        if (newestNumberDto != null) {
+                            Double valueNumber = ((Number)newestNumberDto.getValue()).doubleValue();
+                            if (latestNumberMeasurement == null) {
+                                latestNumberMeasurement = new Measurement(station, type, valueNumber, new Date(newestNumberDto.getTimestamp()), newestNumberDto.getPeriod());
+                                latestNumberMeasurement.setProvenance(provenance);
+                                em.persist(latestNumberMeasurement);
+                            } else if (newestNumberDto.getTimestamp() > latestNumberMeasurementTime) {
+                                latestNumberMeasurement.setTimestamp(new Date(newestNumberDto.getTimestamp()));
+                                latestNumberMeasurement.setProvenance(provenance);
+                                latestNumberMeasurement.setValue(valueNumber);
+                                em.merge(latestNumberMeasurement);
+                            }
+                        }
+
+                        if (newestStringDto != null) {
+                            String valueString = (String) newestStringDto.getValue();
+                            if (latestStringMeasurement == null) {
+                                latestStringMeasurement = new MeasurementString(station, type, valueString, new Date(newestStringDto.getTimestamp()), newestStringDto.getPeriod());
+                                latestStringMeasurement.setProvenance(provenance);
+                                em.persist(latestStringMeasurement);
+                            } else if (newestStringDto.getTimestamp() > latestStringMeasurementTime) {
+                                latestStringMeasurement.setTimestamp(new Date(newestStringDto.getTimestamp()));
+                                latestStringMeasurement.setValue(valueString);
+                                latestStringMeasurement.setProvenance(provenance);
+                                em.merge(latestStringMeasurement);
+                            }
+                        }
+                        if (newestJsonDto != null) {
+							@SuppressWarnings("unchecked")
+                            Map<String,Object> jsonValue = (Map<String,Object>) newestJsonDto.getValue();
+                            if (latestJSONMeasurement == null) {
+                                latestJSONMeasurement = new MeasurementJSON(station, type, jsonValue, new Date(newestJsonDto.getTimestamp()), newestJsonDto.getPeriod());
+                                latestJSONMeasurement.setProvenance(provenance);
+                                em.persist(latestJSONMeasurement);
+                            } else if (newestJsonDto.getTimestamp() > latestJSONMeasurementTime) {
+                                latestJSONMeasurement.setTimestamp(new Date(newestJsonDto.getTimestamp()));
+                                latestJSONMeasurement.setValue(jsonValue);
+                                latestJSONMeasurement.setProvenance(provenance);
+                                em.merge(latestJSONMeasurement);
+                            }
+                        }
+						em.getTransaction().commit();
+
                     } catch(Exception ex) {
 						log.error(
 							String.format("Exception '%s'... Skipping this measurement!", ex.getMessage()),
 							ex
 						);
+						if (em.getTransaction().isActive())
+                            em.getTransaction().rollback();
                     }
                 }
             }
         } catch(Exception e) {
+			if (em.getTransaction().isActive())
+				em.getTransaction().rollback();
             throw JPAException.unnest(e);
         } finally {
             em.clear();
+			if (em.isOpen())
+                em.close();
         }
     }
 

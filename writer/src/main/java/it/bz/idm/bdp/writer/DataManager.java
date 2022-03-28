@@ -88,11 +88,8 @@ public class DataManager {
 		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
-			entityManager.getTransaction().begin();
 			MeasurementAbstractHistory.pushRecords(entityManager, stationType, dataMap);
-			entityManager.getTransaction().commit();
 		} catch (Exception e) {
-			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();
