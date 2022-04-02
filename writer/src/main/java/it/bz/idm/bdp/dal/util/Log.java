@@ -13,6 +13,10 @@ public class Log {
 	private Logger logger;
 	private String methodName;
 
+	public static Log init(Logger logger, String methodName) {
+		return new Log(logger, methodName);
+	}
+
 	public Log(Logger logger, String methodName, Provenance provenance) {
 		this.logger = logger;
 		this.provenance = provenance;
@@ -23,8 +27,16 @@ public class Log {
 		this(logger, methodName, null);
 	}
 
-	public void setProvenance(Provenance provenance) {
+	public Log setProvenance(Provenance provenance) {
 		this.provenance = provenance;
+		return this;
+	}
+
+	public Log setProvenance(String name, String version) {
+		this.provenance = new Provenance();
+		this.provenance.setDataCollector(name);
+		this.provenance.setDataCollectorVersion(version);
+		return this;
 	}
 
 	public void warn(String message) {

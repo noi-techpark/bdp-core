@@ -35,10 +35,6 @@ GET {{host}}/json/stations?prn=dc-blabla&prv=1.0.2
 Authorization: Bearer {{authtoken}}
 
 ### Get a single stationtype from the writer
-GET {{host}}/json/stations2/MeteoStation
-Authorization: Bearer {{authtoken}}
-
-### Get a single stationtype from the writer
 GET {{host}}/json/stations/MeteoStation
 Authorization: Bearer {{authtoken}}
 
@@ -83,19 +79,19 @@ Authorization: Bearer {{authtoken}}
 }
 
 ### Post a station
-POST {{host}}/json/syncStations/EChargingStation
-?prn=test
-&prv=11111
-&syncState=false
+POST {{host}}/json/syncStations/EChargingStation34
+#?prn=test
+#&prv=11111
+#&syncState=true
 Content-Type: application/json
 Authorization: Bearer {{authtoken}}
 
 [
 	{
 		"name": "PETER",
-		"id": "PETER000001",
+		"id": "PETER",
 		"stationType": "EChargingStation",
-		"origin": "ALPERIA"
+		"origin": null
 	}
 ]
 
@@ -110,6 +106,16 @@ Authorization: Bearer {{authtoken}}
 	"ASM_00000456",
 	"A15_00000003"
 ]
+
+### Push Records
+POST {{host}}/json/pushRecords/RWISstation
+Content-Type: application/json
+Authorization: Bearer {{authtoken}}
+
+{
+	"name": "(default)",
+
+}
 
 ### Actuator / Healthcheck
 GET {{host}}/actuator/health

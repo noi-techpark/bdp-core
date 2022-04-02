@@ -58,6 +58,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 
 import it.bz.idm.bdp.dal.util.JPAException;
+import it.bz.idm.bdp.dal.util.Log;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.CoordinateDto;
 import it.bz.idm.bdp.dto.StationDto;
@@ -322,7 +323,7 @@ public class Station {
 	 * @return unique string identifiers for each existing station type
 	 */
 	public static List<String> findStationTypes(EntityManager em) {
-		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class)
+		return em.createQuery("SELECT station.stationtype FROM station station GROUP BY station.stationtype", String.class)
 				 .getResultList();
 	}
 
@@ -422,7 +423,7 @@ public class Station {
 		}
 		if (syncState) {
 			String origin = data.get(0).getOrigin();
-			syncStationStates(em, stationType, origin, stationCodes);
+			syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion);
 		}
 	}
 
@@ -539,28 +540,42 @@ public class Station {
 	}
 
 	/**
-	 * Synchronizes stations state, active stations are provided by a data collector.
-	 * Queries database for stations with a specific origin and if provided, station type.
-	 * Deactivates stations in DB which are not in the provided list and activates the ones which are.
+	 * Synchronizes stations state, active stations are provided by a data
+	 * collector. Queries database for stations with a specific origin and if
+	 * provided, station type. Deactivates stations in DB which are not in the
+	 * provided list and activates the ones which are.
 	 *
-	 * @param em   entity manager
-	 * @param dtos active stations, provided by the corresponding data-collector
+	 * @param em                entity manager
+	 * @param stationType       typology of a {@link Station}
+	 * @param origin            name of the source of this data set (optional
+	 * 							for compatibility reasons with past versions)
+	 * @param stationCodeList   active station IDs, provided by the corresponding
+	 * 							data-collector
 	 */
 	public static int syncStationStates(
 		EntityManager em,
 		String stationType,
 		String origin,
-		List<String> stationCodeList
+		List<String> stationCodeList,
+		String provenanceName,
+		String provenanceVersion
 	) {
+		if (origin == null || origin.isEmpty()) {
+			Log
+				.init(LOG, "syncStationStates")
+				.setProvenance(provenanceName, provenanceVersion)
+				.warn("Data Collector does not provide an origin");
+		}
 		return QueryBuilder
 			.init(em)
 			.nativeQuery()
 			.addSql("update {h-schema}station s set active = case")
 			.addSql("when s.stationcode in :stationlist then true else false end")
-			.addSql("where s.stationtype = :stationtype and s.origin = :origin")
+			.addSql("where s.stationtype = :stationtype")
 			.setParameter("stationlist", stationCodeList)
 			.setParameter("stationtype", stationType)
-			.setParameter("origin", origin)
+			.setParameterIfNotEmpty("origin", origin, "and s.origin = :origin")
+			.addSqlIf("and s.origin is null", origin == null || origin.isEmpty())
 			.buildNative()
 			.executeUpdate();
 	}

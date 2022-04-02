@@ -31,6 +31,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.Transactional;
 
@@ -402,7 +403,9 @@ public class DataManager {
 				entityManager,
 				stationType,
 				origin,
-				stationCodeList
+				stationCodeList,
+				provenanceName,
+				provenanceVersion
 			);
 			entityManager.getTransaction().commit();
 			LOG.debug("DataManager: syncStationStates: {} records updated", updatedRecords);
