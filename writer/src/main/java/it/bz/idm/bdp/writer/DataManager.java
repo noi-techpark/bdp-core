@@ -119,11 +119,8 @@ public class DataManager {
 		);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
-			entityManager.getTransaction().begin();
 			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState);
-			entityManager.getTransaction().commit();
 		} catch (Exception e) {
-			entityManager.getTransaction().rollback();
 			throw JPAException.unnest(e);
 		} finally {
 			entityManager.close();

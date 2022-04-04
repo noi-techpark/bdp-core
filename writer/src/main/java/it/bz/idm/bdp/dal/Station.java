@@ -323,7 +323,7 @@ public class Station {
 	 * @return unique string identifiers for each existing station type
 	 */
 	public static List<String> findStationTypes(EntityManager em) {
-		return em.createQuery("SELECT station.stationtype FROM station station GROUP BY station.stationtype", String.class)
+		return em.createQuery("SELECT station.stationtype FROM Station station GROUP BY station.stationtype", String.class)
 				 .getResultList();
 	}
 
@@ -401,29 +401,29 @@ public class Station {
 			return;
 		}
 		List<String> stationCodes = new ArrayList<>();
+		em.getTransaction().begin();
 		for (StationDto dto : data){
-			try {
-				if (dto.getStationType() == null) {
-					dto.setStationType(stationType);
-				}
-				if (dto.isValid()) {
-					sync(em, dto);
-					stationCodes.add(dto.getId());
-				} else {
-					LOG.warn(
-						"[{}/{}] Invalid JSON for StationDto: {}",
-						provenanceName,
-						provenanceVersion,
-						v("StationDto", dto)
-					);
-				}
-			} catch (Exception e) {
-				throw JPAException.unnest(e);
+			if (dto.getStationType() == null) {
+				dto.setStationType(stationType);
+			}
+			if (dto.isValid()) {
+				sync(em, dto);
+				stationCodes.add(dto.getId());
+			} else {
+				LOG.warn(
+					"[{}/{}] Invalid JSON for StationDto: {}",
+					provenanceName,
+					provenanceVersion,
+					v("StationDto", dto)
+				);
 			}
 		}
+		em.getTransaction().commit();
 		if (syncState) {
 			String origin = data.get(0).getOrigin();
+			em.getTransaction().begin();
 			syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion);
+			em.getTransaction().commit();
 		}
 	}
 
