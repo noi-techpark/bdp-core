@@ -31,9 +31,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
-import javax.transaction.Transactional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,7 +82,6 @@ public class DataManager {
 	 * @param dataMap containing all data as measurement in a tree structure
 	 * @return correct response status code
 	 */
-	@Transactional
 	public ResponseEntity<Object> pushRecords(String stationType, URI responseLocation, DataMapDto<RecordDtoImpl> dataMap){
 		LOG.debug("DataManager: pushRecords: {}, {}", stationType, responseLocation);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -104,7 +101,6 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	@Transactional
 	public ResponseEntity<Object> syncStations(
 		String stationType,
 		List<StationDto> dtos,
@@ -140,7 +136,6 @@ public class DataManager {
 	 * @param responseLocation
 	 * @return correct response status code
 	 */
-	@Transactional
 	public ResponseEntity<Object> syncDataTypes(List<DataTypeDto> dtos, URI responseLocation) {
 		LOG.debug("DataManager: syncDataTypes: {}, List<DataTypeDto>.size = {}", responseLocation, dtos.size());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -164,7 +159,6 @@ public class DataManager {
 	 * @param period interval between 2 measurements
 	 * @return a date object representing the time when the specific measurement was updated last
 	 */
-	@Transactional
 	public Date getDateOfLastRecord(String stationType, String stationCode, String dataTypeName, Integer period) {
 		if (isEmpty(stationType) || isEmpty(stationCode)) {
 			throw new JPAException(
@@ -221,7 +215,6 @@ public class DataManager {
 	 * @return list of station DTOs converted from station entities
 	 * @throws JPAException
 	 */
-	@Transactional
 	public List<StationDto> getStations(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStations: {}, {}", stationType, origin);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -234,7 +227,6 @@ public class DataManager {
 		}
 	}
 
-	@Transactional
 	public Object getStationsNative(String stationType, String origin) throws JPAException {
 		LOG.debug("DataManager: getStationsNative: {}, {}", stationType, origin);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -268,7 +260,6 @@ public class DataManager {
 	/**
 	 * @return list of unique station type identifier
 	 */
-	@Transactional
 	public List<String> getStationTypes() {
 		LOG.debug("DataManager: getStationTypes");
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -284,7 +275,6 @@ public class DataManager {
 	/**
 	 * @return list of unique data type identifier
 	 */
-	@Transactional
 	public List<String> getDataTypes() {
 		LOG.debug("DataManager: getDataTypes");
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -304,7 +294,6 @@ public class DataManager {
 	 * @param stations list of data transfer objects
 	 */
 	@Deprecated
-	@Transactional
 	public void patchStations(List<StationDto> stations) {
 		LOG.debug("DataManager: patchStations (deprecated)");
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -322,7 +311,6 @@ public class DataManager {
 		}
 	}
 
-	@Transactional
 	public String addProvenance(ProvenanceDto provenance) {
 		String uuid = null;
 		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
@@ -340,7 +328,6 @@ public class DataManager {
 		return uuid;
 	}
 
-	@Transactional
 	public List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
 		List<Provenance> resultList = new ArrayList<>();
 		LOG.debug("DataManager: findProvenance: {}, {}, {}, {}", uuid, name, version, lineage);
@@ -360,7 +347,6 @@ public class DataManager {
 		return provenances;
 	}
 
-	@Transactional
 	public ResponseEntity<Object> addEvents(List<EventDto> eventDtos, URI responseLocation) {
 		LOG.debug("DataManager: addEvents: {}, List<EventDto>.size = {}", responseLocation, eventDtos.size());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -386,7 +372,6 @@ public class DataManager {
 		return what == null || what.isEmpty();
 	}
 
-	@Transactional
 	public ResponseEntity<Object> syncStationStates(
 		String stationType,
 		String origin,
