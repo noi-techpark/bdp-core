@@ -12,7 +12,8 @@ on:
 
 env:
   PROJECT_NAME: odh-mobility-writer
-  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}-app
+  DOCKER_REGISTRY_HOST: ghcr.io
+  DOCKER_IMAGE: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}-app
   DOCKER_TAG: ${{ github.sha }}
   JAVA_VERSION: '8'
 
@@ -81,6 +82,7 @@ jobs:
         with:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
+          docker-host: ${{ env.DOCKER_REGISTRY_HOST }}
 
       - name: Deploy application
         uses: noi-techpark/github-actions/docker-deploy@v2
@@ -90,6 +92,7 @@ jobs:
           docker-username: 'noi-techpark-bot'
           docker-password: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           project-name: ${{ env.PROJECT_NAME }}
+          docker-host: ${{ env.DOCKER_REGISTRY_HOST }}
 
   # Deploy Prod
   deploy-prod:
@@ -142,6 +145,7 @@ jobs:
         with:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
+          docker-host: ${{ env.DOCKER_REGISTRY_HOST }}
 
       - name: Deploy application
         uses: noi-techpark/github-actions/docker-deploy@v2
@@ -151,3 +155,4 @@ jobs:
           docker-username: 'noi-techpark-bot'
           docker-password: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           project-name: ${{ env.PROJECT_NAME }}
+          docker-host: ${{ env.DOCKER_REGISTRY_HOST }}
