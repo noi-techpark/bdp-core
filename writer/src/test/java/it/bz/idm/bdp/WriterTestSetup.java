@@ -30,14 +30,23 @@ import javax.persistence.PersistenceUnit;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.Provenance;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.writer.config.PersistenceConfig;
 
-public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
+/**
+ * Setup of the writer test cases with initial data, that will be added and
+ * removed for each test.
+ *
+ * Abstract, because we do not want to run this class itself.
+ */
+@Import(PersistenceConfig.class)
+public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 
 	@PersistenceUnit
 	private EntityManagerFactory entityManagerFactory;
@@ -53,20 +62,31 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 	protected Station station;
 	protected DataType type;
 	protected Measurement measurement;
+	protected Provenance provenance;
 
 	@Before
 	public void setup() {
+
+		// Make sure no remainders left after last run
+		cleanup();
+
 		em = entityManagerFactory.createEntityManager();
 
 		station = new Station(prefix + "Environment", prefix + "Station01", "Station One");
 		type = new DataType(prefix + "NO2", "mg", "Fake type", "Instants");
 		measurement = new Measurement(station, type, 1.11, new Date(), 500);
+		provenance = new Provenance();
+		provenance.setDataCollector("writer-integration-tests");
+		provenance.setDataCollectorVersion("0.0.0");
+		provenance.setLineage("from-the-writer-integration-tests");
+		provenance.setUuid("12345678");
 
 		try {
 			em.getTransaction().begin();
 			em.persist(station);
 			em.persist(type);
 			em.persist(measurement);
+			em.persist(provenance);
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			em.getTransaction().rollback();
@@ -78,27 +98,23 @@ public class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 		}
 	}
 
-	@Test
-	public void testDuplicates() {
-
-	}
-
 	@After
 	public void cleanup() {
 		/*
 		 * Clean the database after tests have been run. We delete everything,
 		 * that has "prefix" (see above) as natural key.
 		 */
+		em = entityManagerFactory.createEntityManager();
 		try {
 			em.getTransaction().begin();
 			em.createQuery("DELETE FROM Measurement WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM Measurement WHERE type_id IN (SELECT id FROM DataType WHERE cname LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("UPDATE Station SET meta_data_id = NULL WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
-			em.createQuery("DELETE FROM BDPRules WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM MetaData WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
 			em.createQuery("DELETE FROM Station WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
 			em.createQuery("DELETE FROM DataType WHERE cname LIKE '" + prefix + "%'").executeUpdate();
-			em.createQuery("DELETE FROM BDPRole WHERE name LIKE '" + prefix + "%'").executeUpdate();
+			em.createQuery("DELETE FROM Event WHERE provenance_id = (select id from Provenance where data_collector = 'writer-integration-tests')").executeUpdate();
+			em.createQuery("DELETE FROM Provenance WHERE data_collector = 'writer-integration-tests'").executeUpdate();
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			em.getTransaction().rollback();

@@ -39,9 +39,12 @@ import org.junit.runner.RunWith;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
@@ -55,7 +58,14 @@ import it.bz.idm.bdp.writer.DataManager;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ComponentScan(basePackages = "it.bz.idm.bdp")
 @Component
+@WebAppConfiguration
+@TestPropertySource(properties = {
+	"spring.flyway.enabled=false"
+})
 public class DataRetrievalIT extends WriterTestSetup {
+
+	@Autowired
+	DataManager dataManager;
 
 	@Test
 	public void testStationFetch() {
@@ -84,7 +94,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		StationDto s = new StationDto(prefix + "WRITER", "Some name", null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		new DataManager().syncStations(prefix + "EnvironmentStation", dtos, null, "testProvenance", "testProvenanceVersion", true); // TODO Update response location
+		dataManager.syncStations(prefix + "EnvironmentStation", dtos, null, "testProvenance", "testProvenanceVersion", true); // TODO Update response location
 	}
 
 	@Test
@@ -92,8 +102,9 @@ public class DataRetrievalIT extends WriterTestSetup {
 		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
-		new DataManager().syncDataTypes(dtos, null);
+		dataManager.syncDataTypes(dtos, null);
 	}
+
 	@Test
 	public void testAddEvents() {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
@@ -111,8 +122,11 @@ public class DataRetrievalIT extends WriterTestSetup {
 		metaData.put("test", 5);
 		t.setMetaData(metaData );
 		t.setOrigin("origin");
-		List<EventDto> dtos = new ArrayList<EventDto>();
+		t.setEventSeriesUuid(UUID.randomUUID().toString());
+		t.setName("some-event-name");
+		t.setProvenance("12345678");
+		List<EventDto> dtos = new ArrayList<>();
 		dtos.add(t);
-		new DataManager().addEvents(dtos, null);
+		dataManager.addEvents(dtos, null);
 	}
 }
