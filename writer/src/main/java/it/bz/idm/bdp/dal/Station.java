@@ -564,8 +564,21 @@ public class Station {
 			Log
 				.init(LOG, "syncStationStates")
 				.setProvenance(provenanceName, provenanceVersion)
-				.warn("Data Collector does not provide an origin");
+				.warn("Data Collector does not provide an origin, we update only the stations in the list!");
+
+			return QueryBuilder
+				.init(em)
+				.nativeQuery()
+				.addSql("update {h-schema}station s set active = true")
+				.addSql("where s.stationtype = :stationtype")
+				.addSql("and s.stationcode in :stationlist")
+				.addSql("and s.origin is null")
+				.setParameter("stationtype", stationType)
+				.setParameter("stationlist", stationCodeList)
+				.buildNative()
+				.executeUpdate();
 		}
+
 		return QueryBuilder
 			.init(em)
 			.nativeQuery()
@@ -575,7 +588,6 @@ public class Station {
 			.setParameter("stationlist", stationCodeList)
 			.setParameter("stationtype", stationType)
 			.setParameterIfNotEmpty("origin", origin, "and s.origin = :origin")
-			.addSqlIf("and s.origin is null", origin == null || origin.isEmpty())
 			.buildNative()
 			.executeUpdate();
 	}
