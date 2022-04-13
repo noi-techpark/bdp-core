@@ -199,12 +199,12 @@ public class JsonController {
 		);
 	}
 
-	@PostMapping(value = "/syncStationStates/{stationType}/{origin}")
+	@PostMapping(value = {"/syncStationStates/{stationType}", "/syncStationStates/{stationType}/{origin}"})
 	@ResponseBody
 	public ResponseEntity<Object> syncStationStates(
 		HttpServletRequest request,
 		@PathVariable String stationType,
-		@PathVariable String origin,
+		@PathVariable(required = false) String origin,
 		@RequestBody(required = true) List<String> stationCodes,
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
