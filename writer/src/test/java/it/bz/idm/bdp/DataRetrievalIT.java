@@ -50,8 +50,12 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.EventDto;
+import it.bz.idm.bdp.dto.RecordDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.writer.DataManager;
 
@@ -69,11 +73,11 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testStationFetch() {
-		Station station = Station.findStation(em, prefix + "non-existent-stationtype", prefix + "hey");
+		Station station = Station.findStation(em, PREFIX + "non-existent-stationtype", PREFIX + "hey");
 		assertNull(station);
-		List<Station> stationsWithOrigin = Station.findStations(em, prefix + "TrafficSensor", prefix + "FAMAS-traffic");
+		List<Station> stationsWithOrigin = Station.findStations(em, PREFIX + "TrafficSensor", PREFIX + "FAMAS-traffic");
 		assertNotNull(stationsWithOrigin);
-		List<Station> stations = Station.findStations(em, prefix + "TrafficSensor", null);
+		List<Station> stations = Station.findStations(em, PREFIX + "TrafficSensor", null);
 		assertNotNull(stations);
 	}
 
@@ -91,15 +95,15 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testSyncStations() {
-		StationDto s = new StationDto(prefix + "WRITER", "Some name", null, null);
+		StationDto s = new StationDto(PREFIX + "WRITER", "Some name", null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		dataManager.syncStations(prefix + "EnvironmentStation", dtos, null, "testProvenance", "testProvenanceVersion", true); // TODO Update response location
+		dataManager.syncStations(PREFIX + "EnvironmentStation", dtos, null, "testProvenance", "testProvenanceVersion", true); // TODO Update response location
 	}
 
 	@Test
 	public void testSyncDataTypes() {
-		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
+		DataTypeDto t = new DataTypeDto(PREFIX + "WRITER", null, null, null);
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
 		dataManager.syncDataTypes(dtos, null);
@@ -128,5 +132,16 @@ public class DataRetrievalIT extends WriterTestSetup {
 		List<EventDto> dtos = new ArrayList<>();
 		dtos.add(t);
 		dataManager.addEvents(dtos, null);
+	}
+
+	@Test
+	public void testDuplicateMeasurements() {
+		// List<RecordDto> dtos = new ArrayList<>();
+		// dtos.add(new SimpleRecordDto());
+
+		// DataMapDto<RecordDtoImpl> dataMap = new DataMapDto<>();
+		// dataMap.addRecords(station.getStationcode(), type.getCname(), dtos);
+
+		// dataManager.pushRecords(PREFIX + "TestStationType", null, dataMap);
 	}
 }

@@ -56,7 +56,7 @@ public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 	 * also be delete, so please careful what you set here! We add it prior
 	 * to any entity's natural key.
 	 */
-	protected static final String prefix = "--TEST--";
+	protected static final String PREFIX = "--TEST--";
 
 	protected EntityManager em;
 	protected Station station;
@@ -72,8 +72,8 @@ public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 
 		em = entityManagerFactory.createEntityManager();
 
-		station = new Station(prefix + "Environment", prefix + "Station01", "Station One");
-		type = new DataType(prefix + "NO2", "mg", "Fake type", "Instants");
+		station = new Station(PREFIX + "Environment", PREFIX + "Station01", "Station One");
+		type = new DataType(PREFIX + "NO2", "mg", "Fake type", "Instants");
 		measurement = new Measurement(station, type, 1.11, new Date(), 500);
 		provenance = new Provenance();
 		provenance.setDataCollector("writer-integration-tests");
@@ -107,12 +107,12 @@ public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 		em = entityManagerFactory.createEntityManager();
 		try {
 			em.getTransaction().begin();
-			em.createQuery("DELETE FROM Measurement WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
-			em.createQuery("DELETE FROM Measurement WHERE type_id IN (SELECT id FROM DataType WHERE cname LIKE '" + prefix + "%')").executeUpdate();
-			em.createQuery("UPDATE Station SET meta_data_id = NULL WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
-			em.createQuery("DELETE FROM MetaData WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + prefix + "%')").executeUpdate();
-			em.createQuery("DELETE FROM Station WHERE stationcode LIKE '" + prefix + "%'").executeUpdate();
-			em.createQuery("DELETE FROM DataType WHERE cname LIKE '" + prefix + "%'").executeUpdate();
+			em.createQuery("DELETE FROM Measurement WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
+			em.createQuery("DELETE FROM Measurement WHERE type_id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
+			em.createQuery("UPDATE Station SET meta_data_id = NULL WHERE stationcode LIKE '" + PREFIX + "%'").executeUpdate();
+			em.createQuery("DELETE FROM MetaData WHERE station_id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
+			em.createQuery("DELETE FROM Station WHERE stationcode LIKE '" + PREFIX + "%'").executeUpdate();
+			em.createQuery("DELETE FROM DataType WHERE cname LIKE '" + PREFIX + "%'").executeUpdate();
 			em.createQuery("DELETE FROM Event WHERE provenance_id = (select id from Provenance where data_collector = 'writer-integration-tests')").executeUpdate();
 			em.createQuery("DELETE FROM Provenance WHERE data_collector = 'writer-integration-tests'").executeUpdate();
 			em.getTransaction().commit();
