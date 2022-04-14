@@ -67,7 +67,9 @@ jobs:
           # Logging
           X_LOG_APPLICATION_NAME: "writer"
           X_LOG_APPLICATION_VERSION: ${{ github.sha }}
+          X_LOG_STYLE: "json"
           X_LOG_LEVEL: "info"
+          X_ROOT_LOG_LEVEL : "info"
           X_HIBERNATE_LOG_LEVEL: "warning"
           X_HIBERNATE_SQL_LOG: "false"
 
@@ -130,7 +132,9 @@ jobs:
           # Logging
           X_LOG_APPLICATION_NAME: "writer"
           X_LOG_APPLICATION_VERSION: ${{ github.sha }}
+          X_LOG_STYLE: "json"
           X_LOG_LEVEL: "info"
+          X_ROOT_LOG_LEVEL : "info"
           X_HIBERNATE_LOG_LEVEL: "warning"
           X_HIBERNATE_SQL_LOG: "false"
 
