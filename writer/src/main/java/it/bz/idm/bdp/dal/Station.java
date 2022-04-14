@@ -563,7 +563,7 @@ public class Station {
 		String provenanceVersion,
 		boolean onlyActivation
 	) {
-		if (origin == null || origin.isEmpty()) {
+		if (!onlyActivation && (origin == null || origin.isEmpty())) {
 			Log
 				.init(LOG, "syncStationStates")
 				.setProvenance(provenanceName, provenanceVersion)
@@ -578,7 +578,8 @@ public class Station {
 				.addSql("update {h-schema}station s set active = true")
 				.addSql("where s.stationtype = :stationtype")
 				.addSql("and s.stationcode in :stationlist")
-				.addSql("and s.origin is null")
+				.addSqlIf("and s.origin is null", origin == null || origin.isEmpty())
+				.setParameterIfNotEmpty("origin", origin, "and s.origin = :origin")
 				.setParameter("stationtype", stationType)
 				.setParameter("stationlist", stationCodeList)
 				.buildNative()
