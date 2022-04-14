@@ -395,7 +395,8 @@ public class Station {
 		List<StationDto> data,
 		String provenanceName,
 		String provenanceVersion,
-		boolean syncState
+		boolean syncState,
+		boolean onlyActivation
 	) {
 		if (data == null || data.isEmpty()) {
 			return;
@@ -422,7 +423,7 @@ public class Station {
 		if (syncState) {
 			String origin = data.get(0).getOrigin();
 			em.getTransaction().begin();
-			syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion);
+			syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion, onlyActivation);
 			em.getTransaction().commit();
 		}
 	}
@@ -551,6 +552,7 @@ public class Station {
 	 * 							for compatibility reasons with past versions)
 	 * @param stationCodeList   active station IDs, provided by the corresponding
 	 * 							data-collector
+	 * @param onlyActivation    Do not set other stations in the category to inactive
 	 */
 	public static int syncStationStates(
 		EntityManager em,
@@ -558,14 +560,18 @@ public class Station {
 		String origin,
 		List<String> stationCodeList,
 		String provenanceName,
-		String provenanceVersion
+		String provenanceVersion,
+		boolean onlyActivation
 	) {
 		if (origin == null || origin.isEmpty()) {
 			Log
 				.init(LOG, "syncStationStates")
 				.setProvenance(provenanceName, provenanceVersion)
 				.warn("Data Collector does not provide an origin, we update only the stations in the list!");
+			onlyActivation = true;
+		}
 
+		if (onlyActivation) {
 			return QueryBuilder
 				.init(em)
 				.nativeQuery()

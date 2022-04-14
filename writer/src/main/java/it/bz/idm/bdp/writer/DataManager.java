@@ -107,7 +107,8 @@ public class DataManager {
 		URI responseLocation,
 		String provenanceName,
 		String provenanceVersion,
-		boolean syncState
+		boolean syncState,
+		boolean onlyActivation
 	) {
 		LOG.debug(
 			"[{}/{}] DataManager: syncStations: {}, {}, List<StationDto>.size = {}",
@@ -119,7 +120,7 @@ public class DataManager {
 		);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
-			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState);
+			Station.syncStations(entityManager, stationType, dtos, provenanceName, provenanceVersion, syncState, onlyActivation);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		} finally {
@@ -375,7 +376,8 @@ public class DataManager {
 		List<String> stationCodeList,
 		URI uriMapping,
 		String provenanceName,
-		String provenanceVersion
+		String provenanceVersion,
+		boolean onlyActivation
 	) {
 		LOG.debug("DataManager: syncStationStates: {}, {}", stationType, origin);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -387,7 +389,8 @@ public class DataManager {
 				origin,
 				stationCodeList,
 				provenanceName,
-				provenanceVersion
+				provenanceVersion,
+				onlyActivation
 			);
 			entityManager.getTransaction().commit();
 			LOG.debug("DataManager: syncStationStates: {} records updated", updatedRecords);

@@ -94,7 +94,15 @@ public class DataRetrievalIT extends WriterTestSetup {
 		StationDto s = new StationDto(prefix + "WRITER", "Some name", null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		dataManager.syncStations(prefix + "EnvironmentStation", dtos, null, "testProvenance", "testProvenanceVersion", true); // TODO Update response location
+		dataManager.syncStations(
+			prefix + "EnvironmentStation",
+			dtos,
+			null,
+			"testProvenance",
+			"testProvenanceVersion",
+			true,
+			false
+		); // TODO Update response location
 	}
 
 	@Test
@@ -107,7 +115,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testAddEvents() {
-        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+		GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 		EventDto t = new EventDto();
 		t.setUuid(UUID.randomUUID().toString());
@@ -120,7 +128,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		t.setLocationDescription("Fake location");
 		Map<String, Object> metaData = new HashMap<>();
 		metaData.put("test", 5);
-		t.setMetaData(metaData );
+		t.setMetaData(metaData);
 		t.setOrigin("origin");
 		t.setEventSeriesUuid(UUID.randomUUID().toString());
 		t.setName("some-event-name");

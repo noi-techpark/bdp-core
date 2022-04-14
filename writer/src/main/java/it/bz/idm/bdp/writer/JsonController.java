@@ -187,7 +187,8 @@ public class JsonController {
 		@RequestBody(required = true) List<StationDto> stationDtos,
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion,
-		@RequestParam(value = "syncState", required = false, defaultValue = "true") Boolean syncState
+		@RequestParam(value = "syncState", required = false, defaultValue = "true") Boolean syncState,
+		@RequestParam(value = "onlyActivation", required = false, defaultValue = "false") Boolean onlyActivation
 	) {
 		return dataManager.syncStations(
 			stationType,
@@ -195,7 +196,8 @@ public class JsonController {
 			getURIMapping("/stations/{stationType}", stationType),
 			provenanceName,
 			provenanceVersion,
-			syncState
+			syncState,
+			onlyActivation
 		);
 	}
 
@@ -207,7 +209,8 @@ public class JsonController {
 		@PathVariable(required = false) String origin,
 		@RequestBody(required = true) List<String> stationCodes,
 		@RequestParam(value = "prn", required = false) String provenanceName,
-		@RequestParam(value = "prv", required = false) String provenanceVersion
+		@RequestParam(value = "prv", required = false) String provenanceVersion,
+		@RequestParam(value = "onlyActivation", required = false, defaultValue = "false") Boolean onlyActivation
 	) {
 		return dataManager.syncStationStates(
 			stationType,
@@ -215,7 +218,8 @@ public class JsonController {
 			stationCodes,
 			getURIMapping("/stations/{stationType}/{origin}", stationType, origin),
 			provenanceName,
-			provenanceVersion
+			provenanceVersion,
+			onlyActivation
 		);
 	}
 
