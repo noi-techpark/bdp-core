@@ -160,6 +160,9 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			"NonBlockingJSONPusher/syncStation: Pushing {} stations to the writer",
 			stations.size()
 		);
+
+		this.pushProvenance();
+
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
@@ -260,6 +263,9 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			"NonBlockingJSONPusher/syncStationStates: Syncronizing {} station states (active flag)",
 			stationCodes.size()
 		);
+
+		this.pushProvenance();
+
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
@@ -292,6 +298,9 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			"NonBlockingJSONPusher/syncDataTypes: Pushing {} data types to the writer",
 			data.size()
 		);
+
+		this.pushProvenance();
+
         return client
 			.post()
 			.uri(uriBuilder -> uriBuilder
@@ -337,11 +346,6 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.retrieve()
 			.bodyToMono(Date.class)
 			.block();
-    }
-
-    @Override
-    public void connectToDataCenterCollector() {
-        // TODO authentification to writer
     }
 
     @Override
