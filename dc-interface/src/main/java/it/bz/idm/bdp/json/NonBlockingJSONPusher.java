@@ -377,6 +377,11 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.block();
     }
 
+	@Override
+	public void connectToDataCenterCollector() {
+        // TODO authentification to writer
+    }
+
     @Override
     public List<StationDto> fetchStations(String stationType, String origin) {
 		LOG.info(
