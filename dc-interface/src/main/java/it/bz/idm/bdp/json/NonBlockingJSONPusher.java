@@ -131,20 +131,38 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
         return pushData(this.integreenTypology, dto);
     }
 
-    public Object syncStations(StationList data) {
-        return this.syncStations(this.integreenTypology, data, STATION_CHUNK_SIZE);
-    }
-
-    public Object syncStations(StationList data, int chunkSize) {
-        return this.syncStations(this.integreenTypology, data, chunkSize);
-    }
-
+	/** syncStations with stationType */
 	@Override
-    public Object syncStations(String stationType, StationList stations) {
-		return syncStationsImpl(stationType, stations, true, false);
+	public Object syncStations(String stationType, StationList stations) {
+		return syncStationSingleChunk(stationType, stations, true, false);
+	}
+	@Override
+	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
+		return syncStationMultiChunk(stationType, stations, chunkSize, true, false);
+	}
+	public List<Object> syncStations(String stationType, StationList stations, boolean syncState, boolean onlyActivation) {
+		return syncStationMultiChunk(stationType, stations, STATION_CHUNK_SIZE, syncState, onlyActivation);
+	}
+	@Override
+	public List<Object> syncStations(String stationType, StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
+		return syncStationMultiChunk(stationType, stations, chunkSize, syncState, onlyActivation);
 	}
 
-    private Object syncStationsImpl(String stationType, StationList stations, boolean syncState, boolean onlyActivation) {
+	/** syncStations without stationType */
+    public Object syncStations(StationList stations) {
+        return syncStationMultiChunk(this.integreenTypology, stations, STATION_CHUNK_SIZE, true, false);
+    }
+    public Object syncStations(StationList stations, int chunkSize) {
+        return syncStationMultiChunk(this.integreenTypology, stations, chunkSize, true, false);
+    }
+	public Object syncStations(StationList stations, boolean syncState, boolean onlyActivation) {
+		return syncStationMultiChunk(this.integreenTypology, stations, STATION_CHUNK_SIZE, syncState, onlyActivation);
+    }
+	public Object syncStations(StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
+		return syncStationMultiChunk(this.integreenTypology, stations, chunkSize, syncState, onlyActivation);
+	}
+
+    private Object syncStationSingleChunk(String stationType, StationList stations, boolean syncState, boolean onlyActivation) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
 			v("parameters",
@@ -181,13 +199,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.block();
     }
 
-	@Override
-	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
-		return syncStations(stationType, stations, chunkSize, true, false);
-	}
-
-	@Override
-	public List<Object> syncStations(String stationType, StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
+	private List<Object> syncStationMultiChunk(String stationType, StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
 			v("parameters",
@@ -245,7 +257,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 			// Do not sync states, since we need to do this once for all and not for each chunk
 			// otherwise the last chunk would set all other stations for that station type to inactive.
-			results.add(syncStationsImpl(stationType, stationChunk, false, onlyActivation));
+			results.add(syncStationSingleChunk(stationType, stationChunk, false, onlyActivation));
 		}
 		LOG.info("NonBlockingJSONPusher/syncStation: READY!");
 
