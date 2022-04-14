@@ -141,10 +141,10 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 	@Override
     public Object syncStations(String stationType, StationList stations) {
-		return syncStationsImpl(stationType, stations, true);
+		return syncStationsImpl(stationType, stations, true, false);
 	}
 
-    private Object syncStationsImpl(String stationType, StationList stations, boolean syncState) {
+    private Object syncStationsImpl(String stationType, StationList stations, boolean syncState, boolean onlyActivation) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
 			v("parameters",
@@ -169,7 +169,8 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 				.path(SYNC_STATIONS + stationType)
 				.queryParams(
 					createParams(
-						"syncState", syncState
+						"syncState", syncState,
+						"onlyActivation", onlyActivation
 					)
 				)
 				.build()
@@ -182,6 +183,11 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 	@Override
 	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
+		return syncStations(stationType, stations, chunkSize, true, false);
+	}
+
+	@Override
+	public List<Object> syncStations(String stationType, StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStations",
 			v("parameters",
@@ -198,13 +204,15 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		}
 
 		/* Syncronize station states, that is, set the active flag to true or false */
-		List<String> stationCodes = new ArrayList<>();
-		for (StationDto station : stations) {
-			if (stationCodes.contains(station.getId()))
-				continue;
-			stationCodes.add(station.getId());
+		if (syncState) {
+			List<String> stationCodes = new ArrayList<>();
+			for (StationDto station : stations) {
+				if (stationCodes.contains(station.getId()))
+					continue;
+				stationCodes.add(station.getId());
+			}
+			syncStationStates(stationType, stations.get(0).getOrigin(), stationCodes, onlyActivation);
 		}
-		syncStationStates(stationType, stations.get(0).getOrigin(), stationCodes);
 
 		if (chunkSize <= 0)
 			chunkSize = STATION_CHUNK_SIZE;
@@ -237,14 +245,19 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 			// Do not sync states, since we need to do this once for all and not for each chunk
 			// otherwise the last chunk would set all other stations for that station type to inactive.
-			results.add(syncStationsImpl(stationType, stationChunk, false));
+			results.add(syncStationsImpl(stationType, stationChunk, false, onlyActivation));
 		}
 		LOG.info("NonBlockingJSONPusher/syncStation: READY!");
 
 		return results;
 	}
 
-	public Object syncStationStates(String stationType, String origin, List<String> stationCodes) {
+	public Object syncStationStates(
+		String stationType,
+		String origin,
+		List<String> stationCodes,
+		boolean onlyActivation
+	) {
 		LOG.info(
 			"NonBlockingJSONPusher/syncStationStates",
 			v("parameters",
@@ -270,7 +283,11 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 			.post()
 			.uri(uriBuilder -> uriBuilder
 				.pathSegment(SYNC_STATION_STATES, stationType, origin)
-				.queryParams(createParams())
+				.queryParams(
+					createParams(
+						"onlyActivation", onlyActivation
+					)
+				)
 				.build()
 			)
 			.body(Mono.just(stationCodes), Object.class)
