@@ -18,7 +18,11 @@
         </encoder>
     </appender>
 
-	<root level="${LOG_LEVEL:-INFO}">
+	<logger level="${LOG_LEVEL:-INFO}" name="it.bz" additivity="false">
+		<appender-ref ref="${LOG_STYLE:-text}" />
+	</logger>
+
+	<root level="${ROOT_LOG_LEVEL:-INFO}" additivity="false">
 		<appender-ref ref="${LOG_STYLE:-text}"/>
 	</root>
 
