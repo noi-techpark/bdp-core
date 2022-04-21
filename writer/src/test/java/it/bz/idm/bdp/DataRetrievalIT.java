@@ -41,6 +41,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -94,7 +96,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		StationDto s = new StationDto(prefix + "WRITER", "Some name", null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
-		dataManager.syncStations(
+		ResponseEntity<Object> result = dataManager.syncStations(
 			prefix + "EnvironmentStation",
 			dtos,
 			null,
@@ -102,7 +104,8 @@ public class DataRetrievalIT extends WriterTestSetup {
 			"testProvenanceVersion",
 			true,
 			false
-		); // TODO Update response location
+		);
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 
 	@Test
@@ -110,7 +113,8 @@ public class DataRetrievalIT extends WriterTestSetup {
 		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
-		dataManager.syncDataTypes(dtos, null);
+		ResponseEntity<Object> result = dataManager.syncDataTypes(dtos, null);
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 
 	@Test
@@ -135,6 +139,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 		t.setProvenance("12345678");
 		List<EventDto> dtos = new ArrayList<>();
 		dtos.add(t);
-		dataManager.addEvents(dtos, null);
+		ResponseEntity<Object> result = dataManager.addEvents(dtos, null);
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 }
