@@ -178,25 +178,26 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                 }
                 for(Entry<String,DataMapDto<RecordDtoImpl>> typeEntry : stationEntry.getValue().getBranch().entrySet()) {
                     try {
-                        DataType type = DataType.findByCname(em, typeEntry.getKey());
-                        if (type == null) {
+						DataType type = DataType.findByCname(em, typeEntry.getKey());
+						if (type == null) {
 							log.warn(String.format("Type '%s' not found. Skipping...", typeEntry.getKey()));
 							continue;
-                        }
+						}
                         List<? extends RecordDtoImpl> dataRecords = typeEntry.getValue().getData();
                         if (dataRecords.isEmpty()) {
 							log.warn("Empty data set. Skipping...");
                             continue;
                         }
 
+						//TODO: remove period check once it gets removed from database
+						Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
+						if (period == null){
+							log.warn("No period specified. Skipping...");
+							continue;
+						}
+
 						em.getTransaction().begin();
 
-                        //TODO: remove period check once it gets removed from database
-                        Integer period = ((SimpleRecordDto) dataRecords.get(0)).getPeriod();
-                        if (period == null){
-                            log.warn("No period specified. Skipping...");
-                            continue;
-                        }
                         MeasurementAbstract latestNumberMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, Measurement.class);
                         long latestNumberMeasurementTime = (latestNumberMeasurement != null) ? latestNumberMeasurement.getTimestamp().getTime() : 0;
                         MeasurementAbstract latestStringMeasurement = MeasurementAbstract.findLatestEntry(em, station, type, period, MeasurementString.class);
@@ -207,6 +208,9 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         SimpleRecordDto newestStringDto = null;
                         SimpleRecordDto newestNumberDto = null;
                         SimpleRecordDto newestJsonDto = null;
+
+						List<String> dupList = new ArrayList<>();
+
                         for (RecordDtoImpl recordDto : dataRecords) {
 
                             /*
@@ -222,6 +226,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             if (valueObj instanceof Number) {
 								if (latestNumberMeasurementTime < dateOfMeasurement) {
                                     Double value = ((Number)valueObj).doubleValue();
+									if (isDuplicate(log, dupList, station, type, simpleRecordDto.getPeriod(), "NUMBER", dateOfMeasurement, value))
+										continue;
                                     MeasurementHistory rec = new MeasurementHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
                                     rec.setProvenance(provenance);
                                     em.persist(rec);
@@ -232,6 +238,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             } else if (valueObj instanceof String) {
                                 if (latestStringMeasurementTime < dateOfMeasurement) {
                                     String value = (String) valueObj;
+									if (isDuplicate(log, dupList, station, type, simpleRecordDto.getPeriod(), "STRING", dateOfMeasurement, value))
+										continue;
                                     MeasurementStringHistory rec = new MeasurementStringHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
                                     rec.setProvenance(provenance);
                                     em.persist(rec);
@@ -243,6 +251,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                 if (latestJSONMeasurementTime < dateOfMeasurement) {
 									@SuppressWarnings("unchecked")
                                     Map<String,Object> value = (Map<String,Object>) valueObj;
+									if (isDuplicate(log, dupList, station, type, simpleRecordDto.getPeriod(), "JSON", dateOfMeasurement, value))
+										continue;
                                     MeasurementJSONHistory rec = new MeasurementJSONHistory(station, type, value, new Date(dateOfMeasurement), simpleRecordDto.getPeriod());
                                     rec.setProvenance(provenance);
                                     em.persist(rec);
@@ -325,6 +335,27 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                 em.close();
         }
     }
+
+	private static boolean isDuplicate(Log log, List<String> dupList, Station station, DataType type, long period, String measurementType, long timestamp, Object value) {
+		String dupCheck = measurementType + timestamp + value.hashCode();
+		if (dupList.contains(dupCheck)) {
+			log.warn(
+				String.format(
+					"Measurement duplicate of type %s found in list, skipping! (stationtype, stationcode, cname, period, timestamp, double_value) = (%s, %s, %s, %d, %d, %s) ",
+					measurementType,
+					station.getStationtype(),
+					station.getStationcode(),
+					type.getCname(),
+					period,
+					timestamp,
+					value.toString()
+				)
+			);
+			return true;
+		}
+		dupList.add(dupCheck);
+		return false;
+	}
 
     private static List<RecordDto> castToDtos(List<MeasurementAbstractHistory> result, boolean setPeriod) {
         List<RecordDto> dtos = new ArrayList<>();

@@ -31,7 +31,7 @@
            <property name="hibernate.hikari.dataSource.user" value="bdp"/>
            <property name="hibernate.hikari.dataSource.password" value='password'/>
            <property name="hibernate.id.new_generator_mappings" value="true"/>
-           <property name="hibernate.show_sql" value="true"/>
+           <property name="hibernate.show_sql" value="false"/>
            <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
            <property name="hibernate.implicit_naming_strategy" value="it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
 		   <property name="hibernate.cache.use_second_level_cache" value="true"/>

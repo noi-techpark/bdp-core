@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.collections.map.SingletonMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,10 +52,12 @@ import it.bz.idm.bdp.dal.DataType;
 import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
 import it.bz.idm.bdp.dal.Station;
+import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
 import it.bz.idm.bdp.dto.EventDto;
+import it.bz.idm.bdp.dto.RecordDtoImpl;
+import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
-import it.bz.idm.bdp.writer.DataManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ComponentScan(basePackages = "it.bz.idm.bdp")
@@ -66,16 +68,13 @@ import it.bz.idm.bdp.writer.DataManager;
 })
 public class DataRetrievalIT extends WriterTestSetup {
 
-	@Autowired
-	DataManager dataManager;
-
 	@Test
 	public void testStationFetch() {
-		Station station = Station.findStation(em, prefix + "non-existent-stationtype", prefix + "hey");
+		Station station = Station.findStation(em, PREFIX + "non-existent-stationtype", PREFIX + "hey");
 		assertNull(station);
-		List<Station> stationsWithOrigin = Station.findStations(em, prefix + "TrafficSensor", prefix + "FAMAS-traffic");
+		List<Station> stationsWithOrigin = Station.findStations(em, PREFIX + "TrafficSensor", PREFIX + "FAMAS-traffic");
 		assertNotNull(stationsWithOrigin);
-		List<Station> stations = Station.findStations(em, prefix + "TrafficSensor", null);
+		List<Station> stations = Station.findStations(em, PREFIX + "TrafficSensor", null);
 		assertNotNull(stations);
 	}
 
@@ -93,11 +92,11 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testSyncStations() {
-		StationDto s = new StationDto(prefix + "WRITER", "Some name", null, null);
+		StationDto s = new StationDto(PREFIX + "WRITER", "Some name", null, null);
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
 		ResponseEntity<Object> result = dataManager.syncStations(
-			prefix + "EnvironmentStation",
+			PREFIX + "EnvironmentStation",
 			dtos,
 			null,
 			"testProvenance",
@@ -110,7 +109,7 @@ public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testSyncDataTypes() {
-		DataTypeDto t = new DataTypeDto(prefix + "WRITER", null, null, null);
+		DataTypeDto t = new DataTypeDto(PREFIX + "WRITER", null, null, null);
 		List<DataTypeDto> dtos = new ArrayList<DataTypeDto>();
 		dtos.add(t);
 		ResponseEntity<Object> result = dataManager.syncDataTypes(dtos, null);
@@ -142,4 +141,50 @@ public class DataRetrievalIT extends WriterTestSetup {
 		ResponseEntity<Object> result = dataManager.addEvents(dtos, null);
 		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
+
+	@Test
+	public void testDuplicateStations() {
+		List<StationDto> dtos = new ArrayList<StationDto>();
+		dtos.add(new StationDto(PREFIX + "WRITER", "Some name 1", null, null));
+		dtos.add(new StationDto(PREFIX + "WRITER", "Some name 1", null, null));
+		dtos.add(new StationDto(PREFIX + "WRITER", "Some name 2", null, null));
+		ResponseEntity<Object> result = dataManager.syncStations(
+			STATION_TYPE,
+			dtos,
+			null,
+			"testProvenance",
+			"testProvenanceVersion",
+			true,
+			false
+		);
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
+	}
+
+	@Test
+	public void testDuplicateMeasurements() {
+		List<RecordDtoImpl> values = new ArrayList<>();
+		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(), measurementOld.getPeriod()));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime(), measurement.getValue(), measurement.getPeriod()));
+		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(), measurementOld.getPeriod()));
+
+		// Number measurements newer as the latest entry
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, 3.33, 1800));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, 3.33, 1800));
+
+		// String measurements newer as the latest entry
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, "abc", 1800));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, "abc", 1800));
+
+		// JSON measurements newer as the latest entry
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, new SingletonMap("a", 1), 1800));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, new SingletonMap("a", 1), 1800));
+
+		ResponseEntity<Object> result = dataManager.pushRecords(
+			STATION_TYPE,
+			null,
+			DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values)
+		);
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
+	}
+
 }

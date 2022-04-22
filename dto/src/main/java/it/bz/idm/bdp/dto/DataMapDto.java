@@ -158,4 +158,13 @@ public class DataMapDto <X extends RecordDtoImpl> implements Serializable{
 	public void setProvenance(String provenanceUuid) {
 		this.provenance = provenanceUuid;
 	}
+
+	public static DataMapDto<RecordDtoImpl> build(String provenanceUuid, String stationCode, String dataType, List<RecordDtoImpl> values) {
+		DataMapDto<RecordDtoImpl> rootMap = new DataMapDto<>();
+		rootMap.setProvenance(provenanceUuid);
+		DataMapDto<RecordDtoImpl> stationMap = rootMap.upsertBranch(stationCode);
+		DataMapDto<RecordDtoImpl> metricMap = stationMap.upsertBranch(dataType);
+		metricMap.getData().addAll(values);
+		return rootMap;
+	}
 }

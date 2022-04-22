@@ -408,8 +408,18 @@ public class Station {
 				dto.setStationType(stationType);
 			}
 			if (dto.isValid()) {
-				sync(em, dto);
-				stationCodes.add(dto.getId());
+				if (stationCodes.contains(dto.getId())) {
+					LOG.warn(
+						"[{}/{}] Station with ID {} already in syncStation list... skipping!",
+						provenanceName,
+						provenanceVersion,
+						dto.getId(),
+						v("StationDto", dto)
+					);
+				} else {
+					sync(em, dto);
+					stationCodes.add(dto.getId());
+				}
 			} else {
 				LOG.warn(
 					"[{}/{}] Invalid JSON for StationDto: {}",
