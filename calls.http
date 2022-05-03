@@ -7,11 +7,9 @@
 POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=password
-&username={{$dotenv AUTH_TEST_USERNAME}}
-&password={{$dotenv AUTH_TEST_PASSWORD}}
-&client_id=odh-mobility-datacollector-test
-&client_secret={{$dotenv AUTH_TEST_CLIENT_SECRET}}
+grant_type=client_credentials
+&client_id=odh-mobility-datacollector-development
+&client_secret=7bd46f8f-c296-416d-a13d-dc81e68d0830
 
 ### Get access token for the writer (PROD)
 # @name login

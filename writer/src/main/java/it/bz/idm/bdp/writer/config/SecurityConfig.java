@@ -44,8 +44,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		http.csrf().disable()
 			.authorizeRequests()
 			.mvcMatchers("/actuator/**").permitAll()
-			.mvcMatchers("/json/**").authenticated()
-			.and()
-			.authorizeRequests().anyRequest().permitAll();
+			.mvcMatchers("/json/**")
+				.hasRole("ADMIN")
+				.anyRequest().permitAll();
 	}
 }

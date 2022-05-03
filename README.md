@@ -22,8 +22,10 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 - [Big Data Platform](#big-data-platform)
   - [CORE](#core)
     - [WRITER](#writer)
+      - [Data Collector Development with Docker](#data-collector-development-with-docker)
       - [Authentication](#authentication)
       - [DAL](#dal)
+        - [Configuration of the database connection](#configuration-of-the-database-connection)
         - [Station](#station)
         - [DataType](#datatype)
         - [Record](#record)
@@ -47,30 +49,83 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 
 ## CORE
 
-The core of the platform contains all the business logic which handles
-connections to the database, to the data collectors which provide the data and
-to the web services which serve the data.
+The core of the platform contains the business logic of an **INBOUND** API which
+handles connections to the database and provides an API for data collectors (see
+[writer](#writer)), in form of a REST interface and a Java SDK (see
+[dc-interface](#dc-interface)).
 
-The core provides two components, the `writer`, that writes data to the database
-and `reader`, that exposes REST APIs for web services. The new version of the
-`reader` is called `ninja`, which is stored in another repository. Have a look
-at the [Ninja
-README.md](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja/blob/main/README.md)
-for details.
+Finally, [dto](#dto) which is a library containinig all *Data Transfer Objects*
+used by the `writer` and `dc-interface` to exchange data in a standardized
+format.
+
+The **OUTBOUND** API is called
+[Ninja](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja).
 
 ### WRITER
 The writer is a REST API, which takes JSON DTOs, deserializes and validates them
 and finally stores them in the database. Additionally, it sets stations to
 active/inactive according to their presence inside the provided data. The writer
 itself implements the methods to write data and is therefore the endpoint for
-all data collectors. It uses the persistence-unit of the DAL which has full
-permissions on the database.
+all data collectors. It uses the persistence-unit of the
+[DAL](/writer/src/main/java/it/bz/idm/bdp/dal) which has full permissions on the
+database.
 
 The full API description can be found inside
 [JsonController.java](writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
 
-Finally, we provide an interface to facilitate data collector development under
-Java. See the next chapter for more details.
+#### Data Collector Development with Docker
+
+If you want to develop a data collector or simply test the INBOUND writer API,
+the easiest way to get started is to start a docker container. In the root
+folder of this repository:
+
+1) Copy `.env.example` to `.env`
+2) Run `docker-compose up -d`
+3) You can follow logs with `docker-compose logs -f`
+
+Now you have a Postgres instance running on port 5555 and the API on port 8999.
+
+Lets test Postgres first:
+
+1) Login to the DB
+    a) with Docker, do:
+     ```
+     $ docker-compose exec db bash
+     bash-5.1# psql -U bdp bdp
+     ```
+    b) natively, do:
+     ```
+     PGPASSWORD=password psql -h localhost -p 5555 -U bdp bdp
+     ```
+2) Test the installation as follows:
+```
+bdp=# set search_path to intimev2;
+bdp=# \dt
+
+                  List of relations
+  Schema  |           Name           | Type  | Owner
+----------+--------------------------+-------+-------
+ intimev2 | edge                     | table | bdp
+ intimev2 | event                    | table | bdp
+ intimev2 | flyway_schema_history    | table | bdp
+ intimev2 | location                 | table | bdp
+ intimev2 | measurement              | table | bdp
+ intimev2 | measurementhistory       | table | bdp
+ intimev2 | measurementjson          | table | bdp
+ intimev2 | measurementjsonhistory   | table | bdp
+ intimev2 | measurementstring        | table | bdp
+ intimev2 | measurementstringhistory | table | bdp
+ intimev2 | metadata                 | table | bdp
+ intimev2 | provenance               | table | bdp
+ intimev2 | station                  | table | bdp
+ intimev2 | type                     | table | bdp
+ intimev2 | type_metadata            | table | bdp
+(15 rows)
+```
+... if you see a similar output as above, then you are set!
+
+Now, lets test the writer API:
+
 
 #### Authentication
 We use Keycloak to authenticate. That service provides an `access_token` that
@@ -80,33 +135,33 @@ Howto](https://opendatahub.readthedocs.io/en/latest/guidelines/authentication.ht
 for further details.
 
 ```sh
-curl -X POST -L "https://auth.opendatahub.bz.it/auth/realms/noi/protocol/openid-connect/token" \
+curl -X POST -L "https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token" \
     --header 'Content-Type: application/x-www-form-urlencoded' \
-    --data-urlencode 'grant_type=password' \
-    --data-urlencode 'username=my_username' \
-    --data-urlencode 'password=my_password' \
-    --data-urlencode 'client_id=odh-mobility-datacollector' \
-    --data-urlencode 'client_secret=the_client_secret'
+    --data-urlencode 'grant_type=client_credentials' \
+    --data-urlencode 'client_id=odh-mobility-datacollector-development' \
+    --data-urlencode 'client_secret=7bd46f8f-c296-416d-a13d-dc81e68d0830'
 ```
 
 With this call you get an `access_token` that can then be used as follows in all
 writer API methods. Here just an example to get all stations:
 
 ```sh
-curl -X GET "https://share.mobility.api.opendatahub.bz.it/json/stations" \
+curl -X GET "http://localhost:8999/json/stations" \
     --header 'Content-Type: application/json' \
     --header 'Authorization: bearer your-access-token'
 ```
 
+You should get an empty JSON list as result.
+
 Write an email to `help@opendatahub.bz.it`, if you want to get the `client_secret`
-and an Open Data Hub OAuth2 account.
+and an Open Data Hub OAuth2 account for a non-development setup.
 
 #### DAL
 
-DAL is the layer which communicates with the DB underneath used by the so called
-reader and writer modules. The communication is handled through the ORM
-Hibernate and its spatial component for geometries. The whole module got
-developed using PostgreSQL as database and Postgis as an extension.
+DAL is the *Data Access Layer* which communicates with the DB underneath used by
+the writer modules. The communication is handled through the ORM Hibernate and
+its spatial component for geometries. The whole module got developed using
+PostgreSQL as database and Postgis as an extension.
 
 Connection pooling is handled by
 [HikariCP](https://github.com/brettwooldridge/HikariCP) for high speed
@@ -116,28 +171,36 @@ In some cases geometry transformations and elaborations were needed to be
 executed on application level and therefore [Geotools](http://www.geotools.org/)
 was added as dependency.
 
+##### Configuration of the database connection
+
 To configure the DAL module to communicate with your database you need to
-provide configuration and credentials:
->`writer/src/main/resources/META-INF/persistence.xml`
+provide configuration and credentials inside
+> `writer/src/main/resources/application.properties`
 
-As you will see 2 persistence-units are configured. One is meant for the reader
-with preferably a read-only user and the other one for the writer which performs
-all the transactions.
+Default can be found at:
 
-We use a separate tool to generate the schema inside the database. See
-`tools/README.md` for further details. The latest schema can always be found
-within `dal/src/main/resources/META-INF/sql` with the name
-`schema-<version>-dump.sql` and `schema-<version>-modifications.sql`. Execute
-both scripts in that order.
+> `writer/src/main/resources/META-INF/persistence.xml`
+
+Please note, values inside the `application.properties` file, overwrite values
+inside `persistence.xml`.
+
+We use a [schema-generator](infrastructure/utils/schema-generator/README.md) to
+generate the schema for the database. After that you can manually check what the
+difference between that schema and the old one is and provide a new flyway
+script inside `writer/src/main/resources/db/migration`.
 
 Hibernate, our object-relational-mapping (ORM) framework, handles the schema
-validation only (for security reasons).
-> hibernate.hbm2ddl.auto = `validate`
+validation only (for security reasons). Usually, we set the value
+`hibernate.hbm2ddl.auto = validate` during development and
+`hibernate.hbm2ddl.auto = none` at runtime for performance reasons on startup.
 
 See the [Installation guide](#installation-guide) for a fast initial setup.
 
-The following chapters describe the most important entities: `station`, `data
-type`, `record` and `edge`.
+The following chapters describe the most important DAL entities:
+- `station`
+- `data type`
+- `record`
+- `edge`
 
 ##### Station
 The `station` represents the origin of the data which needs an identifier, a
@@ -190,16 +253,14 @@ description of the edge.
 > passed it.
 
 If you need more information about specific entities or classes, try to use the
-javadoc or source code inside [DAL](dal).
+javadoc or source code inside [DAL](writer/src/main/java/it/bz/idm/bdp/dal).
 
 ### DTO
 Data transfer objects (DTOs) are used to define the structure of the data
-exchange. They are used between data provider and data persister (`writer`), but
-also between data dispatcher and data reader (`reader`). They consist of fields
-which are all primitives and easily serializable. The [DTO](dto) module is a
-java library contained in all modules of the big data platform, simply because
-it defines the communication structure in between.
-
+exchange. They are used between data provider and data persister (`writer`).
+They consist of fields which are all primitives and easily serializable. The
+[DTO](dto) module is a java library contained in all modules of the big data
+platform, simply because it defines the communication structure in between.
 
 The following chapters describe the most used DTOs.
 

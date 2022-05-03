@@ -10,6 +10,8 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javassist.NotFoundException;
+
 public class PropertiesWithEnv extends Properties {
 
 	private static final Logger LOG = LoggerFactory.getLogger(
@@ -26,7 +28,7 @@ public class PropertiesWithEnv extends Properties {
 
 	public static PropertiesWithEnv fromActiveSpringProfile() throws IOException {
 		String profile = System.getProperty("spring.profiles.active");
-		if (profile == null) {
+		if (profile == null || profile.trim().isEmpty()) {
 			LOG.debug("Loading properties from the default profile");
 			profile = "";
 		} else {
@@ -35,11 +37,14 @@ public class PropertiesWithEnv extends Properties {
 			);
 			profile = "-" + profile;
 		}
+		String filename = "application" + profile + ".properties";
 		PropertiesWithEnv properties = new PropertiesWithEnv();
-		properties.load(
-			PropertiesWithEnv.class.getClassLoader()
-				.getResourceAsStream("application" + profile + ".properties")
-		);
+		InputStream resourceAsStream = PropertiesWithEnv.class.getClassLoader()
+			.getResourceAsStream(filename);
+		if (resourceAsStream == null) {
+			throw new IOException("Loading properties failed: Unable to find " + filename);
+		}
+		properties.load(resourceAsStream);
 		return properties;
 	}
 

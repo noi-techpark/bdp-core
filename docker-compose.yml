@@ -1,9 +1,30 @@
 version: "3.4"
 services:
+  requirements:
+    image: maven:3-jdk-8-alpine
+    env_file:
+      - .env
+    environment:
+      MAVEN_CONFIG: /var/maven/.m2
+    command: >
+      mvn
+        -Duser.home=/var/maven
+        --also-make
+        --projects dto
+        --projects dc-interface
+        clean install
+    volumes:
+      # comment this line, if you don't want to write to your local maven repos
+      - ~/.m2/:/var/maven/.m2
+      - ./:/code
+    working_dir: /code
+    tty: true
+
   app:
     image: maven:3-jdk-8-alpine
     depends_on:
       - db
+      - requirements
     env_file:
       - .env
     environment:
@@ -21,6 +42,7 @@ services:
       - "${SERVER_PORT}:${SERVER_PORT}"
       - 8990:8990
     volumes:
+      # comment this line, if you don't want to write to your local maven repos
       - ~/.m2/:/var/maven/.m2
       - ./writer/:/code
     working_dir: /code
@@ -36,6 +58,7 @@ services:
       POSTGRES_DB: bdp
       POSTGRES_USER: bdp
       POSTGRES_PASSWORD: password
+    # Uncomment this lines, if you want to keep Postgres data on your local machine
     #volumes:
     #  - ./tmp/postgres/data:/var/lib/postgresql/data
     ports:
