@@ -299,21 +299,11 @@ deploy_war_files() {
     # Build libs and war files
     cd $BDPROOT
 
-    for FOLDER in dto dal dc-interface ws-interface; do
-        cd $FOLDER
-        mvn clean install
-        cd ..
-    done
+	(cd dto; mvn clean install)
+	(cd dc-interface; mvn clean install)
+	(cd writer; mvn clean package)
 
-    for FOLDER in writer reader; do
-        cd $FOLDER
-        mvn clean package
-        cd ..
-    done
-
-    sudo cp $BDPROOT/reader/target/reader.war $APPSERVER_WEBAPPS
     sudo cp $BDPROOT/writer/target/writer.war $APPSERVER_WEBAPPS
-    sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/reader.war
     sudo chown $APPSERVER_USER:$APPSERVER_GROUP $APPSERVER_WEBAPPS/writer.war
 
     echo
@@ -341,7 +331,7 @@ test_first() {
 
     PGVERSION=$(psql_call -d $PGDBDEFAULT -tc "SHOW server_version_num")
     V=$(psql_call -d $PGDBDEFAULT -tc "SHOW server_version")
-    if (( $PGVERSION < 90500 )); then
+    if (( PGVERSION < 90500 )); then
         echo "ERROR: PostgreSQL must be at least version 9.5, but installed version is $V."
         echo "Terminating..."
         exit 1
