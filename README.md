@@ -22,7 +22,7 @@ PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
 - [Big Data Platform](#big-data-platform)
   - [CORE](#core)
     - [WRITER](#writer)
-      - [Data Collector Development with Docker](#data-collector-development-with-docker)
+      - [Getting started with Docker](#getting-started-with-docker)
       - [Authentication](#authentication)
       - [DAL](#dal)
         - [Configuration of the database connection](#configuration-of-the-database-connection)
@@ -73,7 +73,7 @@ database.
 The full API description can be found inside
 [JsonController.java](writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
 
-#### Data Collector Development with Docker
+#### Getting started with Docker
 
 If you want to develop a data collector or simply test the INBOUND writer API,
 the easiest way to get started is to start a docker container. In the root
@@ -124,8 +124,8 @@ bdp=# \dt
 ```
 ... if you see a similar output as above, then you are set!
 
-Now, lets test the writer API:
-
+Please use the `curl` commands inside the chapter
+[Authentication](#authentication) to test the writer API.
 
 #### Authentication
 We use Keycloak to authenticate. That service provides an `access_token` that
