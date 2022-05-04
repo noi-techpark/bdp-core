@@ -84,6 +84,7 @@ Now you have a Postgres instance running on port 5555 and the API on port 8999.
 Lets test Postgres first:
 
 1) Login to the DB
+
     a) with Docker, do:
      ```
      $ docker-compose exec db bash
