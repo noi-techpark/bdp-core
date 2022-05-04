@@ -12,42 +12,39 @@ a REST interface.
 For a detailed introduction, see our [Big Data Platform
 Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
 
-The Big Data Platform Core is free software. It is licensed under GNU GENERAL
-PUBLIC LICENSE Version 3 from 29 June 2007 (see `LICENSE` file).
-
 ----
 
 **Table of Contents**
 
 - [Big Data Platform](#big-data-platform)
-  - [CORE](#core)
-    - [WRITER](#writer)
-      - [Getting started with Docker](#getting-started-with-docker)
-      - [Authentication](#authentication)
-      - [DAL](#dal)
-        - [Configuration of the database connection](#configuration-of-the-database-connection)
-        - [Station](#station)
-        - [DataType](#datatype)
-        - [Record](#record)
-        - [Edge](#edge)
+  - [Inbound API (writer)](#inbound-api-writer)
+    - [Getting started with Docker](#getting-started-with-docker)
+    - [Authentication](#authentication)
+    - [DAL](#dal)
+      - [Configuration of the database connection](#configuration-of-the-database-connection)
+      - [Entities](#entities)
     - [DTO](#dto)
       - [StationDto](#stationdto)
       - [DataTypeDto](#datatypedto)
       - [SimpleRecordDto](#simplerecorddto)
-  - [Installation guide](#installation-guide)
     - [dc-interface](#dc-interface)
+  - [Installation guide without Docker](#installation-guide-without-docker)
   - [Flight rules](#flight-rules)
     - [I want to generate a new schema dump out of Hibernate's Entity classes](#i-want-to-generate-a-new-schema-dump-out-of-hibernates-entity-classes)
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
     - [I want to update the CONTRIBUTORS.rst file](#i-want-to-update-the-contributorsrst-file)
     - [I want to use dc-interface or ws-interface in my Java Maven project](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
-  - [Licenses](#licenses)
+  - [Information](#information)
+    - [Support](#support)
+    - [Contributing](#contributing)
+    - [Documentation](#documentation)
+    - [License](#license)
     - [Third party components](#third-party-components)
 
 ----
 
-## CORE
+## Inbound API (writer)
 
 The core of the platform contains the business logic of an **INBOUND** API which
 handles connections to the database and provides an API for data collectors (see
@@ -61,7 +58,6 @@ format.
 The **OUTBOUND** API is called
 [Ninja](https://github.com/noi-techpark/it.bz.opendatahub.api.mobility-ninja).
 
-### WRITER
 The writer is a REST API, which takes JSON DTOs, deserializes and validates them
 and finally stores them in the database. Additionally, it sets stations to
 active/inactive according to their presence inside the provided data. The writer
@@ -73,7 +69,7 @@ database.
 The full API description can be found inside
 [JsonController.java](writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
 
-#### Getting started with Docker
+### Getting started with Docker
 
 If you want to run the application using [Docker](https://www.docker.com/), the environment is already set up with all dependencies for you. This is the recommended way to test and develop data collectors for this writer API. You only have to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) and follow the instructions below.
 
@@ -127,7 +123,7 @@ bdp=# \dt
 Please use the `curl` commands inside the chapter
 [Authentication](#authentication) to test the writer API.
 
-#### Authentication
+### Authentication
 We use Keycloak to authenticate. That service provides an `access_token` that
 can be used to send POST requests to the writer. See the [Open Data Hub
 Authentication / Quick
@@ -156,7 +152,7 @@ You should get an empty JSON list as result.
 Write an email to `help@opendatahub.bz.it`, if you want to get the `client_secret`
 and an Open Data Hub OAuth2 account for a non-development setup.
 
-#### DAL
+### DAL
 
 DAL is the *Data Access Layer* which communicates with the DB underneath used by
 the writer modules. The communication is handled through the ORM Hibernate and
@@ -171,7 +167,7 @@ In some cases geometry transformations and elaborations were needed to be
 executed on application level and therefore [Geotools](http://www.geotools.org/)
 was added as dependency.
 
-##### Configuration of the database connection
+#### Configuration of the database connection
 
 To configure the DAL module to communicate with your database you need to
 provide configuration and credentials inside
@@ -196,13 +192,16 @@ validation only (for security reasons). Usually, we set the value
 
 See the [Installation guide](#installation-guide) for a fast initial setup.
 
-The following chapters describe the most important DAL entities:
+#### Entities
+
+This chapter describes the most important DAL entities:
 - `station`
-- `data type`
+- `datatype`
 - `record`
 - `edge`
 
-##### Station
+**Station**
+
 The `station` represents the origin of the data which needs an identifier, a
 name, a coordinate and a so called `stationtype`. It also should contain the
 origin of the data, the current *active* state (if actively used or not) and if
@@ -219,7 +218,8 @@ have additional information like address, municipality, opening times etc.,
 which would be modelled as meta data entry.
 
 
-##### DataType
+**DataType**
+
 The `data type` represents the typology of the data in form of an unique name
 and a unit. Description and metric of measurements can also be provided.
 
@@ -227,7 +227,8 @@ and a unit. Description and metric of measurements can also be provided.
 >A `temperature` can have a unit `°C` and can be an `average` value of the last
 >300 seconds (called `period`).
 
-##### Record
+**Record**
+
 A `record` represents a single measurement containing a `value`, a `timestamp` ,
 a `data-type`, a `station`, and a `provenance`. Provenance indicates which data
 collector in which version collected the data. It is needed to implement
@@ -239,7 +240,8 @@ cleansing or bug fixes.
 > type example) of `20.4` for a meteo station called `89935GW` (see station
 > example).
 
-##### Edge
+**Edge**
+
 An edge represents the spatial geometry between two stations. We model this
 internally as a station triple: `origin, edge, destination`, because currently
 only stations can be exposed through our API. We add a line-geometry to that
@@ -276,30 +278,6 @@ Describes a specific type of data. We define the structure inside
 #### SimpleRecordDto
 Describes the measured value. We define the structure inside
 [SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java)
-
-## Installation guide
-
-Use the
-[quickbuild.sh](quickbuild.sh)
-script to setup your environment. Usage, configuration and prerequisite
-information can be found inside the script. The `SQLVERSION` variable specifies
-the dump and modification SQL script versions inside DAL.
-
-> The Postgres user `PGUSER` must have privileges to create schemas and tables!
-
-Example:
-```
-PGUSER=postgres PGPASSWORD=yourpassword SQLVERSION=1.3.6 ./quickbuild.sh
-```
-
-If this works you made it.
-
-You deployed your bdp-core and now will be able to add modules or develop your
-own. If you want to fill your DB with data, you will either create your own
-module, which works with the writer API or you can follow the guide on
-https://github.com/noi-techpark/bdp-helloworld/tree/main/data-collectors/my-first-data-collector
-where it's shown hot to use an already existing JAVA-client. If you also need to
-expose this data you can either use the NINJA API.
 
 ### dc-interface
 The dc-interface contains the API through which components can communicate with
@@ -353,6 +331,29 @@ structure, see the
 [DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
 source.
 
+## Installation guide without Docker
+
+Use the
+[quickbuild.sh](quickbuild.sh)
+script to setup your environment. Usage, configuration and prerequisite
+information can be found inside the script. The `SQLVERSION` variable specifies
+the dump and modification SQL script versions inside DAL.
+
+> The Postgres user `PGUSER` must have privileges to create schemas and tables!
+
+Example:
+```
+PGUSER=postgres PGPASSWORD=yourpassword SQLVERSION=1.3.6 ./quickbuild.sh
+```
+
+If this works you made it.
+
+You deployed your bdp-core and now will be able to add modules or develop your
+own. If you want to fill your DB with data, you will either create your own
+module, which works with the writer API or you can follow the guide on
+https://github.com/noi-techpark/bdp-helloworld/tree/main/data-collectors/my-first-data-collector
+where it's shown hot to use an already existing JAVA-client. If you also need to
+expose this data you can either use the NINJA API.
 
 ## Flight rules
 
@@ -406,7 +407,27 @@ in our [release channel](https://github.com/noi-techpark/bdp-core/releases) on
 GitHub.
 
 
-## Licenses
+## Information
+
+### Support
+
+For support, please contact [help@opendatahub.bz.it](mailto:help@opendatahub.bz.it).
+
+### Contributing
+
+If you'd like to contribute, please follow our [Getting
+Started](https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines:-Getting-started)
+instructions.
+
+### Documentation
+
+More documentation can be found at
+[https://docs.opendatahub.bz.it](https://docs.opendatahub.bz.it).
+
+### License
+
+The code in this project is licensed under the GNU GENERAL PUBLIC LICENSE
+Version 3 license. See the [LICENSE](LICENSE) file for more information.
 
 ### Third party components
 
