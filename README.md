@@ -34,7 +34,7 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
     - [I want to update the CONTRIBUTORS.rst file](#i-want-to-update-the-contributorsrst-file)
-    - [I want to use dc-interface or ws-interface in my Java Maven project](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
+    - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
   - [Information](#information)
     - [Support](#support)
     - [Contributing](#contributing)
@@ -283,7 +283,7 @@ Describes the measured value. We define the structure inside
 ### dc-interface
 The dc-interface contains the API through which components can communicate with
 the BDP writer. Just include the `dc-interface` [maven
-dependency](#i-want-to-use-dc-interface-or-ws-interface-in-my-java-maven-project)
+dependency](#i-want-to-use-dc-interface-in-my-java-maven-project)
 in your project and use the existing [JSON client
 implementation](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
 
@@ -382,7 +382,7 @@ Just run `bash CONTRIBUTORS.rst` and check the output inside the file itself.
 Configure any mail or name mappings inside `.mailmap`. See `man git shortlog`
 for further details.
 
-### I want to use dc-interface or ws-interface in my Java Maven project
+### I want to use dc-interface in my Java Maven project
 Include the following snippet in your `pom.xml` file:
 ```
 	<repositories>
@@ -393,17 +393,16 @@ Include the following snippet in your `pom.xml` file:
 	</repositories>
 ```
 
-Include then, also the dependency (either `dc-interface` for data collectors or
-`ws-interface` for read-only web services):
+Include the dependency `dc-interface` for data collectors:
 ```
 <dependency>
   <groupId>it.bz.idm.bdp</groupId>
   <artifactId>dc-interface</artifactId>
-  <version>2.0.0</version>
+  <version>7.3.0</version>
 </dependency>
 ```
 
-You can also use a version-range, like `[2.0.0,3.0.0)`. Find the latest version
+You can also use a version-range, like `[7.3.0,8.0.0)`. Find the latest version
 in our [release channel](https://github.com/noi-techpark/bdp-core/releases) on
 GitHub.
 
