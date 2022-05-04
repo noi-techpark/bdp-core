@@ -75,9 +75,9 @@ The full API description can be found inside
 
 #### Getting started with Docker
 
-If you want to develop a data collector or simply test the INBOUND writer API,
-the easiest way to get started is to start a docker container. In the root
-folder of this repository:
+If you want to run the application using [Docker](https://www.docker.com/), the environment is already set up with all dependencies for you. This is the recommended way to test and develop data collectors for this writer API. You only have to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) and follow the instructions below.
+
+In the root folder of this repository:
 
 1) Copy `.env.example` to `.env`
 2) Run `docker-compose up -d`
