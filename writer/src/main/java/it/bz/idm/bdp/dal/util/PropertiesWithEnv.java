@@ -10,8 +10,6 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javassist.NotFoundException;
-
 public class PropertiesWithEnv extends Properties {
 
 	private static final Logger LOG = LoggerFactory.getLogger(
