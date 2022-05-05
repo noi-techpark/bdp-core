@@ -2,7 +2,7 @@
 # Create a .env file and set the corresponding variables
 # See all $dotenv fields below
 
-### Get access token for the writer (TEST)
+### Get access token for the writer (LOCAL DEV)
 # @name login
 POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
@@ -11,7 +11,16 @@ grant_type=client_credentials
 &client_id=odh-mobility-datacollector-development
 &client_secret=7bd46f8f-c296-416d-a13d-dc81e68d0830
 
-### Get access token for the writer (PROD)
+### Get access token for the writer (TEST DB)
+# @name login
+POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id=odh-mobility-datacollector
+&client_secret=${{dotenv AUTH_TEST_CLIENT_SECRET}}
+
+### Get access token for the writer (PROD DB)
 # @name login
 POST https://auth.opendatahub.bz.it/auth/realms/noi/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
@@ -23,8 +32,8 @@ grant_type=password
 &client_secret={{$dotenv AUTH_PROD_CLIENT_SECRET}}
 
 #@host=https://mobility.share.opendatahub.bz.it
-#@host=https://mobility.share.opendatahub.testingmachine.eu
 @host=http://localhost:8999
+@host=https://mobility.share.opendatahub.testingmachine.eu
 @authtoken = {{login.response.body.access_token}}
 
 
