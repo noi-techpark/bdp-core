@@ -43,6 +43,7 @@ import javax.persistence.UniqueConstraint;
 
 import javax.persistence.Column;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -121,6 +122,7 @@ public class Event {
 	private Provenance provenance;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String description;
 
 	public Provenance getProvenance() {

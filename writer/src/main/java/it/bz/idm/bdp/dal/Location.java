@@ -32,6 +32,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
 import org.locationtech.jts.geom.Geometry;
 
 @Table(name = "location")
@@ -48,6 +49,7 @@ public class Location {
 	protected Geometry geometry;
 
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String description;
 
 	public Geometry getGeometry() {
