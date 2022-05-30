@@ -39,6 +39,20 @@ public class Log {
 		return this;
 	}
 
+	public void info(String message) {
+		logger.info(
+			"{}: {}",
+			methodName,
+			message,
+			v("api_request_info",
+				Utils.mapOf(
+					"provenance_name", provenance == null ? null : provenance.getDataCollector(),
+					"provenance_version", provenance == null ? null : provenance.getDataCollectorVersion()
+				)
+			)
+		);
+	}
+
 	public void warn(String message) {
 		logger.warn(
 			"{}: {}",

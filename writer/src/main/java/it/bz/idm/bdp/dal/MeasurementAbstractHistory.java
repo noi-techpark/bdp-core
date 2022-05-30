@@ -339,7 +339,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 	private static boolean isDuplicate(Log log, List<String> dupList, Station station, DataType type, long period, String measurementType, long timestamp, Object value) {
 		String dupCheck = measurementType + timestamp + value.hashCode();
 		if (dupList.contains(dupCheck)) {
-			log.warn(
+			log.info(
 				String.format(
 					"Measurement duplicate of type %s found in list, skipping! (stationtype, stationcode, cname, period, timestamp, double_value) = (%s, %s, %s, %d, %d, %s) ",
 					measurementType,
