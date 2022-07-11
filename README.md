@@ -34,6 +34,7 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
     - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
+    - [I want to get started with a new data-collector](#i-want-to-get-started-with-a-new-data-collector)
   - [Information](#information)
     - [Support](#support)
     - [Contributing](#contributing)
@@ -139,7 +140,7 @@ the case create them:
 
 ```sql
 -- These values are already set inside the application.properties file, so you do
--- not need to configure anything except the port if you keep like this!
+-- not need to configure anything except the port if you keep them like this!
 create database bdp;
 create user 'bdp' with login password 'password';
 create schema if not exists 'intimev2';
@@ -412,6 +413,13 @@ You can also use a version-range, like `[7.3.0,8.0.0)`. Find the latest version
 in our [release channel](https://github.com/noi-techpark/bdp-core/releases) on
 GitHub.
 
+### I want to get started with a new data-collector
+
+Refer to the [Contributing chapter] and our [HelloWorld Example Data Collector] inside
+https://github.com/noi-techpark/bdp-commons to start a new data collector.
+
+[Contributing chapter]: https://github.com/noi-techpark/bdp-commons/blob/main/README.md#contributing
+[HelloWorld Example Project]: https://github.com/noi-techpark/bdp-commons/tree/main/data-collectors/helloworld
 
 ## Information
 
