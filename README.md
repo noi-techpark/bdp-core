@@ -228,8 +228,6 @@ validation only (for security reasons). Usually, we set the value
 `hibernate.hbm2ddl.auto = validate` during development and
 `hibernate.hbm2ddl.auto = none` at runtime for performance reasons on startup.
 
-See the [Installation guide](#installation-guide) for a fast initial setup.
-
 #### Entities
 
 This chapter describes the most important DAL entities:
