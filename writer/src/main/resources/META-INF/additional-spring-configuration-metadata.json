@@ -1,5 +1,42 @@
-{"properties": [{
-  "name": "security.cors.allowedOrigins",
-  "type": "java.lang.String",
-  "description": "Set allowed origins, or * to allow all"
-}]}
+{"properties": [
+  {
+    "name": "security.cors.allowedOrigins",
+    "type": "java.lang.String",
+    "description": "Set allowed origins, or * to allow all"
+  },
+  {
+    "name": "hibernate.hikari.dataSource.serverName",
+    "type": "java.lang.String",
+    "description": "The Postgres Database Server name, ex. localhost"
+  },
+  {
+    "name": "hibernate.hikari.dataSource.portNumber",
+    "type": "java.lang.Integer",
+    "description": "The Postgres Database Server name, ex. 5432"
+  },
+  {
+    "name": "hibernate.hikari.dataSource.databaseName",
+    "type": "java.lang.String",
+    "description": "The Postgres Database name, ex. bdp"
+  },
+  {
+    "name": "hibernate.hikari.maximumPoolSize",
+    "type": "java.lang.Integer",
+    "description": "How big should be the pool size of Hikari?"
+  },
+  {
+    "name": "hibernate.hikari.dataSource.password",
+    "type": "java.lang.String",
+    "description": "The Postgres Database privileged user's password"
+  },
+  {
+    "name": "hibernate.hikari.dataSource.user",
+    "type": "java.lang.String",
+    "description": "The Postgres Database privileged user's name"
+  },
+  {
+    "name": "hibernate.default_schema",
+    "type": "java.lang.String",
+    "description": "The Postgres Database default schema, ex. intimev2 or public"
+  }
+]}
