@@ -19,6 +19,7 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
 - [Big Data Platform](#big-data-platform)
   - [Inbound API (writer)](#inbound-api-writer)
     - [Getting started with Docker](#getting-started-with-docker)
+    - [Getting started natively](#getting-started-natively)
     - [Authentication](#authentication)
     - [DAL](#dal)
       - [Configuration of the database connection](#configuration-of-the-database-connection)
@@ -28,19 +29,16 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
       - [DataTypeDto](#datatypedto)
       - [SimpleRecordDto](#simplerecorddto)
     - [dc-interface](#dc-interface)
-  - [Installation guide without Docker](#installation-guide-without-docker)
   - [Flight rules](#flight-rules)
     - [I want to generate a new schema dump out of Hibernate's Entity classes](#i-want-to-generate-a-new-schema-dump-out-of-hibernates-entity-classes)
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
-    - [I want to update the CONTRIBUTORS.rst file](#i-want-to-update-the-contributorsrst-file)
     - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
   - [Information](#information)
     - [Support](#support)
     - [Contributing](#contributing)
     - [Documentation](#documentation)
     - [License](#license)
-    - [Third party components](#third-party-components)
 
 ----
 
@@ -71,7 +69,11 @@ The full API description can be found inside
 
 ### Getting started with Docker
 
-If you want to run the application using [Docker](https://www.docker.com/), the environment is already set up with all dependencies for you. This is the recommended way to test and develop data collectors for this writer API. You only have to install [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) and follow the instructions below.
+If you want to run the application using [Docker](https://www.docker.com/), the
+environment is already set up with all dependencies for you. This is the
+recommended way to test and develop data collectors for this writer API. You
+only have to install [Docker](https://www.docker.com/) and [Docker
+Compose](https://docs.docker.com/compose/) and follow the instructions below.
 
 In the root folder of this repository:
 
@@ -120,6 +122,40 @@ bdp=# \dt
 (15 rows)
 ```
 ... if you see a similar output as above, then you are set!
+
+Please use the `curl` commands inside the chapter
+[Authentication](#authentication) to test the writer API.
+
+### Getting started natively
+
+If you do not want to use docker, you can also start this application manually.
+You need Java 8 and maven, and a Postgres DB. Postgresql can eventually also be
+started with our [Docker setup](#getting-started-with-docker). Just call
+`docker-compose up -d db`. It runs on port 5555. Alternatively, install and
+start your own Postgresql instance.
+
+The database, schema and the privileged user must already exist, if that is not
+the case create them:
+
+```sql
+-- These values are already set inside the application.properties file, so you do
+-- not need to configure anything except the port if you keep like this!
+create database bdp;
+create user 'bdp' with login password 'password';
+create schema if not exists 'intimev2';
+grant all on schema intimev2 to bdp;
+```
+
+To start the writer, do the following:
+1) Open `writer/src/main/resources/application.properties` and configure it,
+   this step can be omitted if you use our dockerized Postgresql. For your own
+   Postgres, just alter the port to 5432 and make sure you use the same names as
+   shown above. Otherwise, configure also those parameters...
+2) Start the Java application with `mvn spring-boot:run`
+
+The application itself will create tables and other database objects for you. If
+you prefer to do that manually, set `spring.flyway.enabled=false` and execute
+the SQL files inside `writer/src/main/resources/db/migration` yourself.
 
 Please use the `curl` commands inside the chapter
 [Authentication](#authentication) to test the writer API.
@@ -332,37 +368,12 @@ structure, see the
 [DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
 source.
 
-## Installation guide without Docker
-
-Use the
-[quickbuild.sh](quickbuild.sh)
-script to setup your environment. Usage, configuration and prerequisite
-information can be found inside the script. The `SQLVERSION` variable specifies
-the dump and modification SQL script versions inside DAL.
-
-> The Postgres user `PGUSER` must have privileges to create schemas and tables!
-
-Example:
-```
-PGUSER=postgres PGPASSWORD=yourpassword SQLVERSION=1.3.6 ./quickbuild.sh
-```
-
-If this works you made it.
-
-You deployed your bdp-core and now will be able to add modules or develop your
-own. If you want to fill your DB with data, you will either create your own
-module, which works with the writer API or you can follow the guide on
-https://github.com/noi-techpark/bdp-helloworld/tree/main/data-collectors/my-first-data-collector
-where it's shown hot to use an already existing JAVA-client. If you also need to
-expose this data you can either use the NINJA API.
-
 ## Flight rules
 
 ### I want to generate a new schema dump out of Hibernate's Entity classes
 
-See
-[README.md](tools/README.md)
-inside `/tools`.
+See [README.md](infrastructure/utils/schema-generator/README.md) inside
+`/infrastructure/utils/schema-generator`.
 
 ### I want to update license headers of each source file
 To update license headers in each source code file run `mvn license:format`. To
@@ -376,11 +387,6 @@ headers at once.
 Run `mvn site` to create a HTML page with all details of this project. Results
 can be found under `<project>/target/site/`, entrypoint is as usual
 `index.html`.
-
-### I want to update the CONTRIBUTORS.rst file
-Just run `bash CONTRIBUTORS.rst` and check the output inside the file itself.
-Configure any mail or name mappings inside `.mailmap`. See `man git shortlog`
-for further details.
 
 ### I want to use dc-interface in my Java Maven project
 Include the following snippet in your `pom.xml` file:
@@ -428,7 +434,3 @@ More documentation can be found at
 
 The code in this project is licensed under the GNU GENERAL PUBLIC LICENSE
 Version 3 license. See the [LICENSE](LICENSE) file for more information.
-
-### Third party components
-
-- `CONTRIBUTORS.rst` script done by [Daniele Gobbetti](https://github.com/danielegobbetti)
