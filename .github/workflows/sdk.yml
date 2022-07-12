@@ -55,7 +55,7 @@ jobs:
         run: mkdir ~/.m2 && echo "$SETTINGS_XML" > ~/.m2/settings.xml
       - name: Preparation for a snapshot release with latest production version
         run: |
-          git fetch --prune --unshallow
+          git fetch origin prod
           LAST_VERSION=$(git describe --abbrev=0 prod)
           ./infrastructure/utils/quickrelease.sh snapshot "$LAST_VERSION"
 
