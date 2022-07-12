@@ -71,7 +71,6 @@ jobs:
       - name: Deploy SDK
         run: >
           mvn
-            --settings ~/.m2/settings.xml
             -B
             -DskipTests
             --projects dto
