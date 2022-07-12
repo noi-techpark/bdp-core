@@ -20,6 +20,7 @@ jobs:
   # Test
   test:
     runs-on: ubuntu-20.04
+    if: $(false)
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -59,13 +60,22 @@ jobs:
         run: |
           git fetch origin prod
           LAST_VERSION=$(git describe --abbrev=0 FETCH_HEAD)
+          echo "Releasing ${LAST_VERSION}-snapshot"
           ./infrastructure/utils/quickrelease.sh snapshot "$LAST_VERSION"
 
       - name: Deploy SDK
         uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          build-command: 'mvn -B -DskipTests --projects dto --projects dc-interface --also-make clean install deploy'
+          build-command: >
+            mvn
+              --settings ~/.m2/settings.xml
+              -B
+              -DskipTests
+              --projects dto
+              --projects dc-interface
+              --also-make
+              install deploy
 
 
   # Deploy Prod
