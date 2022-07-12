@@ -69,14 +69,7 @@ jobs:
             </settings>
         run: echo "$SETTINGS_XML" > ~/.m2/settings.xml
       - name: Deploy SDK
-        run: >
-          mvn
-            -B
-            -DskipTests
-            --projects dto
-            --projects dc-interface
-            --also-make
-            install deploy
+        run: mvn -B -DskipTests --projects dto --projects dc-interface --also-make install deploy
 
 
   # Deploy Prod
