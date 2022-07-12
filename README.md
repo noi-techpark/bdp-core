@@ -156,7 +156,8 @@ To start the writer, do the following:
 
 The application itself will create tables and other database objects for you. If
 you prefer to do that manually, set `spring.flyway.enabled=false` and execute
-the SQL files inside `writer/src/main/resources/db/migration` yourself.
+the SQL files inside `writer/src/main/resources/db/migration` yourself. Replace 
+`${default_schema}` with your default schema, most probably `intimev2`.
 
 Please use the `curl` commands inside the chapter
 [Authentication](#authentication) to test the writer API.
