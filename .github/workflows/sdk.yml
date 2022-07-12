@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'    # to get all branches and tags
       - name: Create a settings.xml file
         env:
           SETTINGS_XML: |
