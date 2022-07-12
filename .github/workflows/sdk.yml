@@ -50,7 +50,7 @@ jobs:
                     </server>
                 </servers>
             </settings>
-        run: echo "$SETTINGS_XML" > ~/.m2/settings.xml
+        run: mkdir ~/.m2 && echo "$SETTINGS_XML" > ~/.m2/settings.xml
       - name: Preparation for a snapshot release with latest production version
         run: ./infrastructure/utils/quickrelease.sh snapshot $(git describe --abbrev=0 prod)
 
