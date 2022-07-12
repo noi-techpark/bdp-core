@@ -56,7 +56,7 @@ jobs:
       - name: Preparation for a snapshot release with latest production version
         run: |
           git fetch origin prod
-          LAST_VERSION=$(git describe --abbrev=0 prod)
+          LAST_VERSION=$(git describe --abbrev=0 FETCH_HEAD)
           ./infrastructure/utils/quickrelease.sh snapshot "$LAST_VERSION"
 
       - name: Deploy SDK
