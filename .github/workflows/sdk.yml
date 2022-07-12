@@ -67,7 +67,7 @@ jobs:
                     </server>
                 </servers>
             </settings>
-        run: mkdir ~/.m2 && echo "$SETTINGS_XML" > ~/.m2/settings.xml
+        run: echo "$SETTINGS_XML" > ~/.m2/settings.xml
       - name: Deploy SDK
         run: >
           mvn
