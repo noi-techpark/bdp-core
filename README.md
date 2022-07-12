@@ -34,6 +34,7 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
     - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
+    - [I want to publish a new dc-interface sdk on our maven repository](#i-want-to-publish-a-new-dc-interface-sdk-on-our-maven-repository)
     - [I want to get started with a new data-collector](#i-want-to-get-started-with-a-new-data-collector)
   - [Information](#information)
     - [Support](#support)
@@ -156,7 +157,7 @@ To start the writer, do the following:
 
 The application itself will create tables and other database objects for you. If
 you prefer to do that manually, set `spring.flyway.enabled=false` and execute
-the SQL files inside `writer/src/main/resources/db/migration` yourself. Replace 
+the SQL files inside `writer/src/main/resources/db/migration` yourself. Replace
 `${default_schema}` with your default schema, most probably `intimev2`.
 
 Please use the `curl` commands inside the chapter
@@ -411,6 +412,44 @@ Include the dependency `dc-interface` for data collectors:
 You can also use a version-range, like `[7.3.0,8.0.0)`. Find the latest version
 in our [release channel](https://github.com/noi-techpark/bdp-core/releases) on
 GitHub.
+
+### I want to publish a new dc-interface sdk on our maven repository
+
+This chapter is for the NOI team only. It describes how to publish a new
+dc-interface manually on our maven repo. Either as "release" or "snapshot"
+version...
+
+Create a file `~/.m2/settings.xml`, and copy/paste the following code:
+```xml
+<settings>
+    <servers>
+        <server>
+            <id>maven-repo.opendatahub.bz.it-release</id>
+            <username>your-remote-repos-username</username>
+            <password>your-remote-repos-password</password>
+        </server>
+        <server>
+            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <username>your-remote-repos-username</username>
+            <password>your-remote-repos-password</password>
+        </server>
+    </servers>
+</settings>
+```
+
+Replace `your-remote-repos-username` and `your-remote-repos-password` with your
+Maven repo credentials. We have a group on our AWS/IAM called
+`s3-odh-maven-repo` that gives permissions to push to the maven repo. Assign
+that role to your user eventually, or search for `s3-odh-maven-repo` on our
+password server for credentials.
+
+Update all `pom.xml` files with the correct version. Here an example to create a
+snapshot release with version `8.0.1` (do not put a `v` prefix):
+`./infrastructure/utils/quickrelease.sh snapshot 8.0.1`
+
+Use `./infrastructure/utils/quickrelease.sh release 8.0.1` for a production release.
+
+Call `mvn --projects dto --projects dc-interface --also-make clean install deploy`
 
 ### I want to get started with a new data-collector
 
