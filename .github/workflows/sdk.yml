@@ -1,9 +1,15 @@
 name: Release SDK
 
 on:
-  release:
+  push:
     paths-ignore:
       - 'writer/**'
+      - '.github/workflows/main.yml'
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - 'writer/**'
+      - '.github/workflows/main.yml'
       - '*.md'
 
 env:
