@@ -20,7 +20,7 @@ jobs:
   # Test
   test:
     runs-on: ubuntu-20.04
-    if: $(false)
+    if: ${{ false }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
   release-sdk-test:
     runs-on: ubuntu-20.04
     if: github.ref == 'refs/heads/cisdk'
-    needs: test
+    # needs: test
     concurrency: release-sdk-test
     steps:
       - name: Checkout source code
