@@ -423,14 +423,14 @@ Either as "release" or "snapshot" version...
 
 #### Automatically via Github Actions
 
-**SNAPSHOT RELEASES**: If you push code to the `main` branch, which changes
+*SNAPSHOT RELEASES*: If you push code to the `main` branch, which changes
 either `dto` or `dc-interface` the Github Action workflow deploys a new snapshot
 version of those libraries. The version is then the latest version tag on the
 `prod` branch and a `-SNAPSHOT` postfix. For example, if the version tag is
 `v7.4.0`, then the new snapshot version string is `7.4.0-SNAPSHOT` (the initial
 `v` will be removed).
 
-**PRODUCTION RELEASES**: Push your code to the `prod` branch and tag it with a
+*PRODUCTION RELEASES*: Push your code to the `prod` branch and tag it with a
 semantic versioning tag prefixed by `v`. As you might notice in the past we had version tags without that prefix, but the new Github Action workflow requires it, so in future please always put it like this. For example, `v7.5.0`.
 
 #### Manually from your machine
