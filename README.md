@@ -35,6 +35,8 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
     - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
     - [I want to publish a new dc-interface sdk on our maven repository](#i-want-to-publish-a-new-dc-interface-sdk-on-our-maven-repository)
+      - [Automatically via Github Actions](#automatically-via-github-actions)
+      - [Manually from your machine](#manually-from-your-machine)
     - [I want to get started with a new data-collector](#i-want-to-get-started-with-a-new-data-collector)
   - [Information](#information)
     - [Support](#support)
@@ -416,8 +418,22 @@ GitHub.
 ### I want to publish a new dc-interface sdk on our maven repository
 
 This chapter is for the NOI team only. It describes how to publish a new
-dc-interface manually on our maven repo. Either as "release" or "snapshot"
-version...
+dc-interface manually or via the Github Action workflow on our maven repo.
+Either as "release" or "snapshot" version...
+
+#### Automatically via Github Actions
+
+**SNAPSHOT RELEASES**: If you push code to the `main` branch, which changes
+either `dto` or `dc-interface` the Github Action workflow deploys a new snapshot
+version of those libraries. The version is then the latest version tag on the
+`prod` branch and a `-SNAPSHOT` postfix. For example, if the version tag is
+`v7.4.0`, then the new snapshot version string is `7.4.0-SNAPSHOT` (the initial
+`v` will be removed).
+
+**PRODUCTION RELEASES**: Push your code to the `prod` branch and tag it with a
+semantic versioning tag prefixed by `v`. As you might notice in the past we had version tags without that prefix, but the new Github Action workflow requires it, so in future please always put it like this. For example, `v7.5.0`.
+
+#### Manually from your machine
 
 Create a file `~/.m2/settings.xml`, and copy/paste the following code:
 ```xml
