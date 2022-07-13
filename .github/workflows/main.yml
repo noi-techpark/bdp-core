@@ -172,6 +172,6 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ github.event.repository.name }}-app
-          target: sha-4e332ceaeac3d414353291195360ce3714807675 # sha-${{ github.sha }}
+          target: 4e332ceaeac3d414353291195360ce3714807675 # sha-${{ github.sha }}
           tags: |
             latest
