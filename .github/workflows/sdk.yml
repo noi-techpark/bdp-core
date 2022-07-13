@@ -75,14 +75,12 @@ jobs:
   # Release Production SDK
   release-sdk-prod:
     runs-on: ubuntu-20.04
-    if: startsWith(github.ref, 'v')
+    if: startsWith(github.ref, 'refs/tags/v')
     # needs: test
     concurrency: release-sdk-prod
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'    # to get all branches and tags
       - name: Install xmlstarlet
         run: sudo apt-get install -y xmlstarlet
       - name: Preparation for a production release with given version tag
