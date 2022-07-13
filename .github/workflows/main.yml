@@ -4,10 +4,12 @@ on:
   push:
     paths-ignore:
       - 'dc-interface/**'
+      - '.github/workflows/sdk.yml'
       - '*.md'
   pull_request:
     paths-ignore:
       - 'dc-interface/**'
+      - '.github/workflows/sdk.yml'
       - '*.md'
 
 env:
