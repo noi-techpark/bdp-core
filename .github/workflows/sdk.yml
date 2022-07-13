@@ -85,7 +85,7 @@ jobs:
         run: sudo apt-get install -y xmlstarlet
       - name: Preparation for a production release with given version tag
         run: |
-          LAST_VERSION=$(git describe --abbrev=0)
+          LAST_VERSION=${GITHUB_REF##*/}
           echo "Releasing ${LAST_VERSION}"
           ./infrastructure/utils/quickrelease.sh release "$LAST_VERSION"
       - name: Set up Java
