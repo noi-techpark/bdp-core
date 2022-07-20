@@ -35,7 +35,7 @@ jobs:
   # Deploy Test
   deploy-test:
     runs-on: ubuntu-20.04
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/testtag'
     needs: test
     concurrency: deploy-test
     steps:
@@ -85,6 +85,16 @@ jobs:
         with:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/shrink/actions-docker-registry-tag
+      - name: Add a "unstable" docker tag
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ github.event.repository.name }}-app
+          target: ${{ env.DOCKER_TAG }}
+          tags: |
+            unstable
 
       - name: Deploy application
         uses: noi-techpark/github-actions/docker-deploy@v2
@@ -149,6 +159,16 @@ jobs:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
 
+      # https://github.com/shrink/actions-docker-registry-tag
+      - name: Add a "latest" docker tag
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ github.event.repository.name }}-app
+          target: ${{ env.DOCKER_TAG }}
+          tags: |
+            latest
+
       - name: Deploy application
         uses: noi-techpark/github-actions/docker-deploy@v2
         with:
@@ -157,21 +177,3 @@ jobs:
           docker-username: 'noi-techpark-bot'
           docker-password: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           project-name: ${{ env.PROJECT_NAME }}
-
-
-
-
-
-  test-tag:
-    runs-on: ubuntu-20.04
-    if: github.ref == 'refs/heads/testtag'
-    steps:
-      # https://github.com/shrink/actions-docker-registry-tag
-      - name: Add a "latest" docker tag
-        uses: shrink/actions-docker-registry-tag@v2
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ github.event.repository.name }}-app
-          target: 4e332ceaeac3d414353291195360ce3714807675 # sha-${{ github.sha }}
-          tags: |
-            latest
