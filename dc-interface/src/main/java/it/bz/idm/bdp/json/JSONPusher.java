@@ -21,6 +21,7 @@
  * SPDX-License-Identifier: GPL-3.0
  */
 package it.bz.idm.bdp.json;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -48,7 +49,8 @@ import it.bz.idm.bdp.util.Utils;
 import static net.logstash.logback.argument.StructuredArguments.v;
 
 /**
- * Send data as JSON-format to the writer. Implementation with spring REST template.
+ * Send data as JSON-format to the writer. Implementation with spring REST
+ * template.
  *
  * @author Patrick Bertolla
  *
@@ -73,28 +75,33 @@ public abstract class JSONPusher extends DataPusher {
 	@PostConstruct
 	public void init() {
 		super.init();
-		this.url = "http://" + config.getString(HOST_KEY)+":"+config.getString(PORT_KEY)+config.getString(JSON_ENDPOINT);
+		this.url = "http://" + config.getString(HOST_KEY) + ":" + config.getString(PORT_KEY)
+				+ config.getString(JSON_ENDPOINT);
 	}
 
 	@Override
 	public Object pushData(String stationType, DataMapDto<? extends RecordDtoImpl> dto) {
 		LOG.info(
-			"JSONPusher/pushData",
-			v("provenance", provenance)
-		);
+				"JSONPusher/pushData",
+				v("provenance", provenance));
 		this.pushProvenance();
 		dto.setProvenance(this.provenance.getUuid());
+
+		if (dto.getBranch() == null || dto.getBranch().isEmpty()) {
+			LOG.warn("JSONPusher/pushData : Dto is empty. Returning!");
+			return null;
+		}
+
 		return restTemplate
-			.exchange(
-				url + PUSH_RECORDS + "{stationType}?prn={}&prv={}",
-				HttpMethod.POST,
-				new HttpEntity<DataMapDto<? extends RecordDtoImpl>>(dto),
-				Object.class,
-				stationType,
-				provenance.getDataCollector(),
-				provenance.getDataCollectorVersion()
-			)
-			.getBody();
+				.exchange(
+						url + PUSH_RECORDS + "{stationType}?prn={}&prv={}",
+						HttpMethod.POST,
+						new HttpEntity<DataMapDto<? extends RecordDtoImpl>>(dto),
+						Object.class,
+						stationType,
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion())
+				.getBody();
 	}
 
 	private void pushProvenance() {
@@ -106,17 +113,15 @@ public abstract class JSONPusher extends DataPusher {
 			return;
 		}
 		LOG.info(
-			"JSONPusher/pushProvenance",
-			v("provenance", provenance)
-		);
+				"JSONPusher/pushProvenance",
+				v("provenance", provenance));
 		ResponseEntity<String> provenanceUuid = restTemplate.exchange(
-			url + PROVENANCE + "?prn={}&prv={}",
-			HttpMethod.POST,
-			new HttpEntity<ProvenanceDto>(this.provenance),
-			String.class,
-			provenance.getDataCollector(),
-			provenance.getDataCollectorVersion()
-		);
+				url + PROVENANCE + "?prn={}&prv={}",
+				HttpMethod.POST,
+				new HttpEntity<ProvenanceDto>(this.provenance),
+				String.class,
+				provenance.getDataCollector(),
+				provenance.getDataCollectorVersion());
 		this.provenance.setUuid(provenanceUuid.getBody());
 	}
 
@@ -132,46 +137,38 @@ public abstract class JSONPusher extends DataPusher {
 	@Override
 	public Object syncStations(String stationType, StationList stations) {
 		LOG.info(
-			"JSONPusher/syncStations",
-			v(
-				"parameters", Utils.mapOf(
-					"stationType", stationType
-				)
-			),
-			v("provenance", provenance)
-		);
+				"JSONPusher/syncStations",
+				v(
+						"parameters", Utils.mapOf(
+								"stationType", stationType)),
+				v("provenance", provenance));
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("JSONPusher/syncStation: No stations given. Returning!");
 			return null;
 		}
 		LOG.info(
-			"JSONPusher/syncStation: Pushing {} stations to the writer",
-			stations.size()
-		);
+				"JSONPusher/syncStation: Pushing {} stations to the writer",
+				stations.size());
 		return restTemplate
-			.exchange(
-				url + SYNC_STATIONS + "{stationType}?prn={}&prv={}",
-				HttpMethod.POST,
-				new HttpEntity<StationList>(stations),
-				Object.class,
-				stationType,
-				provenance.getDataCollector(),
-				provenance.getDataCollectorVersion()
-			)
-			.getBody();
+				.exchange(
+						url + SYNC_STATIONS + "{stationType}?prn={}&prv={}",
+						HttpMethod.POST,
+						new HttpEntity<StationList>(stations),
+						Object.class,
+						stationType,
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion())
+				.getBody();
 	}
 
 	@Override
 	public List<Object> syncStations(String stationType, StationList stations, int chunkSize) {
 		LOG.info(
-			"JSONPusher/syncStations",
-			v(
-				"parameters", Utils.mapOf(
-					"stationType", stationType
-				)
-			),
-			v("provenance", provenance)
-		);
+				"JSONPusher/syncStations",
+				v(
+						"parameters", Utils.mapOf(
+								"stationType", stationType)),
+				v("provenance", provenance));
 		if (stations == null || stations.isEmpty()) {
 			LOG.warn("JSONPusher/syncStation: No stations given. Returning!");
 			return null;
@@ -181,11 +178,10 @@ public abstract class JSONPusher extends DataPusher {
 			chunkSize = STATION_CHUNK_SIZE;
 		int chunks = (int) Math.ceil((float) stations.size() / chunkSize);
 		LOG.info(
-			"JSONPusher/syncStation: Syncing {} stations in {} chunks of a maximum size {}!",
-			stations.size(),
-			chunks,
-			STATION_CHUNK_SIZE
-		);
+				"JSONPusher/syncStation: Syncing {} stations in {} chunks of a maximum size {}!",
+				stations.size(),
+				chunks,
+				STATION_CHUNK_SIZE);
 
 		List<Object> results = new ArrayList<>();
 		for (int i = 0; i < chunks; i++) {
@@ -198,14 +194,13 @@ public abstract class JSONPusher extends DataPusher {
 
 			if (stationChunk == null || stationChunk.isEmpty()) {
 				LOG.warn(
-					"JSONPusher/syncStation: No stations in chunk {} of {}. Skipping!",
-					i+1,
-					chunks
-				);
+						"JSONPusher/syncStation: No stations in chunk {} of {}. Skipping!",
+						i + 1,
+						chunks);
 				continue;
 			}
 
-			LOG.info("JSONPusher/syncStation: Chunk {} of {}", i+1, chunks);
+			LOG.info("JSONPusher/syncStation: Chunk {} of {}", i + 1, chunks);
 			results.add(syncStations(stationType, stationChunk));
 		}
 		LOG.info("JSONPusher/syncStation: READY!");
@@ -216,33 +211,28 @@ public abstract class JSONPusher extends DataPusher {
 	@Override
 	public Object syncDataTypes(String stationType, List<DataTypeDto> data) {
 		LOG.info(
-			"JSONPusher/syncDataTypes",
-			v(
-				"parameters", Utils.mapOf(
-					"stationType", stationType
-				)
-			),
-			v("provenance", provenance)
-		);
+				"JSONPusher/syncDataTypes",
+				v(
+						"parameters", Utils.mapOf(
+								"stationType", stationType)),
+				v("provenance", provenance));
 
 		if (data == null) {
 			LOG.warn("JSONPusher/syncDataTypes: No data types given. Returning!");
 			return null;
 		}
 		LOG.info(
-			"JSONPusher/syncDataTypes: Pushing {} data types to the writer",
-			data.size()
-		);
+				"JSONPusher/syncDataTypes: Pushing {} data types to the writer",
+				data.size());
 		return restTemplate
-			.exchange(
-				url + SYNC_DATA_TYPES + "?prn={}&prv={}",
-				HttpMethod.POST,
-				new HttpEntity<List<DataTypeDto>>(data),
-				Object.class,
-				provenance.getDataCollector(),
-				provenance.getDataCollectorVersion()
-			)
-			.getBody();
+				.exchange(
+						url + SYNC_DATA_TYPES + "?prn={}&prv={}",
+						HttpMethod.POST,
+						new HttpEntity<List<DataTypeDto>>(data),
+						Object.class,
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion())
+				.getBody();
 	}
 
 	public Object syncDataTypes(List<DataTypeDto> data) {
@@ -252,27 +242,24 @@ public abstract class JSONPusher extends DataPusher {
 	@Override
 	public Object getDateOfLastRecord(String stationCode, String dataType, Integer period) {
 		LOG.info(
-			"JSONPusher/getDateOfLastRecord",
-			v(
-				"parameters", Utils.mapOf(
-					"stationCode", stationCode,
-					"dataType", dataType,
-					"period", period
-				)
-			),
-			v("provenance", provenance)
-		);
+				"JSONPusher/getDateOfLastRecord",
+				v(
+						"parameters", Utils.mapOf(
+								"stationCode", stationCode,
+								"dataType", dataType,
+								"period", period)),
+				v("provenance", provenance));
 		return restTemplate
-			.getForObject(
-				url + GET_DATE_OF_LAST_RECORD + "{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
-				Date.class,
-				this.integreenTypology,
-				stationCode,
-				dataType,
-				period,
-				provenance.getDataCollector(),
-				provenance.getDataCollectorVersion()
-			);
+				.getForObject(
+						url + GET_DATE_OF_LAST_RECORD
+								+ "{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
+						Date.class,
+						this.integreenTypology,
+						stationCode,
+						dataType,
+						period,
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion());
 	}
 
 	@Override
@@ -283,24 +270,20 @@ public abstract class JSONPusher extends DataPusher {
 	@Override
 	public List<StationDto> fetchStations(String stationType, String origin) {
 		LOG.info(
-			"JSONPusher/fetchStations",
-			v(
-				"parameters", Utils.mapOf(
-					"stationType", stationType,
-					"origin", origin
-				)
-			),
-			v("provenance", provenance)
-		);
+				"JSONPusher/fetchStations",
+				v(
+						"parameters", Utils.mapOf(
+								"stationType", stationType,
+								"origin", origin)),
+				v("provenance", provenance));
 		StationDto[] object = restTemplate
-			.getForObject(
-				url + STATIONS +"{datasourceName}/?origin={origin}&prn={}&prv={}",
-				StationDto[].class,
-				stationType == null ? this.integreenTypology : stationType,
-				origin,
-				provenance.getDataCollector(),
-				provenance.getDataCollectorVersion()
-			);
+				.getForObject(
+						url + STATIONS + "{datasourceName}/?origin={origin}&prn={}&prv={}",
+						StationDto[].class,
+						stationType == null ? this.integreenTypology : stationType,
+						origin,
+						provenance.getDataCollector(),
+						provenance.getDataCollectorVersion());
 		return Arrays.asList(object);
 	}
 
