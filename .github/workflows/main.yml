@@ -133,7 +133,7 @@ jobs:
 
           # Security
           X_SECURITY_ALLOWED_ORIGINS: "*"
-          X_KEYCLOAK_URL: "https://auth.opendatahub.bz.it/auth"
+          X_KEYCLOAK_URL: "https://auth.opendatahub.com/auth"
           X_KEYCLOAK_SSL_REQUIRED: "none"
           X_KEYCLOAK_REALM: "noi"
           X_KEYCLOAK_CLIENT_ID: "odh-mobility-writer"
