@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+--
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 /*
  * If you use migration scripts within Java Application, then you need a "mvn clean",
  * because otherwise the copy inside the "target" folder gets used, which might be outdated

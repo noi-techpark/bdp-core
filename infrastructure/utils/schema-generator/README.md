@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # BIG DATA PLATFORM - Schema Generator
 
 Generate a schema dump of all entities inside a given path and write it into a file.

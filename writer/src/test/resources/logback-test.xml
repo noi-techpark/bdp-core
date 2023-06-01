@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 <configuration>
 
 	<appender name="json" class="ch.qos.logback.core.ConsoleAppender">

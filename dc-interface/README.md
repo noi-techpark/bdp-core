@@ -1,4 +1,8 @@
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 
+SPDX-License-Identifier: CC0-1.0
+-->
 
 ### Security-Oauth
 set the following environment variables to make your datacollector work

@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: bdp-core
+Upstream-Contact: NOI Techpark <digital@noi.bz.it>
+Source: https://github.com/noi-techpark/bdp-core
+
+Files: .github/* infrastructure/ansible/* infrastructure/docker/* infrastructure/jenkins/* .gitignore .dockerignore .editorconfig .env.example calls.http LICENSE dc-interface/**/*.properties dto/**/*.properties infrastructure/utils/schema-generator/**/*.properties writer/**/*.properties dto/src/main/java/META-INF/MANIFEST.MF writer/src/main/resources/META-INF/additional-spring-configuration-metadata.json
+Copyright: (c) NOI Techpark <digital@noi.bz.it>
+License: CC0-1.0
