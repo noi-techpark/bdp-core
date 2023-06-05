@@ -37,7 +37,7 @@ jobs:
   # Deploy Test
   deploy-test:
     runs-on: ubuntu-20.04
-    if: github.ref == 'refs/heads/testtag'
+    if: github.ref == 'refs/heads/main'
     needs: test
     concurrency: deploy-test
     steps:
