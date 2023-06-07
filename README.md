@@ -139,7 +139,7 @@ Please use the `curl` commands inside the chapter
 ### Getting started natively
 
 If you do not want to use docker, you can also start this application manually.
-You need Java 8 and maven, and a Postgres DB. Postgresql can eventually also be
+You need Java 17 and maven, and a Postgres DB. Postgresql can eventually also be
 started with our [Docker setup](#getting-started-with-docker). Just call
 `docker-compose up -d db`. It runs on port 5555. Alternatively, install and
 start your own Postgresql instance.

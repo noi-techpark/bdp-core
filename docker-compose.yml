@@ -5,14 +5,14 @@
 version: "3.4"
 services:
   app:
-    image: maven:3-jdk-8-alpine
+    image: maven:3-eclipse-temurin-17-alpine
     depends_on:
       - db
     env_file:
       - .env
     environment:
       MAVEN_CONFIG: /var/maven/.m2
-      MAVEN_OPTS: -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8990
+      MAVEN_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8990
       SERVER_PORT: ${SERVER_PORT}
       SPRING_PROFILE: ${SPRING_PROFILE}
     command: >

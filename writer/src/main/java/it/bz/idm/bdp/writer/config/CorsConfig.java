@@ -22,7 +22,7 @@ public class CorsConfig implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 		registry
 			.addMapping("/**")
-			.allowedOrigins(allowedOrigins)
+			.allowedOriginPatterns(allowedOrigins)
 			.allowedMethods(CorsConfiguration.ALL)
 			.allowedHeaders(CorsConfiguration.ALL)
 			.allowCredentials(true);

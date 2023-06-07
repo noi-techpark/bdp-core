@@ -1,4 +1,4 @@
-FROM tomcat:8.5-jdk8-openjdk-slim-buster
+FROM tomcat:9.0.75-jdk17-temurin
 RUN apt-get update \
  && apt-get -y install --no-install-recommends wget \
  && apt-get clean \

@@ -37,7 +37,7 @@ SPDX-License-Identifier: CC0-1.0
 			<dependency>
 				<groupId>org.keycloak.bom</groupId>
 				<artifactId>keycloak-adapter-bom</artifactId>
-				<version>4.1.0.Final</version>
+				<version>21.0.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

@@ -7,6 +7,7 @@ package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -462,11 +463,13 @@ public class Station {
 			if (parent != null)
 				existingStation.setParent(parent);
 		}
-		syncMetaData(em, dto.getMetaData(), existingStation);
-
+		
 		/* We do not need to check for NULL, nor empty strings, because the writer will take care of that */
 		existingStation.setName(dto.getName());
 		existingStation.setActive(true);
+
+		syncMetaData(em, dto.getMetaData(), existingStation);
+
 		em.merge(existingStation);
 	}
 
@@ -482,8 +485,21 @@ public class Station {
 		if (metaData == null)
 			return;
 
+		//Map<String, Object> stationMeta = new HashMap<>();
+		//stationMeta.put("code", station.getStationcode());
+		//stationMeta.put("name", station.getName());
+		//stationMeta.put("origin", station.getOrigin());
+		//stationMeta.put("type", station.getOrigin());
+		//stationMeta.put("active", station.getOrigin());
+		//stationMeta.put("available", station.getOrigin());
+		//stationMeta.put("coordinate", Map.of(
+		//	"x", station.pointprojection.getX(),
+		//	"y", station.pointprojection.getY(),
+		//	"srid", station.pointprojection.getSRID()));
+		//metaData.put("station", stationMeta);
+
 		boolean metaDataExists = (station.getMetaData() != null && station.getMetaData().getJson() != null);
-		if (!metaDataExists || !station.getMetaData().getJson().equals(metaData)) {
+		if (!metaDataExists || !metaData.equals(station.getMetaData().getJson())) {
 			station.setMetaData(metaData);
 			em.persist(station.getMetaData());
 		}
