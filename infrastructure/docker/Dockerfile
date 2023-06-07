@@ -1,6 +1,5 @@
-FROM tomcat:9.0.75-jdk17-temurin
-RUN apt-get update \
- && apt-get -y install --no-install-recommends wget \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-COPY writer/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /bdp
+RUN apk add --no-cache wget
+COPY writer/target/bdp.jar /bdp/bdp.jar
+CMD [ "java", "-jar", "bdp.jar" ]

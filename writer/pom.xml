@@ -16,7 +16,7 @@ SPDX-License-Identifier: CC0-1.0
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-	<packaging>${packaging}</packaging>	<!-- jar packaging needed by infrastructure/utils/schema-generator -->
+	<packaging>jar</packaging>	<!-- jar packaging needed by infrastructure/utils/schema-generator -->
 	<groupId>it.bz.idm.bdp</groupId>
 	<artifactId>writer</artifactId>
 	<description>Data Writer for the Big Data Platform</description>
@@ -183,12 +183,9 @@ SPDX-License-Identifier: CC0-1.0
 	</repositories>
 
 	<profiles>
-		<!-- war packaging for the REST API deployment -->
+		<!-- packaging for the REST API deployment -->
 		<profile>
 			<id>default</id>
-			<properties>
-				<packaging>war</packaging>
-			</properties>
 			<build>
 				<finalName>${finalName}</finalName>
 				<plugins>
@@ -206,9 +203,6 @@ SPDX-License-Identifier: CC0-1.0
 		<!-- jar packaging needed by infrastructure/utils/schema-generator -->
 		<profile>
 			<id>generator</id>
-			<properties>
-				<packaging>jar</packaging>
-			</properties>
 		</profile>
 	</profiles>
 
