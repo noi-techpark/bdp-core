@@ -13,7 +13,7 @@ SPDX-License-Identifier: CC0-1.0
 	<artifactId>core</artifactId>
 	<packaging>pom</packaging>
 	<!-- Make sure to update also .github/workflows + must correspond to project.properties.revision -->
-	<version>7.4.0</version>
+	<version>8.0.0</version>
     <inceptionYear>2019</inceptionYear>
 
 	<parent>
@@ -26,7 +26,7 @@ SPDX-License-Identifier: CC0-1.0
 
 	<properties>
 		<!-- Make sure to update also .github/workflows + must correspond to project.version -->
-		<revision>7.4.0</revision>
+		<revision>8.0.0</revision>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>17</java.version>
