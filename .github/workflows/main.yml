@@ -73,7 +73,7 @@ jobs:
           X_LOG_STYLE: "json"
           X_LOG_LEVEL: "info"
           X_ROOT_LOG_LEVEL : "info"
-          X_HIBERNATE_LOG_LEVEL: "warning"
+          X_HIBERNATE_LOG_LEVEL: "warn"
           X_HIBERNATE_SQL_LOG: "false"
 
       - name: Build project
@@ -146,14 +146,14 @@ jobs:
           X_LOG_STYLE: "json"
           X_LOG_LEVEL: "info"
           X_ROOT_LOG_LEVEL : "info"
-          X_HIBERNATE_LOG_LEVEL: "warning"
+          X_HIBERNATE_LOG_LEVEL: "warn"
           X_HIBERNATE_SQL_LOG: "false"
 
       - name: Build project
         uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          build-command: 'mvn -B -DskipTests -DfinalName=ROOT --projects writer --also-make clean package'
+          build-command: 'mvn -B -DskipTests -DfinalName=bdp --projects writer --also-make clean package'
 
       - name: Build and push images
         uses: noi-techpark/github-actions/docker-build-and-push@v2
