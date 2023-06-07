@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     ports:
-      - ${SERVER_PORT}:8080
+      - ${SERVER_PORT}:${SERVER_PORT}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
       interval: 20s
