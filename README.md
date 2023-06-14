@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.com>
 
 SPDX-License-Identifier: CC0-1.0
 -->
@@ -9,7 +9,7 @@ SPDX-License-Identifier: CC0-1.0
 ![REUSE Compliance](https://github.com/noi-techpark/bdp-core/actions/workflows/reuse.yml/badge.svg)
 [![CI](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml)
 
-The Big Data Platform is part of the [Open Data Hub](http://opendatahub.bz.it/)
+The Big Data Platform is part of the [Open Data Hub](http://opendatahub.com/)
 project. It collects and exposes data sets of various domains.
 
 This platform collects heterogeneous data of different sources and different
@@ -198,7 +198,7 @@ curl -X GET "http://localhost:8999/json/stations" \
 
 You should get an empty JSON list as result.
 
-Write an email to `help@opendatahub.bz.it`, if you want to get the `client_secret`
+Write an email to `help@opendatahub.com`, if you want to get the `client_secret`
 and an Open Data Hub OAuth2 account for a non-development setup.
 
 ### DAL
@@ -403,8 +403,8 @@ Include the following snippet in your `pom.xml` file:
 ```
 	<repositories>
 		<repository>
-			<id>maven-repo.opendatahub.bz.it</id>
-			<url>https://maven-repo.opendatahub.bz.it/snapshot</url>
+			<id>maven-repo.opendatahub.com</id>
+			<url>https://maven-repo.opendatahub.com/snapshot</url>
 		</repository>
 	</repositories>
 ```
@@ -447,12 +447,12 @@ Create a file `~/.m2/settings.xml`, and copy/paste the following code:
 <settings>
     <servers>
         <server>
-            <id>maven-repo.opendatahub.bz.it-release</id>
+            <id>maven-repo.opendatahub.com-release</id>
             <username>your-remote-repos-username</username>
             <password>your-remote-repos-password</password>
         </server>
         <server>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <id>maven-repo.opendatahub.com-snapshot</id>
             <username>your-remote-repos-username</username>
             <password>your-remote-repos-password</password>
         </server>
@@ -486,7 +486,7 @@ https://github.com/noi-techpark/bdp-commons to start a new data collector.
 
 ### Support
 
-For support, please contact [help@opendatahub.bz.it](mailto:help@opendatahub.bz.it).
+For support, please contact [help@opendatahub.com](mailto:help@opendatahub.com).
 
 ### Contributing
 
@@ -497,7 +497,7 @@ instructions.
 ### Documentation
 
 More documentation can be found at
-[https://docs.opendatahub.bz.it](https://docs.opendatahub.bz.it).
+[https://docs.opendatahub.com](https://docs.opendatahub.com).
 
 ### License
 
