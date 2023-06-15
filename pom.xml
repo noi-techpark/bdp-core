@@ -37,8 +37,8 @@ SPDX-License-Identifier: CC0-1.0
 
 	<repositories>
 		<repository>
-			<id>maven-repo.opendatahub.bz.it</id>
-			<url>https://maven-repo.opendatahub.bz.it/release</url>
+			<id>maven-repo.opendatahub.com</id>
+			<url>https://maven-repo.opendatahub.com/release</url>
 		</repository>
 	</repositories>
 
