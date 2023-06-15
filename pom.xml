@@ -110,12 +110,12 @@ SPDX-License-Identifier: CC0-1.0
 
 	<distributionManagement>
         <snapshotRepository>
-            <id>maven-repo.opendatahub.bz.it-snapshot</id>
+            <id>maven-repo.opendatahub.com-snapshot</id>
             <name>Open Data Hub AWS S3 Snapshot Repository</name>
             <url>s3://it.bz.opendatahub/snapshot</url>
         </snapshotRepository>
         <repository>
-            <id>maven-repo.opendatahub.bz.it-release</id>
+            <id>maven-repo.opendatahub.com-release</id>
             <name>Open Data Hub AWS S3 Release Repository</name>
             <url>s3://it.bz.opendatahub/release</url>
         </repository>

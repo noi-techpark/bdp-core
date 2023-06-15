@@ -21,7 +21,7 @@ pipeline {
         AWS_SECRET_KEY = credentials('s3_repo_password')
         REL_TYPE = "${params.BRANCH == "prod" ? "release" : "snapshot"}"
         VERSION = "${params.BRANCH == "prod" ? "${params.TAG}" : "${params.TAG}-SNAPSHOT"}"
-        S3_REPO_ID = "${params.BRANCH == "prod" ? "maven-repo.opendatahub.bz.it-release": "maven-repo.opendatahub.bz.it-snapshot"}"
+        S3_REPO_ID = "${params.BRANCH == "prod" ? "maven-repo.opendatahub.com-release": "maven-repo.opendatahub.com-snapshot"}"
     }
 
     stages {
@@ -63,7 +63,7 @@ pipeline {
             when {expression {return "${params.BRANCH}" == "prod"}}
             steps {
                 sshagent (credentials: ['jenkins_github_ssh_key']) {
-                    sh "git config --global user.email 'info@opendatahub.bz.it'"
+                    sh "git config --global user.email 'info@opendatahub.com'"
                     sh "git config --global user.name 'Jenkins'"
                     sh "git commit -a -m 'Version ${VERSION}' --allow-empty"
                     sh "git tag -d ${VERSION} || true"

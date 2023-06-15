@@ -15,7 +15,7 @@ test "$TYPE" = "release" -o "$TYPE" = "snapshot" || {
 }
 
 ### Configuration
-REP_ID="maven-repo.opendatahub.bz.it"
+REP_ID="maven-repo.opendatahub.com"
 REP_URL="https://maven-repo.opendatahub.com/$TYPE"
 XMLNS=http://maven.apache.org/POM/4.0.0
 CMD="xmlstarlet ed -P -L -N pom=$XMLNS"
