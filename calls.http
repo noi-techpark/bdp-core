@@ -33,7 +33,7 @@ grant_type=password
 
 #@host=https://mobility.share.opendatahub.com
 @host=http://localhost:8999
-@host=https://mobility.share.opendatahub.testingmachine.eu
+#@host=https://mobility.share.opendatahub.testingmachine.eu
 @authtoken = {{login.response.body.access_token}}
 
 

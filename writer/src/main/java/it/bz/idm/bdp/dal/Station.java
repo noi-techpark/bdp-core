@@ -7,7 +7,6 @@ package it.bz.idm.bdp.dal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +63,6 @@ import static net.logstash.logback.argument.StructuredArguments.v;
 @Table(name = "station", uniqueConstraints = @UniqueConstraint(columnNames = { "stationcode", "stationtype" }))
 @Entity
 public class Station {
-
 	private static final Logger LOG = LoggerFactory.getLogger(Station.class);
 
 	public static final String GEOM_CRS = "EPSG:4326";
@@ -413,6 +411,7 @@ public class Station {
 				);
 			}
 		}
+		writeStationHistory(em, null, null, stationCodes);
 		em.getTransaction().commit();
 		if (syncState) {
 			String origin = data.get(0).getOrigin();
@@ -519,7 +518,7 @@ public class Station {
 	}
 
 	/**
-	 * Synchronizes stations state, active stations are provided by a  data collector.
+	 * Synchronizes stations state, active stations are provided by a data collector.
 	 * Queries database for stations with a specific origin and if provided, station type.
 	 * Deactivates stations in DB which are not in the provided list and activates the ones which are.
 	 *
@@ -545,6 +544,7 @@ public class Station {
 			if (station.getActive() == null || isActive != station.getActive()){
 				station.setActive(isActive);
 				em.merge(station);
+				
 			}
 		}
 	}
@@ -572,6 +572,7 @@ public class Station {
 		String provenanceVersion,
 		boolean onlyActivation
 	) {
+		int updatedRecordsCount;
 		if (!onlyActivation && (origin == null || origin.isEmpty())) {
 			Log
 				.init(LOG, "syncStationStates")
@@ -581,7 +582,7 @@ public class Station {
 		}
 
 		if (onlyActivation) {
-			return QueryBuilder
+			updatedRecordsCount = QueryBuilder
 				.init(em)
 				.nativeQuery()
 				.addSql("update {h-schema}station s set active = true")
@@ -593,19 +594,21 @@ public class Station {
 				.setParameter("stationlist", stationCodeList)
 				.buildNative()
 				.executeUpdate();
+		} else {
+			updatedRecordsCount =  QueryBuilder
+				.init(em)
+				.nativeQuery()
+				.addSql("update {h-schema}station s set active = case")
+				.addSql("when s.stationcode in :stationlist then true else false end")
+				.addSql("where s.stationtype = :stationtype")
+				.setParameter("stationlist", stationCodeList)
+				.setParameter("stationtype", stationType)
+				.setParameterIfNotEmpty("origin", origin, "and s.origin = :origin")
+				.buildNative()
+				.executeUpdate();
 		}
-
-		return QueryBuilder
-			.init(em)
-			.nativeQuery()
-			.addSql("update {h-schema}station s set active = case")
-			.addSql("when s.stationcode in :stationlist then true else false end")
-			.addSql("where s.stationtype = :stationtype")
-			.setParameter("stationlist", stationCodeList)
-			.setParameter("stationtype", stationType)
-			.setParameterIfNotEmpty("origin", origin, "and s.origin = :origin")
-			.buildNative()
-			.executeUpdate();
+		writeStationHistory(em, stationType, origin, stationCodeList);
+		return updatedRecordsCount;
 	}
 
 	/**
@@ -677,4 +680,85 @@ public class Station {
 		}
 	}
 
+	/**
+	 * The table stationhistory is used to track changes on the station table (think of how measurementhistory tracks measurement)
+	 * This method looks at all stations fitting the filter (in absense of any filter it's all stations)
+	 * If the most recent history record is missing or not equal to our station, we insert one
+	 * 
+	 * @param em entity manager
+	 * @param stationType typology of the {@link Station}s to consider for history update (optional)
+	 * @param origin origin of the stations to consider for history update (optional)
+	 * @param stationCodes list of station IDs to consider for history update (optional)
+	 */
+	private static void writeStationHistory(EntityManager em, String stationType, String origin, List<String> stationCodes) {
+		try{
+			QueryBuilder
+				.init(em)
+				.nativeQuery()
+				// first retrieve a list of current stations, left outer join the most recent history (which should be equal to it)
+				// left outer join because it could be a new station where no history exists yet
+				.addSql(
+					"with current_history as (",
+					"        select",
+					"                s.id       		as s_id,",
+					"                s.active           as s_active,",
+					"                s.name             as s_name,",
+					"                s.origin           as s_origin,",
+					"                s.pointprojection  as s_pointprojection,",
+					"                s.stationcode      as s_stationcode,",
+					"                s.stationtype      as s_stationtype,",
+					"                s.meta_data_id     as s_meta_data_id,",
+					"                s.parent_id        as s_parent_id,",
+					"                h.id               as h_id,",
+					"                h.active           as h_active,",
+					"                h.name             as h_name,",
+					"                h.origin           as h_origin,",
+					"                h.pointprojection  as h_pointprojection,",
+					"                h.stationcode      as h_stationcode,",
+					"                h.stationtype      as h_stationtype,",
+					"                h.meta_data_id      as h_meta_data_id,",
+					"                h.parent_id        as h_parent_id",
+					"        from {h-schema}station s",
+					"        left outer join {h-schema}stationhistory h on h.station_id = s.id ",
+					"			and h.created_on = (select max(created_on) from {h-schema}stationhistory where station_id = s.id)",
+					// where 1=1 because all other were conditions are optional and start with 'AND'
+					"        where 1=1")
+				// apply optional filters to the stations we consider
+				.setParameterIf("stationType", stationType, "AND s.stationtype = :stationType", stationType != null)
+				.setParameterIf("stationList", stationCodes, "AND s.stationcode in :stationList", stationCodes != null)
+				.setParameterIf("origin", origin, "AND s.origin = :origin", origin != null)
+				// Now filter for only those stations where the most recent history differs from the current state.
+				// We do this by comparing fields one to one in a null-safe way
+				// note that in case of missing history (all fields are null), these conditions trigger as well
+				// s_* prefix names are our station fields
+				// h_* prefix names are our history fields
+				.addSql(
+					"),",
+					"changed_station_ids as (",
+					"  select s_id",
+					"    from current_history",
+					"    where s_active         is distinct from h_active",
+					"      or s_name            is distinct from h_name",
+					"      or s_origin          is distinct from h_origin",
+					// postgis geometry does not allow "is distinct from" operator, hence using st_equals instead,
+					// which has a more adequate semantic (look up the documentation for differences to '=' operator)
+					"      or not st_equals(s_pointprojection, h_pointprojection)",
+					"      or s_stationcode     is distinct from h_stationcode",
+					"      or s_stationtype     is distinct from h_stationtype",
+					"      or s_meta_data_id    is distinct from h_meta_data_id",
+					"      or s_parent_id       is distinct from h_parent_id",
+					")")
+				// We've created a list of station IDs whose history is not up to date.
+				// Insert a new history record for each of those stations, using the current station data
+				.addSql(
+					"insert into {h-schema}stationhistory(id, created_on, station_id, active, name, origin, pointprojection, stationcode, stationtype, meta_data_id, parent_id)",
+					"select nextval('{h-schema}stationhistory_seq'), now(), id, active, name, origin, pointprojection, stationcode, stationtype, meta_data_id, parent_id",
+					"from {h-schema}station s",
+					"join changed_station_ids c on c.s_id = s.id")
+				.buildNative()
+				.executeUpdate();
+		} catch (Exception e) {
+			throw new JPAException("Unable to update station history", e);
+		}
+	}
 }
