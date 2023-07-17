@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Big Data Platform
 
-![REUSE Compliance](https://github.com/noi-techpark/bdp-core/actions/workflows/reuse.yml/badge.svg)
+[![REUSE Compliance](https://github.com/noi-techpark/bdp-core/actions/workflows/reuse.yml/badge.svg)](https://github.com/noi-techpark/odh-docs/wiki/REUSE#badges)
 [![CI](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/bdp-core/actions/workflows/main.yml)
 
 The Big Data Platform is part of the [Open Data Hub](http://opendatahub.com/)
