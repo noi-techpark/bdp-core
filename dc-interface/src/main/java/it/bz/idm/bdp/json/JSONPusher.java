@@ -5,12 +5,12 @@
 
 package it.bz.idm.bdp.json;
 
+import static net.logstash.logback.argument.StructuredArguments.v;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,6 @@ import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 import it.bz.idm.bdp.util.Utils;
 
-import static net.logstash.logback.argument.StructuredArguments.v;
-
 /**
  * Send data as JSON-format to the writer. Implementation with spring REST
  * template.
@@ -47,20 +45,10 @@ public abstract class JSONPusher extends DataPusher {
 	private static final String SYNC_STATIONS = "/syncStations/";
 	private static final String PUSH_RECORDS = "/pushRecords/";
 	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
-	private static final String JSON_ENDPOINT = "json_endpoint";
 	private static final String STATIONS = "/stations/";
 	private static final String PROVENANCE = "/provenance/";
 
 	protected RestTemplate restTemplate = new RestTemplate();
-	private String url;
-
-	@Override
-	@PostConstruct
-	public void init() {
-		super.init();
-		this.url = "http://" + config.getString(HOST_KEY) + ":" + config.getString(PORT_KEY)
-				+ config.getString(JSON_ENDPOINT);
-	}
 
 	@Override
 	public Object pushData(String stationType, DataMapDto<? extends RecordDtoImpl> dto) {
@@ -77,7 +65,7 @@ public abstract class JSONPusher extends DataPusher {
 
 		return restTemplate
 				.exchange(
-						url + PUSH_RECORDS + "{stationType}?prn={}&prv={}",
+						PUSH_RECORDS + "{stationType}?prn={}&prv={}",
 						HttpMethod.POST,
 						new HttpEntity<DataMapDto<? extends RecordDtoImpl>>(dto),
 						Object.class,
@@ -99,7 +87,7 @@ public abstract class JSONPusher extends DataPusher {
 				"JSONPusher/pushProvenance",
 				v("provenance", provenance));
 		ResponseEntity<String> provenanceUuid = restTemplate.exchange(
-				url + PROVENANCE + "?prn={}&prv={}",
+				PROVENANCE + "?prn={}&prv={}",
 				HttpMethod.POST,
 				new HttpEntity<ProvenanceDto>(this.provenance),
 				String.class,
@@ -134,7 +122,7 @@ public abstract class JSONPusher extends DataPusher {
 				stations.size());
 		return restTemplate
 				.exchange(
-						url + SYNC_STATIONS + "{stationType}?prn={}&prv={}",
+						SYNC_STATIONS + "{stationType}?prn={}&prv={}",
 						HttpMethod.POST,
 						new HttpEntity<StationList>(stations),
 						Object.class,
@@ -209,7 +197,7 @@ public abstract class JSONPusher extends DataPusher {
 				data.size());
 		return restTemplate
 				.exchange(
-						url + SYNC_DATA_TYPES + "?prn={}&prv={}",
+						SYNC_DATA_TYPES + "?prn={}&prv={}",
 						HttpMethod.POST,
 						new HttpEntity<List<DataTypeDto>>(data),
 						Object.class,
@@ -234,7 +222,7 @@ public abstract class JSONPusher extends DataPusher {
 				v("provenance", provenance));
 		return restTemplate
 				.getForObject(
-						url + GET_DATE_OF_LAST_RECORD
+						GET_DATE_OF_LAST_RECORD
 								+ "{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
 						Date.class,
 						this.integreenTypology,
@@ -261,7 +249,7 @@ public abstract class JSONPusher extends DataPusher {
 				v("provenance", provenance));
 		StationDto[] object = restTemplate
 				.getForObject(
-						url + STATIONS + "{datasourceName}/?origin={origin}&prn={}&prv={}",
+						STATIONS + "{datasourceName}/?origin={origin}&prn={}&prv={}",
 						StationDto[].class,
 						stationType == null ? this.integreenTypology : stationType,
 						origin,

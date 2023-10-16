@@ -15,6 +15,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
@@ -70,7 +71,7 @@ public class OAuth2ClientCredentialsFlowConfig {
         List<ClientRegistration> clients = new ArrayList<ClientRegistration>();
         ClientRegistration.Builder builder = ClientRegistration.withRegistrationId("odh");
         builder
-        .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
+        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
         .scope(env.getProperty("scope"))
         .authorizationUri(env.getProperty("authorizationUri"))
@@ -83,7 +84,7 @@ public class OAuth2ClientCredentialsFlowConfig {
         String ninjaSecret= env.getProperty("NINJA_SECRET");
         if (ninjaClient != null && !ninjaClient.isEmpty() && ninjaSecret != null && !ninjaSecret.isEmpty()) {
             ClientRegistration.Builder ninjaBuilder = ClientRegistration.withRegistrationId("ninja");
-            ninjaBuilder.clientAuthenticationMethod(ClientAuthenticationMethod.POST)
+            ninjaBuilder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
             .scope(env.getProperty("scope"))
             .authorizationUri(env.getProperty("authorizationUri"))
@@ -94,5 +95,10 @@ public class OAuth2ClientCredentialsFlowConfig {
             clients.add(ninjaBuilder.build());
         }
         return new InMemoryClientRegistrationRepository(clients);
+    }
+
+    @Bean
+    public OAuth2AuthorizedClientService authorizedClientService(@Autowired ClientRegistrationRepository repository) {
+        return new InMemoryOAuth2AuthorizedClientService(repository);
     }
 }

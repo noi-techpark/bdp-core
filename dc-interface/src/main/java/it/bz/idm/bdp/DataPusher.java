@@ -30,15 +30,6 @@ public abstract class DataPusher implements IntegreenPushable  {
 
 	public static final int STATION_CHUNK_SIZE = 25;
 
-	private static final String APPLICATION_PROPERTIES_FILE 		= "application.properties";
-	protected static final String ENDPOINT_KEY		   				= "bdp_endpoint";
-	protected static final String HOST_KEY							= "bdp_host";
-	protected static final String PORT_KEY							= "bdp_port";
-
-	protected static String DEFAULT_HOST 							= "localhost";
-	protected static Integer DEFAULT_PORT							= 8080;
-	protected static String DEFAULT_ENDPOINT						= "";
-
 	protected Configuration config;
 	protected String integreenTypology;
 	protected ProvenanceDto provenance;
@@ -52,7 +43,6 @@ public abstract class DataPusher implements IntegreenPushable  {
 	 */
 	@PostConstruct
 	public void init() {
-		initConfig();
 		connectToDataCenterCollector();
 		this.integreenTypology = initIntegreenTypology();
 		if (this.integreenTypology == null)
@@ -61,21 +51,6 @@ public abstract class DataPusher implements IntegreenPushable  {
 		if (!ProvenanceDto.isValid(provenanceCandidate))
 			throw new IllegalStateException("You need to provide a valid provenance to be able to send data");
 		this.provenance = provenanceCandidate;
-	}
-
-	/**
-	 * set host, port and endpoint of the writer module
-	 */
-	protected void initConfig() {
-		if (config == null)
-			try {
-				config = new PropertiesConfiguration(APPLICATION_PROPERTIES_FILE);
-				DEFAULT_HOST =  config.getString(HOST_KEY);
-				DEFAULT_PORT =	config.getInt(PORT_KEY);
-				DEFAULT_ENDPOINT = config.getString(ENDPOINT_KEY);
-			} catch (ConfigurationException e1) {
-				e1.printStackTrace();
-			}
 	}
 
 	public String getIntegreenTypology() {
