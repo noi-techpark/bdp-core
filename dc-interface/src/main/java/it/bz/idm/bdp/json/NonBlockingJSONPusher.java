@@ -10,9 +10,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,6 +26,8 @@ import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.StationDto;
 import it.bz.idm.bdp.dto.StationList;
 import it.bz.idm.bdp.util.Utils;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import reactor.core.publisher.Mono;
 
 import static net.logstash.logback.argument.StructuredArguments.v;
