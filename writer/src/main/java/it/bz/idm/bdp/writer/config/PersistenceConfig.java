@@ -7,8 +7,8 @@ package it.bz.idm.bdp.writer.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import it.bz.idm.bdp.dal.util.PropertiesWithEnv;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 @Configuration
 public class PersistenceConfig {

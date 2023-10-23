@@ -10,7 +10,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;

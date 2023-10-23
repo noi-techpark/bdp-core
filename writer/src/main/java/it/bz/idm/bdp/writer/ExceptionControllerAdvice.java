@@ -7,8 +7,8 @@ package it.bz.idm.bdp.writer;
 
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.hibernate.PropertyValueException;
 import org.springframework.http.HttpStatus;

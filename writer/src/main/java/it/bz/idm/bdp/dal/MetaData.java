@@ -8,22 +8,18 @@ package it.bz.idm.bdp.dal;
 import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import it.bz.idm.bdp.dto.StationDto;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 /**
  * <p>
@@ -36,7 +32,6 @@ import it.bz.idm.bdp.dto.StationDto;
  * @author Patrick Bertolla
  *
  */
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(name = "metadata")
 public class MetaData {
@@ -47,8 +42,7 @@ public class MetaData {
 	@ColumnDefault(value = "nextval('metadata_seq')")
 	protected Long id;
 
-	@Type(type = "jsonb")
-	@Column(columnDefinition = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	private Map<String, Object> json;
 
 	@ManyToOne

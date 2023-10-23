@@ -10,14 +10,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import it.bz.idm.bdp.dto.ExceptionDto;
 
@@ -27,7 +27,7 @@ import static net.logstash.logback.argument.StructuredArguments.v;
  * Interceptor on each http request to log its name and performance stats
  */
 @Component
-public class CustomRequestInterceptor extends HandlerInterceptorAdapter {
+public class CustomRequestInterceptor implements HandlerInterceptor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(
 		CustomRequestInterceptor.class

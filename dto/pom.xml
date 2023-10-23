@@ -27,14 +27,14 @@ SPDX-License-Identifier: GPL-3.0-only
 		<dependency>
 			<groupId>com.fasterxml.uuid</groupId>
 			<artifactId>java-uuid-generator</artifactId>
-			<version>4.0.1</version>
+			<version>4.3.0</version>
 		</dependency>
 
 		<!-- API Model Annotations in DTOs -->
 		<dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version>
+            <version>2.10.5</version>
         </dependency>
     </dependencies>
 

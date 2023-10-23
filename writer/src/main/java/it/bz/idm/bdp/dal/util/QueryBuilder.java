@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 /**
  * Create an instance of TypedQuery for executing a Java Persistence query language statement.
@@ -152,7 +152,7 @@ public class QueryBuilder {
 	}
 
 	/**
-	 * Build the current query and execute {@link javax.persistence.TypedQuery#getResultList}
+	 * Build the current query and execute {@link jakarta.persistence.TypedQuery#getResultList}
 	 *
 	 * @param resultClass Type of the query result
 	 * @return List of <code>resultClass</code> objects
@@ -171,7 +171,7 @@ public class QueryBuilder {
 
 	/**
 	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
-	 * return null, if {@link javax.persistence.TypedQuery#getResultList} has no results,
+	 * return null, if {@link jakarta.persistence.TypedQuery#getResultList} has no results,
 	 * and leave exceptions to proper errors.
 	 *
 	 * @param resultClass Type of the query result
@@ -183,11 +183,11 @@ public class QueryBuilder {
 
 	/**
 	 * Emulate getSingleResult without not-found or non-unique-result exceptions. Simply
-	 * return <code>alternative</code>, if {@link javax.persistence.TypedQuery#getResultList}
+	 * return <code>alternative</code>, if {@link jakarta.persistence.TypedQuery#getResultList}
 	 * has no results, and leave exceptions to proper errors.
 	 *
 	 * @param resultClass Type of the query result
-	 * @param alternative to be returned, if {@link javax.persistence.TypedQuery#getResultList} does not return results
+	 * @param alternative to be returned, if {@link jakarta.persistence.TypedQuery#getResultList} does not return results
 	 * @return topmost result or 'alternative' if not found
 	 */
 	@SuppressWarnings("unchecked")

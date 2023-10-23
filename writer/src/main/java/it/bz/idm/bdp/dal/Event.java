@@ -11,31 +11,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import javax.persistence.Column;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
-import com.vladmihalcea.hibernate.type.range.Range;
-
+import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
+import io.hypersistence.utils.hibernate.type.range.Range;
 import it.bz.idm.bdp.dal.util.QueryBuilder;
 import it.bz.idm.bdp.dto.EventDto;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Table(
 	name = "event",
@@ -44,10 +41,6 @@ import it.bz.idm.bdp.dto.EventDto;
 	}
 )
 @Entity
-@TypeDef(
-    typeClass = PostgreSQLRangeType.class,
-    defaultForType = Range.class
-)
 public class Event {
 
 	private static WKTReader wktReader = new WKTReader(Station.geometryFactory);
@@ -93,6 +86,7 @@ public class Event {
 
 	private Date createdOn;
 
+	@Type(PostgreSQLRangeType.class)
 	private Range<LocalDateTime> eventInterval;
 
 	@ManyToOne
@@ -105,7 +99,6 @@ public class Event {
 	private Provenance provenance;
 
 	@Lob
-	@Type(type = "org.hibernate.type.TextType")
 	private String description;
 
 	public Provenance getProvenance() {
