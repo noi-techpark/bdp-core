@@ -45,7 +45,7 @@ public class DtoTest {
 
 		assertFalse(childMapDto.getData().isEmpty());
 		assertTrue(dto.getData().isEmpty());
-		assertEquals(((SimpleRecordDto)childOfChildMapDto.getData().get(0)).getValue(),new Double(2));
+		assertEquals(((SimpleRecordDto)childOfChildMapDto.getData().get(0)).getValue(), Double.valueOf(2));
 	}
 
 	@Test
