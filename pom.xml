@@ -30,7 +30,6 @@ SPDX-License-Identifier: CC0-1.0
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>17</java.version>
-		<log4j2.version>2.21.0</log4j2.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 	</properties>
