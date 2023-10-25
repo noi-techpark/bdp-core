@@ -25,7 +25,7 @@ import jakarta.persistence.PersistenceUnit;
 @DataJpaTest
 @Import(PersistenceConfig.class)
 @ContextConfiguration(classes=Application.class)
-public class PersistenceITTest{
+public class PersistenceIT{
 
 	@PersistenceUnit
 	private EntityManagerFactory entityManagerFactory;

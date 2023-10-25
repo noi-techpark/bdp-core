@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -49,7 +48,7 @@ import it.bz.idm.bdp.writer.config.PersistenceConfig;
 @TestPropertySource(properties = {
 	"spring.flyway.enabled=false"
 })
-public class DataRetrievalITTest extends WriterTestSetup {
+public class DataRetrievalIT extends WriterTestSetup {
 
 	@Test
 	public void testStationFetch() {
