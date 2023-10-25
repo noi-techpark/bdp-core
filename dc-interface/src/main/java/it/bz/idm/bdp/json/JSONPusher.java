@@ -41,12 +41,12 @@ public abstract class JSONPusher extends DataPusher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(JSONPusher.class);
 
-	private static final String SYNC_DATA_TYPES = "/syncDataTypes/";
-	private static final String SYNC_STATIONS = "/syncStations/";
-	private static final String PUSH_RECORDS = "/pushRecords/";
-	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord/";
-	private static final String STATIONS = "/stations/";
-	private static final String PROVENANCE = "/provenance/";
+	private static final String SYNC_DATA_TYPES = "/syncDataTypes";
+	private static final String SYNC_STATIONS = "/syncStations";
+	private static final String PUSH_RECORDS = "/pushRecords";
+	private static final String GET_DATE_OF_LAST_RECORD = "/getDateOfLastRecord";
+	private static final String STATIONS = "/stations";
+	private static final String PROVENANCE = "/provenance";
 
 	protected RestTemplate restTemplate = new RestTemplate();
 
@@ -65,7 +65,7 @@ public abstract class JSONPusher extends DataPusher {
 
 		return restTemplate
 				.exchange(
-						PUSH_RECORDS + "{stationType}?prn={}&prv={}",
+						PUSH_RECORDS + "/{stationType}?prn={}&prv={}",
 						HttpMethod.POST,
 						new HttpEntity<DataMapDto<? extends RecordDtoImpl>>(dto),
 						Object.class,
@@ -223,7 +223,7 @@ public abstract class JSONPusher extends DataPusher {
 		return restTemplate
 				.getForObject(
 						GET_DATE_OF_LAST_RECORD
-								+ "{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
+								+ "/{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
 						Date.class,
 						this.integreenTypology,
 						stationCode,
@@ -249,7 +249,7 @@ public abstract class JSONPusher extends DataPusher {
 				v("provenance", provenance));
 		StationDto[] object = restTemplate
 				.getForObject(
-						STATIONS + "{datasourceName}/?origin={origin}&prn={}&prv={}",
+						STATIONS + "/{datasourceName}/?origin={origin}&prn={}&prv={}",
 						StationDto[].class,
 						stationType == null ? this.integreenTypology : stationType,
 						origin,
