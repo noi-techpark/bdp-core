@@ -10,6 +10,7 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=client_credentials
 &client_id=odh-mobility-datacollector-development
 &client_secret=7bd46f8f-c296-416d-a13d-dc81e68d0830
+&scope=openid
 
 ### Get access token for the writer (TEST DB)
 # @name login
@@ -33,7 +34,7 @@ grant_type=password
 
 #@host=https://mobility.share.opendatahub.com
 @host=http://localhost:8999
-@host=https://mobility.share.opendatahub.testingmachine.eu
+#@host=https://mobility.share.opendatahub.testingmachine.eu
 @authtoken = {{login.response.body.access_token}}
 
 
