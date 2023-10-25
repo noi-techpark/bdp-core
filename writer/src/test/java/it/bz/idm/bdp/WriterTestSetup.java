@@ -13,8 +13,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -59,7 +59,7 @@ public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 	protected Measurement measurementOld;
 	protected Provenance provenance;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		// Make sure no remainders left after last run
@@ -103,7 +103,7 @@ public abstract class WriterTestSetup extends AbstractJUnit4SpringContextTests {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		/*
 		 * Clean the database after tests have been run. We delete everything,

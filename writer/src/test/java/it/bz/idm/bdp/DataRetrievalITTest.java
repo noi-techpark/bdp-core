@@ -5,10 +5,10 @@
 
 package it.bz.idm.bdp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,22 +18,21 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.collections.map.SingletonMap;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import it.bz.idm.bdp.dal.DataType;
-import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Measurement;
+import it.bz.idm.bdp.dal.MeasurementAbstract;
 import it.bz.idm.bdp.dal.Station;
 import it.bz.idm.bdp.dto.DataMapDto;
 import it.bz.idm.bdp.dto.DataTypeDto;
@@ -41,15 +40,16 @@ import it.bz.idm.bdp.dto.EventDto;
 import it.bz.idm.bdp.dto.RecordDtoImpl;
 import it.bz.idm.bdp.dto.SimpleRecordDto;
 import it.bz.idm.bdp.dto.StationDto;
+import it.bz.idm.bdp.writer.Application;
+import it.bz.idm.bdp.writer.config.PersistenceConfig;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ComponentScan(basePackages = "it.bz.idm.bdp")
-@Component
-@WebAppConfiguration
+@SpringBootTest
+@Import(PersistenceConfig.class)
+@ContextConfiguration(classes=Application.class)
 @TestPropertySource(properties = {
 	"spring.flyway.enabled=false"
 })
-public class DataRetrievalIT extends WriterTestSetup {
+public class DataRetrievalITTest extends WriterTestSetup {
 
 	@Test
 	public void testStationFetch() {

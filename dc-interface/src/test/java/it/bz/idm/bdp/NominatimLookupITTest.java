@@ -5,15 +5,13 @@
 
 package it.bz.idm.bdp;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import it.bz.idm.bdp.util.NominatimException;
 import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
 
-public class NominatimLookupIT {
+public class NominatimLookupITTest {
 
 	private NominatimLocationLookupUtil util = new NominatimLocationLookupUtil();
 

@@ -10,26 +10,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+
+import it.bz.idm.bdp.writer.Application;
+import it.bz.idm.bdp.writer.config.PersistenceConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-
-import it.bz.idm.bdp.writer.config.PersistenceConfig;
-
+@DataJpaTest
 @Import(PersistenceConfig.class)
-public class PersistenceIT extends AbstractJUnit4SpringContextTests {
+@ContextConfiguration(classes=Application.class)
+public class PersistenceITTest{
 
 	@PersistenceUnit
 	private EntityManagerFactory entityManagerFactory;
 
 	private Map<String,Object> map = new HashMap<>();
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		map.put("He", new Integer(4));
 	}
