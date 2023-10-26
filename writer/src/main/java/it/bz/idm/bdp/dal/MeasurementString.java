@@ -61,8 +61,7 @@ public class MeasurementString extends MeasurementAbstract {
      * Ex. private String value; and private Double value; would not work
      *     inside MeasurementString and Measurement respectively
      */
-	@Lob
-	@Column(nullable = false, columnDefinition = "text")
+	@Column(nullable = false)
 	private String stringValue;
 
 	public MeasurementString() {
