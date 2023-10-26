@@ -306,7 +306,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 						if (em.getTransaction().isActive()){
                             em.getTransaction().rollback();
                         }
-                        LOG.error("Printing stack trace", ex);
+                        LOG.debug("Printing stack trace", ex);
                     }
                 }
             }
