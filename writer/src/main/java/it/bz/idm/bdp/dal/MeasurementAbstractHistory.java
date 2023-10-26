@@ -303,8 +303,10 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 							String.format("Exception '%s'... Skipping this measurement!", ex.getMessage()),
 							ex
 						);
-						if (em.getTransaction().isActive())
+						if (em.getTransaction().isActive()){
                             em.getTransaction().rollback();
+                        }
+                        LOG.error("Printing stack trace", ex);
                     }
                 }
             }
