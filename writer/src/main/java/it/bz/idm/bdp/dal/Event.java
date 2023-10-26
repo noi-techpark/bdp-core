@@ -98,8 +98,7 @@ public class Event {
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	private Provenance provenance;
 
-	@Lob
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "TEXT")
 	private String description;
 
 	public Provenance getProvenance() {
