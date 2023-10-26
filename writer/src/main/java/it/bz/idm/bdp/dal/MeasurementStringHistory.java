@@ -56,8 +56,8 @@ public class MeasurementStringHistory extends MeasurementAbstractHistory {
      * Ex. private String value; and private Double value; would not work
      *     inside MeasurementStringHistory and MeasurementHistory respectively
      */
-	@Column(nullable = false)
 	@Lob
+	@Column(nullable = false, columnDefinition = "text")
 	private String stringValue;
 
 	public MeasurementStringHistory() {

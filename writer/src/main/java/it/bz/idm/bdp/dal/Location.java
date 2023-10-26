@@ -31,6 +31,7 @@ public class Location {
 	protected Geometry geometry;
 
 	@Lob
+	@Column(columnDefinition = "text")
 	private String description;
 
 	public Geometry getGeometry() {

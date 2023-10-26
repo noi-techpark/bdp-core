@@ -99,6 +99,7 @@ public class Event {
 	private Provenance provenance;
 
 	@Lob
+	@Column(columnDefinition = "text")
 	private String description;
 
 	public Provenance getProvenance() {
