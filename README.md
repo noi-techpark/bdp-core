@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: NOI Techpark <digital@noi.com>
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 
 SPDX-License-Identifier: CC0-1.0
 -->
@@ -50,6 +50,7 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
     - [Contributing](#contributing)
     - [Documentation](#documentation)
     - [License](#license)
+    - [REUSE](#reuse)
 
 ----
 
