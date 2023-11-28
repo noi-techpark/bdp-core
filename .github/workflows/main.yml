@@ -3,12 +3,12 @@ name: CI/CD
 on:
   push:
     paths-ignore:
-      - 'dc-interface/**'
+      - 'client/**'
       - '.github/workflows/sdk.yml'
       - '*.md'
   pull_request:
     paths-ignore:
-      - 'dc-interface/**'
+      - 'client/**'
       - '.github/workflows/sdk.yml'
       - '*.md'
 

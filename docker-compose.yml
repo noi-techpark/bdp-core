@@ -20,7 +20,7 @@ services:
         -Duser.home=/var/maven \
         --also-make \
         --projects dto \
-        --projects dc-interface \
+        --projects client \
         clean install \
       && cd writer; mvn \
         -Dmaven.tomcat.port=${SERVER_PORT} \

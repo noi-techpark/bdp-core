@@ -39,9 +39,9 @@ DAL="$DALPATH/target/classes"
 CLASSPATH="$DTO:$DAL:$GEN"
 
 # Classes and paths
-GENERATORMAIN='it.bz.idm.bdp.tools.SchemaGenerator'
-CLASSPREFIX="it.bz.idm.bdp.dal"
-STRATEGYCLASS='it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
+GENERATORMAIN='com.opendatahub.timeseries.bdp.tools.SchemaGenerator'
+CLASSPREFIX="com.opendatahub.timeseries.bdp.dal"
+STRATEGYCLASS='com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy'
 
 # Output
 OUTPUTPATH="$BDPROOT/dal/src/main/resources/META-INF/sql"

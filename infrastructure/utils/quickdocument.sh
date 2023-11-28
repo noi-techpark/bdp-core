@@ -11,7 +11,7 @@ set -xeuo pipefail
 TMP=$(mktemp -d /tmp/bdpcoredoc.XXXXXX)
 
 wkhtmltopdf dto/target/site/dependencies.html "$TMP/dto-dependencies.pdf"
-wkhtmltopdf dc-interface/target/site/dependencies.html "$TMP/dc-interface-dependencies.pdf"
+wkhtmltopdf client/target/site/dependencies.html "$TMP/client-dependencies.pdf"
 wkhtmltopdf writer/target/site/dependencies.html "$TMP/writer-dependencies.pdf"
 
 pdfunite "$TMP"/*.pdf dependencies.pdf

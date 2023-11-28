@@ -11,14 +11,14 @@ SPDX-License-Identifier: GPL-3.0-only
     <modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>it.bz.idm.bdp</groupId>
+        <groupId>com.opendatahub.timeseries.bdp</groupId>
         <artifactId>core</artifactId>
 		<version>8.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
 	<packaging>jar</packaging>
-    <groupId>it.bz.idm.bdp</groupId>
+    <groupId>com.opendatahub.timeseries.bdp</groupId>
     <artifactId>dto</artifactId>
     <description>Data Transport Objects for an object-relational mapping</description>
 
