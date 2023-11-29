@@ -7,7 +7,7 @@ package com.opendatahub.timeseries.bdp.writer.dal.util;
 import org.slf4j.Logger;
 
 import com.opendatahub.timeseries.bdp.writer.dal.Provenance;
-import com.opendatahub.timeseries.bdp.dto.util.Utils;
+import com.opendatahub.timeseries.bdp.dto.utils.Utils;
 
 import static net.logstash.logback.argument.StructuredArguments.v;
 

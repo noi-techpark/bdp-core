@@ -20,14 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.opendatahub.timeseries.bdp.DataPusher;
-import com.opendatahub.timeseries.bdp.dto.dtoDataMapDto;
-import com.opendatahub.timeseries.bdp.dto.dtoDataTypeDto;
-import com.opendatahub.timeseries.bdp.dto.dtoProvenanceDto;
-import com.opendatahub.timeseries.bdp.dto.dtoRecordDtoImpl;
-import com.opendatahub.timeseries.bdp.dto.dtoStationDto;
-import com.opendatahub.timeseries.bdp.dto.dtoStationList;
-import com.opendatahub.timeseries.bdp.util.Utils;
+import com.opendatahub.timeseries.bdp.client.DataPusher;
+import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
+import com.opendatahub.timeseries.bdp.dto.dto.DataTypeDto;
+import com.opendatahub.timeseries.bdp.dto.dto.ProvenanceDto;
+import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
+import com.opendatahub.timeseries.bdp.dto.dto.StationDto;
+import com.opendatahub.timeseries.bdp.dto.dto.StationList;
+import com.opendatahub.timeseries.bdp.dto.utils.Utils;
 
 /**
  * Send data as JSON-format to the writer. Implementation with spring REST

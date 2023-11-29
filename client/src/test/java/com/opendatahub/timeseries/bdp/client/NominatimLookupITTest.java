@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.opendatahub.timeseries.bdp;
+package com.opendatahub.timeseries.bdp.client;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import com.opendatahub.timeseries.bdp.util.NominatimException;
-import com.opendatahub.timeseries.bdp.util.NominatimLocationLookupUtil;
+import com.opendatahub.timeseries.bdp.client.util.NominatimException;
+import com.opendatahub.timeseries.bdp.client.util.NominatimLocationLookupUtil;
 
 public class NominatimLookupITTest {
 

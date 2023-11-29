@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.opendatahub.timeseries.bdp;
+package com.opendatahub.timeseries.bdp.client;
 
 import jakarta.annotation.PostConstruct;
 
@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.opendatahub.timeseries.bdp.dto.dtoProvenanceDto;
+import com.opendatahub.timeseries.bdp.dto.dto.ProvenanceDto;
 
 import static net.logstash.logback.argument.StructuredArguments.v;
 

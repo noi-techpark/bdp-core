@@ -3,15 +3,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.opendatahub.timeseries.bdp;
+package com.opendatahub.timeseries.bdp.client;
 
 import java.util.List;
 
-import com.opendatahub.timeseries.bdp.dto.dtoDataMapDto;
-import com.opendatahub.timeseries.bdp.dto.dtoDataTypeDto;
-import com.opendatahub.timeseries.bdp.dto.dtoRecordDtoImpl;
-import com.opendatahub.timeseries.bdp.dto.dtoStationDto;
-import com.opendatahub.timeseries.bdp.dto.dtoStationList;
+import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
+import com.opendatahub.timeseries.bdp.dto.dto.DataTypeDto;
+import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
+import com.opendatahub.timeseries.bdp.dto.dto.StationDto;
+import com.opendatahub.timeseries.bdp.dto.dto.StationList;
 
 /**
  * Each data collector must implement these methods. It provides allows to push data

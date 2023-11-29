@@ -10,7 +10,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import com.opendatahub.timeseries.bdp.dto.util.Utils;
+import com.opendatahub.timeseries.bdp.dto.utils.Utils;
 
 import static net.logstash.logback.argument.StructuredArguments.v;
 

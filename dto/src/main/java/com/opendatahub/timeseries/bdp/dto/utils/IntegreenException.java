@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.opendatahub.timeseries.bdp.util;
+package com.opendatahub.timeseries.bdp.dto.utils;
 
 import java.io.Serializable;
 
