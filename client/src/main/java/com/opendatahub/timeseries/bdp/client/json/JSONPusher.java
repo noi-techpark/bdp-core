@@ -98,11 +98,11 @@ public abstract class JSONPusher extends DataPusher {
 
 	public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
 		dto.clean();
-		return pushData(this.integreenTypology, dto);
+		return pushData(this.stationType, dto);
 	}
 
 	public Object syncStations(StationList data) {
-		return this.syncStations(this.integreenTypology, data);
+		return this.syncStations(this.stationType, data);
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public abstract class JSONPusher extends DataPusher {
 	}
 
 	public Object syncDataTypes(List<DataTypeDto> data) {
-		return syncDataTypes(this.integreenTypology, data);
+		return syncDataTypes(this.stationType, data);
 	}
 
 	@Override
@@ -225,7 +225,7 @@ public abstract class JSONPusher extends DataPusher {
 						GET_DATE_OF_LAST_RECORD
 								+ "/{datasourceName}/?stationId={stationId}&typeId={dataType}&period={period}&prn={}&prv={}",
 						Date.class,
-						this.integreenTypology,
+						this.stationType,
 						stationCode,
 						dataType,
 						period,
@@ -251,7 +251,7 @@ public abstract class JSONPusher extends DataPusher {
 				.getForObject(
 						STATIONS + "/{datasourceName}/?origin={origin}&prn={}&prv={}",
 						StationDto[].class,
-						stationType == null ? this.integreenTypology : stationType,
+						stationType == null ? this.stationType : stationType,
 						origin,
 						provenance.getDataCollector(),
 						provenance.getDataCollectorVersion());

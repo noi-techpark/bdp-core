@@ -22,18 +22,18 @@ import static net.logstash.logback.argument.StructuredArguments.v;
  * @author Patrick Bertolla
  */
 @Component
-public abstract class DataPusher implements IntegreenPushable  {
+public abstract class DataPusher implements OdhClient  {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataPusher.class);
 
 	public static final int STATION_CHUNK_SIZE = 25;
 
 	protected Configuration config;
-	protected String integreenTypology;
+	protected String stationType;
 	protected ProvenanceDto provenance;
 
 	public abstract void connectToDataCenterCollector();
-	public abstract String initIntegreenTypology();
+	public abstract String initStationType();
 	public abstract ProvenanceDto defineProvenance();
 
 	/**
@@ -42,8 +42,8 @@ public abstract class DataPusher implements IntegreenPushable  {
 	@PostConstruct
 	public void init() {
 		connectToDataCenterCollector();
-		this.integreenTypology = initIntegreenTypology();
-		if (this.integreenTypology == null)
+		this.stationType = initStationType();
+		if (this.stationType == null)
 			throw new IllegalStateException("You need to provide a valid data source type to continue");
 		ProvenanceDto provenanceCandidate = defineProvenance();
 		if (!ProvenanceDto.isValid(provenanceCandidate))
@@ -51,11 +51,11 @@ public abstract class DataPusher implements IntegreenPushable  {
 		this.provenance = provenanceCandidate;
 	}
 
-	public String getIntegreenTypology() {
-		return integreenTypology;
+	public String getStationType() {
+		return stationType;
 	}
-	public void setIntegreenTypology(String integreenTypology) {
-		this.integreenTypology = integreenTypology;
+	public void setStationType(String integreenTypology) {
+		this.stationType = integreenTypology;
 	}
 
 	protected void logInfo(String msg, Object parameters) {

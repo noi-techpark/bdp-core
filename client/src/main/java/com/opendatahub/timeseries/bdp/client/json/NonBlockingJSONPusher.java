@@ -110,7 +110,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
     public Object pushData(DataMapDto<? extends RecordDtoImpl> dto) {
         dto.clean();
-        return pushData(this.integreenTypology, dto);
+        return pushData(this.stationType, dto);
     }
 
 	/** syncStations with stationType */
@@ -132,16 +132,16 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 	/** syncStations without stationType */
     public Object syncStations(StationList stations) {
-        return syncStationMultiChunk(this.integreenTypology, stations, STATION_CHUNK_SIZE, true, false);
+        return syncStationMultiChunk(this.stationType, stations, STATION_CHUNK_SIZE, true, false);
     }
     public Object syncStations(StationList stations, int chunkSize) {
-        return syncStationMultiChunk(this.integreenTypology, stations, chunkSize, true, false);
+        return syncStationMultiChunk(this.stationType, stations, chunkSize, true, false);
     }
 	public Object syncStations(StationList stations, boolean syncState, boolean onlyActivation) {
-		return syncStationMultiChunk(this.integreenTypology, stations, STATION_CHUNK_SIZE, syncState, onlyActivation);
+		return syncStationMultiChunk(this.stationType, stations, STATION_CHUNK_SIZE, syncState, onlyActivation);
     }
 	public Object syncStations(StationList stations, int chunkSize, boolean syncState, boolean onlyActivation) {
-		return syncStationMultiChunk(this.integreenTypology, stations, chunkSize, syncState, onlyActivation);
+		return syncStationMultiChunk(this.stationType, stations, chunkSize, syncState, onlyActivation);
 	}
 
     private Object syncStationSingleChunk(String stationType, StationList stations, boolean syncState, boolean onlyActivation) {
@@ -326,7 +326,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
     }
 
     public Object syncDataTypes(List<DataTypeDto> data) {
-        return syncDataTypes(this.integreenTypology, data);
+        return syncDataTypes(this.stationType, data);
     }
 
     @Override
@@ -344,7 +344,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 		return client
 			.get()
 			.uri(uriBuilder -> uriBuilder
-				.path(GET_DATE_OF_LAST_RECORD + this.integreenTypology)
+				.path(GET_DATE_OF_LAST_RECORD + this.stationType)
 				.queryParams(
 					createParams(
 						"stationId", stationCode,
@@ -379,7 +379,7 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
         StationDto[] object = client
 			.get()
 			.uri(uriBuilder->uriBuilder
-				.path(stationType == null ? STATIONS + this.integreenTypology : STATIONS + stationType)
+				.path(stationType == null ? STATIONS + this.stationType : STATIONS + stationType)
 				.queryParams(createParams("origin", origin))
 				.build()
 			)

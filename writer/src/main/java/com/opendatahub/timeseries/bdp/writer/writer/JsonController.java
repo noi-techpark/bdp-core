@@ -78,11 +78,11 @@ public class JsonController {
 		throw new JPAException("Missing station type. For example set MyStationType: .../getDateOfLastRecord/MyStationType?stationId=X&typeId=Y");
 	}
 
-	@GetMapping(value = "/getDateOfLastRecord/{integreenTypology}")
+	@GetMapping(value = "/getDateOfLastRecord/{stationType}")
 	@ResponseBody
 	public ResponseEntity<Date> dateOfLastRecord(
 		HttpServletRequest request,
-		@PathVariable("integreenTypology") String stationType,
+		@PathVariable("stationType") String stationType,
 		@RequestParam("stationId") String stationId,
 		@RequestParam(value = "typeId", required = false) String typeId,
 		@RequestParam(value = "period", required = false) Integer period,
@@ -97,7 +97,7 @@ public class JsonController {
 	// This actually returns a List<StationDto> format wise, but for optimization purposes the whole JSON is built during SQL query already.
 	public Object stationsGetList(
 		HttpServletRequest request,
-		@PathVariable("integreenTypology") String stationType,
+		@PathVariable("stationType") String stationType,
 		@RequestParam(value = "origin", required = false) String origin,
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
