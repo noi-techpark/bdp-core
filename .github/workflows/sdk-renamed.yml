@@ -1,0 +1,69 @@
+name: Release renamed SDK
+
+on:
+  push:
+    branches:
+      - renamed
+    paths-ignore:
+      - 'writer/**'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/sdk.yml'
+      - '.github/workflows/reuse.yml'
+      - '*.md'
+
+env:
+  JAVA_VERSION: '17'
+
+jobs:
+
+  # Test
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: REUSE Compliance Check
+        uses: fsfe/reuse-action@v1
+      - name: Test code
+        uses: noi-techpark/github-actions/maven-test@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          test-command: 'mvn -B test'
+
+  # Release Test SDK
+  release-sdk-snapshot:
+    runs-on: ubuntu-22.04
+    needs: test
+    concurrency: release-sdk-snapshot
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'    # to get all branches and tags
+      - name: Install xmlstarlet
+        run: sudo apt-get install -y xmlstarlet
+      - name: Preparation for a snapshot release with latest production version
+        run: |
+          echo "Releasing 1.0.0"
+          ./infrastructure/utils/quickrelease.sh release 1.0.0
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Create a settings.xml file
+        env:
+          SETTINGS_XML: |
+            <settings>
+                <servers>
+                    <server>
+                        <id>maven-repo.opendatahub.com-snapshot</id>
+                        <username>${{ secrets.AWS_S3_ACCESS_KEY_ID }}</username>
+                        <password>${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}</password>
+                    </server>
+                </servers>
+            </settings>
+        run: echo "$SETTINGS_XML" > ~/.m2/settings.xml
+      - name: Deploy the SDK to our maven repo
+        run: mvn -B -DskipTests --projects dto --projects client --also-make install deploy
