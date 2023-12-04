@@ -12,6 +12,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -52,7 +54,8 @@ public abstract class NonBlockingJSONPusher extends DataPusher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NonBlockingJSONPusher.class);
 
-    @Resource(name = "webClient")
+	@Autowired
+    @Qualifier("oauthWebClient")
     protected WebClient client;
 
     @Override

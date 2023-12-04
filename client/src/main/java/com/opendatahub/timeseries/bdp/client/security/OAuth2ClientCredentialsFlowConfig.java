@@ -39,7 +39,7 @@ public class OAuth2ClientCredentialsFlowConfig {
 		this.env=env;
 	}
 
-    @Bean(name = "webClient")
+    @Bean("oauthWebClient")
     WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
                 new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
@@ -51,6 +51,7 @@ public class OAuth2ClientCredentialsFlowConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
+
     @Bean
     OAuth2AuthorizedClientManager authorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
                                                              OAuth2AuthorizedClientService clientService) {
