@@ -22,7 +22,7 @@ import static net.logstash.logback.argument.StructuredArguments.v;
  * @author Patrick Bertolla
  */
 @Component
-public abstract class DataPusher implements OdhClient  {
+public abstract class DataPusher implements OpendatahubClient  {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataPusher.class);
 
@@ -54,8 +54,8 @@ public abstract class DataPusher implements OdhClient  {
 	public String getStationType() {
 		return stationType;
 	}
-	public void setStationType(String integreenTypology) {
-		this.stationType = integreenTypology;
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
 	}
 
 	protected void logInfo(String msg, Object parameters) {

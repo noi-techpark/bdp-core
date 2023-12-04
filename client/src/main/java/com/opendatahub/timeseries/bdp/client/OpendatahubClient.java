@@ -19,7 +19,7 @@ import com.opendatahub.timeseries.bdp.dto.dto.StationList;
  *
  * @author Patrick Bertolla
  */
-public interface OdhClient {
+public interface OpendatahubClient {
 
 	/**
 	 * @param data in any form with information of space, time and measurement type
