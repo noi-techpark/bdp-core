@@ -58,7 +58,7 @@ jobs:
             <settings>
                 <servers>
                     <server>
-                        <id>maven-repo.opendatahub.com-snapshot</id>
+                        <id>maven-repo.opendatahub.com-release</id>
                         <username>${{ secrets.AWS_S3_ACCESS_KEY_ID }}</username>
                         <password>${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}</password>
                     </server>
