@@ -12,6 +12,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,8 +92,9 @@ public class JsonController {
 		return ResponseEntity.ok(dataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
-	@GetMapping(value = "/stations/{integreenTypology}")
+	@GetMapping(value = "/stations/{integreenTypology}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
+	// This actually returns a List<StationDto> format wise, but for optimization purposes the whole JSON is built during SQL query already.
 	public Object stationsGetList(
 		HttpServletRequest request,
 		@PathVariable("integreenTypology") String stationType,
@@ -100,7 +102,12 @@ public class JsonController {
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
-		return dataManager.getStationsNative(stationType, origin);
+		try {
+			return dataManager.getStationsNative(stationType, origin);
+		} catch (Throwable t){
+			t.printStackTrace();
+		}
+		return null;
 	}
 
 	@GetMapping(value = "/stations")
