@@ -89,10 +89,10 @@ public class CustomRequestInterceptor implements HandlerInterceptor {
 				request.setAttribute("level", "WARN");
 				LOG.warn("API call", v("api_request_info", logPayload));
 			} else {
-				logPayload.put("exception", Arrays.toString(exception.getStackTrace()));
+				logPayload.put("exception", exception != null ? Arrays.toString(exception.getStackTrace()) : "<null>");
 				logPayload.put("request_state", "ERROR");
 				LOG.error("API call", v("api_request_info", logPayload));
-				if (LOG.isDebugEnabled()) {
+				if (LOG.isDebugEnabled() && exception != null) {
 					exception.printStackTrace(System.err);
 				}
 			}
