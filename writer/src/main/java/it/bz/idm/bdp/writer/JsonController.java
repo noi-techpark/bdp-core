@@ -102,12 +102,7 @@ public class JsonController {
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
-		try {
-			return dataManager.getStationsNative(stationType, origin);
-		} catch (Throwable t){
-			t.printStackTrace();
-		}
-		return null;
+		return dataManager.getStationsNative(stationType, origin);
 	}
 
 	@GetMapping(value = "/stations")
