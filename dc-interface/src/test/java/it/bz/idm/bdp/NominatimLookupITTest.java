@@ -7,7 +7,6 @@ package it.bz.idm.bdp;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
 import it.bz.idm.bdp.util.NominatimException;
 import it.bz.idm.bdp.util.NominatimLocationLookupUtil;
 
