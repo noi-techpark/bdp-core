@@ -11,20 +11,20 @@ SPDX-License-Identifier: CC0-1.0
         xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
         version="2.0">
     <persistence-unit name="jpa-persistence" transaction-type="RESOURCE_LOCAL">
-    <class>com.opendatahub.timeseries.bdp.dal.DataType</class>
-      <class>com.opendatahub.timeseries.bdp.dal.DataTypeMetaData</class>
-    <class>com.opendatahub.timeseries.bdp.dal.Measurement</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MetaData</class>
-    <class>com.opendatahub.timeseries.bdp.dal.Provenance</class>
-    <class>com.opendatahub.timeseries.bdp.dal.Station</class>
-    <class>com.opendatahub.timeseries.bdp.dal.Edge</class>
-      <class>com.opendatahub.timeseries.bdp.dal.Event</class>
-    <class>com.opendatahub.timeseries.bdp.dal.Location</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MeasurementJSON</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MeasurementString</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MeasurementHistory</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MeasurementJSONHistory</class>
-    <class>com.opendatahub.timeseries.bdp.dal.MeasurementStringHistory</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.DataType</class>
+      <class>com.opendatahub.timeseries.bdp.writer.dal.DataTypeMetaData</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.Measurement</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MetaData</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.Provenance</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.Station</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.Edge</class>
+      <class>com.opendatahub.timeseries.bdp.writer.dal.Event</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.Location</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MeasurementJSON</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MeasurementString</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MeasurementHistory</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MeasurementJSONHistory</class>
+    <class>com.opendatahub.timeseries.bdp.writer.dal.MeasurementStringHistory</class>
          <properties>
            <property name="hibernate.default_schema" value="intimev2"/>
            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
@@ -40,7 +40,7 @@ SPDX-License-Identifier: CC0-1.0
            <property name="hibernate.id.new_generator_mappings" value="true"/>
            <property name="hibernate.show_sql" value="false"/>
            <property name="hibernate.hbm2dll.extra_physical_table_types" value="MATERIALIZED VIEW"/>
-           <property name="hibernate.implicit_naming_strategy" value="com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
+           <property name="hibernate.implicit_naming_strategy" value="com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy"/>
             <property name="hibernate.cache.use_second_level_cache" value="true"/>
            <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.jcache.JCacheRegionFactory"/>
     </properties>

@@ -36,8 +36,8 @@ Dump BDP/dal entity classes:
     java -cp '../dto/target/dto-2.0.0.jar:../dal/target/dal-2.0.0.jar:target/schemagenerator-1.0.0.jar' \
          -Dlog4j.configuration=src/main/resources/log4j.properties \
          com.opendatahub.timeseries.bdp.tools.SchemaGenerator \
-         com.opendatahub.timeseries.bdp.dal \
-         com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy \
+         com.opendatahub.timeseries.bdp.writer.dal \
+         com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy \
          /tmp/schema_dump1.sql
 ```
 
@@ -45,8 +45,8 @@ Hereby, `../dto/target/dto-2.0.0.jar:../dal/target/dal-2.0.0.jar` are class path
 the `@Entity` annotated classes, that should be dumped as SQL DDL commands.  `target/schemagenerator-1.0.0.jar`
 is the library that contains the `main` method.  `-Dlog4j.configuration=src/main/resources/log4j.properties` is
 to override log levels, which may be too verbose.  `com.opendatahub.timeseries.bdp.tools.SchemaGenerator` is the class that
-contains the main method to be executed.  The script scans `com.opendatahub.timeseries.bdp.dal` for entity classes, and dumps the
-result configured by `com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy` into `/tmp/schema_dump1.sql`.
+contains the main method to be executed.  The script scans `com.opendatahub.timeseries.bdp.writer.dal` for entity classes, and dumps the
+result configured by `com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy` into `/tmp/schema_dump1.sql`.
 
 ### Known issues
 You can provide PostgreSQL connection information. However, the script also works if they are wrong.  That is,

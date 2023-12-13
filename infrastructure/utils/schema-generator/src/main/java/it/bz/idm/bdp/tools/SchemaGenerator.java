@@ -37,7 +37,7 @@ import org.reflections.Reflections;
  *   <code>SchemaGenerator PREFIX STRATEGYCLASS OUTPUTFILE</code>
  *
  * <p>Example:
- *   <code>SchemaGenerator com.opendatahub.timeseries.bdp.dal com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql</code>
+ *   <code>SchemaGenerator com.opendatahub.timeseries.bdp.writer.dal com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql</code>
  *
  * <p>We assume that it is a Postgis dialect, and that only @Entity annotated classes are important.
  *
@@ -74,8 +74,8 @@ public class SchemaGenerator {
 				"  EXAMPLE: \n" +
 				"    java -cp 'dal/target/dal-2.0.0.jar:tools/target/schemagenerator-1.0.0.jar' \\ \n" +
 				"         com.opendatahub.timeseries.bdp.tools.SchemaGenerator \\ \n" +
-				"         com.opendatahub.timeseries.bdp.dal \\ \n" +
-				"         com.opendatahub.timeseries.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy \\ \n" +
+				"         com.opendatahub.timeseries.bdp.writer.dal \\ \n" +
+				"         com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy \\ \n" +
 				"         /tmp/schema_dump.sql \n" +
 				"\n");
 			System.exit(1);
