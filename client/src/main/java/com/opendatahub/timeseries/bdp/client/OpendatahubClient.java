@@ -25,7 +25,9 @@ public interface OpendatahubClient {
 	 * @param data in any form with information of space, time and measurement type
 	 * @return data records ordered in a tree structure
 	 */
-	public abstract <T> DataMapDto<RecordDtoImpl> mapData(T data);
+	default public <T> DataMapDto<RecordDtoImpl> mapData(T data) {
+		return null;
+	}
 
 	/**
 	 * @param stationType unique existing station typology
