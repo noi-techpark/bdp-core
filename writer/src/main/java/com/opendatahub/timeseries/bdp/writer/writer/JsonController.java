@@ -92,7 +92,7 @@ public class JsonController {
 		return ResponseEntity.ok(dataManager.getDateOfLastRecord(stationType, stationId, typeId, period));
 	}
 
-	@GetMapping(value = "/stations/{integreenTypology}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/stations/{stationType}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	// This actually returns a List<StationDto> format wise, but for optimization purposes the whole JSON is built during SQL query already.
 	public Object stationsGetList(
