@@ -14,11 +14,9 @@ services:
       MAVEN_CONFIG: /var/maven/.m2
       SERVER_PORT: ${SERVER_PORT}
       SPRING_PROFILE: ${SPRING_PROFILE}
-    command:
-      - bash
-      - -c
-      - |
-        mvn-Duser.home=/var/maven \
+    command: >
+      bash -c "mvn \
+        -Duser.home=/var/maven \
         --also-make \
         --projects dto \
         --projects client \
