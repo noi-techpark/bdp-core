@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -28,6 +29,9 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
+
+	@Value("${auth.client.id}")
+	private String authClientId;
 
 	private static final Logger LOG = LoggerFactory.getLogger(
 		WebSecurity.class
@@ -64,7 +68,7 @@ public class WebSecurity {
 			Collection<String> roles = new ArrayList<>();
 			Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
 			if (resourceAccess != null) {
-				Map<String, Object> resource = (Map<String, Object>) resourceAccess.get("odh-mobility-writer");
+				Map<String, Object> resource = (Map<String, Object>) resourceAccess.get(authClientId);
 				if (resource != null) {
 					roles.addAll((Collection<String>) resource.get("roles"));
 				}
