@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
 SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 
 SPDX-License-Identifier: CC0-1.0
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +11,7 @@ SPDX-License-Identifier: CC0-1.0
 	<artifactId>core</artifactId>
 	<packaging>pom</packaging>
 	<!-- Make sure to update also .github/workflows + must correspond to project.properties.revision -->
-	<version>1.0.0</version>
+	<version>9.0.0</version>
     <inceptionYear>2019</inceptionYear>
 
 	<parent>
@@ -26,7 +24,7 @@ SPDX-License-Identifier: CC0-1.0
 
 	<properties>
 		<!-- Make sure to update also .github/workflows + must correspond to project.version -->
-		<revision>1.0.0</revision>
+		<revision>9.0.0</revision>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>17</java.version>
