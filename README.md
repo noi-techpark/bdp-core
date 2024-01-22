@@ -35,13 +35,13 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
       - [StationDto](#stationdto)
       - [DataTypeDto](#datatypedto)
       - [SimpleRecordDto](#simplerecorddto)
-    - [dc-interface](#dc-interface)
+    - [client](#client)
   - [Flight rules](#flight-rules)
     - [I want to generate a new schema dump out of Hibernate's Entity classes](#i-want-to-generate-a-new-schema-dump-out-of-hibernates-entity-classes)
     - [I want to update license headers of each source file](#i-want-to-update-license-headers-of-each-source-file)
     - [I want to see details of this project as HTML page](#i-want-to-see-details-of-this-project-as-html-page)
-    - [I want to use dc-interface in my Java Maven project](#i-want-to-use-dc-interface-in-my-java-maven-project)
-    - [I want to publish a new dc-interface sdk on our maven repository](#i-want-to-publish-a-new-dc-interface-sdk-on-our-maven-repository)
+    - [I want to use client in my Java Maven project](#i-want-to-use-client-in-my-java-maven-project)
+    - [I want to publish a new client sdk on our maven repository](#i-want-to-publish-a-new-client-sdk-on-our-maven-repository)
       - [Automatically via Github Actions](#automatically-via-github-actions)
       - [Manually from your machine](#manually-from-your-machine)
     - [I want to get started with a new data-collector](#i-want-to-get-started-with-a-new-data-collector)
@@ -59,10 +59,10 @@ Introduction](https://opendatahub.readthedocs.io/en/latest/intro.html).
 The core of the platform contains the business logic of an **INBOUND** API which
 handles connections to the database and provides an API for data collectors (see
 [writer](#writer)), in form of a REST interface and a Java SDK (see
-[dc-interface](#dc-interface)).
+[client](#client)).
 
 Finally, [dto](#dto) which is a library containinig all *Data Transfer Objects*
-used by the `writer` and `dc-interface` to exchange data in a standardized
+used by the `writer` and `client` to exchange data in a standardized
 format.
 
 The **OUTBOUND** API is called
@@ -327,16 +327,16 @@ Describes a specific type of data. We define the structure inside
 Describes the measured value. We define the structure inside
 [SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java)
 
-### dc-interface
-The dc-interface contains the API through which components can communicate with
-the BDP writer. Just include the `dc-interface` [maven
-dependency](#i-want-to-use-dc-interface-in-my-java-maven-project)
+### client
+The client contains the API through which components can communicate with
+the BDP writer. Just include the `client` [maven
+dependency](#i-want-to-use-client-in-my-java-maven-project)
 in your project and use the existing [JSON client
-implementation](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
+implementation](client/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
 
 The API contains several methods. We describe the most important methods here,
 for the rest see
-[JSONPusher.java](dc-interface/src/main/java/it/bz/idm/bdp/json/JSONPusher.java)
+[JSONPusher.java](client/src/main/java/it/bz/idm/bdp/json/JSONPusher.java)
 implementation.
 
 **`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
@@ -399,7 +399,7 @@ Run `mvn site` to create a HTML page with all details of this project. Results
 can be found under `<project>/target/site/`, entrypoint is as usual
 `index.html`.
 
-### I want to use dc-interface in my Java Maven project
+### I want to use client in my Java Maven project
 Include the following snippet in your `pom.xml` file:
 ```
 	<repositories>
@@ -410,11 +410,11 @@ Include the following snippet in your `pom.xml` file:
 	</repositories>
 ```
 
-Include the dependency `dc-interface` for data collectors:
+Include the dependency `client` for data collectors:
 ```
 <dependency>
-  <groupId>it.bz.idm.bdp</groupId>
-  <artifactId>dc-interface</artifactId>
+  <groupId>com.opendatahub.timeseries.bdp</groupId>
+  <artifactId>client</artifactId>
   <version>7.3.0</version>
 </dependency>
 ```
@@ -423,16 +423,16 @@ You can also use a version-range, like `[7.3.0,8.0.0)`. Find the latest version
 in our [release channel](https://github.com/noi-techpark/bdp-core/releases) on
 GitHub.
 
-### I want to publish a new dc-interface sdk on our maven repository
+### I want to publish a new client sdk on our maven repository
 
 This chapter is for the NOI team only. It describes how to publish a new
-dc-interface manually or via the Github Action workflow on our maven repo.
+client manually or via the Github Action workflow on our maven repo.
 Either as "release" or "snapshot" version...
 
 #### Automatically via Github Actions
 
 *SNAPSHOT RELEASES*: If you push code to the `main` branch, which changes
-either `dto` or `dc-interface` the Github Action workflow deploys a new snapshot
+either `dto` or `client` the Github Action workflow deploys a new snapshot
 version of those libraries. The version is then the latest version tag on the
 `prod` branch and a `-SNAPSHOT` postfix. For example, if the version tag is
 `v7.4.0`, then the new snapshot version string is `7.4.0-SNAPSHOT` (the initial
@@ -473,7 +473,7 @@ snapshot release with version `8.0.1` (do not put a `v` prefix):
 
 Use `./infrastructure/utils/quickrelease.sh release 8.0.1` for a production release.
 
-Call `mvn --projects dto --projects dc-interface --also-make clean install deploy`
+Call `mvn --projects dto --projects client --also-make clean install deploy`
 
 ### I want to get started with a new data-collector
 

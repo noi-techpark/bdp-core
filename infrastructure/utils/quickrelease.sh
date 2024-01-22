@@ -31,10 +31,10 @@ $CMD -u "/pom:project/pom:properties/pom:revision" -v "$VERSION" pom.xml
 $CMD -u "/pom:project/pom:repositories/pom:repository[starts-with(pom:id,'$REP_ID')]/pom:url" -v "$REP_URL" pom.xml
 
 # UPDATE pom.xml files
-for FOLDER in dto writer dc-interface
+for FOLDER in dto writer client
 do
     $CMD -u "/pom:project/pom:parent/pom:version" -v "$VERSION" $FOLDER/pom.xml
-    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='it.bz.idm.bdp'][pom:artifactId='dto']/pom:version" -v "$VERSION" $FOLDER/pom.xml
+    $CMD -u "/pom:project/pom:dependencies/pom:dependency[pom:groupId='com.opendatahub.timeseries.bdp'][pom:artifactId='dto']/pom:version" -v "$VERSION" $FOLDER/pom.xml
 done
 
 exit 0

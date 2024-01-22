@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+        <groupId>com.opendatahub.timeseries.bdp</groupId>
+        <artifactId>core</artifactId>
+		<version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+	<packaging>jar</packaging>
+	<groupId>com.opendatahub.timeseries.bdp</groupId>
+	<artifactId>client</artifactId>
+	<description>Data Collector Interface for the Open Data Hub</description>
+
+	<properties>
+		<spring.security.version>6.1.4</spring.security.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.opendatahub.timeseries.bdp</groupId>
+			<artifactId>dto</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webflux</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty -->
+		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+			<version>1.1.12</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+		</dependency>
+
+		<!-- To handle spatial objects and transformations -->
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.18.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.spatial4j</groupId>
+			<artifactId>spatial4j</artifactId>
+			<version>0.8</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>${spring.security.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

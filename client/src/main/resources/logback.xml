@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+<configuration>
+
+	<appender name="json" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+			<fieldNames>
+				<version>[ignore]</version>
+				<logger>[ignore]</logger>
+				<thread>[ignore]</thread>
+			</fieldNames>
+			<customFields>{"application":"${provenance_name:-DCTEST}","application_version":"${provenance_version:-0000}"}</customFields>
+		</encoder>
+	</appender>
+
+	<appender name="text" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+	<logger level="${LOG_LEVEL:-INFO}" name="com.opendatahub.timeseries.bdp" additivity="false">
+		<appender-ref ref="${LOG_STYLE:-text}" />
+	</logger>
+
+	<root level="${ROOT_LOG_LEVEL:-INFO}" additivity="false">
+		<appender-ref ref="${LOG_STYLE:-text}"/>
+	</root>
+
+</configuration>
+

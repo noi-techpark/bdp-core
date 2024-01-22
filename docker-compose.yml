@@ -12,23 +12,22 @@ services:
       - .env
     environment:
       MAVEN_CONFIG: /var/maven/.m2
-      MAVEN_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8990
       SERVER_PORT: ${SERVER_PORT}
       SPRING_PROFILE: ${SPRING_PROFILE}
-    command:
-      - bash
-      - -c
-      - |
-        mvn-Duser.home=/var/maven \
+    command: >
+      bash -c "mvn \
+        -Duser.home=/var/maven \
         --also-make \
         --projects dto \
-        --projects dc-interface \
-        clean install
-        cd writer; mvn \
-          -Dmaven.tomcat.port=${SERVER_PORT} \
-          -Duser.home=/var/maven \
-          -Dspring.profiles.active=${SPRING_PROFILE} \
-          clean spring-boot:run
+        --projects client \
+        clean install \
+      && cd writer; mvn \
+        -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8990" \
+        -Dmaven.tomcat.port=${SERVER_PORT} \
+        -Duser.home=/var/maven \
+        -Dspring.profiles.active=${SPRING_PROFILE} \
+        clean spring-boot:run
+      "
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
       - 8990:8990

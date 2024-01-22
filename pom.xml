@@ -9,11 +9,11 @@ SPDX-License-Identifier: CC0-1.0
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>it.bz.idm.bdp</groupId>
+	<groupId>com.opendatahub.timeseries.bdp</groupId>
 	<artifactId>core</artifactId>
 	<packaging>pom</packaging>
 	<!-- Make sure to update also .github/workflows + must correspond to project.properties.revision -->
-	<version>8.0.0</version>
+	<version>1.0.0</version>
     <inceptionYear>2019</inceptionYear>
 
 	<parent>
@@ -26,7 +26,7 @@ SPDX-License-Identifier: CC0-1.0
 
 	<properties>
 		<!-- Make sure to update also .github/workflows + must correspond to project.version -->
-		<revision>8.0.0</revision>
+		<revision>1.0.0</revision>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>17</java.version>
@@ -44,7 +44,7 @@ SPDX-License-Identifier: CC0-1.0
 	<modules>
 		<module>dto</module>
 		<module>writer</module>
-		<module>dc-interface</module>
+		<module>client</module>
 	</modules>
 
 	<dependencies>
@@ -84,7 +84,7 @@ SPDX-License-Identifier: CC0-1.0
 				jar file for a project. Deploying this source jar to a remote
 				repository can be useful for other developers so that they can
 				'attach source' and debug into the project source code. Mainly
-				useful for the dc-interface / dto libraries used in data
+				useful for the client / dto libraries used in data
 				collectors.
 			-->
 			<plugin>

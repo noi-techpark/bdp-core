@@ -2,7 +2,7 @@
 
 // SPDX-License-Identifier: GPL-3.0-only
 
-package it.bz.idm.bdp.tools;
+package com.opendatahub.timeseries.bdp.tools;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -37,7 +37,7 @@ import org.reflections.Reflections;
  *   <code>SchemaGenerator PREFIX STRATEGYCLASS OUTPUTFILE</code>
  *
  * <p>Example:
- *   <code>SchemaGenerator it.bz.idm.bdp.dal it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql</code>
+ *   <code>SchemaGenerator com.opendatahub.timeseries.bdp.writer.dal com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy /tmp/schema_dump.sql</code>
  *
  * <p>We assume that it is a Postgis dialect, and that only @Entity annotated classes are important.
  *
@@ -66,16 +66,16 @@ public class SchemaGenerator {
 				"\n" +
 				"  USAGE: \n" +
 				"    java -cp 'ENTITY_MODEL.jar:schemagenerator-x.y.z.jar' \\ \n" +
-				"         it.bz.idm.bdp.tools.SchemaGenerator \\ \n" +
+				"         com.opendatahub.timeseries.bdp.tools.SchemaGenerator \\ \n" +
 				"         ENTITY_MODEL_PATH_PREFIX \\ \n" +
 				"         STRATEGYCLASS \\ \n" +
 				"         OUTPUTFILE \n" +
 				"\n" +
 				"  EXAMPLE: \n" +
 				"    java -cp 'dal/target/dal-2.0.0.jar:tools/target/schemagenerator-1.0.0.jar' \\ \n" +
-				"         it.bz.idm.bdp.tools.SchemaGenerator \\ \n" +
-				"         it.bz.idm.bdp.dal \\ \n" +
-				"         it.bz.idm.bdp.dal.util.SchemaGeneratorImplicitNamingStrategy \\ \n" +
+				"         com.opendatahub.timeseries.bdp.tools.SchemaGenerator \\ \n" +
+				"         com.opendatahub.timeseries.bdp.writer.dal \\ \n" +
+				"         com.opendatahub.timeseries.bdp.writer.dal.util.SchemaGeneratorImplicitNamingStrategy \\ \n" +
 				"         /tmp/schema_dump.sql \n" +
 				"\n");
 			System.exit(1);
