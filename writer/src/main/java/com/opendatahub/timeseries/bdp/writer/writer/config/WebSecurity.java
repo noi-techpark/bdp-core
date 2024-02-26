@@ -5,10 +5,12 @@
 package com.opendatahub.timeseries.bdp.writer.writer.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,15 +18,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerMapping;
 
 @Configuration
 @EnableWebSecurity
@@ -94,6 +100,32 @@ public class WebSecurity {
 						// health check always accessible
 						.requestMatchers("/actuator/**")
 						.permitAll()
+						// Databrowser station sync access
+						.requestMatchers("/json/syncStations/**")
+						.access(((authenticationSupplier, ctx) -> {
+							Authentication a = authenticationSupplier.get();
+							if (!a.isAuthenticated()) {
+								return new AuthorizationDecision(false);
+							}
+							
+							@SuppressWarnings("unchecked")
+							// This is apparently how you get the URL parameters in the handler definition in JsonController
+							var pathVariables = (Map<String, String>) ctx.getRequest().getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+							String stationType = pathVariables != null ? pathVariables.get("stationType") : null;
+							// Origin, OTOH is a regular query path variable
+							String origin = ctx.getRequest().getParameter("origin");
+							
+							LOG.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
+							
+							if (!StringUtils.hasText(stationType) || !StringUtils.hasText(origin)) {
+								return new AuthorizationDecision(false);
+							}
+							
+							LOG.debug("Beginning UMA check");
+							
+							// call keycloak authz and check if this URL with origin and stationtype is authorized
+							return new AuthorizationDecision(true);
+						}))
 						// Authorize based on role claim ROLE_ADMIN
 						.requestMatchers("/json/**")
 						.hasRole("ADMIN")
