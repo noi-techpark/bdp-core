@@ -4,13 +4,17 @@
 
 package com.opendatahub.timeseries.bdp.writer.writer.config;
 
+import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.authenticated;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasRole;
+import static org.springframework.security.authorization.AuthorizationManagers.allOf;
+import static org.springframework.security.authorization.AuthorizationManagers.anyOf;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,10 +32,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerMapping;
 
 @Configuration
 @EnableWebSecurity
@@ -40,8 +45,7 @@ public class WebSecurity {
 	private String authClientId;
 
 	private static final Logger LOG = LoggerFactory.getLogger(
-		WebSecurity.class
-	);
+			WebSecurity.class);
 
 	/**
 	 * Defines the session authentication strategy.
@@ -80,7 +84,7 @@ public class WebSecurity {
 				}
 			}
 
-			if(roles.isEmpty()){
+			if (roles.isEmpty()) {
 				LOG.warn("OAuth client has no roles assigned.");
 			}
 
@@ -91,50 +95,54 @@ public class WebSecurity {
 		});
 		return jwtConverter;
 	}
+	
+	// Must be authenticated, and either ADMIN or whatever else we want to check
+	private static AuthorizationManager<RequestAuthorizationContext> adminOr(AuthorizationManager<RequestAuthorizationContext> f){
+		return allOf(authenticated(), anyOf(hasRole("ADMIN"), f));
+	}
 
 	@Bean
 	public SecurityFilterChain oauthFilter(HttpSecurity http) throws Exception {
+
 		http
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
 						// health check always accessible
-						.requestMatchers("/actuator/**")
-						.permitAll()
+						.requestMatchers("/actuator/**").permitAll()
 						// Databrowser station sync access
-						.requestMatchers("/json/syncStations/**")
-						.access(((authenticationSupplier, ctx) -> {
-							Authentication a = authenticationSupplier.get();
-							if (!a.isAuthenticated()) {
-								return new AuthorizationDecision(false);
-							}
-							
-							@SuppressWarnings("unchecked")
-							// This is apparently how you get the URL parameters in the handler definition in JsonController
-							var pathVariables = (Map<String, String>) ctx.getRequest().getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-							String stationType = pathVariables != null ? pathVariables.get("stationType") : null;
-							// Origin, OTOH is a regular query path variable
-							String origin = ctx.getRequest().getParameter("origin");
-							
-							LOG.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
-							
-							if (!StringUtils.hasText(stationType) || !StringUtils.hasText(origin)) {
-								return new AuthorizationDecision(false);
-							}
-							
-							LOG.debug("Beginning UMA check");
-							
-							// call keycloak authz and check if this URL with origin and stationtype is authorized
-							return new AuthorizationDecision(true);
-						}))
+						.requestMatchers("/json/syncStations/{stationType}").access(adminOr(new UMAAuthorized()))
 						// Authorize based on role claim ROLE_ADMIN
-						.requestMatchers("/json/**")
-						.hasRole("ADMIN")
+						.requestMatchers("/json/**").hasRole("ADMIN")
 						// permitAll is ported over from legacy code, not sure if it doesn't make more
 						// sense to deny all other requests
 						.anyRequest().permitAll())
 				.oauth2Client(Customizer.withDefaults());
+
 		// Register the oauth server, and our custom jwt converter
 		http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter())));
 		return http.build();
+	}
+
+	private static class UMAAuthorized implements AuthorizationManager<RequestAuthorizationContext> {
+		@Override
+		public AuthorizationDecision check(Supplier<Authentication> authenticationSupplier,
+				RequestAuthorizationContext ctx) {
+			String stationType = ctx.getVariables().get("stationType");
+
+			// Origin, OTOH is a regular query path variable
+			String origin = ctx.getRequest().getParameter("origin");
+
+			LOG.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
+
+			if (!StringUtils.hasText(stationType) || !StringUtils.hasText(origin)) {
+				return new AuthorizationDecision(false);
+			}
+
+			LOG.debug("Beginning UMA check");
+
+			// call keycloak authz and check if this URL with origin and stationtype is
+			// authorized
+			return new AuthorizationDecision(true);
+		}
 	}
 }
