@@ -73,11 +73,11 @@ and finally stores them in the database. Additionally, it sets stations to
 active/inactive according to their presence inside the provided data. The writer
 itself implements the methods to write data and is therefore the endpoint for
 all data collectors. It uses the persistence-unit of the
-[DAL](/writer/src/main/java/it/bz/idm/bdp/dal) which has full permissions on the
+[DAL](/writer/src/main/java/com/opendatahub/timeseries/bdp/writer/dal) which has full permissions on the
 database.
 
 The full API description can be found inside
-[JsonController.java](writer/src/main/java/it/bz/idm/bdp/writer/JsonController.java).
+[JsonController.java](writer/src/main/java/com/opendatahub/timeseries/bdp/writer/writer/JsonController.java).
 
 ### Getting started with Docker
 
@@ -257,7 +257,7 @@ it has a parent station, used to model a hierarchical station structure. For all
 remaining data, which enriches the station, we created a field *metadata*. It
 can hold any kind of meta information in form of a JSON object. To understand
 the functionality and the main job of this entity check the source code
-[Station.java](dal/src/main/java/it/bz/idm/bdp/dal/Station.java).
+[Station.java](dal/src/main/java/com/opendatahub/timeseries/bdp/dal/Station.java).
 
 *Example*:
 >A station can be of stationtype `MeteoStation`, has an identifier `89935GW` and
@@ -303,7 +303,7 @@ description of the edge.
 > passed it.
 
 If you need more information about specific entities or classes, try to use the
-javadoc or source code inside [DAL](writer/src/main/java/it/bz/idm/bdp/dal).
+javadoc or source code inside [DAL](writer/src/main/java/com/opendatahub/timeseries/bdp/dal).
 
 ### DTO
 Data transfer objects (DTOs) are used to define the structure of the data
@@ -317,26 +317,26 @@ The following chapters describe the most used DTOs.
 #### StationDto
 Describes a place where measurements get collected. It is the origin of the
 data. We define the structure inside
-[StationDto.java](dto/src/main/java/it/bz/idm/bdp/dto/StationDto.java).
+[StationDto.java](dto/src/main/java/com/opendatahub/timeseries/bdp/dto/dto/StationDto.java).
 
 #### DataTypeDto
 Describes a specific type of data. We define the structure inside
-[DataTypeDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataTypeDto.java)
+[DataTypeDto.java](dto/src/main/java/com/opendatahub/timeseries/bdp/dto/dto/DataTypeDto.java)
 
 #### SimpleRecordDto
 Describes the measured value. We define the structure inside
-[SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java)
+[SimpleRecordDto.java](dto/src/main/java/com/opendatahub/timeseries/bdp/dto/dto/SimpleRecordDto.java)
 
 ### client
 The client contains the API through which components can communicate with
 the BDP writer. Just include the `client` [maven
 dependency](#i-want-to-use-client-in-my-java-maven-project)
 in your project and use the existing [JSON client
-implementation](client/src/main/java/it/bz/idm/bdp/json/JSONPusher.java).
+implementation](client/src/main/java/com/opendatahub/timeseries/bdp/json/JSONPusher.java).
 
 The API contains several methods. We describe the most important methods here,
 for the rest see
-[JSONPusher.java](client/src/main/java/it/bz/idm/bdp/json/JSONPusher.java)
+[JSONPusher.java](client/src/main/java/com/opendatahub/timeseries/bdp/client/json/JSONPusher.java)
 implementation.
 
 **`Object getDateOfLastRecord(String stationCode,String dataType,Integer period)`**
@@ -372,11 +372,11 @@ we store everything on the second level, like this:
 ```
 
 As value you can put a list of
-[SimpleRecordDto.java](dto/src/main/java/it/bz/idm/bdp/dto/SimpleRecordDto.java),
+[SimpleRecordDto.java](dto/src/main/java/com/opendatahub/timeseries/bdp/dto/dto/SimpleRecordDto.java),
 which contains all the data points with a specific station and  a specific type.
 Each point is represented as timestamp and value. To better understand the
 structure, see the
-[DataMapDto.java](dto/src/main/java/it/bz/idm/bdp/dto/DataMapDto.java)
+[DataMapDto.java](dto/src/main/java/com/opendatahub/timeseries/bdp/dto/dto/DataMapDto.java)
 source.
 
 ## Flight rules
