@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.authorization.client.resource.AuthorizationResource;
+import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,22 +107,26 @@ public class WebSecurity {
 	@Bean
 	public SecurityFilterChain oauthFilter(HttpSecurity http) throws Exception {
 
-		http
-				.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth
-						// health check always accessible
-						.requestMatchers("/actuator/**").permitAll()
-						// Databrowser station sync access
-						.requestMatchers("/json/syncStations/{stationType}").access(adminOr(new UMAAuthorized()))
-						// Authorize based on role claim ROLE_ADMIN
-						.requestMatchers("/json/**").hasRole("ADMIN")
-						// permitAll is ported over from legacy code, not sure if it doesn't make more
-						// sense to deny all other requests
-						.anyRequest().permitAll())
-				.oauth2Client(Customizer.withDefaults());
+		http.csrf(csrf -> csrf.disable());
+		// Try this out to replace WebConfig cors configuration http.cors(cors -> cors.disable());
+
+		http.authorizeHttpRequests(auth -> auth
+				// health check always accessible
+				.requestMatchers("/actuator/**").permitAll()
+				// Databrowser station sync access
+				.requestMatchers("/json/syncStations/{stationType}").access(adminOr(new UMAAuthorized()))
+				// Authorize based on role claim ROLE_ADMIN
+				.requestMatchers("/json/**").hasRole("ADMIN")
+				// permitAll is ported over from legacy code, not sure if it doesn't make more
+				// sense to deny all other requests
+				.anyRequest().permitAll());
+
+		http.oauth2Client(Customizer.withDefaults());
 
 		// Register the oauth server, and our custom jwt converter
-		http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter())));
+		http.oauth2ResourceServer(oauth2 -> oauth2
+			.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter())));
+
 		return http.build();
 	}
 
@@ -140,8 +147,13 @@ public class WebSecurity {
 
 			LOG.debug("Beginning UMA check");
 
-			// call keycloak authz and check if this URL with origin and stationtype is
-			// authorized
+			// call keycloak authz and check if this URL with origin and stationtype is authorized
+			var authz = AuthzClient.create();
+			var res = authz.authorization();
+			var req = new AuthorizationRequest();
+			res.getPermissions(req);
+
+
 			return new AuthorizationDecision(true);
 		}
 	}
