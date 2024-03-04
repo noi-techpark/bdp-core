@@ -1,0 +1,29 @@
+##### VSCODE / REST Client
+# Create a .env file and set the corresponding variables
+# See all $dotenv fields below
+
+@host = https://auth.opendatahub.testingmachine.eu/auth/realms/noi
+
+### Get access token for UMA tests
+# @name login
+POST {{host}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+&grant_type=client_credentials
+&client_id=odh-mobility-dev-uma
+&client_secret=STFLg69cUgZS8nNgtUQIuZDMiPQBIipe
+&scope=openid
+
+###
+@authtoken = {{login.response.body.access_token}}
+
+# See here for documentation of the API: https://www.keycloak.org/docs/23.0.7/authorization_services/#_service_overview
+
+### Get endpoints and capabilities
+GET {{host}}/.well-known/uma2-configuration
+
+### Get permissions
+GET {{host}}/authz/protection/resource_set
+Authorization: Bearer {{authtoken}}
+
+&grant_type=urn:ietf:params:oauth:grant-type:uma-ticket

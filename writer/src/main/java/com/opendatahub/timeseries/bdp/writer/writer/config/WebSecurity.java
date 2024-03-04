@@ -162,9 +162,14 @@ public class WebSecurity {
 			
 			// call keycloak authz and check if this URL with origin and stationtype is authorized
 			var authz = AuthzClient.create(applicationContext.getBean(org.keycloak.authorization.client.Configuration.class));
-			var res = authz.authorization();
+			var ress = authz.authorization();
 			var req = new AuthorizationRequest();
-			res.getPermissions(req);
+
+			// https://github.com/keycloak/keycloak/issues/27483
+			req.setMetadata(new AuthorizationRequest.Metadata());
+			req.getMetadata().setPermissionResourceFormat("uri");
+
+			var perm = ress.getPermissions(req);
 
 			return new AuthorizationDecision(true);
 		}
