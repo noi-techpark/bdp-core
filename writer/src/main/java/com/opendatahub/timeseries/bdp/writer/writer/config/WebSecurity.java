@@ -17,10 +17,13 @@ import java.util.stream.Collectors;
 
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.resource.AuthorizationResource;
+import org.keycloak.protocol.oidc.client.authentication.ClientIdAndSecretCredentialsProvider;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -105,6 +108,7 @@ public class WebSecurity {
 	}
 
 	@Bean
+	/** Main entry point authorization configuration for all endpoints */
 	public SecurityFilterChain oauthFilter(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable());
@@ -121,6 +125,7 @@ public class WebSecurity {
 				// sense to deny all other requests
 				.anyRequest().permitAll());
 
+		// Configuration in application.properties
 		http.oauth2Client(Customizer.withDefaults());
 
 		// Register the oauth server, and our custom jwt converter
@@ -130,10 +135,18 @@ public class WebSecurity {
 		return http.build();
 	}
 
-	private static class UMAAuthorized implements AuthorizationManager<RequestAuthorizationContext> {
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	/** Authorization manager that checks resource acces via custom implementation of Keycloak UMA */
+	private class UMAAuthorized implements AuthorizationManager<RequestAuthorizationContext> {
 		@Override
 		public AuthorizationDecision check(Supplier<Authentication> authenticationSupplier,
 				RequestAuthorizationContext ctx) {
+			
+			// TODO: Check if user even has UMA enabled, e.g. hasrole uma_authorization
+			// Should be in the initial JWT, if not enable the role mapping on keycloak
+
 			String stationType = ctx.getVariables().get("stationType");
 
 			// Origin, OTOH is a regular query path variable
@@ -146,15 +159,25 @@ public class WebSecurity {
 			}
 
 			LOG.debug("Beginning UMA check");
-
+			
 			// call keycloak authz and check if this URL with origin and stationtype is authorized
-			var authz = AuthzClient.create();
+			var authz = AuthzClient.create(applicationContext.getBean(org.keycloak.authorization.client.Configuration.class));
 			var res = authz.authorization();
 			var req = new AuthorizationRequest();
 			res.getPermissions(req);
 
-
 			return new AuthorizationDecision(true);
 		}
 	}
+	
+	@Bean
+	public org.keycloak.authorization.client.Configuration keycloakConfig(
+		@Value("${authz.keycloak.authServerUrl}") String server,
+		@Value("${authz.keycloak.realm}") String realm,
+		@Value("${authz.keycloak.clientId}") String clientId,
+		@Value("${authz.keycloak.clientSecret}") String clientSecret
+	) {
+		return new org.keycloak.authorization.client.Configuration(server, realm, clientId, Map.of("secret", clientSecret), null);
+	}
+
 }
