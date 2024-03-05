@@ -292,7 +292,7 @@ public class DataManager {
 		}
 	}
 
-	public String addProvenance(ProvenanceDto provenance) {
+	public synchronized String addProvenance(ProvenanceDto provenance) {
 		String uuid = null;
 		LOG.debug("DataManager: addProvenance: {}", provenance.toString());
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
