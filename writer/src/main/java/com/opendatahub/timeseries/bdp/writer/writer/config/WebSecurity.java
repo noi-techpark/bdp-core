@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.resource.AuthorizationResource;
+import org.keycloak.authorization.client.resource.ProtectedResource;
 import org.keycloak.protocol.oidc.client.authentication.ClientIdAndSecretCredentialsProvider;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -50,7 +52,7 @@ public class WebSecurity {
 	@Value("${auth.client.id}")
 	private String authClientId;
 
-	private static final Logger LOG = LoggerFactory.getLogger(
+	private static final Logger log = LoggerFactory.getLogger(
 			WebSecurity.class);
 
 	/**
@@ -91,7 +93,7 @@ public class WebSecurity {
 			}
 
 			if (roles.isEmpty()) {
-				LOG.warn("OAuth client has no roles assigned.");
+				log.warn("OAuth client has no roles assigned.");
 			}
 
 			return roles
@@ -152,17 +154,18 @@ public class WebSecurity {
 			// Origin, OTOH is a regular query path variable
 			String origin = ctx.getRequest().getParameter("origin");
 
-			LOG.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
+			log.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
 
 			if (!StringUtils.hasText(stationType) || !StringUtils.hasText(origin)) {
 				return new AuthorizationDecision(false);
 			}
-
-			LOG.debug("Beginning UMA check");
+			log.debug("Beginning UMA check");
 			
 			// call keycloak authz and check if this URL with origin and stationtype is authorized
 			var authz = AuthzClient.create(applicationContext.getBean(org.keycloak.authorization.client.Configuration.class));
-			var ress = authz.authorization();
+			
+			var cred = (OAuth2Token) authenticationSupplier.get().getCredentials();
+			var ress = authz.authorization(cred.getTokenValue());
 			var req = new AuthorizationRequest();
 
 			// https://github.com/keycloak/keycloak/issues/27483
@@ -170,6 +173,10 @@ public class WebSecurity {
 			req.getMetadata().setPermissionResourceFormat("uri");
 
 			var perm = ress.getPermissions(req);
+			
+			var protect = authz.protection(cred.getTokenValue());
+			protect.resource().findByUri
+
 
 			return new AuthorizationDecision(true);
 		}
