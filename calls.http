@@ -54,6 +54,10 @@ Authorization: Bearer {{authtoken}}
 GET {{host}}/json/stations2/TrafficSensor
 Authorization: Bearer {{authtoken}}
 
+### Get EChargingStation stations
+GET {{host}}/json/stations/TestStations
+Authorization: Bearer {{authtoken}}
+
 ### Get a single stationtype from the writer
 GET {{host}}/json/stations2/MeteoStation?origin=1111
 Authorization: Bearer {{authtoken}}
@@ -160,3 +164,67 @@ GET {{host}}/actuator/health
 
 ###
 GET {{host}}/error
+
+### Sync data types
+POST {{host}}/json/syncDataTypes
+?prn=test
+&prv=11111
+Content-Type: application/json
+Authorization: Bearer {{authtoken}}
+
+[
+  {
+    "name":"docs-example-type",
+    "unit":"odh-docs-unit",
+    "rtype":"docs-example-rtype",
+    "description":"docs-example description",
+    "period": 600,
+    "metadata": 
+      {
+        "extra":"fields"
+      }
+  },
+  {
+    "name":"docs-example-type-2",
+    "unit":"odh-docs-unit",
+    "rtype":"docs-example-rtype",
+    "description":"docs-example description",
+    "period": 300,
+    "metadata": 
+      {
+        "even-more":"fields"
+      }
+  }
+]
+
+### Sync stations
+POST {{host}}/json/syncStations/TestStations
+?prn=test
+&prv=11111
+Content-Type: application/json
+Authorization: Bearer {{authtoken}}
+
+[
+    {
+      "id": "example-station-id-1",
+      "name": "example-station-name-1",
+      "origin": "docs-example",
+      "latitude": 46.333,
+      "longitude": 11.356,
+      "municipality": "Bolzano", 
+      "metaData" : {
+        "additional": "fields"
+      }
+    },
+    {
+      "id": "example-station-id-2",
+      "name": "example-station-name-2",
+      "origin": "docs-example",
+      "latitude": 46.333,
+      "longitude": 11.356,
+      "municipality": "Bolzano", 
+      "metaData" : {
+        "additional": "fields"
+      }
+    }
+]
