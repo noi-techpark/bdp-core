@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-version: "3.4"
 services:
   app:
     image: maven:3-eclipse-temurin-17-alpine
@@ -15,18 +14,18 @@ services:
       SERVER_PORT: ${SERVER_PORT}
       SPRING_PROFILE: ${SPRING_PROFILE}
     command: >
-      bash -c "mvn \
-        -Duser.home=/var/maven \
-        --also-make \
-        --projects dto \
-        --projects client \
-        clean install \
-      && cd writer; mvn \
-        -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8990" \
-        -Dmaven.tomcat.port=${SERVER_PORT} \
-        -Duser.home=/var/maven \
-        -Dspring.profiles.active=${SPRING_PROFILE} \
-        clean spring-boot:run
+      bash -c "mvn \\
+        -Duser.home=/var/maven \\
+        --also-make \\
+        --projects dto  \\
+        --projects client  \\
+        clean install  \\
+      && cd writer; mvn  \\
+        -Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8990'  \\
+        -Dmaven.tomcat.port=${SERVER_PORT}  \\
+        -Duser.home=/var/maven  \\
+        -Dspring.profiles.active=${SPRING_PROFILE}  \\
+        clean spring-boot:run  \\
       "
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
