@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 services:
-  app:
+  bdp:
     image: maven:3-eclipse-temurin-17-alpine
     depends_on:
       - db
@@ -52,3 +52,31 @@ services:
     #  - ./tmp/postgres/data:/var/lib/postgresql/data
     ports:
       - "5555:5432"
+        
+  # To start a local ninja instance along with the core, use `docker compose --profile full up`.
+  # It's then accessible on port 8991
+  ninja:
+    image: "ghcr.io/noi-techpark/it.bz.opendatahub.api.mobility-ninja/it.bz.opendatahub.api.mobility-ninja-app:latest"
+    depends_on: 
+      - bdp
+    profiles: 
+      - full
+    environment:
+      SERVER_PORT: 8991
+      NINJA_BASE_URL: http://localhost:8991
+      NINJA_HOST_URL: http://localhost:8991
+      NINJA_QUERY_TIMEOUT_SEC: 30
+      NINJA_RESPONSE_MAX_SIZE_MB: 100
+      SECURITY_ALLOWED_ORIGINS: "*"
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_SSL_REQUIRED: ${KEYCLOAK_SSL_REQUIRED}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      LOG_APPLICATION_NAME: ninja
+      LOG_APPLICATION_VERSION: 0.0.0-local-dev
+      JDBC_URL: jdbc:postgresql://db:5432/bdp?currentSchema=intimev2,public
+      DB_USERNAME: bdp
+      DB_PASSWORD: password
+    ports:
+      - "8991:8991"
