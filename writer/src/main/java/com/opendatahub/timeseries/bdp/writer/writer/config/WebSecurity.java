@@ -16,10 +16,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.keycloak.authorization.client.AuthzClient;
-import org.keycloak.authorization.client.resource.AuthorizationResource;
-import org.keycloak.authorization.client.resource.ProtectedResource;
-import org.keycloak.protocol.oidc.client.authentication.ClientIdAndSecretCredentialsProvider;
-import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +32,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import org.springframework.util.StringUtils;
+
+import com.opendatahub.timeseries.bdp.writer.writer.authz.Authorization;
 
 @Configuration
 @EnableWebSecurity
@@ -145,38 +141,18 @@ public class WebSecurity {
 		@Override
 		public AuthorizationDecision check(Supplier<Authentication> authenticationSupplier,
 				RequestAuthorizationContext ctx) {
-			
-			// TODO: Check if user even has UMA enabled, e.g. hasrole uma_authorization
-			// Should be in the initial JWT, if not enable the role mapping on keycloak
-
-			String stationType = ctx.getVariables().get("stationType");
-
-			// Origin, OTOH is a regular query path variable
-			String origin = ctx.getRequest().getParameter("origin");
-
-			log.debug("Authorization check for stationType = {}, origin = {}", stationType, origin);
-
-			if (!StringUtils.hasText(stationType) || !StringUtils.hasText(origin)) {
-				return new AuthorizationDecision(false);
-			}
 			log.debug("Beginning UMA check");
 			
-			// call keycloak authz and check if this URL with origin and stationtype is authorized
-			var authz = AuthzClient.create(applicationContext.getBean(org.keycloak.authorization.client.Configuration.class));
+			var cred = (Jwt) authenticationSupplier.get().getCredentials();
+			var authzClient = AuthzClient.create(applicationContext.getBean(org.keycloak.authorization.client.Configuration.class));
+			Authorization authz = new Authorization(authzClient, cred.getTokenValue());
 			
-			var cred = (OAuth2Token) authenticationSupplier.get().getCredentials();
-			var ress = authz.authorization(cred.getTokenValue());
-			var req = new AuthorizationRequest();
-
-			// https://github.com/keycloak/keycloak/issues/27483
-			req.setMetadata(new AuthorizationRequest.Metadata());
-			req.getMetadata().setPermissionResourceFormat("uri");
-
-			var perm = ress.getPermissions(req);
+			if(!authz.hasAnyAuthorization()){
+				return new AuthorizationDecision(false);
+			}
 			
-			var protect = authz.protection(cred.getTokenValue());
-			protect.resource().findByUri
-
+			// delegate actual authorization decisions to endpoints
+			ctx.getRequest().setAttribute(Authorization.ATTRIBUTE_AUTHORIZATION, authz);
 
 			return new AuthorizationDecision(true);
 		}
