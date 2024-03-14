@@ -210,9 +210,11 @@ Authorization: Bearer {{authtoken}}
 ]
 
 ### Sync stations
-POST {{host}}/json/syncStations/TestStations
+POST {{host}}/json/syncStations/testtype
 ?prn=test
 &prv=11111
+&syncState=false
+&onlyActivation=false
 Content-Type: application/json
 Authorization: Bearer {{authtoken}}
 
@@ -220,7 +222,7 @@ Authorization: Bearer {{authtoken}}
     {
       "id": "example-station-id-1",
       "name": "example-station-name-1",
-      "origin": "docs-example",
+      "origin": "testorigin",
       "latitude": 46.333,
       "longitude": 11.356,
       "municipality": "Bolzano", 
@@ -231,7 +233,7 @@ Authorization: Bearer {{authtoken}}
     {
       "id": "example-station-id-2",
       "name": "example-station-name-2",
-      "origin": "docs-example",
+      "origin": "testorigin",
       "latitude": 46.333,
       "longitude": 11.356,
       "municipality": "Bolzano", 

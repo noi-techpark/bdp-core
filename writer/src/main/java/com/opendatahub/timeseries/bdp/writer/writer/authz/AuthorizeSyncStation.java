@@ -5,12 +5,15 @@
 package com.opendatahub.timeseries.bdp.writer.writer.authz;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.opendatahub.timeseries.bdp.dto.dto.StationDto;
@@ -42,21 +45,11 @@ public class AuthorizeSyncStation {
         var authorizedResources = authz.getAuthorizedResources("station", "write");
         
         log.debug("Got authorized resources from server: {}", authorizedResources);
+        
 
         boolean authorized = authorizedResources.stream()
                 .flatMap(r -> r.getUris().stream())
-                .map(s -> UriComponentsBuilder.fromUriString(s).build())
-                // it's just a bunch of lambdas that produce booleans, and all have to be true
-                .filter(u -> Arrays.stream(new BooleanSupplier[] {
-                        () -> "bdp".equals(u.getScheme()),
-                        () -> "station".equals(u.getSchemeSpecificPart()),
-                        () -> u.getQueryParams().get("stationType").stream().anyMatch(s -> s.equals(stationType)),
-                        () -> u.getQueryParams().get("origin").stream().anyMatch(s -> s.equals(origin)),
-                        () -> u.getQueryParams().get("syncState").stream().map(Boolean::getBoolean)
-                                .anyMatch(b -> b == syncState),
-                        () -> u.getQueryParams().get("onlyActivation").stream().map(Boolean::getBoolean)
-                                .anyMatch(b -> b == onlyActivation)
-                }).allMatch(BooleanSupplier::getAsBoolean))
+                .filter(u -> uriMatches(u, stationType, origin, syncState, onlyActivation))
                 .findAny().isPresent();
                 
         log.debug("Authorization on resource granted: {}", authorized);
@@ -64,5 +57,30 @@ public class AuthorizeSyncStation {
         if (!authorized){
             throw new NotAuthorizedException("Missing authorization");
         }
+    }
+
+    private record Test(String name, BooleanSupplier condition){}
+
+    public static boolean uriMatches(String uri, String stationType, String origin, boolean syncState, boolean onlyActivation) {
+        var u = UriComponentsBuilder.fromUriString(uri).build();
+
+        log.debug("Checking URI {}", u);
+        return Arrays.stream(new Test[] {
+            new Test("scheme", () -> "bdp".equals(u.getScheme())),
+            new Test("authority", () -> "station".equals(u.getHost())),
+            new Test("stationType", () -> getQueryParam(u, "stationType").anyMatch(s -> s.equals(stationType))),
+            new Test("origin", () -> getQueryParam(u, "origin").anyMatch(s -> s.equals(origin))),
+            new Test("syncState", () -> getQueryParam(u, "syncState").map(Boolean::parseBoolean).anyMatch(b -> b == syncState)),
+            new Test("onlyActivation", () -> getQueryParam(u, "onlyActivation").map(Boolean::parseBoolean).anyMatch(b -> b == onlyActivation))
+        })
+        .allMatch(t -> {
+            boolean result = t.condition.getAsBoolean();
+            log.debug("Check {}: {}", t.name, result);
+            return result;
+        });
+    }
+    
+    private static Stream<String> getQueryParam(UriComponents u, String param){
+        return u.getQueryParams().getOrDefault(param, Collections.emptyList()).stream();
     }
 }
