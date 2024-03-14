@@ -12,6 +12,17 @@ grant_type=client_credentials
 &client_secret=7bd46f8f-c296-416d-a13d-dc81e68d0830
 &scope=openid
 
+### Get access token for UMA tests
+# @name login
+#
+POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id=odh-mobility-dev-uma
+&client_secret=STFLg69cUgZS8nNgtUQIuZDMiPQBIipe
+&scope=openid
+
 ### Get access token for the writer (TEST DB)
 # @name login
 POST https://auth.opendatahub.testingmachine.eu/auth/realms/noi/protocol/openid-connect/token
@@ -96,6 +107,7 @@ POST {{host}}/json/syncStations/EChargingStation34
 &prv=11111
 &syncState=true
 &onlyActivation=true
+&origin=Test123
 Content-Type: application/json
 Authorization: Bearer {{authtoken}}
 
@@ -198,9 +210,11 @@ Authorization: Bearer {{authtoken}}
 ]
 
 ### Sync stations
-POST {{host}}/json/syncStations/TestStations
+POST {{host}}/json/syncStations/testtype
 ?prn=test
 &prv=11111
+&syncState=false
+&onlyActivation=false
 Content-Type: application/json
 Authorization: Bearer {{authtoken}}
 
@@ -208,7 +222,7 @@ Authorization: Bearer {{authtoken}}
     {
       "id": "example-station-id-1",
       "name": "example-station-name-1",
-      "origin": "docs-example",
+      "origin": "testorigin",
       "latitude": 46.333,
       "longitude": 11.356,
       "municipality": "Bolzano", 
@@ -219,7 +233,7 @@ Authorization: Bearer {{authtoken}}
     {
       "id": "example-station-id-2",
       "name": "example-station-name-2",
-      "origin": "docs-example",
+      "origin": "testorigin",
       "latitude": 46.333,
       "longitude": 11.356,
       "municipality": "Bolzano", 

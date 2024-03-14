@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
+import com.opendatahub.timeseries.bdp.writer.writer.authz.AuthorizeSyncStation;
 import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
 import com.opendatahub.timeseries.bdp.dto.dto.DataTypeDto;
 import com.opendatahub.timeseries.bdp.dto.dto.EventDto;
@@ -175,6 +176,7 @@ public class JsonController {
 		@RequestParam(value = "syncState", required = false, defaultValue = "true") Boolean syncState,
 		@RequestParam(value = "onlyActivation", required = false, defaultValue = "false") Boolean onlyActivation
 	) {
+		AuthorizeSyncStation.authorize(request, stationType, stationDtos, syncState, onlyActivation);
 		return dataManager.syncStations(
 			stationType,
 			stationDtos,

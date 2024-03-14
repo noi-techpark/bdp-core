@@ -23,6 +23,8 @@ SPDX-License-Identifier: CC0-1.0
 		<finalName>writer</finalName>
 		<geotools.version>30.0</geotools.version>
 		<hibernate.version>6.3.1.Final</hibernate.version>
+		<keycloak.version>23.0.7</keycloak.version>
+		<!--keycloak.version>999.0.0-SNAPSHOT</keycloak.version-->
 	</properties>
 
 	<dependencyManagement>
@@ -70,6 +72,18 @@ SPDX-License-Identifier: CC0-1.0
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Keycloak UMA To request Resource level authorization -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+			<version>${keycloak.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-authz-client</artifactId>
+			<version>${keycloak.version}</version>
+        </dependency>
 
 		<!-- To create JSON schema descriptions out of classes -->
 		<dependency>

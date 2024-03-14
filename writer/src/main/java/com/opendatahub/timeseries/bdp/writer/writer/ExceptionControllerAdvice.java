@@ -7,9 +7,6 @@ package com.opendatahub.timeseries.bdp.writer.writer;
 
 import java.util.Map;
 
-import jakarta.persistence.PersistenceException;
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.hibernate.PropertyValueException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +18,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-
-import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
 import com.opendatahub.timeseries.bdp.dto.dto.ExceptionDto;
+import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
+
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Catch and handle various exceptions. We use this to provide an unique representation of
