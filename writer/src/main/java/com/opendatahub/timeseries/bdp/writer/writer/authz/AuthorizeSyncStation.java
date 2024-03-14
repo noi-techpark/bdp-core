@@ -41,11 +41,8 @@ public class AuthorizeSyncStation {
         log.debug("Start evaluating UMA for stationType = {}, origin = {}, syncState = {}, onlyActivation = {}", stationType, origin, syncState, onlyActivation);
 
         var authz = (Authorization) req.getAttribute(Authorization.ATTRIBUTE_AUTHORIZATION);
-
         var authorizedResources = authz.getAuthorizedResources("station", "write");
-        
         log.debug("Got authorized resources from server: {}", authorizedResources);
-        
 
         boolean authorized = authorizedResources.stream()
                 .flatMap(r -> r.getUris().stream())
