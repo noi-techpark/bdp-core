@@ -25,6 +25,11 @@ public class AuthorizeSyncStation {
 
     public static void authorize(HttpServletRequest req, String stationType, List<StationDto> dtos, boolean syncState,
             boolean onlyActivation) {
+        var authz = (Authorization) req.getAttribute(Authorization.ATTRIBUTE_AUTHORIZATION);
+        if (authz == null) {
+            log.warn("No UMA authorization configuration found. Maybe your client credentials are incomplete or incorrect?");
+            throw new NotAuthorizedException("Not authorized");
+        }
         log.debug("Start authorizing station sync");
 
         var origins = dtos.stream()
@@ -40,7 +45,6 @@ public class AuthorizeSyncStation {
         
         log.debug("Start evaluating UMA for stationType = {}, origin = {}, syncState = {}, onlyActivation = {}", stationType, origin, syncState, onlyActivation);
 
-        var authz = (Authorization) req.getAttribute(Authorization.ATTRIBUTE_AUTHORIZATION);
         var authorizedResources = authz.getAuthorizedResources("station", "write");
         log.debug("Got authorized resources from server: {}", authorizedResources);
 
