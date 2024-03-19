@@ -9,8 +9,6 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +22,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
-import com.opendatahub.timeseries.bdp.writer.writer.authz.AuthorizeSyncStation;
 import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
 import com.opendatahub.timeseries.bdp.dto.dto.DataTypeDto;
 import com.opendatahub.timeseries.bdp.dto.dto.EventDto;
 import com.opendatahub.timeseries.bdp.dto.dto.ProvenanceDto;
 import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
 import com.opendatahub.timeseries.bdp.dto.dto.StationDto;
+import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
+import com.opendatahub.timeseries.bdp.writer.writer.authz.AuthorizeSyncStation;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Spring controller handling JSON requests to the writer API.

@@ -27,8 +27,8 @@ public class AuthorizeSyncStation {
             boolean onlyActivation) {
         var authz = (Authorization) req.getAttribute(Authorization.ATTRIBUTE_AUTHORIZATION);
         if (authz == null) {
-            log.warn("No UMA authorization configuration found. Maybe your client credentials are incomplete or incorrect?");
-            throw new NotAuthorizedException("Not authorized");
+            // User is already authorized via role
+            return;
         }
         log.debug("Start authorizing station sync");
 
