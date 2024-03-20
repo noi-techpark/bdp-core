@@ -25,11 +25,13 @@ public class AuthorizeSyncStation {
 
     public static void authorize(HttpServletRequest req, String stationType, List<StationDto> dtos, boolean syncState,
             boolean onlyActivation) {
+
+        // First check if we are already authorized via other means. The presence of the attribute indicates we are not
         var authz = (Authorization) req.getAttribute(Authorization.ATTRIBUTE_AUTHORIZATION);
         if (authz == null) {
-            // User is already authorized via role
             return;
         }
+
         log.debug("Start authorizing station sync");
 
         var origins = dtos.stream()

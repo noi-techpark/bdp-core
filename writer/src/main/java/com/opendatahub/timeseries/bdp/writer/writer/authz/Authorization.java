@@ -16,10 +16,13 @@ import org.keycloak.authorization.client.resource.AuthorizationResource;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
 import org.keycloak.representations.idm.authorization.Permission;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
 public class Authorization {
 	public static final String ATTRIBUTE_AUTHORIZATION = "bdp_authz";
+	private final static Logger log = LoggerFactory.getLogger(Authorization.class);
 
 	private AuthzClient authz;
 	private AuthorizationResource authzRes;
@@ -36,6 +39,11 @@ public class Authorization {
 			authzRes.authorize();
 			return true;
 		} catch (AuthorizationDeniedException e) {
+			log.info("UMA: User does not have any relevant authorizations");
+			return false;
+		} catch (Exception e) {
+			log.error("UMA: Unexpected error getting user authorizations: {}", e.getMessage());
+			log.debug("Dumping stack trace", e);
 			return false;
 		}
 	}
