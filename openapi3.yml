@@ -4,701 +4,739 @@
 
 openapi: 3.0.1
 info:
-    title: Open Data Hub - Writer API
-    description: >
-        Documentation:
-        [Github Wiki](https://github.com/noi-techpark/odh-docs/wiki/Getting-started-with-a-new-Data-Collector-development)
-    termsOfService: https://docs.opendatahub.com/en/latest/licenses.html#apis-terms-of-service
-    contact:
-        name: Open Data Hub
-        url: https://opendatahub.com
-        email: help@opendatahub.com
-    version: V1
+  title: Open Data Hub - Writer API
+  description: >
+    Documentation:
+    [Github Wiki](https://github.com/noi-techpark/odh-docs/wiki/Getting-started-with-a-new-Data-Collector-development)
+  termsOfService: https://docs.opendatahub.com/en/latest/licenses.html#apis-terms-of-service
+  contact:
+    name: Open Data Hub
+    url: https://opendatahub.com
+    email: help@opendatahub.com
+  version: V1
 servers:
-    - url: __ODH_SERVER_URL__
+  - url: __ODH_SERVER_URL__
 tags:
-    - name: Writer API
-      description: Generic Data Controller to input all kinds of data
+  - name: Writer API
+    description: Generic Data Controller to input all kinds of data
 paths:
-    # Writer Endpoints ------------------------------------------------------------
+  # Writer Endpoints ------------------------------------------------------------
 
-    /provenance:
-        post:
-            tags:
-                - Provenance Management
-            summary: Create a new Provenance
-            description: |
-                This endpoint is used to create a new Provenance entity. You can optionally specify a provenance name (`prn`) and a provenance version (`prv`).
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/ProvenanceDto"
-            parameters:
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: Successful response with the created Provenance details
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-
-        # ---
-
-        get:
-            tags:
-                - Provenance Management
-            summary: Retrieve Provenance Information
-            description: >
-                Returns a list of Provenance records. You can filter the records by various attributes, such as uuid, dataCollector, dataCollectorVersion, and lineage.
-            parameters:
-                - $ref: "#/components/parameters/uuid"
-                - $ref: "#/components/parameters/dataCollector"
-                - $ref: "#/components/parameters/dataCollectorVersion"
-                - $ref: "#/components/parameters/lineage"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: A list of provenance records matching the query.
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/ProvenanceDto"
+  /provenance:
+    post:
+      tags:
+        - Provenance
+      summary: Create a new Provenance
+      description: |
+        This endpoint is used to create a new Provenance entity. You can optionally specify a provenance name (`prn`) and a provenance version (`prv`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvenanceDto"
+      parameters:
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: Successful response with the created Provenance details
+          content:
+            application/json:
+              schema:
+                type: string
 
     # ---
 
-    /getDateOfLastRecord/{stationType}:
-        get:
-            tags:
-                - Check Date
-            summary: Retrieve the Date of the Last Record
-            description: >
-                Returns the date of the last record for a specified station type. Additional filters can be specified through query parameters.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/stationId"
-                - $ref: "#/components/parameters/typeId"
-                - $ref: "#/components/parameters/period"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: Successful response with the date of the last record.
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                                format: date-time
-                400:
-                    description: Bad request if required parameters are missing or invalid.
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error"
-                500:
-                    description: Internal Server Error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Error"
+    get:
+      tags:
+        - Provenance
+      summary: Retrieve Provenance Information
+      description: >
+        Returns a list of Provenance records. You can filter the records by various attributes, such as uuid, dataCollector, dataCollectorVersion, and lineage.
+      parameters:
+        - $ref: "#/components/parameters/uuid"
+        - $ref: "#/components/parameters/dataCollector"
+        - $ref: "#/components/parameters/dataCollectorVersion"
+        - $ref: "#/components/parameters/lineage"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: A list of provenance records matching the query.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProvenanceDto"
 
-    # ---
+  # ---
 
-    /stations/{stationType}:
-        get:
-            tags:
-                - Station Management
-            summary: Retrieve Stations by Type
-            description: >
-                Gets a list of stations filtered by the station type. You can also filter the results by origin, provenance name, and provenance version.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/origin"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: An array of stations matching the criteria.
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/StationDto"
+  /getDateOfLastRecord/{stationType}:
+    get:
+      tags:
+        - Stations
+      summary: Retrieve the Date of the Last Record
+      description: >
+        Returns the date of the last record for a specified station type. Additional filters can be specified through query parameters.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/stationId"
+        - $ref: "#/components/parameters/typeId"
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: Successful response with the date of the last record.
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
+        400:
+          description: Bad request if required parameters are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
-    # ---
+  # ---
 
-    /stations:
-        get:
-            tags:
-                - Station Management
-            summary: Retrieve Station Types
-            description: >
-                Returns a list of unique station types available in the system. 
-                The list can be filtered by optional provenance name and version parameters.
-            parameters:
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: A list of station types available.
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    type: string
-    # ---
+  /stations/{stationType}:
+    get:
+      tags:
+        - Stations
+      summary: Retrieve Stations by Type
+      description: >
+        Gets a list of stations filtered by the station type. You can also filter the results by origin, provenance name, and provenance version.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/origin"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: An array of stations matching the criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StationDto"
 
-    /types:
-        get:
-            tags:
-                - Data Type Management
-            summary: Retrieve Data Types
-            description: >
-                c
-            parameters:
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            responses:
-                200:
-                    description: A list of unique data type identifiers.
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    type: string
+  # ---
 
-    # ---
+  /stations:
+    get:
+      tags:
+        - Stations
+      summary: Retrieve Station Types
+      description: >
+        Returns a list of unique station types available in the system. 
+        The list can be filtered by optional provenance name and version parameters.
+      parameters:
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: A list of station types available.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  # ---
 
-    /pushRecords/{stationType}:
-        post:
-            tags:
-                - Record Management
-            summary: Push Records for Station Type
-            description: >
-                Pushes a set of records for a given station type. The records are specified in the request body,
-                and the operation allows for optional filtering by provenance name and version.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/DataMapDtoRecord"
-            responses:
-                200:
-                    description: Records successfully pushed. The response format and the success criteria may vary based on the operation's outcome.
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    message:
-                                        type: string
-                                    status:
-                                        type: string
+  /types:
+    get:
+      tags:
+        - Data Types
+      summary: Retrieve Data Types
+      description: >
+        Returns a list of all unique data type identifier.
+      parameters:
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: A list of unique data type identifiers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
 
-    # ---
+  # ---
 
-    /syncStations/{stationType}:
-        post:
-            tags:
-                - Station Synchronization
-            summary: Synchronize Stations of a Specific Type
-            description: >
-                Synchronizes stations for a given station type with the provided station data. Allows optional parameters for provenance name, provenance version, sync state, and only activation flag.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-                - $ref: "#/components/parameters/syncState"
-                - $ref: "#/components/parameters/onlyActivation"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: array
-                            items:
-                                $ref: "#/components/schemas/StationDto"
-            responses:
-                200:
-                    description: Stations successfully synchronized.
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    message:
-                                        type: string
-                                    status:
-                                        type: string
+  /pushRecords/{stationType}:
+    post:
+      tags:
+        - Records
+      summary: Push Records for Station Type
+      description: >
+        Pushes a set of records for a given station type. The records are specified in the request body,
+        and the operation allows for optional filtering by provenance name and version.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DataMapDtoRecord"
+      responses:
+        200:
+          description: Records successfully pushed. The response format and the success criteria may vary based on the operation's outcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
 
-    # ---
+  # ---
 
-    /syncStationStates/{stationType}:
-        post:
-            tags:
-                - Station State Synchronization
-            summary: Synchronize Station States Without Origin
-            description: >
-                Synchronizes the active state of stations for a given station type. This endpoint updates station states
-                based on the provided station codes, optionally setting unlisted stations to inactive unless `onlyActivation`
-                is set to true. Does not filter by origin.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-                - $ref: "#/components/parameters/onlyActivation"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: array
-                            items:
-                                type: string
-                            description: List of station codes to be synchronized.
-            responses:
-                200:
-                    description: Stations successfully synchronized.
+  /syncStations/{stationType}:
+    post:
+      tags:
+        - Stations
+      summary: Synchronize Stations of a Specific Type
+      description: >
+        Synchronizes stations for a given station type with the provided station data. Allows optional parameters for provenance name, provenance version, sync state, and only activation flag.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+        - $ref: "#/components/parameters/syncState"
+        - $ref: "#/components/parameters/onlyActivation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/StationDto"
+      responses:
+        200:
+          description: Stations successfully synchronized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
 
-    # ---
+  # ---
 
-    /syncStationStates/{stationType}/{origin}:
-        post:
-            tags:
-                - Station State Synchronization
-            summary: Synchronize Station States With Origin
-            description: >
-                Synchronizes the active state of stations for a given station type and origin. This endpoint updates
-                station states based on the provided station codes, optionally setting unlisted stations to inactive unless
-                `onlyActivation` is set to true. Filters by origin.
-            parameters:
-                - $ref: "#/components/parameters/stationType"
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-                - $ref: "#/components/parameters/onlyActivation"
-                - $ref: "#/components/parameters/origin_p"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: array
-                            items:
-                                type: string
-                            description: List of station codes to be synchronized, filtered by the specified origin.
-            responses:
-                200:
-                    description: Stations successfully synchronized.
+  /syncStationStates/{stationType}:
+    post:
+      tags:
+        - Stations
+      summary: Synchronize Station States Without Origin
+      description: >
+        Synchronizes the active state of stations for a given station type. This endpoint updates station states
+        based on the provided station codes, optionally setting unlisted stations to inactive unless `onlyActivation`
+        is set to true. Does not filter by origin.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+        - $ref: "#/components/parameters/onlyActivation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              description: List of station codes to be synchronized.
+      responses:
+        200:
+          description: Stations successfully synchronized.
 
-    # ---
+  # ---
 
-    /syncDataTypes:
-        post:
-            tags:
-                - Data Type Synchronization
-            summary: Synchronize Data Types
-            description: >
-                Synchronizes a list of data types provided by a data collector. This endpoint allows for
-                the insertion or update of data types in the system without overriding existing descriptions
-                if they are already provided in the database.
-            parameters:
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: array
-                            items:
-                                $ref: "#/components/schemas/DataTypeDto"
-            responses:
-                201:
-                    description: Data types successfully synchronized. Returns the URI of the newly synchronized data types.
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    uri:
-                                        type: string
-                                        description: The URI mapping for the synchronized data types.
+  /syncStationStates/{stationType}/{origin}:
+    post:
+      tags:
+        - Stations
+      summary: Synchronize Station States With Origin
+      description: >
+        Synchronizes the active state of stations for a given station type and origin. This endpoint updates
+        station states based on the provided station codes, optionally setting unlisted stations to inactive unless
+        `onlyActivation` is set to true. Filters by origin.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+        - $ref: "#/components/parameters/onlyActivation"
+        - $ref: "#/components/parameters/origin_p"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              description: List of station codes to be synchronized, filtered by the specified origin.
+      responses:
+        200:
+          description: Stations successfully synchronized.
 
-    # ---
+  # ---
 
-    /event:
-        post:
-            tags:
-                - Event Management
-            summary: Add New Events
-            description: >
-                Adds a list of new events to the system. Each event is defined by an `EventDto` object. 
-                This endpoint allows for optional specification of provenance information.
-            parameters:
-                - $ref: "#/components/parameters/prn"
-                - $ref: "#/components/parameters/prv"
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: array
-                            items:
-                                $ref: "#/components/schemas/EventDto"
-            responses:
-                201:
-                    description: Events successfully added. Returns the URI of the newly added events.
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    uri:
-                                        type: string
-                                        description: The URI mapping for the added events.
+  /syncDataTypes:
+    post:
+      tags:
+        - Data Types
+      summary: Synchronize Data Types
+      description: >
+        Synchronizes a list of data types provided by a data collector. This endpoint allows for
+        the insertion or update of data types in the system without overriding existing descriptions
+        if they are already provided in the database.
+      parameters:
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/DataTypeDto"
+      responses:
+        201:
+          description: Data types successfully synchronized. Returns the URI of the newly synchronized data types.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uri:
+                    type: string
+                    description: The URI mapping for the synchronized data types.
+
+  # ---
+
+  /event:
+    post:
+      tags:
+        - Events
+      summary: Add New Events
+      description: >
+        Adds a list of new events to the system. Each event is defined by an `EventDto` object. 
+        This endpoint allows for optional specification of provenance information.
+      parameters:
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/EventDto"
+      responses:
+        201:
+          description: Events successfully added. Returns the URI of the newly added events.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uri:
+                    type: string
+                    description: The URI mapping for the added events.
 
 # -----------------------------------------------------------------------------
 
 # Writer Parameters -----------------------------------------------------------
 
 components:
-    parameters:
-        stationType:
-            name: stationType
-            in: path
-            required: true
-            description: The type of station
-            schema:
-                type: string
-                enum: [Type1, Type2, Type3]
+  parameters:
+    stationType:
+      name: stationType
+      in: path
+      required: true
+      description: The type of station
+      schema:
+        type: string
 
-        # ---
+    # ---
 
-        origin:
-            name: origin
-            in: query
-            required: false
-            description: origin filter for the stations
-            schema:
-                type: string
+    origin:
+      name: origin
+      in: query
+      required: false
+      description: origin filter for the stations
+      schema:
+        type: string
 
-        # ---
+    # ---
 
-        origin_p:
-            name: origin
-            in: path
-            required: true
-            description: The origin of the stations to synchronize
-            schema:
-                type: string
+    origin_p:
+      name: origin
+      in: path
+      required: true
+      description: The origin of the stations to synchronize
+      schema:
+        type: string
 
-        # ---
+    # ---
 
+    uuid:
+      name: uuid
+      in: query
+      required: false
+      description: unique identifier. Needs to be null.
+      schema:
+        type: string
+
+    # ---
+
+    dataCollector:
+      name: dataCollector
+      in: query
+      required: false
+      description: name of the data collector
+      schema:
+        type: string
+
+    # ---
+
+    dataCollectorVersion:
+      name: dataCollectorVersion
+      in: query
+      required: false
+      description: version of the data collector
+      schema:
+        type: string
+
+    # ---
+
+    lineage:
+      name: lineage
+      in: query
+      required: false
+      description: lineage information. Should be equal to the origin.
+      schema:
+        type: string
+
+    # ---
+
+    prn:
+      name: prn
+      in: query
+      required: false
+      description: Provenance name
+      schema:
+        type: string
+
+    # ---
+
+    prv:
+      name: prv
+      in: query
+      required: false
+      description: Provenance version
+      schema:
+        type: string
+
+    # ---
+    stationId:
+      name: stationId
+      in: query
+      required: true
+      description: The ID of the station
+      schema:
+        type: string
+
+    # ---
+
+    typeId:
+      name: typeId
+      in: query
+      required: false
+      description: The type ID for the station
+      schema:
+        type: string
+
+    # ---
+
+    period:
+      name: period
+      in: query
+      required: false
+      description: The period for which the date is queried.
+      schema:
+        type: integer
+
+    # ---
+    syncState:
+      name: syncState
+      in: query
+      required: false
+      description: Specifies whether to synchronize the state of the stations. Defaults to true.
+      schema:
+        type: boolean
+
+    # ---
+
+    onlyActivation:
+      name: onlyActivation
+      in: query
+      required: false
+      description: If true, only activates the stations without full synchronization. Defaults to false.
+      schema:
+        type: boolean
+
+  # -----------------------------------------------------------------------------
+
+  # Writer Schemas---------------------------------------------------------------
+
+  schemas:
+    # ---
+
+    ProvenanceDto:
+      type: object
+      properties:
         uuid:
-            name: uuid
-            in: query
-            required: false
-            description: unique identifier
-            schema:
-                type: string
-
-        # ---
-
-        dataCollector:
-            name: dataCollector
-            in: query
-            required: false
-            description: name of the data collector
-            schema:
-                type: string
-
-        # ---
-
-        dataCollectorVersion:
-            name: dataCollectorVersion
-            in: query
-            required: false
-            description: version of the data collector
-            schema:
-                type: string
-
-        # ---
-
+          type: string
+          description: Unique identifier for the provenance
         lineage:
-            name: lineage
-            in: query
-            required: false
-            description: lineage information
-            schema:
-                type: string
+          type: string
+          description: Lineage information of the data
+        dataCollector:
+          type: string
+          description: Name of the data collector
+        dataCollectorVersion:
+          type: string
+          description: Version of the data collector
+      required:
+        - lineage
+        - dataCollector
 
-        # ---
+    # ---
 
-        prn:
-            name: prn
-            in: query
-            required: false
-            description: Provenance name
-            schema:
-                type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A message describing the error.
 
-        # ---
+    # ---
 
-        prv:
-            name: prv
-            in: query
-            required: false
-            description: Provenance version
-            schema:
-                type: string
+    StationDto:
+      type: object
+      description: Data transfer object representing a station, which is a point that measures data.
+      properties:
+        id:
+          type: string
+          description: Unique station code (ex., bz:noi01).
+        stationType:
+          type: string
+          description: Station type or category (ex., Environment).
+        name:
+          type: string
+          description: Natural station name (ex., Primary NOI Station).
+        latitude:
+          type: number
+          format: double
+          description: The latitude where this station is located.
+        longitude:
+          type: number
+          format: double
+          description: The longitude where this station is located.
+        elevation:
+          type: number
+          format: double
+          description: The elevation where this station is located.
+        coordinateReferenceSystem:
+          type: string
+          description: The coordinate reference system for the location.
+        origin:
+          type: string
+          description: Who provided this station?
+        municipality:
+          type: string
+          description: The town or city where the station is located.
+        parentStation:
+          type: string
+          description: Station code to which this station belongs (ex., bz:noi).
+        metaData:
+          type: object
+          additionalProperties: true
+          description: Meta data that describes this station (can be any valid JSON string).
+      required:
+        - id
+        - stationType
+        - name
 
-        # ---
-        stationId:
-            name: stationId
-            in: query
-            required: true
-            description: The ID of the station
-            schema:
-                type: string
+    # ---
 
-        # ---
+    DataMapDtoRecord:
+      type: object
+      properties:
+        name:
+          type: string
+          default: "(default)"
+        branch:
+          type: array
+          items:
+            $ref: "#/components/schemas/BranchRecord"
+          description: This is a Map of Stations
+        data:
+          type: array
+          default: []
+          items:
+            type: string
+        provenance:
+          type: string
 
-        typeId:
-            name: typeId
-            in: query
-            required: false
-            description: The type ID for the station
-            schema:
-                type: string
+    BranchRecord:
+      type: object
+      properties:
+        name:
+          type: string
+          default: "(default)"
+        branch:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimpleRecordDto"
+        data:
+          type: array
+          default: []
+          items:
+            type: string
 
-        # ---
-
+    SimpleRecordDto:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        value:
+          type: string
         period:
-            name: period
-            in: query
-            required: false
-            description: The period for which the date is queried.
-            schema:
-                type: integer
+          type: integer
+          format: int32
+        _t:
+          type: string
+          default: it.bz.idm.bdp.dto.SimpleRecordDto
+          description: Type descriptor for identifying DTO type
 
-        # ---
-        syncState:
-            name: syncState
-            in: query
-            required: false
-            description: Specifies whether to synchronize the state of the stations. Defaults to true.
-            schema:
-                type: boolean
+    # -
 
-        # ---
+    RecordDto_1:
+      type: object
+      description: This can variate based on the kind of data.
 
-        onlyActivation:
-            name: onlyActivation
-            in: query
-            required: false
-            description: If true, only activates the stations without full synchronization. Defaults to false.
-            schema:
-                type: boolean
+    # ---
 
-    # -----------------------------------------------------------------------------
+    DataTypeDto:
+      type: object
+      description: Data transfer object representing a data type.
+      required:
+        - name
+        - unit
+        - description
+        - rtype
+      properties:
+        name:
+          type: string
+          description: The name of the data type.
+        unit:
+          type: string
+          description: The unit of the data type.
+        description:
+          type: string
+          description: A description of the data type.
+        rtype:
+          type: string
+          description: The representation type of the data (e.g., numerical, categorical).
+        metaData:
+          type: object
+          additionalProperties: true
+          description: Optional metadata associated with the data type.
 
-    # Writer Schemas---------------------------------------------------------------
-
-    schemas:
-        # ---
-
-        ProvenanceDto:
-            type: object
-            properties:
-                uuid:
-                    type: string
-                    description: Unique identifier for the provenance
-                lineage:
-                    type: string
-                    description: Lineage information of the data
-                dataCollector:
-                    type: string
-                    description: Name of the data collector
-                dataCollectorVersion:
-                    type: string
-                    description: Version of the data collector
-            required:
-                - lineage
-                - dataCollector
-
-        # ---
-
-        Error:
-            type: object
-            properties:
-                message:
-                    type: string
-                    description: Eine Nachricht, die den Fehler beschreibt.
-
-        # ---
-
-        StationDto:
-            type: object
-            description: Data transfer object representing a station, which is a point that measures data.
-            properties:
-                id:
-                    type: string
-                    description: Unique station code (ex., bz:noi01).
-                stationType:
-                    type: string
-                    description: Station type or category (ex., Environment).
-                name:
-                    type: string
-                    description: Natural station name (ex., Primary NOI Station).
-                latitude:
-                    type: number
-                    format: double
-                    description: The latitude where this station is located.
-                longitude:
-                    type: number
-                    format: double
-                    description: The longitude where this station is located.
-                elevation:
-                    type: number
-                    format: double
-                    description: The elevation where this station is located.
-                coordinateReferenceSystem:
-                    type: string
-                    description: The coordinate reference system for the location.
-                origin:
-                    type: string
-                    description: Who provided this station?
-                municipality:
-                    type: string
-                    description: The town or city where the station is located.
-                parentStation:
-                    type: string
-                    description: Station code to which this station belongs (ex., bz:noi).
-                metaData:
-                    type: object
-                    additionalProperties: true
-                    description: Meta data that describes this station (can be any valid JSON string).
-            required:
-                - id
-                - stationType
-                - name
-
-        # ---
-
-        DataMapDtoRecord:
-            type: object
-            description: Data structure containing all data as measurements in a tree structure for a specific station type.
-            properties:
-                provenance:
-                    type: string
-                    description: Provenance UUID associated with the data map.
-                branch:
-                    type: object
-                    additionalProperties:
-                        $ref: "#/components/schemas/RecordDto"
-
-        # -
-
-        RecordDto:
-            type: object
-            description: This can variate based on the kind of data.
-
-        # ---
-
-        DataTypeDto:
-            type: object
-            description: Data transfer object representing a data type.
-            required:
-                - name
-                - unit
-                - description
-                - rtype
-            properties:
-                name:
-                    type: string
-                    description: The name of the data type.
-                unit:
-                    type: string
-                    description: The unit of the data type.
-                description:
-                    type: string
-                    description: A description of the data type.
-                rtype:
-                    type: string
-                    description: The representation type of the data (e.g., numerical, categorical).
-                metaData:
-                    type: object
-                    additionalProperties: true
-                    description: Optional metadata associated with the data type.
-
-        # ---
-        EventDto:
-            type: object
-            description: Data transfer object representing an event.
-            required:
-                - uuid
-                - origin
-                - category
-                - eventSeriesUuid
-                - name
-                - provenance
-            properties:
-                uuid:
-                    type: string
-                    description: Unique UUID describing a single event.
-                origin:
-                    type: string
-                    description: Who provided the event?
-                category:
-                    type: string
-                    description: Describes a group in which the event falls.
-                eventSeriesUuid:
-                    type: string
-                    description: Concatenates equal events that change over time.
-                name:
-                    type: string
-                    description: Unique name describing a single event inside the origin/category/event-series-id hierarchy.
-                description:
-                    type: string
-                    description: Describes the event in few words.
-                    nullable: true
-                metaData:
-                    type: object
-                    additionalProperties: true
-                    description: Meta data, describing additional features of the event.
-                locationDescription:
-                    type: string
-                    description: A short text summarizing the location.
-                    nullable: true
-                wktGeometry:
-                    type: string
-                    description: Text representation of this Geometry (OpenGIS Simple Features Specification).
-                    nullable: true
-                eventStart:
-                    type: integer
-                    format: int64
-                    description: The start time of the event as unix timestamp in milliseconds.
-                    nullable: true
-                eventEnd:
-                    type: integer
-                    format: int64
-                    description: The end time of the event as unix timestamp in milliseconds (excluded).
-                    nullable: true
-                provenance:
-                    type: string
-                    description: The UUID of a data collector name and version.
+    # ---
+    EventDto:
+      type: object
+      description: Data transfer object representing an event.
+      required:
+        - uuid
+        - origin
+        - category
+        - eventSeriesUuid
+        - name
+        - provenance
+      properties:
+        uuid:
+          type: string
+          description: Unique UUID describing a single event.
+        origin:
+          type: string
+          description: Who provided the event?
+        category:
+          type: string
+          description: Describes a group in which the event falls.
+        eventSeriesUuid:
+          type: string
+          description: Concatenates equal events that change over time.
+        name:
+          type: string
+          description: Unique name describing a single event inside the origin/category/event-series-id hierarchy.
+        description:
+          type: string
+          description: Describes the event in few words.
+          nullable: true
+        metaData:
+          type: object
+          additionalProperties: true
+          description: Meta data, describing additional features of the event.
+        locationDescription:
+          type: string
+          description: A short text summarizing the location.
+          nullable: true
+        wktGeometry:
+          type: string
+          description: Text representation of this Geometry (OpenGIS Simple Features Specification).
+          nullable: true
+        eventStart:
+          type: integer
+          format: int64
+          description: The start time of the event as unix timestamp in milliseconds.
+          nullable: true
+        eventEnd:
+          type: integer
+          format: int64
+          description: The end time of the event as unix timestamp in milliseconds (excluded).
+          nullable: true
+        provenance:
+          type: string
+          description: The UUID of a data collector name and version.
 # -----------------------------------------------------------------------------
