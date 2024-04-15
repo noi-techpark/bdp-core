@@ -29,7 +29,7 @@ jobs:
       - name: REUSE Compliance Check
         uses: fsfe/reuse-action@v1
       - name: Test code
-        uses: noi-techpark/github-actions/maven-test@v3
+        uses: noi-techpark/github-actions/maven-test@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
           test-command: 'mvn -B test'
@@ -44,7 +44,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
       - name: Create .env file
-        uses: noi-techpark/github-actions/env-file@v3
+        uses: noi-techpark/github-actions/env-file@v2
         env:
           X_COMPOSE_PROJECT_NAME: ${{ env.PROJECT_NAME }}
           X_DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
@@ -77,13 +77,13 @@ jobs:
           X_HIBERNATE_SQL_LOG: "false"
 
       - name: Build project
-        uses: noi-techpark/github-actions/maven-build@v3
+        uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
           build-command: 'mvn -B -DskipTests -DfinalName=bdp --projects writer --also-make clean package'
 
       - name: Build and push images
-        uses: noi-techpark/github-actions/docker-build-and-push@v3
+        uses: noi-techpark/github-actions/docker-build-and-push@v2
         with:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
@@ -99,7 +99,7 @@ jobs:
             unstable
 
       - name: Deploy application
-        uses: noi-techpark/github-actions/docker-deploy@v3
+        uses: noi-techpark/github-actions/docker-deploy@v2
         with:
           hosts: 'test'
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -117,7 +117,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
       - name: Create .env file
-        uses: noi-techpark/github-actions/env-file@v3
+        uses: noi-techpark/github-actions/env-file@v2
         env:
           X_COMPOSE_PROJECT_NAME: ${{ env.PROJECT_NAME }}
           X_DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
@@ -150,13 +150,13 @@ jobs:
           X_HIBERNATE_SQL_LOG: "false"
 
       - name: Build project
-        uses: noi-techpark/github-actions/maven-build@v3
+        uses: noi-techpark/github-actions/maven-build@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
           build-command: 'mvn -B -DskipTests -DfinalName=bdp --projects writer --also-make clean package'
 
       - name: Build and push images
-        uses: noi-techpark/github-actions/docker-build-and-push@v3
+        uses: noi-techpark/github-actions/docker-build-and-push@v2
         with:
           docker-username: ${{ github.actor }}
           docker-password: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +172,7 @@ jobs:
             latest
 
       - name: Deploy application
-        uses: noi-techpark/github-actions/docker-deploy@v3
+        uses: noi-techpark/github-actions/docker-deploy@v2
         with:
           hosts: 'prod'
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
