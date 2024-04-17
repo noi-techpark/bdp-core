@@ -7,12 +7,14 @@ on:
       - '.github/workflows/main.yml'
       - '.github/workflows/reuse.yml'
       - '*.md'
+      - 'openapi3.yml'
   pull_request:
     paths-ignore:
       - 'writer/**'
       - '.github/workflows/main.yml'
       - '.github/workflows/reuse.yml'
       - '*.md'
+      - 'openapi3.yml'
 
 env:
   JAVA_VERSION: '17'

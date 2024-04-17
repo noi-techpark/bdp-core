@@ -6,11 +6,13 @@ on:
       - 'client/**'
       - '.github/workflows/sdk.yml'
       - '*.md'
+      - 'openapi3.yml'
   pull_request:
     paths-ignore:
       - 'client/**'
       - '.github/workflows/sdk.yml'
       - '*.md'
+      - 'openapi3.yml'
 
 env:
   PROJECT_NAME: odh-mobility-writer
