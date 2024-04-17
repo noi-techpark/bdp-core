@@ -23,37 +23,13 @@ paths:
   # Writer Endpoints ------------------------------------------------------------
 
   /provenance:
-    post:
-      tags:
-        - Provenance
-      summary: Create a new Provenance
-      description: |
-        This endpoint is used to create a new Provenance entity. You can optionally specify a provenance name (`prn`) and a provenance version (`prv`).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProvenanceDto"
-      parameters:
-        - $ref: "#/components/parameters/prn"
-        - $ref: "#/components/parameters/prv"
-      responses:
-        200:
-          description: Successful response with the created Provenance details
-          content:
-            application/json:
-              schema:
-                type: string
-
-    # ---
-
     get:
       tags:
         - Provenance
       summary: Retrieve Provenance Information
       description: >
-        Returns a list of Provenance records. You can filter the records by various attributes, such as uuid, dataCollector, dataCollectorVersion, and lineage.
+        Returns a list of Provenance records. 
+        You can filter the records by various attributes, such as uuid, dataCollector, dataCollectorVersion, and lineage.
       parameters:
         - $ref: "#/components/parameters/uuid"
         - $ref: "#/components/parameters/dataCollector"
@@ -70,70 +46,31 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ProvenanceDto"
-
-  # ---
-
-  /getDateOfLastRecord/{stationType}:
-    get:
+    # ---
+    post:
       tags:
-        - Stations
-      summary: Retrieve the Date of the Last Record
-      description: >
-        Returns the date of the last record for a specified station type. Additional filters can be specified through query parameters.
+        - Provenance
+      summary: Create a new Provenance
+      description: |
+        This endpoint is used to create a new Provenance entity.
+        Returns the unique provenance ID 
       parameters:
-        - $ref: "#/components/parameters/stationType"
-        - $ref: "#/components/parameters/stationId"
-        - $ref: "#/components/parameters/typeId"
-        - $ref: "#/components/parameters/period"
         - $ref: "#/components/parameters/prn"
         - $ref: "#/components/parameters/prv"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvenanceDto"
       responses:
         200:
-          description: Successful response with the date of the last record.
+          description: UUID of the newly created Provenance. Store locally and use in other calls
           content:
             application/json:
               schema:
                 type: string
-                format: date-time
-        400:
-          description: Bad request if required parameters are missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
   # ---
-
-  /stations/{stationType}:
-    get:
-      tags:
-        - Stations
-      summary: Retrieve Stations by Type
-      description: >
-        Gets a list of stations filtered by the station type. You can also filter the results by origin, provenance name, and provenance version.
-      parameters:
-        - $ref: "#/components/parameters/stationType"
-        - $ref: "#/components/parameters/origin"
-        - $ref: "#/components/parameters/prn"
-        - $ref: "#/components/parameters/prv"
-      responses:
-        200:
-          description: An array of stations matching the criteria.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/StationDto"
-
-  # ---
-
   /stations:
     get:
       tags:
@@ -155,7 +92,29 @@ paths:
                 items:
                   type: string
   # ---
-
+  /stations/{stationType}:
+    get:
+      tags:
+        - Stations
+      summary: Retrieve Stations by Type
+      description: >
+        Gets a list of stations filtered by the station type. 
+        You can also filter the results by origin, provenance name, and provenance version.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/origin"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: An array of stations matching the criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StationDto"
+  # ---
   /types:
     get:
       tags:
@@ -198,7 +157,9 @@ paths:
               $ref: "#/components/schemas/DataMapDtoRecord"
       responses:
         200:
-          description: Records successfully pushed. The response format and the success criteria may vary based on the operation's outcome.
+          description: >
+            Records successfully pushed. 
+            The response format and the success criteria may vary based on the operation's outcome.
           content:
             application/json:
               schema:
@@ -209,6 +170,43 @@ paths:
                   status:
                     type: string
 
+  /getDateOfLastRecord/{stationType}:
+    get:
+      tags:
+        - Records
+      summary: Retrieve the Date of the Last Record
+      description: >
+        Returns the date of the last record for a specified station type. 
+        Additional filters can be specified through query parameters.
+      parameters:
+        - $ref: "#/components/parameters/stationType"
+        - $ref: "#/components/parameters/stationId"
+        - $ref: "#/components/parameters/typeId"
+        - $ref: "#/components/parameters/period"
+        - $ref: "#/components/parameters/prn"
+        - $ref: "#/components/parameters/prv"
+      responses:
+        200:
+          description: Successful response with the date of the last record.
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
+        400:
+          description: Bad request if required parameters are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
   # ---
 
   /syncStations/{stationType}:
@@ -217,7 +215,8 @@ paths:
         - Stations
       summary: Synchronize Stations of a Specific Type
       description: >
-        Synchronizes stations for a given station type with the provided station data. Allows optional parameters for provenance name, provenance version, sync state, and only activation flag.
+        Synchronizes stations for a given station type with the provided station data. 
+        Allows optional parameters for provenance name, provenance version, sync state, and only activation flag.
       parameters:
         - $ref: "#/components/parameters/stationType"
         - $ref: "#/components/parameters/prn"
@@ -451,7 +450,7 @@ components:
       name: prn
       in: query
       required: false
-      description: Provenance name
+      description: Provenance name. Used for logging only
       schema:
         type: string
 
@@ -461,7 +460,7 @@ components:
       name: prv
       in: query
       required: false
-      description: Provenance version
+      description: Provenance version. Used for logging only
       schema:
         type: string
 
