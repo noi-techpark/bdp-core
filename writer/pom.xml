@@ -23,8 +23,6 @@ SPDX-License-Identifier: CC0-1.0
 		<finalName>writer</finalName>
 		<geotools.version>30.0</geotools.version>
 		<hibernate.version>6.3.1.Final</hibernate.version>
-		<keycloak.version>25.0.4</keycloak.version>
-		<!--keycloak.version>999.0.0-SNAPSHOT</keycloak.version-->
 	</properties>
 
 	<dependencyManagement>
@@ -77,12 +75,12 @@ SPDX-License-Identifier: CC0-1.0
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
-			<version>${keycloak.version}</version>
+			<version>26.0.6</version>
         </dependency>
 		<dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-authz-client</artifactId>
-			<version>${keycloak.version}</version>
+			<version>26.0.3</version>
         </dependency>
 
 		<!-- To create JSON schema descriptions out of classes -->
