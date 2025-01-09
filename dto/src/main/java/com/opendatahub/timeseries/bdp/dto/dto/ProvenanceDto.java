@@ -1,5 +1,5 @@
 // Copyright © 2018 IDM Südtirol - Alto Adige (info@idm-suedtirol.com)
-// Copyright © 2019 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.com)
+// Copyright © 2024 NOI Techpark - Südtirol / Alto Adige (info@opendatahub.com)
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
@@ -7,7 +7,7 @@ package com.opendatahub.timeseries.bdp.dto.dto;
 
 import java.io.Serializable;
 
-public class ProvenanceDto implements Serializable{
+public class ProvenanceDto implements Serializable {
 
 	/**
 	 *
@@ -22,10 +22,17 @@ public class ProvenanceDto implements Serializable{
 
 	protected String dataCollectorVersion;
 
+	protected String license;
+
+	protected String source;
+
+	protected String owner;
+
 	public ProvenanceDto() {
 	}
+
 	public ProvenanceDto(String uuid, String dataCollector, String dataCollectorVersion, String lineage) {
-		this.uuid=uuid;
+		this.uuid = uuid;
 		this.dataCollector = dataCollector;
 		this.dataCollectorVersion = dataCollectorVersion;
 		this.lineage = lineage;
@@ -62,6 +69,31 @@ public class ProvenanceDto implements Serializable{
 	public void setDataCollectorVersion(String dataCollectorVersion) {
 		this.dataCollectorVersion = dataCollectorVersion;
 	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public static boolean isValid(ProvenanceDto dto) {
 		if (dto == null)
 			return false;
@@ -71,5 +103,4 @@ public class ProvenanceDto implements Serializable{
 			return false;
 		return true;
 	}
-
 }
