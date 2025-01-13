@@ -309,12 +309,12 @@ public class DataManager {
 		return uuid;
 	}
 
-	public List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage) {
+	public List<ProvenanceDto> findProvenance(String uuid, String name, String version, String lineage, String license, String source, String owner) {
 		List<Provenance> resultList = new ArrayList<>();
 		LOG.debug("DataManager: findProvenance: {}, {}, {}, {}", uuid, name, version, lineage);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		try {
-			resultList = Provenance.find(entityManager, uuid, name, version, lineage);
+			resultList = Provenance.find(entityManager, uuid, name, version, lineage, license, source, owner);
 		} catch (Exception e) {
 			throw JPAException.unnest(e);
 		} finally {

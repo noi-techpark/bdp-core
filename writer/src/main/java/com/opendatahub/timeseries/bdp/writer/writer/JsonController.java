@@ -66,12 +66,14 @@ public class JsonController {
 		@RequestParam(value = "dataCollector", required = false) String name,
 		@RequestParam(value = "dataCollectorVersion", required = false) String version,
 		@RequestParam(value = "lineage", required = false) String lineage,
+		@RequestParam(value = "license", required = false) String license,
+		@RequestParam(value = "source", required = false) String source,
+		@RequestParam(value = "owner", required = false) String owner,
 		@RequestParam(value = "prn", required = false) String provenanceName,
 		@RequestParam(value = "prv", required = false) String provenanceVersion
 	) {
-		return dataManager.findProvenance(uuid, name, version, lineage);
+		return dataManager.findProvenance(uuid, name, version, lineage, license, source, owner);
 	}
-
 
 	@GetMapping(value = "/getDateOfLastRecord")
 	@ResponseBody

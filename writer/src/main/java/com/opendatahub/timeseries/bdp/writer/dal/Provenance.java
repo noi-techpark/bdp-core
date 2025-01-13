@@ -24,27 +24,26 @@ import org.hibernate.annotations.ColumnDefault;
 import com.opendatahub.timeseries.bdp.writer.dal.util.QueryBuilder;
 import com.opendatahub.timeseries.bdp.dto.dto.ProvenanceDto;
 
-
 /**
- * <p>Data provenance combines each measurement with it's origin (data collector). It is a tool to
- * create traceability in a data analytics environment and collection process, to find the root
+ * <p>
+ * Data provenance combines each measurement with it's origin (data collector).
+ * It is a tool to
+ * create traceability in a data analytics environment and collection process,
+ * to find the root
  * cause of data errors. It provides cleansing capabilities to a data warehouse.
  *
- * <p>For example, if we find out after some time, that the data collector "Parking Collector v1.3"
- * had a bug, it is easy to remove all wrongly inserted data, because we had an association between
+ * <p>
+ * For example, if we find out after some time, that the data collector "Parking
+ * Collector v1.3"
+ * had a bug, it is easy to remove all wrongly inserted data, because we had an
+ * association between
  * that data collector and each collected measurement.
  *
  * @author Peter Moser
  */
-@Table(
-	name = "provenance",
-	indexes = {
-		@Index(
-			unique = true,
-			columnList = "lineage, data_collector, data_collector_version"
-		)
-	}
-)
+@Table(name = "provenance", indexes = {
+		@Index(unique = true, columnList = "data_collector, data_collector_version, license, source, owner")
+})
 @Entity
 @Cacheable
 public class Provenance {
@@ -55,17 +54,26 @@ public class Provenance {
 	@ColumnDefault(value = "nextval('provenance_seq')")
 	protected Long id;
 
-	@Column(unique=true,nullable = false)
+	@Column(unique = true, nullable = false)
 	protected String uuid;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	protected String lineage;
 
 	@Column(nullable = false)
 	protected String dataCollector;
 
-	@Column(nullable = true)
+	@Column(nullable = false)
 	protected String dataCollectorVersion;
+
+	@Column(nullable = true)
+	protected String license;
+
+	@Column(nullable = true)
+	protected String source;
+
+	@Column(nullable = true)
+	protected String owner;
 
 	public Provenance() {
 		this.uuid = RandomStringUtils.randomAlphanumeric(8);
@@ -111,7 +119,31 @@ public class Provenance {
 		this.dataCollectorVersion = dataCollectorVersion;
 	}
 
-	public static List<Provenance> find(EntityManager em, String uuid, String name, String version, String lineage) {
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	public static List<Provenance> find(EntityManager em, String uuid, String name, String version, String lineage, String license, String source, String owner) {
 		return QueryBuilder
 				.init(em)
 				.addSql("SELECT p FROM Provenance p where 1=1")
@@ -119,11 +151,15 @@ public class Provenance {
 				.setParameterIfNotEmpty("name", name, "and dataCollector = :name")
 				.setParameterIfNotEmpty("version", version, "and dataCollectorVersion = :version")
 				.setParameterIfNotEmpty("lineage", lineage, "and lineage = :lineage")
+				.setParameterIfNotEmpty("license", lineage, "and license = :license")
+				.setParameterIfNotEmpty("source", lineage, "and source = :source")
+				.setParameterIfNotEmpty("owner", version, "and \"owner\" = :owner")
 				.buildResultList(Provenance.class);
 	}
 
 	public static String add(EntityManager em, ProvenanceDto provenance) {
-		List<Provenance> list = find(em, null, provenance.getDataCollector(), provenance.getDataCollectorVersion(), provenance.getLineage());
+		List<Provenance> list = find(em, null, provenance.getDataCollector(), provenance.getDataCollectorVersion(),
+				provenance.getLineage(), provenance.getLicense(), provenance.getSource(), provenance.getOwner());
 		if (!list.isEmpty())
 			return list.get(0).getUuid();
 		Provenance p = new Provenance();
@@ -135,7 +171,7 @@ public class Provenance {
 	}
 
 	public static Provenance findByUuid(EntityManager em, String uuid) {
-		List<Provenance> list = find(em, uuid, null, null, null);
-		return list.size()==1 ? list.get(0) : null;
+		List<Provenance> list = find(em, uuid, null, null, null, null, null, null);
+		return list.size() == 1 ? list.get(0) : null;
 	}
 }
