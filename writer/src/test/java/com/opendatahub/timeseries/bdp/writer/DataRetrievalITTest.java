@@ -45,9 +45,6 @@ import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
 @SpringBootTest
 @Import(PersistenceConfig.class)
 @ContextConfiguration(classes=Application.class)
-@TestPropertySource(properties = {
-	"spring.flyway.enabled=false"
-})
 public class DataRetrievalITTest extends WriterSetupTest {
 
 	@Test
