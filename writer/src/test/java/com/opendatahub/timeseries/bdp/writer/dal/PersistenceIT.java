@@ -34,7 +34,7 @@ public class PersistenceIT{
 
 	@BeforeEach
 	public void setup() {
-		map.put("He", new Integer(4));
+		map.put("He", Integer.valueOf(4));
 	}
 
 	@Test

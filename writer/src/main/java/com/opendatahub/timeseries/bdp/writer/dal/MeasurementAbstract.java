@@ -55,6 +55,7 @@ public abstract class MeasurementAbstract implements Serializable {
 	public abstract MeasurementAbstract findLatestEntry(EntityManager em, Station station, DataType type, Integer period);
 	public abstract Date getDateOfLastRecord(EntityManager em, Station station, DataType type, Integer period);
 	public abstract void setValue(Object value);
+	public abstract Object getValue();
 
 	protected MeasurementAbstract() {
 		this.created_on = new Date();

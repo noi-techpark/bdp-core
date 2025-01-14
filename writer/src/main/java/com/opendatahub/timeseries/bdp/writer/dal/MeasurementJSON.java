@@ -25,7 +25,7 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 
 /**
- * Implementation for measurements cache of type double
+ * Implementation for measurements cache of type json
  *
  * @author Patrick Bertolla
  */
@@ -84,7 +84,7 @@ public class MeasurementJSON extends MeasurementAbstract {
 	@JdbcTypeCode(SqlTypes.JSON)
 	private Map<String, Object> jsonValue;
 
-	public Map<String, Object> getJsonValue() {
+	public Map<String, Object> getValue() {
 		return jsonValue;
 	}
 
