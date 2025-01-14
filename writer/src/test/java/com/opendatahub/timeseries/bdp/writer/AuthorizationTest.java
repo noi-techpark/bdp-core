@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package com.opendatahub.timeseries.bdp.writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
 import com.opendatahub.timeseries.bdp.writer.writer.authz.AuthorizeSyncStation;
@@ -18,7 +20,7 @@ public class AuthorizationTest {
         assertFalse(AuthorizeSyncStation.uriMatches(uri, "testtype", "A22", false, true));
         assertFalse(AuthorizeSyncStation.uriMatches(uri, "testtype", "testorigin", true, true));
         assertFalse(AuthorizeSyncStation.uriMatches(uri, "testtype", "testorigin", false, false));
-        
+
         uri = "bdp://station?origin=testorigin&syncState=false&onlyActivation=true";
         // Missing stationType in URL
         assertFalse(AuthorizeSyncStation.uriMatches(uri, "EchargingStation", "testorigin", false, true));

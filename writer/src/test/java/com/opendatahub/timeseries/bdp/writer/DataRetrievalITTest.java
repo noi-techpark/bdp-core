@@ -27,24 +27,23 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 
-import com.opendatahub.timeseries.bdp.writer.dal.DataType;
-import com.opendatahub.timeseries.bdp.writer.dal.Measurement;
-import com.opendatahub.timeseries.bdp.writer.dal.MeasurementAbstract;
-import com.opendatahub.timeseries.bdp.writer.dal.Station;
 import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
 import com.opendatahub.timeseries.bdp.dto.dto.DataTypeDto;
 import com.opendatahub.timeseries.bdp.dto.dto.EventDto;
 import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
 import com.opendatahub.timeseries.bdp.dto.dto.SimpleRecordDto;
 import com.opendatahub.timeseries.bdp.dto.dto.StationDto;
+import com.opendatahub.timeseries.bdp.writer.dal.DataType;
+import com.opendatahub.timeseries.bdp.writer.dal.Measurement;
+import com.opendatahub.timeseries.bdp.writer.dal.MeasurementAbstract;
+import com.opendatahub.timeseries.bdp.writer.dal.Station;
 import com.opendatahub.timeseries.bdp.writer.writer.Application;
 import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
 
 @SpringBootTest
 @Import(PersistenceConfig.class)
-@ContextConfiguration(classes=Application.class)
+@ContextConfiguration(classes = Application.class)
 public class DataRetrievalITTest extends WriterSetupTest {
 
 	@Test
@@ -75,14 +74,13 @@ public class DataRetrievalITTest extends WriterSetupTest {
 		List<StationDto> dtos = new ArrayList<StationDto>();
 		dtos.add(s);
 		ResponseEntity<Object> result = dataManager.syncStations(
-			PREFIX + "EnvironmentStation",
-			dtos,
-			null,
-			"testProvenance",
-			"testProvenanceVersion",
-			true,
-			false
-		);
+				PREFIX + "EnvironmentStation",
+				dtos,
+				null,
+				"testProvenance",
+				"testProvenanceVersion",
+				true,
+				false);
 		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 
@@ -128,23 +126,25 @@ public class DataRetrievalITTest extends WriterSetupTest {
 		dtos.add(new StationDto(PREFIX + "WRITER", "Some name 1", null, null));
 		dtos.add(new StationDto(PREFIX + "WRITER", "Some name 2", null, null));
 		ResponseEntity<Object> result = dataManager.syncStations(
-			STATION_TYPE,
-			dtos,
-			null,
-			"testProvenance",
-			"testProvenanceVersion",
-			true,
-			false
-		);
+				STATION_TYPE,
+				dtos,
+				null,
+				"testProvenance",
+				"testProvenanceVersion",
+				true,
+				false);
 		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 
 	@Test
 	public void testDuplicateMeasurements() {
 		List<RecordDtoImpl> values = new ArrayList<>();
-		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(), measurementOld.getPeriod()));
-		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime(), measurement.getValue(), measurement.getPeriod()));
-		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(), measurementOld.getPeriod()));
+		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(),
+				measurementOld.getPeriod()));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime(), measurement.getValue(),
+				measurement.getPeriod()));
+		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(),
+				measurementOld.getPeriod()));
 
 		// Number measurements newer as the latest entry
 		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, 3.33, 1800));
@@ -159,10 +159,9 @@ public class DataRetrievalITTest extends WriterSetupTest {
 		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime() + 1000, new SingletonMap("a", 1), 1800));
 
 		ResponseEntity<Object> result = dataManager.pushRecords(
-			STATION_TYPE,
-			null,
-			DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values)
-		);
+				STATION_TYPE,
+				null,
+				DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values));
 		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
 

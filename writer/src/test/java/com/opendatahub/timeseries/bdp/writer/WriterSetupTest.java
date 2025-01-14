@@ -9,25 +9,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceUnit;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
+import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
+import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
+import com.opendatahub.timeseries.bdp.dto.dto.SimpleRecordDto;
 import com.opendatahub.timeseries.bdp.writer.dal.DataType;
 import com.opendatahub.timeseries.bdp.writer.dal.Measurement;
 import com.opendatahub.timeseries.bdp.writer.dal.Provenance;
 import com.opendatahub.timeseries.bdp.writer.dal.Station;
-import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
-import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
-import com.opendatahub.timeseries.bdp.dto.dto.SimpleRecordDto;
 import com.opendatahub.timeseries.bdp.writer.writer.DataManager;
 import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnit;
 
 /**
  * Setup of the writer test cases with initial data, that will be added and
@@ -79,8 +79,10 @@ public abstract class WriterSetupTest extends AbstractJUnit4SpringContextTests {
 		provenance.setUuid("12345678");
 
 		List<RecordDtoImpl> values = new ArrayList<>();
-		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime(), measurement.getValue(), measurement.getPeriod()));
-		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(), measurementOld.getPeriod()));
+		values.add(new SimpleRecordDto(measurement.getTimestamp().getTime(), measurement.getValue(),
+				measurement.getPeriod()));
+		values.add(new SimpleRecordDto(measurementOld.getTimestamp().getTime(), measurementOld.getValue(),
+				measurementOld.getPeriod()));
 
 		try {
 			em.getTransaction().begin();
@@ -89,10 +91,9 @@ public abstract class WriterSetupTest extends AbstractJUnit4SpringContextTests {
 			em.persist(provenance);
 			em.getTransaction().commit();
 			dataManager.pushRecords(
-				STATION_TYPE,
-				null,
-				DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values)
-			);
+					STATION_TYPE,
+					null,
+					DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values));
 		} catch (Exception e) {
 			em.getTransaction().rollback();
 			if (em.isOpen()) {
@@ -112,23 +113,55 @@ public abstract class WriterSetupTest extends AbstractJUnit4SpringContextTests {
 		em = entityManagerFactory.createEntityManager();
 		try {
 			em.getTransaction().begin();
-			em.createQuery("DELETE FROM Measurement WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM Measurement WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementString WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementString WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementStringHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementStringHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementJSON WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementJSON WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementJSONHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("DELETE FROM MeasurementJSONHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '" + PREFIX + "%')").executeUpdate();
-			em.createQuery("UPDATE Station SET metaData = NULL WHERE stationcode LIKE '" + PREFIX + "%'").executeUpdate();
-			em.createQuery("DELETE FROM MetaData WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '" + PREFIX + "%')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM Measurement WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery("DELETE FROM Measurement WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+					+ PREFIX + "%')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery("DELETE FROM MeasurementHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+					+ PREFIX + "%')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementString WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery("DELETE FROM MeasurementString WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+					+ PREFIX + "%')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementStringHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementStringHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementJSON WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery("DELETE FROM MeasurementJSON WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+					+ PREFIX + "%')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementJSONHistory WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery(
+					"DELETE FROM MeasurementJSONHistory WHERE type.id IN (SELECT id FROM DataType WHERE cname LIKE '"
+							+ PREFIX + "%')")
+					.executeUpdate();
+			em.createQuery("UPDATE Station SET metaData = NULL WHERE stationcode LIKE '" + PREFIX + "%'")
+					.executeUpdate();
+			em.createQuery("DELETE FROM MetaData WHERE station.id IN (SELECT id FROM Station WHERE stationcode LIKE '"
+					+ PREFIX + "%')").executeUpdate();
 			em.createQuery("DELETE FROM Station WHERE stationcode LIKE '" + PREFIX + "%'").executeUpdate();
 			em.createQuery("DELETE FROM DataType WHERE cname LIKE '" + PREFIX + "%'").executeUpdate();
-			em.createQuery("DELETE FROM Event WHERE provenance.id = (select id from Provenance where dataCollector = 'writer-integration-tests')").executeUpdate();
+			em.createQuery(
+					"DELETE FROM Event WHERE provenance.id = (select id from Provenance where dataCollector = 'writer-integration-tests')")
+					.executeUpdate();
 			em.createQuery("DELETE FROM Provenance WHERE dataCollector = 'writer-integration-tests'").executeUpdate();
 			em.getTransaction().commit();
 		} catch (Exception e) {
