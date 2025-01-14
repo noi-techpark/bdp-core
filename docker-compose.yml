@@ -41,7 +41,7 @@ services:
   # stop the containers and execute 'docker-compose rm -fv db' to get rid
   # of cached databases...
   db:
-    image: postgis/postgis:12-3.2-alpine
+    image: postgis/postgis:16-3.5-alpine
     environment:
       POSTGRES_DB: bdp
       POSTGRES_USER: bdp
