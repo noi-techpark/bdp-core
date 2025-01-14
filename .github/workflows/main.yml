@@ -32,7 +32,7 @@ jobs:
         uses: fsfe/reuse-action@v1
 
       - name: Start postgis for testing
-        run: docker run -d --name postgres -e POSTGRES_DB=bdp -e POSTGRES_USER=bdp -e POSTGRES_PASSWORD=password -p "5555:5432" postgis/postgis:16-3.5-alpine 
+        run: docker run --rm -d --name postgres -e POSTGRES_DB=bdp -e POSTGRES_USER=bdp -e POSTGRES_PASSWORD=password -p "5555:5432" postgis/postgis:16-3.5-alpine 
 
       - name: Test code
         uses: noi-techpark/github-actions/maven-test@v2
