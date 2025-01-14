@@ -33,7 +33,7 @@ jobs:
         uses: noi-techpark/github-actions/maven-test@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          test-command: 'mvn -B test'
+          test-command: 'mvn -pl dto,client -B test'
 
   # Release Test Snapshot SDK
   release-sdk-snapshot:
