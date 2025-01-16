@@ -164,5 +164,48 @@ public class DataRetrievalITTest extends WriterSetupTest {
 				DataMapDto.build(provenance.getUuid(), station.getStationcode(), type.getCname(), values));
 		assertEquals(HttpStatus.CREATED, result.getStatusCode());
 	}
+	
+	@Test
+	public void testPushRecords(){
+		DataType tCount = new DataType(PREFIX + "reccount", "", "Fake type", "test");
+		em.getTransaction().begin();
+		em.persist(tCount);
+		em.getTransaction().commit();
+
+		List<RecordDtoImpl> recs = new ArrayList<>();
+		long ts = 1737041440;
+
+		// Just insert records in order
+		recs.add(new SimpleRecordDto(ts, 1.0, 600));
+		recs.add(new SimpleRecordDto(ts+1, 1.1, 600));
+		recs.add(new SimpleRecordDto(ts+2, 1.2, 600));
+		var dmResult = dataManager.pushRecords(STATION_TYPE, null, DataMapDto.build(provenance.getUuid(), station.getStationcode(), tCount.getCname(), recs));
+		assertEquals(HttpStatus.CREATED, dmResult.getStatusCode());
+		
+		var qResult = em.createQuery("select count(*) from MeasurementHistory where type.id = " + tCount.getId(), Long.class).getSingleResult();
+		// all there
+		assertEquals(3L, qResult.intValue());
+		
+		// Should ignore the timestamp duplicate
+		recs.clear();
+		recs.add(new SimpleRecordDto(ts, 1.3, 600));
+		recs.add(new SimpleRecordDto(ts+3, 1.3, 600));
+		dmResult = dataManager.pushRecords(STATION_TYPE, null, DataMapDto.build(provenance.getUuid(), station.getStationcode(), tCount.getCname(), recs));
+		assertEquals(HttpStatus.CREATED, dmResult.getStatusCode());
+		qResult = em.createQuery("select count(*) from MeasurementHistory where type.id = " + tCount.getId(), Long.class).getSingleResult();
+		assertEquals(4L, qResult.intValue());
+
+		// Insert different periods, should ignore one record for each period because of timestamp
+		recs.clear();
+		recs.add(new SimpleRecordDto(ts, 1.3, 600));
+		recs.add(new SimpleRecordDto(ts, 1.3, 10));
+		recs.add(new SimpleRecordDto(ts+1, 1.3, 10));
+		recs.add(new SimpleRecordDto(ts+4, 1.3, 600));
+		recs.add(new SimpleRecordDto(ts, 1.3, 10));
+		dmResult = dataManager.pushRecords(STATION_TYPE, null, DataMapDto.build(provenance.getUuid(), station.getStationcode(), tCount.getCname(), recs));
+		assertEquals(HttpStatus.CREATED, dmResult.getStatusCode());
+		qResult = em.createQuery("select count(*) from MeasurementHistory where type.id = " + tCount.getId(), Long.class).getSingleResult();
+		assertEquals(7, qResult.intValue());
+	}
 
 }
