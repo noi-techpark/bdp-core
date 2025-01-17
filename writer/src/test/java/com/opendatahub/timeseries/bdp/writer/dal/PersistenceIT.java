@@ -13,18 +13,15 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.opendatahub.timeseries.bdp.writer.writer.Application;
-import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 
 @DataJpaTest
-@Import(PersistenceConfig.class)
 @ContextConfiguration(classes = Application.class)
 public class PersistenceIT {
 

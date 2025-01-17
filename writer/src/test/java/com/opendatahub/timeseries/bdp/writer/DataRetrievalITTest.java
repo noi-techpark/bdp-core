@@ -23,9 +23,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
@@ -39,10 +39,8 @@ import com.opendatahub.timeseries.bdp.writer.dal.Measurement;
 import com.opendatahub.timeseries.bdp.writer.dal.MeasurementAbstract;
 import com.opendatahub.timeseries.bdp.writer.dal.Station;
 import com.opendatahub.timeseries.bdp.writer.writer.Application;
-import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
 
 @SpringBootTest
-@Import(PersistenceConfig.class)
 @ContextConfiguration(classes = Application.class)
 public class DataRetrievalITTest extends WriterSetupTest {
 

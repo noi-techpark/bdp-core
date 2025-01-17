@@ -9,11 +9,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
 import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
@@ -23,7 +30,6 @@ import com.opendatahub.timeseries.bdp.writer.dal.Measurement;
 import com.opendatahub.timeseries.bdp.writer.dal.Provenance;
 import com.opendatahub.timeseries.bdp.writer.dal.Station;
 import com.opendatahub.timeseries.bdp.writer.writer.DataManager;
-import com.opendatahub.timeseries.bdp.writer.writer.config.PersistenceConfig;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -35,7 +41,10 @@ import jakarta.persistence.PersistenceUnit;
  *
  * Abstract, because we do not want to run this class itself.
  */
-@Import(PersistenceConfig.class)
+@TestPropertySource(properties = {
+		"spring.flyway.enabled=true",
+})
+@DirtiesContext
 public abstract class WriterSetupTest extends AbstractJUnit4SpringContextTests {
 
 	@PersistenceUnit
@@ -58,6 +67,26 @@ public abstract class WriterSetupTest extends AbstractJUnit4SpringContextTests {
 	protected Measurement measurement;
 	protected Measurement measurementOld;
 	protected Provenance provenance;
+
+	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+			DockerImageName.parse("postgis/postgis:16-3.5-alpine").asCompatibleSubstituteFor("postgres"));
+
+	@BeforeAll
+	static void startPG() {
+		postgres.start();
+	}
+
+	@AfterAll
+	static void stopPG() {
+		postgres.stop();
+	}
+
+	@DynamicPropertySource
+	static void configureProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", () -> postgres.getJdbcUrl() + "?currentSchema=intimev2,public");
+		registry.add("spring.datasource.username", postgres::getUsername);
+		registry.add("spring.datasource.password", postgres::getPassword);
+	}
 
 	@BeforeEach
 	public void setup() {

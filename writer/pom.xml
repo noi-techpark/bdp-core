@@ -4,15 +4,17 @@ SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 
 SPDX-License-Identifier: CC0-1.0
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>com.opendatahub.timeseries.bdp</groupId>
-        <artifactId>core</artifactId>
+		<groupId>com.opendatahub.timeseries.bdp</groupId>
+		<artifactId>core</artifactId>
 		<version>9.0.0</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<packaging>jar</packaging>	<!-- jar packaging needed by infrastructure/utils/schema-generator -->
 	<groupId>com.opendatahub.timeseries.bdp</groupId>
@@ -22,7 +24,7 @@ SPDX-License-Identifier: CC0-1.0
 	<properties>
 		<finalName>writer</finalName>
 		<geotools.version>30.0</geotools.version>
-		<hibernate.version>6.3.1.Final</hibernate.version>
+		<hibernate.version>6.6.4.Final</hibernate.version>
 	</properties>
 
 	<dependencyManagement>
@@ -57,10 +59,10 @@ SPDX-License-Identifier: CC0-1.0
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-		
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -70,18 +72,18 @@ SPDX-License-Identifier: CC0-1.0
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Keycloak UMA To request Resource level authorization -->
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-core</artifactId>
-			<version>26.0.6</version>
-        </dependency>
 		<dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-authz-client</artifactId>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+			<version>26.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-authz-client</artifactId>
 			<version>26.0.3</version>
-        </dependency>
+		</dependency>
 
 		<!-- To create JSON schema descriptions out of classes -->
 		<dependency>
@@ -98,10 +100,10 @@ SPDX-License-Identifier: CC0-1.0
 		</dependency>
 
 		<!-- DB migration - Flyway -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
 
 		<!-- Hibernate: ORM with spatial entity support (Postgis, Geometry, ...) -->
 		<dependency>
@@ -114,13 +116,13 @@ SPDX-License-Identifier: CC0-1.0
 			<artifactId>hibernate-spatial</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
-		
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
-        </dependency>
-		
+		</dependency>
+
 		<!--
 			Second level cache, to store entities that never change as
 			for example provenance records.
@@ -182,6 +184,18 @@ SPDX-License-Identifier: CC0-1.0
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 			<version>1.10.0</version>
+		</dependency>
+		<!-- Container support for testing -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.20.0</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
