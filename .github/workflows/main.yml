@@ -37,9 +37,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           test-command: 'mvn -B test'
 
-      - name: Stop postgis
-        run: docker kill postgres
-
   # Deploy Test
   deploy-test:
     runs-on: ubuntu-22.04
