@@ -197,6 +197,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             log.warn("Empty data set. Skipping...");
                             continue;
                         }
+                        dataRecords.sort((l, r) -> Long.compare(l.getTimestamp(), r.getTimestamp()));
 
                         // Some datacollectors write multiple periods in a single call.
                         // They need to be handled as if they were separate datatypes, each with their
@@ -300,23 +301,25 @@ public abstract class MeasurementAbstractHistory implements Serializable {
 
         private class TimeSeries {
             private MeasurementAbstract latest;
-            private long latestTime;
+            private long newestTime;
             private RecordDtoImpl newest;
 
             public TimeSeries(EntityManager em, Class<? extends MeasurementAbstract> clazz) {
                 latest = MeasurementAbstract.findLatestEntry(em, station, type, period, clazz);
-                latestTime = (latest != null) ? latest.getTimestamp().getTime() : 0;
+                newestTime = (latest != null) ? latest.getTimestamp().getTime() : 0;
                 newest = null;
             }
 
             private void updateNewest(RecordDtoImpl dto) {
                 if (newest == null || newest.getTimestamp() < dto.getTimestamp()) {
                     newest = dto;
+                    newestTime = newest.getTimestamp();
                 }
             }
 
             public void addHistory(EntityManager em, Log log, SimpleRecordDto dto, MeasurementAbstractHistory rec) {
-                if (latestTime < dto.getTimestamp()) {
+                // In case of duplicates within a single push, which one is written and which one is discarded, is undefined (depends on the record sorting above)
+                if (newestTime < dto.getTimestamp()) {
                     rec.setProvenance(provenance);
                     em.persist(rec);
                     updateNewest(dto);
@@ -332,7 +335,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     if (latest == null) {
                         measurement.setProvenance(provenance);
                         em.persist(measurement);
-                    } else if (newest.getTimestamp() > latestTime) {
+                    } else if (newest.getTimestamp() > latest.getTimestamp().getTime()) {
                         latest.setTimestamp(new Date(newest.getTimestamp()));
                         latest.setValue(measurement.getValue());
                         latest.setProvenance(provenance);
