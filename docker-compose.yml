@@ -41,16 +41,16 @@ services:
   # stop the containers and execute 'docker-compose rm -fv db' to get rid
   # of cached databases...
   db:
-    image: postgis/postgis:12-3.2-alpine
+    image: postgis/postgis:16-3.5-alpine
     environment:
       POSTGRES_DB: bdp
       POSTGRES_USER: bdp
       POSTGRES_PASSWORD: password
-    # Uncomment this lines, if you want to keep Postgres data on your local machine
-    #volumes:
-    #  - ./tmp/postgres/data:/var/lib/postgresql/data
     ports:
       - "5555:5432"
+    # uncomment to use local data persistence
+    # volumes:
+    #  - ./tmp/postgres/data:/var/lib/postgresql/data
         
   # To start a local ninja instance along with the core, use `docker compose --profile full up`.
   # It's then accessible on port 8991

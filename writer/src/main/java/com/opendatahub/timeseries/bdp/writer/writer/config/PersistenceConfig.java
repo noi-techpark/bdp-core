@@ -4,29 +4,10 @@
 
 package com.opendatahub.timeseries.bdp.writer.writer.config;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
-import com.opendatahub.timeseries.bdp.writer.dal.util.PropertiesWithEnv;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 @Configuration
+@EntityScan("com.opendatahub.timeseries.bdp.writer.dal")
 public class PersistenceConfig {
-
-    public PersistenceConfig() {
-        super();
-    }
-
-	@Bean
-	public EntityManagerFactory entityManagerFactory() {
-		try {
-			PropertiesWithEnv properties = PropertiesWithEnv.fromActiveSpringProfile();
-			return Persistence.createEntityManagerFactory(
-					"jpa-persistence", // This must correspond to the persistence.xml persistence-unit tag
-					properties.getStringMap()
-				);
-		} catch (Exception ex) {
-			throw new RuntimeException("PersistenceConfig: Cannot create EntityManagerFactory", ex);
-		}
-	}
 }
