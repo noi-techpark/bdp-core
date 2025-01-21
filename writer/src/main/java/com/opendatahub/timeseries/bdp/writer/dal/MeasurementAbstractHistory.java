@@ -9,9 +9,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -174,6 +177,10 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                 throw new JPAException(String.format("Provenance with UUID %s not found", dataMap.getProvenance()));
             }
             log.setProvenance(provenance);
+            
+            var skippedDataTypes = new HashSet<String>();
+            int skippedCount = 0;
+
             for (Entry<String, DataMapDto<RecordDtoImpl>> stationEntry : dataMap.getBranch().entrySet()) {
                 Station station = Station.findStation(em, stationType, stationEntry.getKey());
                 if (station == null) {
@@ -245,7 +252,6 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }
                         }
 
-                        int skippedRecs = 0;
                         for (Period period : periods.values()) {
                             period.number.updateLatest(em, (newest) -> {
                                 return new Measurement(station, type, ((Number) newest.getValue()).doubleValue(),
@@ -262,13 +268,8 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                         period.period);
                             });
                             
-                            skippedRecs = skippedRecs + period.skippedRecs;
-                        }
-                        
-                        if (skippedRecs > 0) {
-                            log.warn(String.format("Skipped %d records due to timestamp for type: [%s, %s, %s]",
-                                    skippedRecs,
-                                    station.stationtype, station.stationcode, type.getCname()));
+                            skippedDataTypes.add(type.getCname());
+                            skippedCount += period.skippedCount;
                         }
                         
                         em.getTransaction().commit();
@@ -282,6 +283,12 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                         LOG.debug("Printing stack trace", ex);
                     }
                 }
+            }
+
+            if (skippedCount > 0) {
+                log.warn(String.format("Skipped %d records due to timestamp for type: [%s, (%s)]",
+                        skippedCount,
+                        stationType, String.join(", ", skippedDataTypes)));
             }
         } catch (Exception e) {
             if (em.getTransaction().isActive())
@@ -303,7 +310,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
         private DataType type;
         private Integer period;
         private Provenance provenance;
-        public int skippedRecs = 0;
+        public int skippedCount = 0;
 
         private class TimeSeries {
             private MeasurementAbstract latest;
@@ -332,7 +339,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                 } else {
                     LOG.debug(String.format("Skipping record due to timestamp: [%s, %s, %s, %d, %d]",
                             station.stationtype, station.stationcode, type.getCname(), period, dto.getTimestamp()));
-                    skippedRecs++;
+                    skippedCount++;
                 }
             }
 
