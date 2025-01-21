@@ -9,13 +9,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
+import com.opendatahub.timeseries.bdp.dto.dto.RecordDto;
+import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
+import com.opendatahub.timeseries.bdp.dto.dto.SimpleRecordDto;
+import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
+import com.opendatahub.timeseries.bdp.writer.dal.util.Log;
+import com.opendatahub.timeseries.bdp.writer.dal.util.QueryBuilder;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,17 +31,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.opendatahub.timeseries.bdp.writer.dal.util.JPAException;
-import com.opendatahub.timeseries.bdp.writer.dal.util.Log;
-import com.opendatahub.timeseries.bdp.writer.dal.util.QueryBuilder;
-import com.opendatahub.timeseries.bdp.dto.dto.DataMapDto;
-import com.opendatahub.timeseries.bdp.dto.dto.RecordDto;
-import com.opendatahub.timeseries.bdp.dto.dto.RecordDtoImpl;
-import com.opendatahub.timeseries.bdp.dto.dto.SimpleRecordDto;
 
 /**
  * <p>
@@ -248,6 +245,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                             }
                         }
 
+                        int skippedRecs = 0;
                         for (Period period : periods.values()) {
                             period.number.updateLatest(em, (newest) -> {
                                 return new Measurement(station, type, ((Number) newest.getValue()).doubleValue(),
@@ -263,10 +261,17 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                                         new Date(newest.getTimestamp()),
                                         period.period);
                             });
+                            
+                            skippedRecs = skippedRecs + period.skippedRecs;
                         }
-
+                        
+                        if (skippedRecs > 0) {
+                            log.warn(String.format("Skipped %d records due to timestamp for type: [%s, %s, %s]",
+                                    skippedRecs,
+                                    station.stationtype, station.stationcode, type.getCname()));
+                        }
+                        
                         em.getTransaction().commit();
-
                     } catch (Exception ex) {
                         log.error(
                                 String.format("Exception '%s'... Skipping this measurement!", ex.getMessage()),
@@ -298,6 +303,7 @@ public abstract class MeasurementAbstractHistory implements Serializable {
         private DataType type;
         private Integer period;
         private Provenance provenance;
+        public int skippedRecs = 0;
 
         private class TimeSeries {
             private MeasurementAbstract latest;
@@ -324,8 +330,9 @@ public abstract class MeasurementAbstractHistory implements Serializable {
                     em.persist(rec);
                     updateNewest(dto);
                 } else {
-                    log.warn(String.format("Skipping record due to timestamp: [%s, %s, %s, %d, %d]",
+                    LOG.debug(String.format("Skipping record due to timestamp: [%s, %s, %s, %d, %d]",
                             station.stationtype, station.stationcode, type.getCname(), period, dto.getTimestamp()));
+                    skippedRecs++;
                 }
             }
 
