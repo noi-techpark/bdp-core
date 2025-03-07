@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+version = 1
+SPDX-PackageName = "bdp-core"
+SPDX-PackageSupplier = "NOI Techpark <digital@noi.bz.it>"
+SPDX-PackageDownloadLocation = "https://github.com/noi-techpark/bdp-core"
+
+[[annotations]]
+path = [".github/**", "infrastructure/ansible/**", "infrastructure/docker/**", "infrastructure/helm/**", ".gitignore", ".pre-commit-config.yaml", ".dockerignore", ".editorconfig", ".env.example", "calls.http", "LICENSE", "client/**/**.properties", "dto/**/**.properties", "infrastructure/utils/schema-generator/**/**.properties", "writer/**/**.properties", "dto/src/main/java/META-INF/MANIFEST.MF", "writer/src/main/resources/META-INF/additional-spring-configuration-metadata.json", "writer/src/main/resources/db/migration/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "(c) NOI Techpark <digital@noi.bz.it>"
+SPDX-License-Identifier = "CC0-1.0"
