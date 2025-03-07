@@ -13,7 +13,7 @@ nameOverride: "bdp-core"
 fullnameOverride: "bdp-core"
   
 service:
-  port: 8080
+  port: 80
   type: ClusterIP
   
 health:
