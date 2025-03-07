@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bdp-core.fullname" . }}
+  labels:
+    {{- include "bdp-core.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bdp-core.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "bdp-core.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: "SERVER_PORT"
+              value: "{{ .Values.service.port }}"
+          {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+          {{- end }}
+          {{- if .Values.database.servicebindName }}
+            - name: "POSTGRES_SERVER"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.servicebindName | quote }}
+                  key: "host"
+            - name: "POSTGRES_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.servicebindName | quote }}
+                  key: "port"
+            - name: "POSTGRES_DB"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.servicebindName | quote }}
+                  key: "db"
+            # Schema is in the svcbind but it's intimev2,public. This can be enabled once bdp core doesn't auto append the "public" anymore
+            # For now set this separately as an env variable
+            # - name: "POSTGRES_SCHEMA"
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ .Values.database.servicebindName | quote }}
+            #       key: "schema"
+            - name: "POSTGRES_SCHEMA"
+              value: "intimev2"
+            - name: "POSTGRES_USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.servicebindName | quote }}
+                  key: "username"
+            - name: "POSTGRES_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.servicebindName | quote }}
+                  key: "password"
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: {{ .Values.health.delay }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: {{ .Values.health.delay }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
