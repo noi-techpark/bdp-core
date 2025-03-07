@@ -3,11 +3,11 @@ ingress:
   className: nginx
   hosts:
     - host: mobility.share.opendatahub.testingmachine.eu
-      paths: 
+      paths:
         - path: "/"
           pathType: Prefix
-            
-env: 
+
+env:
   SECURITY_ALLOWED_ORIGINS: "*"
   KEYCLOAK_URL: https://auth.opendatahub.testingmachine.eu/auth
   KEYCLOAK_SSL_REQUIRED: none
@@ -18,6 +18,6 @@ env:
   LOG_APPLICATION_NAME: writer
   HIBERNATE_SQL_LOG: false
   HIBERNATE_LOG_LEVEL: WARN
-  
+
 database:
   servicebindName: "postgres-readwrite-svcbind"
