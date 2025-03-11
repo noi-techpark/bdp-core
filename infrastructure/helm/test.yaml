@@ -6,6 +6,8 @@ ingress:
       paths:
         - path: "/"
           pathType: Prefix
+  annotations:
+    - nginx.ingress.kubernetes.io/proxy-body-size: 50m
 
 env:
   SECURITY_ALLOWED_ORIGINS: "*"
