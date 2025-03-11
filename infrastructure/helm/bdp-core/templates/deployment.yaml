@@ -80,13 +80,15 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: http
+              port:  {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.health.delay }}
+            timeoutSeconds: 3
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: http
+              port:  {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.health.delay }}
+            timeoutSeconds: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
