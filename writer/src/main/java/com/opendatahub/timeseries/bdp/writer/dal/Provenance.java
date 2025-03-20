@@ -151,9 +151,9 @@ public class Provenance {
 				.setParameterIfNotEmpty("name", name, "and dataCollector = :name")
 				.setParameterIfNotEmpty("version", version, "and dataCollectorVersion = :version")
 				.setParameterIfNotEmpty("lineage", lineage, "and lineage = :lineage")
-				.setParameterIfNotEmpty("license", lineage, "and license = :license")
-				.setParameterIfNotEmpty("source", lineage, "and source = :source")
-				.setParameterIfNotEmpty("owner", version, "and \"owner\" = :owner")
+				.setParameterIfNotEmpty("license", license, "and license = :license")
+				.setParameterIfNotEmpty("source", source, "and source = :source")
+				.setParameterIfNotEmpty("owner", owner, "and \"owner\" = :owner")
 				.buildResultList(Provenance.class);
 	}
 
