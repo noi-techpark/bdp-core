@@ -385,38 +385,50 @@ public class Station {
 		}
 		List<String> stationCodes = new ArrayList<>();
 		em.getTransaction().begin();
-		for (StationDto dto : data){
-			if (dto.getStationType() == null) {
-				dto.setStationType(stationType);
-			}
-			if (dto.isValid()) {
-				if (stationCodes.contains(dto.getId())) {
-					LOG.warn(
-						"[{}/{}] Station with ID {} already in syncStation list... skipping!",
-						provenanceName,
-						provenanceVersion,
-						dto.getId(),
-						v("StationDto", dto)
-					);
-				} else {
-					sync(em, dto);
-					stationCodes.add(dto.getId());
+		try {
+			for (StationDto dto : data) {
+				if (dto.getStationType() == null) {
+					dto.setStationType(stationType);
 				}
-			} else {
-				LOG.warn(
-					"[{}/{}] Invalid JSON for StationDto: {}",
-					provenanceName,
-					provenanceVersion,
-					v("StationDto", dto)
-				);
+				if (dto.isValid()) {
+					if (stationCodes.contains(dto.getId())) {
+						LOG.warn(
+								"[{}/{}] Station with ID {} already in syncStation list... skipping!",
+								provenanceName,
+								provenanceVersion,
+								dto.getId(),
+								v("StationDto", dto));
+					} else {
+						sync(em, dto);
+						stationCodes.add(dto.getId());
+					}
+				} else {
+					LOG.warn(
+							"[{}/{}] Invalid JSON for StationDto: {}",
+							provenanceName,
+							provenanceVersion,
+							v("StationDto", dto));
+				}
 			}
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			throw JPAException.unnest(e);
 		}
-		em.getTransaction().commit();
 		if (syncState) {
 			String origin = data.get(0).getOrigin();
 			em.getTransaction().begin();
-			syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion, onlyActivation);
-			em.getTransaction().commit();
+			try {
+				syncStationStates(em, stationType, origin, stationCodes, provenanceName, provenanceVersion, onlyActivation);
+				em.getTransaction().commit();
+			} catch (Exception e) {
+				if (em.getTransaction().isActive()) {
+					em.getTransaction().rollback();
+				}
+				throw JPAException.unnest(e);
+			}
 		}
 	}
 
